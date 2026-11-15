@@ -7,6 +7,7 @@ This is a requirements inventory, not a claim of feature parity or a legal audit
 | Area | Required behavior | Current status |
 | --- | --- | --- |
 | Launcher | Select and start an existing installation without changing saves | Implemented |
+| NUP | Own archive reader, bounded index, safe paths, checksums, streaming extraction | Implemented and tested; base/update packages kept separate |
 | Build | NUP selection, validation, isolated output, progress, logs and project lock | External NX2navi adapter implemented; independent recompilation pending |
 | Updates | Private update feed, verification and rollback | Planned |
 | Cheat manager | Categories, persistence, runtime integration and existing cheats | Pending ownership review and runtime adapter |
@@ -24,7 +25,7 @@ This is a requirements inventory, not a claim of feature parity or a legal audit
 1. Keep playing through the external installation adapter.
 2. Enumerate original owned commits and permissively licensed base components;
    record file-level or change-level provenance and required notices.
-3. Select an authorized runtime and document its adapter contract. NX2navi targets
+3. Implement update composition and executable module loading, then select an authorized runtime and document its adapter contract. NX2navi targets
    a Switch ARM64 build; N64Recomp is not a drop-in replacement for this runtime.
 4. Port owned cheat logic and configuration behind that adapter, retaining source
    attribution. Reimplement restricted integration without copying its expression.

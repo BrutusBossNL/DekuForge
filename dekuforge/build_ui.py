@@ -9,6 +9,7 @@ from tkinter.scrolledtext import ScrolledText
 
 from .builder import default_backend, run_build, validate_nup
 from .core import load_settings, save_installation, update_settings
+from .native import prepare_archive
 
 
 def open_builder(parent, on_installation):
@@ -46,7 +47,7 @@ def open_builder(parent, on_installation):
         if value:
             backend.set(value)
 
-    def begin(check):
+    def begin(mode):
         nonlocal active, built
         if active:
             return
@@ -63,11 +64,16 @@ def open_builder(parent, on_installation):
         use_button.configure(state="disabled")
         check_button.configure(state="disabled")
         build_button.configure(state="disabled")
-        status.set("NUP wordt gecontroleerd..." if check else "Gamebuild gestart. De bestaande installatie blijft intact.")
+        extract_button.configure(state="disabled")
+        status.set("DekuForge verwerkt je archief..." if mode != "build" else "Compatibiliteitsbuild gestart via externe runtime.")
 
         def worker():
             try:
-                run_build(values[0], values[1], lambda kind, data: events.put((kind, data)), check=check, jobs=values[2])
+                emit = lambda kind, data: events.put((kind, data))
+                if mode == "build":
+                    run_build(values[0], values[1], emit, jobs=values[2])
+                else:
+                    prepare_archive(values[0], emit, extract=mode == "extract")
             except Exception as error:
                 events.put(("error", str(error)))
             finally:
@@ -111,6 +117,7 @@ def open_builder(parent, on_installation):
                 active = False
                 check_button.configure(state="normal")
                 build_button.configure(state="normal")
+                extract_button.configure(state="normal")
         window.after(100, drain)
 
     def close():
@@ -120,7 +127,7 @@ def open_builder(parent, on_installation):
             window.destroy()
 
     tk.Label(window, text="NUP / GAME BUILDER", bg="#101b17", fg="#db9d62", font=("Segoe UI", 20)).pack(anchor="w", padx=24, pady=(20, 6))
-    tk.Label(window, text="Bouwt via je apart geïnstalleerde NX2navi-backend. Een eigen runtime is nog in ontwikkeling.",
+    tk.Label(window, text="Eigen NUP-controle en extractie. Speelbare builds gebruiken voorlopig de externe compatibiliteitsbackend.",
              bg="#101b17", fg="#ecede3", wraplength=850, justify="left").pack(anchor="w", padx=24, pady=5)
     row("Eigen NUP-bestand", nup, choose_nup)
     row("Externe builder", backend, choose_backend)
@@ -128,9 +135,11 @@ def open_builder(parent, on_installation):
     actions.pack(fill="x", padx=24, pady=12)
     tk.Label(actions, text="Workers", bg="#101b17", fg="#ecede3").pack(side="left")
     tk.Spinbox(actions, from_=1, to=os.cpu_count() or 1, textvariable=workers, width=4).pack(side="left", padx=8)
-    check_button = tk.Button(actions, text="NUP controleren", command=lambda: begin(True))
+    check_button = tk.Button(actions, text="NUP controleren", command=lambda: begin("check"))
     check_button.pack(side="left", padx=6)
-    build_button = tk.Button(actions, text="Game bouwen", command=lambda: begin(False), bg="#b4d68b")
+    extract_button = tk.Button(actions, text="Uitpakken", command=lambda: begin("extract"))
+    extract_button.pack(side="left", padx=6)
+    build_button = tk.Button(actions, text="Compatibiliteitsbuild", command=lambda: begin("build"), bg="#b4d68b")
     build_button.pack(side="left", padx=6)
     use_button = tk.Button(actions, text="Deze build gebruiken", command=use_build, state="disabled")
     use_button.pack(side="left", padx=6)

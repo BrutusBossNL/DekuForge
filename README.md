@@ -23,11 +23,21 @@ The launcher does not download, update, modify or shut down an existing game.
 
 ## Build from your NUP
 
+**Independent stages:** NUP index parsing, structural validation, streamed
+SHA-256 verification and extraction are implemented in DekuForge itself. They do
+not load an external builder. **NUP controleren** uses this reader. **Uitpakken**
+writes each package into a fresh directory under ignored `build/extracted-*`.
+It preserves base and update packages separately; merging updates, decoding game
+modules, ARM64 lifting, native runtime and rendering remain to be implemented.
+Extraction alone does not produce a playable game. Compressed members require
+Python 3.14+; no third-party decompressor is bundled.
+
 Choose **NUP / Game bouwen**, select your own `.nup` file, and select the root
 of an existing NX2navi launcher installation (containing `app`, `python`,
 `pydeps` and `toolchain`). The normal local installation is selected by default.
-Use **NUP controleren** to validate the title and game version without extraction
-or compilation. **Game bouwen** uses the external backend's Python, dependencies
+Use **NUP controleren** to validate the archive index and structure without extraction
+or compilation. This does not verify the executable game version or all payloads.
+**Compatibiliteitsbuild** uses the external backend's Python, dependencies
 and compiler. Output stays in `DekuForge/build/game`; the backend can also use its
 normal local caches.
 
@@ -43,13 +53,14 @@ project lock prevents simultaneous checks/builds. After a process crash, inspect
 the running processes before manually removing `local/build.lock`. No automatic
 directory deletion is performed.
 
-After success, **Deze build gebruiken** explicitly selects the new executable.
+After a successful compatibility build, **Deze build gebruiken** explicitly selects the new executable.
 Saves and settings are not automatically copied. Leave the launcher open until
 the build finishes. Shader preparation can use the GPU; start a full build when
 you are finished playing.
 
 Command line: `python run_builder.py --nup "D:/Games/own.nup" --check`, or omit
-`--check` to build. Optional `--backend` selects the existing launcher root and
+`--check` for a compatibility build, or use `--extract` for independent verified
+extraction. Optional `--backend` selects the existing launcher root and
 `--jobs` limits compiler workers. With embedded Python, invoke the script with
 that interpreter. No global PATH workaround is required.
 
@@ -59,6 +70,8 @@ that interpreter. No global PATH workaround is required.
   local settings, existing-game launch, duplicate-launch guard within the launcher.
 - Implemented: NUP selection, external-backend validation, isolated build
   orchestration, progress, logs and explicit selection of the result.
+- Implemented: independent NUP v1 reader and verified extraction, without an
+  external backend. Archive checks do not assert a supported executable version.
 - Planned: independent runtime, updater, cheat manager, equipment
   extensions, world markers and memory/performance fixes.
 - Not included: NX2navi runtime, game data, generated game code or upstream
