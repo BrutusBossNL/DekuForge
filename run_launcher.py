@@ -30,6 +30,17 @@ def prepare_tk():
 
 
 if __name__ == "__main__":
-    prepare_tk()
-    from dekuforge.__main__ import main
-    main()
+    try:
+        prepare_tk()
+        from dekuforge.__main__ import main
+        main()
+    except Exception:
+        import traceback
+        crash = Path(__file__).resolve().parent / "local" / "launcher-crash.log"
+        crash.parent.mkdir(exist_ok=True)
+        crash.write_text(traceback.format_exc(), encoding="utf-8")
+        if os.name == "nt":
+            import ctypes
+            ctypes.windll.user32.MessageBoxW(None, f"DekuForge could not start.\n{crash}", "DekuForge", 0x10)
+        else:
+            raise

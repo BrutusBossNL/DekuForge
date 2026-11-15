@@ -5,6 +5,7 @@ Game bytes are read only on request and never placed in project source files.
 """
 
 from dataclasses import dataclass
+from contextlib import nullcontext
 import hashlib
 from pathlib import Path
 import struct
@@ -141,7 +142,7 @@ class Archive:
                 else:
                     pending.append((next_directory, relative))
 
-    def chunks(self, member, chunk_size=1024 * 1024):
+    def chunks(self, member, chunk_size=1024 * 1024, *, stream=None):
         decoder = None
         compression_error = ValueError
         if member.codec:
@@ -153,7 +154,10 @@ class Archive:
             compression_error = ZstdError
         digest = hashlib.sha256()
         total = 0
-        with self.path.open("rb") as stream:
+        # A sequential packer can reuse its own handle. Callers must not share
+        # that handle between threads; each member is still checked independently.
+        context = self.path.open("rb") if stream is None else nullcontext(stream)
+        with context as stream:
             stream.seek(member.offset)
             left = member.stored
             while left:

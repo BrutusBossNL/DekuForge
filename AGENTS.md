@@ -10,12 +10,19 @@ The project's original source is open source under the root MIT license.
 - `dekuforge/native.py`: archive inspection and extraction.
 - `dekuforge/gameplan.py`: package selection, NSO metadata and independent build preparation.
 - `dekuforge/builder.py`: optional compatibility adapter, not the independent builder.
-- `dekuforge/build_ui.py`: Tk build window; `__main__.py`: home window.
+- `dekuforge/ui.py`: single-window home, settings and three-step build wizard.
+- `dekuforge/i18n.py`: English, Dutch, German, Spanish and French launcher text.
+- `dekuforge/workflow.py`: validated requests and measured stage-level progress.
+- `engine_overrides/`: original extensions composed over the immutable engine.
+- `dekuforge/boot_profile.py`: bounded boot metadata and verified local assertions.
+- `tools/build_runtime.py`: Windows host compilation, separate from final game linking.
+- `launcher/main.c`: native Windows bootstrap with embedded project icon.
 - `run_launcher.py`: interpreter bootstrap; `run_builder.py`: build CLI.
 
 ## Engineering
 
-- Write code, comments, documentation and commits in English. Keep player text in Dutch for now.
+- Write code, comments, documentation and commits in English. All launcher text
+  must have matching keys and placeholders in all five supported languages.
 - Python 3.14+ is required for compressed NUP members. The launcher itself supports Python 3.11+ with Tk.
 - Keep user preferences and logs in ignored `local/`; extracted data in `build/`;
   generated source in `generated/`. Do not put game bytes, keys or saves in commits.
@@ -28,6 +35,15 @@ The project's original source is open source under the root MIT license.
   traversal, directory cycles, case collisions and links outside the workspace.
 - Verify streamed content before marking a stage complete. Write manifests atomically.
 - Do not silently substitute an external builder when independent compilation fails.
+- Navigation stays inside one root window. Language switches preserve wizard
+  state and logs. Use the project PNG bytes explicitly rather than automatic
+  file-format detection; verify dimensions and rendered brand colors.
+- Set the explicit Windows application identity before creating the root window.
+  Keep the native executable, taskbar icon and visible logo consistent.
+- Windows users start `DekuForge.exe`. Do not introduce CMD launchers into the
+  user workflow; the final distribution includes its launcher dependencies.
+- Time estimates use measured progress for the current stage; unknown work must
+  stay indeterminate. Never invent an overall completion percentage or duration.
 - Keep planned stages visible as missing; extraction, manifests and inspector
   programs must never be reported as a playable game build.
 - Keep one authoritative module layout and one explicit capability report.
@@ -49,4 +65,14 @@ Changes to future instruction lifting need differential tests against an
 independent ARM64 implementation. Changes to runtime memory or rendering need
 isolated in-game validation and measurements from repeatable scenes.
 
-The repository remains private until the owner explicitly requests publication.
+`python run_launcher.py --self-test` renders 25 views across the five languages
+without starting a game or changing preferences. `tools/check_launcher.py` checks
+the native executable, embedded icon and the same one-window flow. Compile
+emitted LDAPR test fragments with `tools/check_ldapr.py --compiler PATH` and
+compare the resulting state with the ARM64 oracle.
+
+Delivery order is authoritative: Windows parity, Linux parity, custom cheats and
+fixes, public open-source repository, then iOS. Follow `docs/ROADMAP.md`. The owner
+has authorized publication only at priority 4, after the preceding gates pass;
+keep the repository private until then. Keep source-test results separate from
+in-game platform validation. Do not upload game inputs or derived game code to CI.

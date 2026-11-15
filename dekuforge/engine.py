@@ -4,12 +4,13 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
 import sys
 
-from .core import ROOT
+from .core import ROOT, load_installation
 from .gameplan import prepare_game
 from .modules import normalize_prepared
 
@@ -40,16 +41,25 @@ def verify_engine_sources(root=ROOT):
     return len(record["files"])
 
 
-def build_independent(filename, notify, workspace=ROOT):
+def build_independent(filename, notify, workspace=ROOT, destination=None):
+    from .workflow import validate_destination
+    target = validate_destination(destination or workspace / "build" / "game", load_installation())
+    notify("phase", {"phase": "prepared"})
     prepared = prepare_game(filename, notify, workspace)
-    normalize_prepared(prepared)
+    notify("phase", {"phase": "normalizing"})
+    normalize_prepared(prepared, notify)
     report = engine_report()
     notify("log", json.dumps(report, indent=2) + "\n")
-    # Fail closed rather than running an older runtime with unvalidated offsets,
-    # linking the wrong game's generated code or presenting a probe as a game.
-    raise RuntimeError("De zelfstandige invoer is voorbereid in " + str(prepared) +
-                       ". De enginebron is aanwezig, maar de 1.1.1-port en toolchainintegratie zijn nog niet gereed. "
-                       "Er is geen speelbare executable gebouwd.")
+    notify("log", f"Requested installation: {target}\n")
+    # Validate the SDK before spending time on the larger game module. Failed
+    # generation never advances to a native link or selects an installation.
+    notify("phase", {"phase": "generating"})
+    generate_prepared(prepared, notify, modules="sdk", jobs=1)
+    generate_prepared(prepared, notify, modules="main,subsdk0", jobs=1)
+    if not report["game_1_1_1_port_validated"]:
+        raise RuntimeError("CPU generation finished, but the game 1.1.1 host, NVN2 renderer and shader integration "
+                           "are not validated. Native linking is blocked; no playable executable was produced.")
+    raise RuntimeError("Native game linking is not implemented")
 
 
 def generate_prepared(prepared, notify, modules="main,subsdk0,sdk", limit=0, jobs=1):
@@ -79,6 +89,7 @@ def _generate_prepared(prepared, notify, modules, limit, jobs):
         raise ValueError("Invalid generation module selection")
     if limit < 0 or jobs < 1:
         raise ValueError("Invalid generation limits")
+    notify("phase", {"phase": "generating", "done": 0, "total": 0})
     exefs = normalize_prepared(prepared)
     output = prepared / ("generated-smoke" if limit else "generated")
     if output.resolve() != output:
@@ -91,6 +102,9 @@ def _generate_prepared(prepared, notify, modules, limit, jobs):
                           creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)) as process:
         for line in process.stdout:
             notify("log", line)
+            match = re.search(r"emitted\s+(\d+)/(\d+)\s+chunks", line)
+            if match:
+                notify("progress", {"phase": "generating", "done": int(match[1]), "total": int(match[2])})
         code = process.wait()
     if code:
         raise RuntimeError(f"Independent code generation failed with code {code}")

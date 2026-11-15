@@ -1,0 +1,108 @@
+"""Validated build requests and honest stage-level time estimates."""
+
+from dataclasses import dataclass
+import math
+from pathlib import Path
+import time
+
+from .core import ROOT
+
+
+def validate_source(value):
+    if not value:
+        raise ValueError("source_missing")
+    source = Path(value).expanduser().resolve()
+    if not source.is_file():
+        raise ValueError("invalid_source")
+    with source.open("rb") as stream:
+        if stream.read(4) != b"NUP\x01":
+            raise ValueError("invalid_source")
+    return source
+
+
+def validate_destination(value, current_installation=""):
+    if not value:
+        raise ValueError("invalid_destination")
+    original = Path(value).expanduser().absolute()
+    destination = original.resolve()
+    if destination != original or destination == ROOT or destination.is_relative_to(ROOT / "engine"):
+        raise ValueError("invalid_destination")
+    if current_installation:
+        protected = Path(current_installation).resolve().parent
+        if destination == protected or destination.is_relative_to(protected) or protected.is_relative_to(destination):
+            raise ValueError("invalid_destination")
+    if destination.exists():
+        if not destination.is_dir():
+            raise ValueError("invalid_destination")
+        if any(destination.iterdir()) and not (destination / ".dekuforge-owned").is_file():
+            raise ValueError("invalid_destination")
+        for directory in (destination, *destination.parents):
+            if directory.is_symlink() or getattr(directory, "is_junction", lambda: False)():
+                raise ValueError("invalid_destination")
+    return destination
+
+
+@dataclass(frozen=True)
+class BuildRequest:
+    source: Path
+    destination: Path
+
+    @classmethod
+    def create(cls, source, destination, current_installation=""):
+        return cls(validate_source(source), validate_destination(destination, current_installation))
+
+
+@dataclass
+class Progress:
+    started: float = 0
+    phase_started: float = 0
+    phase: str = "checking"
+    done: float = 0
+    total: float = 0
+    active: bool = False
+    ended: float = 0
+
+    def begin(self, now=None):
+        self.started = self.phase_started = time.monotonic() if now is None else now
+        self.phase = "checking"
+        self.done = self.total = self.ended = 0
+        self.active = True
+
+    def update(self, event, now=None):
+        if not isinstance(event, dict):
+            return
+        now = time.monotonic() if now is None else now
+        phase = event.get("phase", event.get("stage", self.phase))
+        if phase != self.phase:
+            self.phase, self.phase_started = phase, now
+            self.done = self.total = 0
+        done, total = event.get("done", event.get("files", 0)), event.get("total", 0)
+        if isinstance(done, (int, float)) and isinstance(total, (int, float)):
+            if math.isfinite(done) and math.isfinite(total) and 0 <= done <= total:
+                self.done, self.total = done, total
+
+    def finish(self, now=None):
+        self.ended = time.monotonic() if now is None else now
+        self.active = False
+
+    def elapsed(self, now=None):
+        if not self.started and not self.active and not self.ended:
+            return 0
+        end = (time.monotonic() if now is None else now) if self.active else self.ended
+        return max(0, end - self.started)
+
+    def remaining(self, now=None):
+        # This estimates only the current measured stage. Unknown work is never
+        # presented as a made-up overall build duration.
+        if not self.active or not self.total or not self.done:
+            return None
+        age = (time.monotonic() if now is None else now) - self.phase_started
+        if age < 2:
+            return None
+        return max(0, age * (self.total - self.done) / self.done)
+
+
+def duration(seconds):
+    minutes, seconds = divmod(max(0, int(seconds)), 60)
+    hours, minutes = divmod(minutes, 60)
+    return f"{hours:02}:{minutes:02}:{seconds:02}" if hours else f"{minutes:02}:{seconds:02}"

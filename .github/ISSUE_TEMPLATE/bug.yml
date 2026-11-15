@@ -1,0 +1,36 @@
+name: Bug or performance regression
+description: Report a reproducible DekuForge problem.
+body:
+  - type: input
+    id: revision
+    attributes:
+      label: Version or commit
+    validations:
+      required: true
+  - type: textarea
+    id: platform
+    attributes:
+      label: Platform and hardware
+      description: OS, CPU, GPU, driver and game version. Do not attach game files.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction and expected behavior
+      description: Include settings, scene and measurements for performance regressions.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant text log
+      description: Remove secrets, personal information and game-derived content.
+      render: text
+  - type: checkboxes
+    id: content
+    attributes:
+      label: Game-content boundary
+      options:
+        - label: This report contains no ROMs, game assets, keys, generated game source or compiled game binaries.
+          required: true

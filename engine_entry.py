@@ -3,11 +3,14 @@
 from pathlib import Path
 import runpy
 import sys
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 root = Path(__file__).resolve().parent
 if __name__ == "__main__":
-    script = (root / "engine" / sys.argv[1]).resolve()
-    if not script.is_relative_to((root / "engine").resolve()):
+    from dekuforge.engine_workspace import stage_engine
+    engine = stage_engine()
+    script = (engine / sys.argv[1]).resolve()
+    if not script.is_relative_to(engine.resolve()):
         raise SystemExit("Engine script must be inside the included source tree")
     sys.path.insert(0, str(script.parent))
     sys.argv = [str(script), *sys.argv[2:]]

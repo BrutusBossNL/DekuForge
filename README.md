@@ -6,35 +6,56 @@
 
 **Reforging a legend.**
 
+ROMs, game assets, keys, generated game source and compiled game binaries must
+never be shared in this repository, its issues, pull requests or releases.
+Issues and pull requests for the project itself are welcome; see `CONTRIBUTING.md`.
+
 An open-source launcher and local game-build project, with a forest-green and
 gold interface inspired by its leaf-and-forge logo. Original project code is MIT licensed. Reused engine components
 retain their accompanying notices.
 
 ## Start
 
-Run `Start-DekuForge.cmd`, or `python run_launcher.py` with Python and Tk installed.
+Start the Windows launcher with `DekuForge.exe`. The native executable has
+the project's embedded icon and starts without a console window. The desktop
+window sets its own application identity rather than inheriting the caller's.
 Select an existing game installation to play without changing saves or settings.
-A local interpreter override can be stored as one path in ignored
-`local/python-path.txt`; otherwise the Windows script uses `py -3`.
+Development from source can use `python run_launcher.py` with Python and Tk
+installed. The local native bootstrap can read a developer interpreter path from
+ignored `local/python-path.txt`; otherwise it checks the project's bundled Python
+or `.venv`. The final user distribution must include the needed launcher runtime.
+No CMD start script is provided.
 
 ## Game builder
 
-Open **NUP / Game bouwen** and choose your own NUP archive.
+The launcher keeps Home, Build game and Settings inside one window. Home shows
+the selected installation folder and Play. Settings offers English, Nederlands,
+Deutsch, Español and Français; changes apply immediately. The launcher can hide
+while the game runs and restore the same window after it closes.
 
-- **NUP controleren** validates the index, checksum, paths and directory structure.
-- **Uitpakken** independently streams and verifies files into a fresh build folder.
-- **Alleen voorbereiden** selects executable modules from base/update packages,
-  verifies their content, and writes NSO metadata and a reproducible build plan.
-- **Zelfstandig bouwen** runs preparation and checks engine readiness. It currently
-  stops before native compilation: the game 1.1.1 port and toolchain integration
-  are unfinished.
-- An optional compatibility build uses an existing installation. It is never
-  silently substituted for an independent build.
+Choose **Build game** for the three-step wizard: game archive, installation
+folder, then building with a live log, measured elapsed time and stage estimates
+when there is enough progress to calculate them. Unknown work stays indeterminate.
+Your current installation and saves are protected from being selected as output.
+The independent engine reads NUP archives, including files with another extension
+that contain the NUP format. Nintendo 64 ROMs need a different engine.
+
+- The command-line archive check validates the index, checksum, paths and directory structure.
+- Command-line extraction streams and verifies files into a fresh build folder.
+- The command-line preparation stage selects executable modules from base/update
+  packages, verifies their content and writes NSO metadata and a module layout.
+- The independent build runs preparation, module decoding and SDK generation
+  before attempting the larger game modules. It currently stops at unsupported
+  SDK instructions; the game 1.1.1 port and native link are also unfinished.
+- An optional command-line compatibility build uses an existing installation.
+  It is never silently substituted for an independent build.
 
 Included engine source contains an ARM64 lifter, C generator, host runtime,
 Vulkan renderer, shader translator and native build tools. This baseline is not
-yet validated for game 1.1.1. A limited SDK generation experiment found unsupported
-instructions. No independently built playable executable is available yet.
+yet validated for game 1.1.1. Full SDK generation found 68 unsupported instructions
+across 45,907 functions after return and acquire-load extensions. No independently
+built playable executable is available yet. Existing installations can still be
+started from Home; no game is automatically closed for testing.
 
 Module normalization decodes segments and checks declared hashes. Full extraction
 keeps package trees separate; RomFS update composition still needs validation.
@@ -71,3 +92,20 @@ Run `python -m unittest discover -s tests`. See `AGENTS.md` for engineering rule
 `docs/MIGRATION.md` for implementation status, and `THIRD_PARTY_NOTICES.md` for
 technical source attribution. The repository remains private; no public installer
 or release is available. Contributions, issues and pull requests are welcome.
+
+The native launcher can be built with `python tools/build_launcher.py --toolchain
+PATH_TO_COMPILER_BIN` (Clang and windres). This packs the application emblem into a
+multi-size Windows icon and embeds product metadata. Packaging needs Pillow from
+`requirements-dev.txt`. `python tools/check_launcher.py` verifies the native
+bootstrap and exercises 25 views across five languages in one window.
+
+Delivery order: Windows parity, Linux parity, custom cheats/fixes, public release,
+then iOS. See `docs/ROADMAP.md` for measurable acceptance gates. The repository
+stays private until the first three priorities pass. Desktop source tests do not
+establish Linux game compatibility or iOS support.
+
+The Windows host runtime can be compiled separately with
+`python run_builder.py --runtime build/prepared-ID --toolchain PATH_TO_UCRT64_BIN`.
+This creates a development library and diagnostic report in `build/windows-runtime`;
+it does not create a playable executable. Constructor assertions are derived from
+the verified local module metadata instead of another game's version constants.

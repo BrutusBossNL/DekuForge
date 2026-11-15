@@ -43,13 +43,14 @@ def normalize_module(payload, name="module"):
     return bytes(output)
 
 
-def normalize_prepared(prepared):
+def normalize_prepared(prepared, notify=None):
     source = prepared / "exefs"
     destination = prepared / "normalized-exefs"
     if destination.exists() and destination.resolve() != destination:
         raise ValueError("Normalized module directory must not be a link")
     destination.mkdir(exist_ok=True)
-    for path in source.iterdir():
+    inputs = list(source.iterdir())
+    for number, path in enumerate(inputs, 1):
         if not path.is_file() or path.resolve() != path:
             raise ValueError("Prepared input must be a regular file")
         payload = path.read_bytes()
@@ -61,4 +62,6 @@ def normalize_prepared(prepared):
         else:
             with target.open("xb") as output:
                 output.write(normalized)
+        if notify is not None:
+            notify("progress", {"phase": "normalizing", "done": number, "total": len(inputs)})
     return destination
