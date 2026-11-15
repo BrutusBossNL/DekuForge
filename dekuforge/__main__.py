@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from . import __version__
 from .core import launch, load_installation, save_installation
+from .build_ui import open_builder
 
 BG, PANEL, GREEN, COPPER, TEXT = "#101b17", "#1b2d25", "#b4d68b", "#db9d62", "#ecede3"
 
@@ -17,6 +18,23 @@ def main():
     executable = tk.StringVar(value=load_installation())
     status = tk.StringVar(value="Kies je bestaande installatie om verder te spelen.")
     process = None
+    builder_window = None
+    build_active = lambda: False
+
+    def build():
+        nonlocal builder_window, build_active
+        if builder_window is not None and builder_window.winfo_exists():
+            builder_window.lift()
+            return
+        builder_window, build_active = open_builder(root, executable.set)
+
+    def close():
+        if build_active():
+            messagebox.showinfo("Build actief", "Laat de gamebuild afronden voordat je de launcher sluit.")
+            return
+        root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", close)
 
     def label(parent, text, color=TEXT, size=12, **kwargs):
         return tk.Label(parent, text=text, fg=color, bg=parent["bg"],
@@ -69,6 +87,8 @@ def main():
     button.pack(side="left")
     tk.Button(actions, text="Installatie kiezen", command=choose, bg=PANEL, fg=TEXT,
               relief="flat", padx=20, pady=10).pack(side="left", padx=10)
+    tk.Button(actions, text="NUP / Game bouwen", command=build, bg=COPPER, fg=BG,
+              relief="flat", padx=14, pady=10).pack(side="left")
     label(root, "Uitrusting   /   Wereld   /   Geheugen en prestaties", COPPER).pack(anchor="w", padx=38, pady=(18, 4))
     label(root, "Eigen runtime en cheat-integratie worden voorbereid.", TEXT, 10).pack(anchor="w", padx=38)
     tk.Label(root, textvariable=status, fg=GREEN, bg=BG, wraplength=800,

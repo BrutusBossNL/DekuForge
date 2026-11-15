@@ -9,13 +9,26 @@ ROOT = Path(__file__).resolve().parent.parent
 SETTINGS = ROOT / "local" / "settings.json"
 
 
-def load_installation(settings=SETTINGS):
+def load_settings(settings=SETTINGS):
     try:
         data = json.loads(settings.read_text(encoding="utf-8"))
-        value = data.get("executable", "")
-        return value if isinstance(value, str) else ""
+        return data if isinstance(data, dict) else {}
     except (OSError, ValueError, AttributeError):
-        return ""
+        return {}
+
+
+def load_installation(settings=SETTINGS):
+    value = load_settings(settings).get("executable", "")
+    return value if isinstance(value, str) else ""
+
+
+def update_settings(changes, settings=SETTINGS):
+    data = load_settings(settings)
+    data.update(changes)
+    settings.parent.mkdir(parents=True, exist_ok=True)
+    temporary = settings.with_suffix(".tmp")
+    temporary.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    temporary.replace(settings)
 
 
 def validate_installation(value):
@@ -31,10 +44,7 @@ def validate_installation(value):
 
 def save_installation(value, settings=SETTINGS):
     executable = validate_installation(value)
-    settings.parent.mkdir(parents=True, exist_ok=True)
-    temporary = settings.with_suffix(".tmp")
-    temporary.write_text(json.dumps({"executable": str(executable)}, indent=2), encoding="utf-8")
-    temporary.replace(settings)
+    update_settings({"executable": str(executable)}, settings)
     return executable
 
 

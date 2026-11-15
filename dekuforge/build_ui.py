@@ -1,0 +1,151 @@
+"""Responsive build window; subprocess output reaches Tk through a queue."""
+
+import os
+from queue import Empty, Queue
+import threading
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from tkinter.scrolledtext import ScrolledText
+
+from .builder import default_backend, run_build, validate_nup
+from .core import load_settings, save_installation, update_settings
+
+
+def open_builder(parent, on_installation):
+    window = tk.Toplevel(parent)
+    window.title("DekuForge — Game bouwen")
+    window.geometry("920x650")
+    window.configure(bg="#101b17")
+    settings = load_settings()
+    nup = tk.StringVar(value=settings.get("nup", ""))
+    backend = tk.StringVar(value=settings.get("backend", str(default_backend())))
+    status = tk.StringVar(value="NUP kiezen, controleren en daarna bouwen naar DekuForge/build/game.")
+    workers = tk.IntVar(value=min(4, os.cpu_count() or 1))
+    events = Queue()
+    active = False
+    built = None
+
+    def row(title, value, chooser):
+        frame = tk.Frame(window, bg="#101b17")
+        frame.pack(fill="x", padx=24, pady=7)
+        tk.Label(frame, text=title, bg="#101b17", fg="#ecede3", width=18, anchor="w").pack(side="left")
+        tk.Entry(frame, textvariable=value, state="readonly", readonlybackground="#1b2d25", fg="#ecede3").pack(side="left", fill="x", expand=True, ipady=7)
+        tk.Button(frame, text="Kiezen", command=chooser).pack(side="left", padx=(8, 0))
+
+    def choose_nup():
+        value = filedialog.askopenfilename(parent=window, title="Kies je eigen NUP", filetypes=[("NUP-bestand", "*.nup")])
+        if value:
+            try:
+                nup.set(str(validate_nup(value)))
+                update_settings({"nup": nup.get()})
+            except (OSError, ValueError) as error:
+                messagebox.showerror("NUP kiezen", str(error), parent=window)
+
+    def choose_backend():
+        value = filedialog.askdirectory(parent=window, title="Kies de bestaande NX2navi-launchermap (met app, python en toolchain)")
+        if value:
+            backend.set(value)
+
+    def begin(check):
+        nonlocal active, built
+        if active:
+            return
+        try:
+            validate_nup(nup.get())
+            jobs = workers.get()
+            update_settings({"nup": nup.get(), "backend": backend.get()})
+        except (OSError, ValueError, tk.TclError) as error:
+            messagebox.showerror("Game bouwen", str(error), parent=window)
+            return
+        values = (nup.get(), backend.get(), jobs)
+        active = True
+        built = None
+        use_button.configure(state="disabled")
+        check_button.configure(state="disabled")
+        build_button.configure(state="disabled")
+        status.set("NUP wordt gecontroleerd..." if check else "Gamebuild gestart. De bestaande installatie blijft intact.")
+
+        def worker():
+            try:
+                run_build(values[0], values[1], lambda kind, data: events.put((kind, data)), check=check, jobs=values[2])
+            except Exception as error:
+                events.put(("error", str(error)))
+            finally:
+                events.put(("finished", None))
+
+        threading.Thread(target=worker, daemon=False).start()
+
+    def use_build():
+        if built:
+            try:
+                value = str(save_installation(built))
+                on_installation(value)
+                status.set("Nieuwe build gekoppeld. Saves zijn niet automatisch overgezet.")
+            except (OSError, ValueError) as error:
+                messagebox.showerror("Build koppelen", str(error), parent=window)
+
+    def drain():
+        nonlocal active, built
+        # Bound work per tick so a verbose compiler cannot starve the window.
+        for _ in range(150):
+            try:
+                kind, data = events.get_nowait()
+            except Empty:
+                break
+            if kind == "log":
+                log.insert("end", data)
+                log.see("end")
+                if int(log.index("end-1c").split(".")[0]) > 1500:
+                    log.delete("1.0", "500.0")
+            elif kind == "progress":
+                status.set(json_progress(data))
+            elif kind == "built":
+                built = data
+                status.set("Build gereed. Koppel hem expliciet met 'Deze build gebruiken'.")
+                use_button.configure(state="normal")
+            elif kind in ("checked", "error"):
+                status.set(data)
+                log.insert("end", data + "\n")
+                log.see("end")
+            elif kind == "finished":
+                active = False
+                check_button.configure(state="normal")
+                build_button.configure(state="normal")
+        window.after(100, drain)
+
+    def close():
+        if active:
+            messagebox.showinfo("Build actief", "Laat de build afronden voordat je de launcher sluit.", parent=window)
+        else:
+            window.destroy()
+
+    tk.Label(window, text="NUP / GAME BUILDER", bg="#101b17", fg="#db9d62", font=("Segoe UI", 20)).pack(anchor="w", padx=24, pady=(20, 6))
+    tk.Label(window, text="Bouwt via je apart geïnstalleerde NX2navi-backend. Een eigen runtime is nog in ontwikkeling.",
+             bg="#101b17", fg="#ecede3", wraplength=850, justify="left").pack(anchor="w", padx=24, pady=5)
+    row("Eigen NUP-bestand", nup, choose_nup)
+    row("Externe builder", backend, choose_backend)
+    actions = tk.Frame(window, bg="#101b17")
+    actions.pack(fill="x", padx=24, pady=12)
+    tk.Label(actions, text="Workers", bg="#101b17", fg="#ecede3").pack(side="left")
+    tk.Spinbox(actions, from_=1, to=os.cpu_count() or 1, textvariable=workers, width=4).pack(side="left", padx=8)
+    check_button = tk.Button(actions, text="NUP controleren", command=lambda: begin(True))
+    check_button.pack(side="left", padx=6)
+    build_button = tk.Button(actions, text="Game bouwen", command=lambda: begin(False), bg="#b4d68b")
+    build_button.pack(side="left", padx=6)
+    use_button = tk.Button(actions, text="Deze build gebruiken", command=use_build, state="disabled")
+    use_button.pack(side="left", padx=6)
+    tk.Label(window, textvariable=status, bg="#101b17", fg="#b4d68b", wraplength=850, justify="left").pack(fill="x", padx=24, pady=8)
+    log = ScrolledText(window, bg="#1b2d25", fg="#ecede3", font=("Consolas", 10), height=18)
+    log.pack(fill="both", expand=True, padx=24, pady=(0, 20))
+    window.protocol("WM_DELETE_WINDOW", close)
+    # Prevent closing the root from orphaning an active build worker.
+    window.transient(parent)
+    window.grab_set()
+    drain()
+    return window, lambda: active
+
+
+def json_progress(data):
+    if isinstance(data, dict):
+        return " | ".join(f"{key}: {value}" for key, value in data.items())[:650]
+    return str(data)[:650]

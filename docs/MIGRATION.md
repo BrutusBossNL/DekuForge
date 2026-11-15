@@ -7,7 +7,8 @@ This is a requirements inventory, not a claim of feature parity or a legal audit
 | Area | Required behavior | Current status |
 | --- | --- | --- |
 | Launcher | Select and start an existing installation without changing saves | Implemented |
-| Build and updates | Local build, private update feed, verification and rollback | Planned |
+| Build | NUP selection, validation, isolated output, progress, logs and project lock | External NX2navi adapter implemented; independent recompilation pending |
+| Updates | Private update feed, verification and rollback | Planned |
 | Cheat manager | Categories, persistence, runtime integration and existing cheats | Pending ownership review and runtime adapter |
 | Equipment | Bomb arrows with black aura; spin reach normal/1.5/2/2.5; charge normal/instant | Pending review and port |
 | World | Independent skulltula, heart piece, grotto, chest, planting, fairy and upgrade switches | Pending review and port |
