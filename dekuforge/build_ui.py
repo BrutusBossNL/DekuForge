@@ -10,13 +10,17 @@ from tkinter.scrolledtext import ScrolledText
 from .builder import default_backend, run_build, validate_nup
 from .core import load_settings, save_installation, update_settings
 from .native import prepare_archive
+from .gameplan import prepare_game
+from .engine import build_independent
+from .theme import BG, PANEL, LEAF, GOLD, TEXT, apply_window, brand_header
 
 
 def open_builder(parent, on_installation):
     window = tk.Toplevel(parent)
     window.title("DekuForge — Game bouwen")
-    window.geometry("920x650")
-    window.configure(bg="#101b17")
+    window.geometry("980x850")
+    window.minsize(900, 800)
+    apply_window(window)
     settings = load_settings()
     nup = tk.StringVar(value=settings.get("nup", ""))
     backend = tk.StringVar(value=settings.get("backend", str(default_backend())))
@@ -27,10 +31,10 @@ def open_builder(parent, on_installation):
     built = None
 
     def row(title, value, chooser):
-        frame = tk.Frame(window, bg="#101b17")
+        frame = tk.Frame(window, bg=BG)
         frame.pack(fill="x", padx=24, pady=7)
-        tk.Label(frame, text=title, bg="#101b17", fg="#ecede3", width=18, anchor="w").pack(side="left")
-        tk.Entry(frame, textvariable=value, state="readonly", readonlybackground="#1b2d25", fg="#ecede3").pack(side="left", fill="x", expand=True, ipady=7)
+        tk.Label(frame, text=title, bg=BG, fg=TEXT, width=18, anchor="w").pack(side="left")
+        tk.Entry(frame, textvariable=value, state="readonly", readonlybackground=PANEL, fg=TEXT).pack(side="left", fill="x", expand=True, ipady=7)
         tk.Button(frame, text="Kiezen", command=chooser).pack(side="left", padx=(8, 0))
 
     def choose_nup():
@@ -43,7 +47,7 @@ def open_builder(parent, on_installation):
                 messagebox.showerror("NUP kiezen", str(error), parent=window)
 
     def choose_backend():
-        value = filedialog.askdirectory(parent=window, title="Kies de bestaande NX2navi-launchermap (met app, python en toolchain)")
+        value = filedialog.askdirectory(parent=window, title="Kies een compatibiliteitsinstallatie (met app, python en toolchain)")
         if value:
             backend.set(value)
 
@@ -65,13 +69,17 @@ def open_builder(parent, on_installation):
         check_button.configure(state="disabled")
         build_button.configure(state="disabled")
         extract_button.configure(state="disabled")
-        status.set("DekuForge verwerkt je archief..." if mode != "build" else "Compatibiliteitsbuild gestart via externe runtime.")
+        status.set("DekuForge verwerkt je archief...")
 
         def worker():
             try:
                 emit = lambda kind, data: events.put((kind, data))
-                if mode == "build":
+                if mode == "compat":
                     run_build(values[0], values[1], emit, jobs=values[2])
+                elif mode == "build":
+                    build_independent(values[0], emit)
+                elif mode == "prepare":
+                    prepare_game(values[0], emit)
                 else:
                     prepare_archive(values[0], emit, extract=mode == "extract")
             except Exception as error:
@@ -126,25 +134,30 @@ def open_builder(parent, on_installation):
         else:
             window.destroy()
 
-    tk.Label(window, text="NUP / GAME BUILDER", bg="#101b17", fg="#db9d62", font=("Segoe UI", 20)).pack(anchor="w", padx=24, pady=(20, 6))
-    tk.Label(window, text="Eigen NUP-controle en extractie. Speelbare builds gebruiken voorlopig de externe compatibiliteitsbackend.",
-             bg="#101b17", fg="#ecede3", wraplength=850, justify="left").pack(anchor="w", padx=24, pady=5)
+    brand_header(window, compact=True)
+    tk.Label(window, text="NUP / GAME BUILDER", bg=BG, fg=GOLD, font=("Segoe UI", 16)).pack(anchor="w", padx=24, pady=(4, 6))
+    tk.Label(window, text="Eigen NUP-verwerking en meegeleverde enginebron. De zelfstandige gameport is nog in ontwikkeling.",
+             bg=BG, fg=TEXT, wraplength=850, justify="left").pack(anchor="w", padx=24, pady=5)
     row("Eigen NUP-bestand", nup, choose_nup)
-    row("Externe builder", backend, choose_backend)
-    actions = tk.Frame(window, bg="#101b17")
+    row("Compatibiliteitsmap", backend, choose_backend)
+    actions = tk.Frame(window, bg=BG)
     actions.pack(fill="x", padx=24, pady=12)
-    tk.Label(actions, text="Workers", bg="#101b17", fg="#ecede3").pack(side="left")
+    tk.Label(actions, text="Workers", bg=BG, fg=TEXT).pack(side="left")
     tk.Spinbox(actions, from_=1, to=os.cpu_count() or 1, textvariable=workers, width=4).pack(side="left", padx=8)
     check_button = tk.Button(actions, text="NUP controleren", command=lambda: begin("check"))
     check_button.pack(side="left", padx=6)
     extract_button = tk.Button(actions, text="Uitpakken", command=lambda: begin("extract"))
     extract_button.pack(side="left", padx=6)
-    build_button = tk.Button(actions, text="Compatibiliteitsbuild", command=lambda: begin("build"), bg="#b4d68b")
+    build_button = tk.Button(actions, text="Zelfstandig bouwen", command=lambda: begin("build"), bg=GOLD, fg=BG, activebackground=LEAF, activeforeground=BG)
     build_button.pack(side="left", padx=6)
     use_button = tk.Button(actions, text="Deze build gebruiken", command=use_build, state="disabled")
     use_button.pack(side="left", padx=6)
-    tk.Label(window, textvariable=status, bg="#101b17", fg="#b4d68b", wraplength=850, justify="left").pack(fill="x", padx=24, pady=8)
-    log = ScrolledText(window, bg="#1b2d25", fg="#ecede3", font=("Consolas", 10), height=18)
+    advanced = tk.Frame(window, bg=BG)
+    advanced.pack(fill="x", padx=24, pady=(0, 8))
+    tk.Button(advanced, text="Alleen voorbereiden", command=lambda: begin("prepare")).pack(side="left", padx=6)
+    tk.Button(advanced, text="Optionele compatibiliteitsbuild", command=lambda: begin("compat")).pack(side="left", padx=6)
+    tk.Label(window, textvariable=status, bg=BG, fg=LEAF, wraplength=850, justify="left").pack(fill="x", padx=24, pady=8)
+    log = ScrolledText(window, bg=PANEL, fg=TEXT, insertbackground=GOLD, font=("Consolas", 10), height=18)
     log.pack(fill="both", expand=True, padx=24, pady=(0, 20))
     window.protocol("WM_DELETE_WINDOW", close)
     # Prevent closing the root from orphaning an active build worker.

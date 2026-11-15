@@ -1,20 +1,21 @@
-"""Forest and copper desktop launcher, written independently for DekuForge."""
+"""DekuForge desktop launcher with shared logo-derived styling."""
 
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from . import __version__
 from .core import launch, load_installation, save_installation
 from .build_ui import open_builder
+from .theme import BG, PANEL, LEAF, GOLD, TEXT, apply_window, brand_header
 
-BG, PANEL, GREEN, COPPER, TEXT = "#101b17", "#1b2d25", "#b4d68b", "#db9d62", "#ecede3"
+GREEN, COPPER = LEAF, GOLD
 
 
 def main():
     root = tk.Tk()
     root.title("DekuForge — Reforging a legend.")
-    root.geometry("900x590")
-    root.minsize(760, 530)
-    root.configure(bg=BG)
+    root.geometry("960x850")
+    root.minsize(860, 800)
+    apply_window(root)
     executable = tk.StringVar(value=load_installation())
     status = tk.StringVar(value="Kies je bestaande installatie om verder te spelen.")
     process = None
@@ -69,11 +70,7 @@ def main():
             button.configure(state="normal")
             status.set(f"Game afgesloten (code {process.returncode}).")
 
-    header = tk.Frame(root, bg=BG, padx=38, pady=24)
-    header.pack(fill="x")
-    label(header, "DEKU / FORGE", COPPER, 13).pack(anchor="w")
-    label(header, "Reforging a legend.", TEXT, 30).pack(anchor="w", pady=(12, 6))
-    label(header, "Een nieuwe werkplaats voor jouw avontuur.", GREEN).pack(anchor="w")
+    brand_header(root)
     card = tk.Frame(root, bg=PANEL, padx=26, pady=22)
     card.pack(fill="x", padx=38, pady=8)
     label(card, "VERDER SPELEN", GREEN, 11).pack(anchor="w")
@@ -82,7 +79,7 @@ def main():
              fg=TEXT, relief="flat", font=("Segoe UI", 10)).pack(fill="x", ipady=9)
     actions = tk.Frame(card, bg=PANEL)
     actions.pack(fill="x", pady=(18, 0))
-    button = tk.Button(actions, text="Spelen  >", command=play, bg=GREEN, fg=BG,
+    button = tk.Button(actions, text="Spelen  >", command=play, bg=GOLD, fg=BG,
                        relief="flat", padx=32, pady=10, font=("Segoe UI", 12, "bold"))
     button.pack(side="left")
     tk.Button(actions, text="Installatie kiezen", command=choose, bg=PANEL, fg=TEXT,

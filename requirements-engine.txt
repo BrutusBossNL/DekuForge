@@ -1,0 +1,4 @@
+# Open-source Python dependencies for module decoding and the included lifter.
+numpy>=2.0
+lz4>=4.0
+zbic==1.0.1.post1

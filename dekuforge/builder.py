@@ -126,7 +126,7 @@ def run_build(nup_value, backend_value, notify, check=False, jobs=4, workspace=R
             environment["PYTHONUNBUFFERED"] = "1"
             environment["PATH"] = str(backend.compiler_root / "bin") + os.pathsep + environment.get("PATH", "")
             flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-            notify("log", "Externe NX2navi-backend; geen zelfstandige DekuForge-runtime.\n")
+            notify("log", "Optionele externe compatibiliteitsbackend; geen zelfstandige DekuForge-runtime.\n")
             notify("log", f"Logbestand: {log_path}\n")
             with log_path.open("w", encoding="utf-8") as log:
                 with subprocess.Popen(backend.command(nup, output, check, jobs), cwd=str(backend.kit),

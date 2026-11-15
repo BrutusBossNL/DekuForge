@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.cmd text eol=crlf
+# Preserve the pinned engine source byte for byte on every platform.
+engine/** -text -whitespace
+engine/SOURCE.json text eol=lf whitespace

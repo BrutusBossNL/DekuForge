@@ -60,6 +60,7 @@ class Archive:
             index = stream.read(length)
         if hashlib.sha256(index).digest() != header[24:56]:
             raise ArchiveError("Archive index checksum mismatch")
+        self.index_sha256 = header[24:56].hex()
         self._index_end = offset + length
         self._decode(index, struct.unpack_from("<I", header, 72)[0])
 

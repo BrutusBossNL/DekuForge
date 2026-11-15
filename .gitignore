@@ -14,3 +14,13 @@ generated/
 *.v64
 *.keys
 *.sav
+engine/build/
+engine/generated/
+engine/refs/
+engine/toolchain/
+engine/config.local.toml
+*.nso
+*.npdm
+*.spv
+*.profdata
+*.profraw

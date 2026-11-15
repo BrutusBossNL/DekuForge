@@ -1,90 +1,73 @@
+<p align="center">
+  <img src="assets/branding/logo.png" alt="DekuForge" width="680">
+</p>
+
 # DekuForge
 
 **Reforging a legend.**
 
-An independent launcher and a foundation for original game tooling. This repository
-starts with newly written Python code, a forest-green and copper interface, and
-an explicit migration plan. It is not a renamed NX2navi distribution.
+An open-source launcher and local game-build project, with a forest-green and
+gold interface inspired by its leaf-and-forge logo. Original project code is MIT licensed. Reused engine components
+retain their accompanying notices.
 
-## Run locally
+## Start
 
-Run `Start-DekuForge.cmd` on Windows, or `python -m dekuforge` with Python 3.11+
-and Tk installed. Select an existing executable using **Installatie kiezen**, then
-press **Spelen**. The launcher runs it in its own installation directory, keeping
-that installation's saves, settings and existing features in place. Launching an
-external installation does not turn its runtime into a DekuForge implementation.
+Run `Start-DekuForge.cmd`, or `python run_launcher.py` with Python and Tk installed.
+Select an existing game installation to play without changing saves or settings.
+A local interpreter override can be stored as one path in ignored
+`local/python-path.txt`; otherwise the Windows script uses `py -3`.
 
-The Windows script can use the Python already installed by NX2navi, without
-copying or distributing it. Otherwise install Python with Tk support.
+## Game builder
 
-Local configuration stays in ignored `local/settings.json`. No game data,
-encryption keys, saves, external executables, or local paths belong in Git.
-The launcher does not download, update, modify or shut down an existing game.
+Open **NUP / Game bouwen** and choose your own NUP archive.
 
-## Build from your NUP
+- **NUP controleren** validates the index, checksum, paths and directory structure.
+- **Uitpakken** independently streams and verifies files into a fresh build folder.
+- **Alleen voorbereiden** selects executable modules from base/update packages,
+  verifies their content, and writes NSO metadata and a reproducible build plan.
+- **Zelfstandig bouwen** runs preparation and checks engine readiness. It currently
+  stops before native compilation: the game 1.1.1 port and toolchain integration
+  are unfinished.
+- An optional compatibility build uses an existing installation. It is never
+  silently substituted for an independent build.
 
-**Independent stages:** NUP index parsing, structural validation, streamed
-SHA-256 verification and extraction are implemented in DekuForge itself. They do
-not load an external builder. **NUP controleren** uses this reader. **Uitpakken**
-writes each package into a fresh directory under ignored `build/extracted-*`.
-It preserves base and update packages separately; merging updates, decoding game
-modules, ARM64 lifting, native runtime and rendering remain to be implemented.
-Extraction alone does not produce a playable game. Compressed members require
-Python 3.14+; no third-party decompressor is bundled.
+Included engine source contains an ARM64 lifter, C generator, host runtime,
+Vulkan renderer, shader translator and native build tools. This baseline is not
+yet validated for game 1.1.1. A limited SDK generation experiment found unsupported
+instructions. No independently built playable executable is available yet.
 
-Choose **NUP / Game bouwen**, select your own `.nup` file, and select the root
-of an existing NX2navi launcher installation (containing `app`, `python`,
-`pydeps` and `toolchain`). The normal local installation is selected by default.
-Use **NUP controleren** to validate the archive index and structure without extraction
-or compilation. This does not verify the executable game version or all payloads.
-**Compatibiliteitsbuild** uses the external backend's Python, dependencies
-and compiler. Output stays in `DekuForge/build/game`; the backend can also use its
-normal local caches.
+Module normalization decodes segments and checks declared hashes. Full extraction
+keeps package trees separate; RomFS update composition still needs validation.
 
-This is original build orchestration around an **external NX2navi backend**,
-not an independent recompiler or runtime. No backend source or binaries are
-bundled, copied, renamed or relicensed. Features of the resulting game come from
-the selected backend version. Missing build tools are not installed automatically.
+## Command line
 
-The window shows progress and a bounded live log; full logs stay in ignored
-`local/logs`. Builds require at least 40 GiB of free space. The output must carry
-a DekuForge ownership marker and contain no symlinks or junctions. An exclusive
-project lock prevents simultaneous checks/builds. After a process crash, inspect
-the running processes before manually removing `local/build.lock`. No automatic
-directory deletion is performed.
+```text
+python run_builder.py --doctor
+python run_builder.py --nup "D:/Games/own.nup" --check
+python run_builder.py --nup "D:/Games/own.nup" --extract
+python run_builder.py --nup "D:/Games/own.nup" --prepare
+python run_builder.py --nup "D:/Games/own.nup"
+```
 
-After a successful compatibility build, **Deze build gebruiken** explicitly selects the new executable.
-Saves and settings are not automatically copied. Leave the launcher open until
-the build finishes. Shader preparation can use the GPU; start a full build when
-you are finished playing.
+The final command requests an independent game build and currently reports the
+unfinished integration. `--compat --backend PATH` explicitly selects an external
+compatibility builder. Install engine dependencies from `requirements-engine.txt`
+in your development environment. Python 3.14+ supports compressed NUP members;
+the launcher alone supports Python 3.11+ with Tk.
 
-Command line: `python run_builder.py --nup "D:/Games/own.nup" --check`, or omit
-`--check` for a compatibility build, or use `--extract` for independent verified
-extraction. Optional `--backend` selects the existing launcher root and
-`--jobs` limits compiler workers. With embedded Python, invoke the script with
-that interpreter. No global PATH workaround is required.
+`--generate build/prepared-ID --modules sdk --limit 3 --jobs 1` exercises the
+included C generator on a prepared input. Unsupported instruction reports fail
+the stage. Omit `--limit` for full generation; this still does not link a game.
 
-## Implementation status
+## Local files and development
 
-- Implemented: original desktop launcher, installation selection, persistent
-  local settings, existing-game launch, duplicate-launch guard within the launcher.
-- Implemented: NUP selection, external-backend validation, isolated build
-  orchestration, progress, logs and explicit selection of the result.
-- Implemented: independent NUP v1 reader and verified extraction, without an
-  external backend. Archive checks do not assert a supported executable version.
-- Planned: independent runtime, updater, cheat manager, equipment
-  extensions, world markers and memory/performance fixes.
-- Not included: NX2navi runtime, game data, generated game code or upstream
-  additions for which reuse permission has not been established.
+Preferences and logs stay in ignored `local/`. Extracted game files, normalized
+modules, plans and generated C stay in ignored `build/` or `generated/`. No game
+files, keys, saves or built game executables are included. Full extraction needs
+the expanded archive size plus 2 GiB free space. Independent preparation leaves
+the selected installation untouched. Run GPU preparation outside play sessions.
 
-See [migration inventory](docs/MIGRATION.md) and [provenance](THIRD_PARTY_NOTICES.md).
-All newly written code in this repository is MIT licensed. External installations
-and future dependencies keep their own licenses.
-
-## Development
-
-`python -m unittest discover -s tests`
-
-Contributions and bug reports are welcome. Preserve attribution, document the
-origin and license of reused code, and never commit game-derived material.
-No public release or installation package is available at this stage.
+Run `python -m unittest discover -s tests`. See `AGENTS.md` for engineering rules,
+`docs/MIGRATION.md` for implementation status, and `THIRD_PARTY_NOTICES.md` for
+technical source attribution. The repository remains private; no public installer
+or release is available. Contributions, issues and pull requests are welcome.
