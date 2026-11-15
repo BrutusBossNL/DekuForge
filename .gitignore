@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.venv/
+local/
+build/
+generated/
+*.exe
+*.dll
+*.nsp
+*.nup
+*.xci
+*.z64
+*.n64
+*.v64
+*.keys
+*.sav
