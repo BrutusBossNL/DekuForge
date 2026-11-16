@@ -12,9 +12,12 @@ developer interpreter overrides are not an end-user installation workflow.
 
 Deliver a standalone build from the owner's NUP input, using included source
 and independently provisioned open-source build tools. No external application
-may silently perform the build. Current gates are incomplete: remaining CPU
-instructions, game-specific host calls and boot, NVN2/shader integration, RomFS
-assembly, native linking and isolated in-game validation.
+may silently perform the build. Local preparation, CPU generation, RomFS
+assembly and native linking now produce an experimental executable that boots
+and loads a copied save. Rendering correctness, movie performance, world
+stability and reference parity remain open. The launcher build wizard still
+stops after CPU generation; it must be connected to the validated native path
+before this priority is delivered.
 
 Acceptance requires install, launch, title, save/load, controller mapping, audio,
 rendering and a repeatable play session. Compare Kokiri Forest, Market Square,

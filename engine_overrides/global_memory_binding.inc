@@ -1,6 +1,40 @@
 // Raw-global shader ABI: 4096 sorted 32-byte address-map records, entry zero
 // empty, unused entries beginning at UINT64_MAX. The companion write log is a
 // 65536-slot hash set plus its overflow word, copied to host memory at completion.
+#include "df_counter_address_map.h"
+
+static int df_counter_raw_map(VkExec *ex, VkDescriptorBufferInfo original_map,
+    VkDescriptorBufferInfo source, VkBuffer staged, VkDescriptorBufferInfo *result) {
+    CbRes *resources=cb_res(ex);
+    const uint64_t (*original)[4]=NULL;
+    size_t bytes=4096*32;
+    if(original_map.range!=bytes) return 0;
+    for(unsigned i=0;i<resources->nchunks;i++) {
+        Chunk *chunk=&resources->chunks[i];
+        if(chunk->buf==original_map.buffer && original_map.offset<=chunk->size &&
+            bytes<=chunk->size-original_map.offset) {
+            original=(const uint64_t (*)[4])((uint8_t *)chunk->map+original_map.offset);
+            break;
+        }
+    }
+    if(!original) return 0;
+    VkBufferDeviceAddressInfo query={.sType=VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO,.buffer=source.buffer};
+    uint64_t from=vkGetBufferDeviceAddress(vk_ctx()->device,&query);
+    query.buffer=staged;
+    uint64_t to=vkGetBufferDeviceAddress(vk_ctx()->device,&query);
+    if(!from || !to || from>UINT64_MAX-source.offset) return 0;
+    uint64_t (*rewritten)[4]=malloc(bytes);
+    if(!rewritten) return 0;
+    int valid=df_counter_address_map(rewritten,original,4096,from+source.offset,source.range,to);
+    if(!valid) { free(rewritten);return 0; }
+    // Private map for this dispatch; scratch lifetime is the submission fence.
+    void *copy=scratch(ex,bytes,&result->buffer,&result->offset);
+    result->range=bytes;
+    memcpy(copy,rewritten,bytes);
+    free(rewritten);
+    return 1;
+}
+
 static VkDescriptorBufferInfo df_mesh_checks_info(VkExec *ex) {
     RS.volatile_ = 1;
     CbRes *resources = cb_res(ex);

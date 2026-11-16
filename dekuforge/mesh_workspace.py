@@ -19,6 +19,7 @@ def stage_mesh(output, write):
     write(output / "runtime/df_scene_scale.inc", (root / "engine_overrides/scene_scale.inc").read_text(encoding="utf-8"))
     write(output / "runtime/df_gpu_pass_timing.inc", (root / "engine_overrides/gpu_pass_timing.inc").read_text(encoding="utf-8"))
     write(output / "runtime/df_compute_counter_stage.inc", (root / "engine_overrides/compute_counter_stage.inc").read_text(encoding="utf-8"))
+    write(output / "runtime/df_counter_address_map.h", (root / "engine_overrides/counter_address_map.h").read_text(encoding="utf-8"))
     for name in ("global_memory_ranges.inc", "global_memory_binding.inc", "global_memory_completion.inc", "texture_numeric.inc", "depth_dummy.inc", "nvn2_stages.h", "mesh_draw_trace.inc", "mesh_fragment_interface.inc", "mesh_point_interface.inc"):
         write(output / "runtime" / ("df_" + name), (output.parent.parent / "engine_overrides" / name).read_text(encoding="utf-8"))
     def edit(name, changes):

@@ -130,6 +130,8 @@ def main():
               "gpu_validation_shader": args.gpu_validation_shader,
               "memory_mode": "import" if args.raw_global_memory else "default",
               "experimental_counter_staging": environment.get("DEKUFORGE_STAGE_COMPUTE_COUNTERS") == "1",
+              "experimental_counter_max_bytes": environment.get("DEKUFORGE_STAGE_COMPUTE_COUNTER_MAX", "64"),
+              "experimental_counter_raw_reads": environment.get("DEKUFORGE_STAGE_COMPUTE_RAW_READS") == "1",
               "descriptor_templates_disabled": args.no_descriptor_templates,
               "fullscreen_requested": args.fullscreen,
               "scene_reconstruction": "edge-adaptive" if environment.get("DEKUFORGE_SCENE_EASU") == "1" else "cubic",

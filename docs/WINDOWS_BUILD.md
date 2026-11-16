@@ -478,3 +478,39 @@ positions. `tools/check_mesh_resources.py` compiles the synthetic wrapper,
 validates SPIR-V and verifies the invariant decoration on the actual position
 member. This closes an interface gap; the combined in-game retest is still
 required before attributing the remaining flicker to it.
+
+The combined float-atomic/invariant build completed its isolated world test
+normally, but has a severe performance regression: frames 2201–2340 measured
+5.29 FPS average (140 samples, including a 379 ms outlier). Correctly executing
+the previously omitted operations is not yet fast enough. The cached restart
+reached guest code in 2.27 seconds. With the existing 64-byte counter experiment,
+a GPU profile at frame 2300 attributed 118.75 ms and 37.52 ms to two compute
+dispatches; the largest measured render passage was 8.30 ms. The movie still
+takes roughly 68 ms per frame. This build is not ready for use as a playable
+replacement.
+
+For diagnosis only, counter staging accepts
+`DEKUFORGE_STAGE_COMPUTE_COUNTER_MAX` from 4 through 8192 bytes, in multiples of
+four. It still requires `DEKUFORGE_STAGE_COMPUTE_COUNTERS=1`, defaults to 64
+bytes, and retains the alias and ambiguous-buffer rejection checks.
+The synthetic command-model test covers a 192-byte copy-back and invalid limits;
+the game harness records the selected bound. This is not a default performance
+fix or a claim of alias equivalence across different Vulkan buffers.
+
+An additional `DEKUFORGE_STAGE_COMPUTE_RAW_READS=1` experiment permits a
+read-only raw-address table. It creates a private table for the dispatch and
+redirects every matching physical interval, including virtual aliases, to the
+staged counter. Raw writes, overlapping descriptor ranges, indirect dispatches
+and malformed or overflowing maps remain rejected. Synthetic tests cover map
+splitting, alias resolution, failure fallback and successful descriptor updates.
+
+The 4-KiB experiment completed normally at 15.64 average FPS. Resource inspection
+identified the remaining exposure buffer as 4160 bytes. With the 8-KiB bound and
+raw-read remapping, frames 2500–3300 measured 33.81 average FPS and 26.02 FPS for
+the slowest one percent (801 samples, median 29.472 ms, maximum 51.329 ms).
+The remaining expensive compute dispatch dropped from 36.13 ms to 0.30 ms in
+the frame-2300 GPU profile. This run exited normally. The source compiler
+identity was `3be8bb71dc1e9c81`; hardware and driver match the reference above.
+The experiment remains opt-in, and its saved world capture has not been
+visually verified. It does not fix the roughly 68-ms movie frames or establish
+rendering parity. A Vulkan validation run is separate from these measurements.
