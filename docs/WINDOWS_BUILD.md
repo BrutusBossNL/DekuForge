@@ -388,3 +388,22 @@ are still unvalidated; adapting constructor metadata does not establish a full
 port. No FPS, frame-time or memory parity claims are supported yet.
 
 The working installation and saves remain separate throughout this work.
+
+### Half arithmetic investigation
+
+The Ampere half-pair translator treated operand swizzle 1 as the high 16-bit
+half, instead of broadcasting the operand's 32-bit float. Uniform operands also
+ignored their half swizzle. `mesh-0035.patch` corrects both paths and preserves
+MUFU's separate half-selection interpretation. The underlying instruction
+semantics are described in the upstream translator's
+[half-pair investigation](https://github.com/seedds/nxnative/blob/main/docs/reference/shaders.md#half-pair-swizzle-on-a-constant-and-f32).
+Exact hardware rounding of non-representable scalar inputs remains unverified.
+
+`tools/check_shader_half_swizzle.py` uses synthetic instructions. The old
+compiler emits 1.9375 for a scalar 1.5 operand; the corrected compiler emits 1.5
+in both lanes. Low/high uniform broadcasts and SPIR-V validation also pass.
+Existing deferred-write and typed-image-store translator checks still pass.
+The local game shader cache must be rebuilt under the new compiler identity;
+these isolated checks alone do not establish that movie or world corruption is
+fixed. The last pre-correction world interval measured 27.02 average FPS and
+23.69 FPS for the slowest one percent over 801 frames at fullscreen presentation.
