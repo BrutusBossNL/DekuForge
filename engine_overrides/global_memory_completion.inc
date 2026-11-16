@@ -31,7 +31,7 @@ static void df_global_complete(CbRes *resources) {
     if (resources->df_checks) {
         const uint32_t *check = resources->df_checks;
         if (check[19]) {
-            uint32_t count = check[18] < 512 ? check[18] : 512;
+            uint32_t count = check[18] < check[19] ? check[18] : check[19];
             rt_log("Mesh position batch: %u captured, %u requested", count, check[18]);
             for (uint32_t i = 0; i < count; i++) {
                 const uint32_t *record = check + 20 + i * 8;

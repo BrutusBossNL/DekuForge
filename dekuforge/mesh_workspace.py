@@ -391,11 +391,14 @@ static int resolve_locked(uint64_t addr, uint64_t size, VkMemSpan *out) {
     edit("vk_pipeline.c", [
         ('    vkCmdSetDepthCompareOp(cb, compare_op(d->df));', '''    VkCompareOp df_compare = compare_op(d->df);
     const char *df_depth_probe = getenv("DEKUFORGE_DIAGNOSTIC_DEPTH_EQUAL");
-    if (df_depth_probe && !strcmp(df_depth_probe, "always") && d->dt && !d->dw &&
+    if (df_depth_probe && d->dt && !d->dw &&
         df_compare == VK_COMPARE_OP_EQUAL) {
-        df_compare = VK_COMPARE_OP_ALWAYS;
+        if (!strcmp(df_depth_probe, "always")) df_compare = VK_COMPARE_OP_ALWAYS;
+        else if (!strcmp(df_depth_probe, "lequal")) df_compare = VK_COMPARE_OP_LESS_OR_EQUAL;
+        else if (!strcmp(df_depth_probe, "gequal")) df_compare = VK_COMPARE_OP_GREATER_OR_EQUAL;
         static int reported;
-        if (!reported++) rt_log("DekuForge: diagnostic bypass of read-only EQUAL depth tests");
+        if (df_compare != VK_COMPARE_OP_EQUAL && !reported++)
+            rt_log("DekuForge: diagnostic read-only EQUAL depth test override: %s", df_depth_probe);
     }
     vkCmdSetDepthCompareOp(cb, df_compare);'''),
         ('    P.max_push = pd.maxPushDescriptors;', '''    P.max_push = pd.maxPushDescriptors;

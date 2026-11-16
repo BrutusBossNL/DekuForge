@@ -25,6 +25,7 @@ def main():
     parser.add_argument("--no-uniform-snapshot", action="store_true", help="Diagnose live uniform reads versus submit-time snapshots")
     parser.add_argument("--trace-mesh-counts", action="store_true", help="Copy indirect draw records for a device-loss report")
     parser.add_argument("--trace-mesh-output", action="store_true", help="Read bounded primitive/position samples after GPU completion")
+    parser.add_argument("--trace-mesh-frame", type=int, help="Capture bounded position bit patterns for one frame")
     parser.add_argument("--raw-global-memory", action="store_true", help="Use coherent imported pools for raw-global shader validation")
     parser.add_argument("--capture-frame", type=int, help="Capture one presented test frame in the owned output")
     parser.add_argument("--dump-frame", type=int, help="Capture intermediate render targets for one isolated frame")
@@ -42,6 +43,10 @@ def main():
     if executable.resolve() != executable or not (folder / ".dekuforge-native").is_file():
         raise ValueError("Use only the owned experimental game build")
     environment = {key: value for key, value in os.environ.items() if not key.startswith("NX2NAVI_")}
+    if args.trace_mesh_frame is not None:
+        if args.mode != "play" or args.trace_mesh_frame < 1:
+            parser.error("Mesh position capture requires play mode and a positive frame")
+        environment["DEKUFORGE_TRACE_MESH_FRAME"] = str(args.trace_mesh_frame)
     environment["NX2NAVI_GPU"] = "vulkan" if args.mode == "play" else "null"
     environment["NX2NAVI_TRACE"] = "host,ipc" if args.mode != "play" else "gfx,present"
     if args.trace:
@@ -147,6 +152,7 @@ def main():
               "uniform_snapshot_disabled": args.no_uniform_snapshot,
               "mesh_count_diagnostics": args.trace_mesh_counts,
               "mesh_output_diagnostics": args.trace_mesh_output,
+              "mesh_position_frame": environment.get("DEKUFORGE_TRACE_MESH_FRAME"),
               "capture_frame_requested": args.capture_frame,
               "profile_frame_requested": args.profile_frame,
               "render_dump": str(dump_folder.relative_to(ROOT)) if dump_folder else None,

@@ -10,6 +10,48 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from dekuforge.mesh_stage import metadata, vulkan_stage
 
 
+def preserve_fused_arithmetic(module):
+    """Keep native FFMA's single rounding across the GLSL stage-wrapper round trip.
+
+    glslang preserves precise add/multiply operations but drops NoContraction
+    from GLSL.std.450 Fma, even when its GLSL result is precise. Without that
+    decoration a driver may use separately rounded multiply/add operations.
+    """
+    path = Path(module)
+    data = path.read_bytes()
+    if len(data) < 20 or len(data) % 4:
+        raise ValueError("Truncated native shader module")
+    words = list(struct.unpack(f"<{len(data)//4}I", data))
+    if words[0] != 0x07230203:
+        raise ValueError("Invalid native shader module magic")
+    imports, precise, fused = set(), set(), set()
+    offset, types = 5, None
+    while offset < len(words):
+        count, opcode = words[offset] >> 16, words[offset] & 0xffff
+        if not count or offset + count > len(words):
+            raise ValueError("Malformed native shader instruction")
+        operands = words[offset+1:offset+count]
+        if opcode == 11 and count >= 3:
+            name = struct.pack(f"<{len(operands)-1}I", *operands[1:]).split(b"\0", 1)[0]
+            if name == b"GLSL.std.450":
+                imports.add(operands[0])
+        elif opcode == 71 and count == 3 and operands[1] == 42:
+            precise.add(operands[0])
+        elif opcode == 12 and count >= 5 and operands[2] in imports and operands[3] == 50:
+            fused.add(operands[1])
+        if types is None and 19 <= opcode <= 39:
+            types = offset
+        offset += count
+    missing = sorted(fused - precise)
+    if missing:
+        if types is None:
+            raise ValueError("Native shader module has no type section")
+        decorations = [word for result in missing for word in ((3 << 16) | 71, result, 42)]
+        words[types:types] = decorations
+        path.write_bytes(struct.pack(f"<{len(words)}I", *words))
+    return len(missing)
+
+
 def validate_resource_bindings(module, resources):
     """Reject native modules whose declared descriptors lack host reflection."""
     data = Path(module).read_bytes()
@@ -82,6 +124,7 @@ def compile_stage(job, output, translator, tools, toolchain):
     run([tools / "spirv-opt.exe", "--remove-unused-interface-variables", "--eliminate-dead-variables",
          compiled, "-o", cleaned])
     cleaned.replace(compiled)
+    preserve_fused_arithmetic(compiled)
     run([tools / "spirv-val.exe", "--target-env", "vulkan1.2", compiled])
     validate_resource_bindings(compiled, resources)
     resources["stage"] = "ts" if stage == "task" else "ms"

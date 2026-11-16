@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from mesh_shader_worker import validate_resource_bindings
+from mesh_shader_worker import preserve_fused_arithmetic, validate_resource_bindings
 from dekuforge.mesh_stage import vulkan_stage
 
 
@@ -53,6 +53,21 @@ void main() { result_buffer.value = live_input.value; }
         else:
             raise AssertionError("Cleanup removed a live resource")
     print("Native shader resources: unused declaration removed, live read/write resources preserved")
+    source = folder / "fused.comp"
+    source.write_text('''#version 460
+layout(local_size_x=1) in;
+layout(binding=0) buffer Values { float a; float b; float c; float result; } values;
+void main() { precise float result=fma(values.a, values.b, values.c); values.result=result; }
+''', encoding="utf-8")
+    fused = folder / "fused.spv"
+    run("glslang", "-V", "--target-env", "vulkan1.2", source, "-o", fused)
+    if preserve_fused_arithmetic(fused) != 1:
+        raise AssertionError("Expected one FMA precision decoration to restore")
+    before = fused.read_bytes()
+    if preserve_fused_arithmetic(fused) != 0 or fused.read_bytes() != before:
+        raise AssertionError("FMA precision repair must be idempotent")
+    run("spirv-val", "--target-env", "vulkan1.2", fused)
+    print("Fused arithmetic: missing precision restored, valid SPIR-V, idempotent repair")
     for kind in ("task", "mesh"):
         facts = dict(kind=kind, threads=32, payload=32, shared=1024,
                      stage_memory=[0, 16, 48, 768], task=True, vertices=3,

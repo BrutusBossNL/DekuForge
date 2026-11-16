@@ -574,10 +574,27 @@ is not a rendering fix. Disabling uniform snapshots with the test harness's
 Both experiments exited normally; neither establishes parity.
 
 `DEKUFORGE_TRACE_MESH_FRAME=N` captures the first emitted vertex of nonempty mesh
-workgroups during the selected frame. Each submission retains at most 512
-records, with shader identifier, workgroup, indirect first index, primitive count
+workgroups during the selected frame. Each submission retains at most 2048
+records (expanded from 512 after a truncated capture), with shader identifier,
+workgroup, indirect first index, primitive count
 and the exact four position bit patterns. Requested and captured counts expose
 truncation. The buffer is read only after submission completion. This diagnostic
 does not modify position values or depth tests and allocates the extra records
 only on the selected frame. It is intended to investigate cross-pass position
 agreement; matching isolated samples alone cannot validate full geometry.
+
+The directional depth diagnostics (`lequal` and `gequal`) remain opt-in.
+The measured white-pixel fraction in the character region was 18.05% with
+normal depth, 16.63% with LEQUAL, and 0.25% with GEQUAL or ALWAYS. This is
+evidence of a cross-pass depth discrepancy, not visual acceptance of either
+override. The first 512-position trace contained no nonfinite values but
+truncated 342 further samples. Its world interval measured 34.05 average FPS
+with experimental counter staging; the process exited normally.
+
+The mesh GLSL round trip was found to discard `NoContraction` decorations on
+`GLSL.std.450 Fma`. A sampled world shader retained all 46 precise add/multiply
+operations but lost the decoration on all 52 fused operations. The native
+stage now restores this decoration to Fma results, preserving single-rounding
+FFMA semantics. A synthetic precise-FMA shader reproduces the loss and checks
+the repair, its idempotence, and SPIR-V validity. All 63 unit tests pass.
+The in-game regression with ordinary depth tests remains a separate gate.

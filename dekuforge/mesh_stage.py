@@ -153,7 +153,7 @@ def vulkan_stage(kernel, info, checks_binding=None):
     if checks_binding is not None:
         body += ["if(v==0u && np>0u && df_checks.words[19]!=0u) {",
                  "uint sample_index=atomicAdd(df_checks.words[18],1u);",
-                 "if(sample_index<512u) { uint at=20u+sample_index*8u;",
+                 "if(sample_index<df_checks.words[19]) { uint at=20u+sample_index*8u;",
                  f"df_checks.words[at]={info.get('diagnostic_tag', 0)}u;",
                  "df_checks.words[at+1u]=gl_WorkGroupID.x;",
                  "df_checks.words[at+2u]=df_first(); df_checks.words[at+3u]=np;",
