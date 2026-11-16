@@ -389,6 +389,15 @@ static int resolve_locked(uint64_t addr, uint64_t size, VkMemSpan *out) {
         ("a[0] < 6 ? a[0] : 0", "a[0] < 8 ? a[0] : 0")])
 
     edit("vk_pipeline.c", [
+        ('    vkCmdSetDepthCompareOp(cb, compare_op(d->df));', '''    VkCompareOp df_compare = compare_op(d->df);
+    const char *df_depth_probe = getenv("DEKUFORGE_DIAGNOSTIC_DEPTH_EQUAL");
+    if (df_depth_probe && !strcmp(df_depth_probe, "always") && d->dt && !d->dw &&
+        df_compare == VK_COMPARE_OP_EQUAL) {
+        df_compare = VK_COMPARE_OP_ALWAYS;
+        static int reported;
+        if (!reported++) rt_log("DekuForge: diagnostic bypass of read-only EQUAL depth tests");
+    }
+    vkCmdSetDepthCompareOp(cb, df_compare);'''),
         ('    P.max_push = pd.maxPushDescriptors;', '''    P.max_push = pd.maxPushDescriptors;
     const char *df_no_push = getenv("DEKUFORGE_NO_PUSH_DESCRIPTORS");
     if (df_no_push && !strcmp(df_no_push, "1")) {

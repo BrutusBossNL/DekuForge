@@ -48,13 +48,17 @@ static VkDescriptorBufferInfo df_mesh_checks_info(VkExec *ex) {
                 ? mesh.maxMeshWorkGroupCount[0] : mesh.maxMeshWorkGroupTotalCount;
             if (!mesh_group_limit) rt_fatal("Mesh workgroup limit is unavailable");
         }
-        resources->df_checks_info.range = 20 * sizeof(uint32_t);
+        const char *trace_frame = getenv("DEKUFORGE_TRACE_MESH_FRAME");
+        uint64_t frame = __atomic_load_n(&gfx_counters.frames, __ATOMIC_RELAXED);
+        int trace_positions = trace_frame && frame == strtoull(trace_frame, NULL, 10);
+        resources->df_checks_info.range = (20 + (trace_positions ? 512 * 8 : 0)) * sizeof(uint32_t);
         resources->df_checks = (uint32_t *)scratch(ex, resources->df_checks_info.range,
             &resources->df_checks_info.buffer, &resources->df_checks_info.offset);
         memset(resources->df_checks, 0, resources->df_checks_info.range);
         resources->df_checks[7] = mesh_group_limit;
         const char *sample = getenv("DEKUFORGE_TRACE_MESH_OUTPUT");
         resources->df_checks[17] = sample && !strcmp(sample, "1");
+        resources->df_checks[19] = trace_positions;
     }
     return resources->df_checks_info;
 }

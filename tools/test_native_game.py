@@ -22,6 +22,7 @@ def main():
     parser.add_argument("--combined-pipelines", action="store_true", help="Diagnose shader interfaces without pipeline libraries")
     parser.add_argument("--synchronous-pipelines", action="store_true", help="Build newly encountered pipelines on the replay thread")
     parser.add_argument("--no-recorder", action="store_true", help="Record Vulkan commands synchronously for diagnosis")
+    parser.add_argument("--no-uniform-snapshot", action="store_true", help="Diagnose live uniform reads versus submit-time snapshots")
     parser.add_argument("--trace-mesh-counts", action="store_true", help="Copy indirect draw records for a device-loss report")
     parser.add_argument("--trace-mesh-output", action="store_true", help="Read bounded primitive/position samples after GPU completion")
     parser.add_argument("--raw-global-memory", action="store_true", help="Use coherent imported pools for raw-global shader validation")
@@ -56,6 +57,8 @@ def main():
         environment["NX2NAVI_PIPE_SKIP"] = "strict"
     if args.no_recorder:
         environment["NX2NAVI_VK_RECORDER"] = "0"
+    if args.no_uniform_snapshot:
+        environment["NX2NAVI_UBO_SNAPSHOT"] = "0"
     if args.trace_mesh_counts:
         environment["DEKUFORGE_TRACE_MESH_COUNTS"] = "1"
     if args.trace_mesh_output:
@@ -133,6 +136,7 @@ def main():
               "experimental_counter_max_bytes": environment.get("DEKUFORGE_STAGE_COMPUTE_COUNTER_MAX", "64"),
               "experimental_counter_raw_reads": environment.get("DEKUFORGE_STAGE_COMPUTE_RAW_READS") == "1",
               "descriptor_templates_disabled": args.no_descriptor_templates,
+              "diagnostic_depth_equal": environment.get("DEKUFORGE_DIAGNOSTIC_DEPTH_EQUAL"),
               "fullscreen_requested": args.fullscreen,
               "scene_reconstruction": "edge-adaptive" if environment.get("DEKUFORGE_SCENE_EASU") == "1" else "cubic",
               "portable_movie_reconstruction": environment.get("DEKUFORGE_PORTABLE_MOVIES") != "0",
@@ -140,6 +144,7 @@ def main():
               "combined_pipelines": args.combined_pipelines,
               "synchronous_pipelines": args.synchronous_pipelines,
               "recorder_disabled": args.no_recorder,
+              "uniform_snapshot_disabled": args.no_uniform_snapshot,
               "mesh_count_diagnostics": args.trace_mesh_counts,
               "mesh_output_diagnostics": args.trace_mesh_output,
               "capture_frame_requested": args.capture_frame,

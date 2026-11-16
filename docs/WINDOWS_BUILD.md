@@ -563,3 +563,21 @@ and menu navigation at 1050–1600 both measured 60.00 average FPS, with a maxim
 the game while copying all targets; it is excluded from navigation timing.
 The default test exited normally after 68.06 seconds. These measurements do
 not resolve the separately reported missing world surfaces and silhouettes.
+
+### World visibility investigation
+
+The world is not visually validated. The read-only EQUAL depth-test diagnostic
+(`DEKUFORGE_DIAGNOSTIC_DEPTH_EQUAL=always`) exposes additional surfaces but
+breaks occlusion and leaves incorrect materials. It is disabled by default and
+is not a rendering fix. Disabling uniform snapshots with the test harness's
+`--no-uniform-snapshot` option did not remove the white character silhouette.
+Both experiments exited normally; neither establishes parity.
+
+`DEKUFORGE_TRACE_MESH_FRAME=N` captures the first emitted vertex of nonempty mesh
+workgroups during the selected frame. Each submission retains at most 512
+records, with shader identifier, workgroup, indirect first index, primitive count
+and the exact four position bit patterns. Requested and captured counts expose
+truncation. The buffer is read only after submission completion. This diagnostic
+does not modify position values or depth tests and allocates the extra records
+only on the selected frame. It is intended to investigate cross-pass position
+agreement; matching isolated samples alone cannot validate full geometry.

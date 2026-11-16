@@ -30,6 +30,15 @@ void df_global_host_barrier(VkCommandBuffer cb) {
 static void df_global_complete(CbRes *resources) {
     if (resources->df_checks) {
         const uint32_t *check = resources->df_checks;
+        if (check[19]) {
+            uint32_t count = check[18] < 512 ? check[18] : 512;
+            rt_log("Mesh position batch: %u captured, %u requested", count, check[18]);
+            for (uint32_t i = 0; i < count; i++) {
+                const uint32_t *record = check + 20 + i * 8;
+                rt_log("Mesh position bits: shader %08x group %u first %u primitives %u xyzw %08x %08x %08x %08x",
+                    record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7]);
+            }
+        }
         if (check[0] == 2)
             rt_fatal("Mesh output bounds: kind %u, value %u, limit %u, group %u, lane %u, shader %08x stage %u",
                 check[1], check[2], check[3], check[4], check[6], check[8], check[9]);

@@ -84,7 +84,7 @@ def vulkan_stage(kernel, info, checks_binding=None):
     prefix += "layout(push_constant) uniform DfMeshDraw { uint first; uint count; uvec2 address; } df_draw;\n"
     prefix += "uint df_first() { return any(notEqual(df_draw.address,uvec2(0))) ? DfIndirect(df_draw.address).first : df_draw.first; }\n"
     if checks_binding is not None:
-        prefix += f"layout(set=0,binding={checks_binding},std430) buffer DfMeshChecks {{ uint words[20]; }} df_checks;\n"
+        prefix += f"layout(set=0,binding={checks_binding},std430) buffer DfMeshChecks {{ uint words[]; }} df_checks;\n"
         prefix += """void df_output_fault(uint kind, uint value, uint limit) {
     if (atomicCompSwap(df_checks.words[0],0u,1u)==0u) {
         df_checks.words[1]=kind; df_checks.words[2]=value; df_checks.words[3]=limit;
@@ -151,6 +151,15 @@ def vulkan_stage(kernel, info, checks_binding=None):
     body += ["vec4 df_position=" + vector(info["vertex"], "position") + ";",
              "gl_MeshVerticesEXT[v].gl_Position=df_position;"]
     if checks_binding is not None:
+        body += ["if(v==0u && np>0u && df_checks.words[19]!=0u) {",
+                 "uint sample_index=atomicAdd(df_checks.words[18],1u);",
+                 "if(sample_index<512u) { uint at=20u+sample_index*8u;",
+                 f"df_checks.words[at]={info.get('diagnostic_tag', 0)}u;",
+                 "df_checks.words[at+1u]=gl_WorkGroupID.x;",
+                 "df_checks.words[at+2u]=df_first(); df_checks.words[at+3u]=np;",
+                 "uvec4 bits=floatBitsToUint(df_position);",
+                 "df_checks.words[at+4u]=bits.x; df_checks.words[at+5u]=bits.y;",
+                 "df_checks.words[at+6u]=bits.z; df_checks.words[at+7u]=bits.w;", "}", "}"]
         body += ["if(v==0u && df_checks.words[17]!=0u) {",
                  "atomicMax(df_checks.words[11],np);",
                  "if(np>0u && atomicCompSwap(df_checks.words[10],0u,1u)==0u) {",
