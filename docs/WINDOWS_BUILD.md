@@ -425,3 +425,26 @@ sampled process working set around 20 GB during compilation. This is a cold-cach
 cost, not gameplay memory or frame timing. Native-window screenshots and Windows
 OCR independently confirmed the displayed pipeline and compute counts; this
 checks the loading UI, not the correctness of the rendered game world.
+
+With that cache populated, the next test reached guest execution in 2.1 seconds
+and exited normally. Frames 2500–3300 measured 27.07 FPS average and 23.62 FPS
+for the slowest one percent. The movie still took about 63–66 ms per frame.
+The following core-validation run reached the world capture at frame 2200 with
+no reported validation errors; it did report unused fragment colour outputs in
+depth-only draws. Its shutdown exceeded the 210-second test deadline and was
+terminated by the harness, so it is not a clean-exit result. Validation timing
+is not comparable to the normal performance run. Local image output remains
+unavailable in the agent session; captures are saved, not visually approved.
+
+### Multi-result optimizer liveness
+
+`mesh-0037.patch` preserves a producer's input uses while any of its results is
+still live. Previously, removing a consumer of one dead image-read channel could
+strip the coordinate's use even though another channel was still consumed.
+`tools/check_shader_optimizer.py` constructs synthetic IR graphs and exercises
+the actual compiler assembly: the old compiler loses the coordinate use, the
+corrected compiler preserves it. Fully dead producers still release their input
+uses, and side-effecting producers keep theirs. Deferred-write and half-swizzle
+regressions also pass. This corrects the independently reproduced issue described
+in the upstream [multi-output optimization investigation](https://github.com/seedds/nxnative/blob/main/docs/reference/shaders.md#dead-code-removal-dropped-a-coordinate-of-a-multi-output-instruction).
+Its effect on the game picture remains subject to an isolated retest.
