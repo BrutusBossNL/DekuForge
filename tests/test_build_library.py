@@ -11,7 +11,7 @@ class BuildLibraryTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name)
+        self.root = Path(self.temp.name).resolve()
         self.library = BuildLibrary(self.root)
         self.folder = self.root / "build" / "one"
         self.folder.mkdir(parents=True)

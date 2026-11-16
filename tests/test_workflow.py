@@ -32,7 +32,7 @@ class WorkflowTests(unittest.TestCase):
 
     def test_request_never_overwrites_selected_installation(self):
         with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
+            root = Path(folder).resolve()
             source = root / "own.rom"
             source.write_bytes(b"NUP\x01" + b"\0" * 124)
             current = root / "current"
@@ -49,7 +49,7 @@ class WorkflowTests(unittest.TestCase):
 
     def test_non_nup_rom_is_rejected(self):
         with tempfile.TemporaryDirectory() as folder:
-            source = Path(folder) / "own.z64"
+            source = Path(folder).resolve() / "own.z64"
             source.write_bytes(b"\x80\x37\x12\x40")
             with self.assertRaisesRegex(ValueError, "invalid_source"):
                 validate_source(source)

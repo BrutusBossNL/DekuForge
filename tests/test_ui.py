@@ -16,7 +16,13 @@ class LauncherWorkflowTests(unittest.TestCase):
     def setUp(self):
         prepare_tk()
         self.temporary = tempfile.TemporaryDirectory()
-        self.folder = Path(self.temporary.name)
+        self.addCleanup(self.temporary.cleanup)
+        for dialog in ("showerror", "showwarning", "showinfo", "askyesno"):
+            guard = patch("dekuforge.ui.messagebox." + dialog,
+                          side_effect=AssertionError("Unexpected modal dialog: " + dialog))
+            guard.start()
+            self.addCleanup(guard.stop)
+        self.folder = Path(self.temporary.name).resolve()
         current = self.folder / "current"
         current.mkdir()
         self.game = current / "game.exe"
@@ -26,18 +32,15 @@ class LauncherWorkflowTests(unittest.TestCase):
         self.save = patch("dekuforge.ui.update_settings")
         self.project = patch("dekuforge.ui.ROOT", self.folder)
         self.load.start()
+        self.addCleanup(self.load.stop)
         self.save_mock = self.save.start()
+        self.addCleanup(self.save.stop)
         self.project.start()
+        self.addCleanup(self.project.stop)
         self.root = tk.Tk()
+        self.addCleanup(self.root.destroy)
         self.root.withdraw()
         self.app = Launcher(self.root)
-
-    def tearDown(self):
-        self.root.destroy()
-        self.project.stop()
-        self.save.stop()
-        self.load.stop()
-        self.temporary.cleanup()
 
     def test_navigation_and_language_preserve_wizard_and_logs_in_one_window(self):
         self.app.source = str(self.folder / "own.nup")

@@ -18,7 +18,7 @@ class ManagementTests(unittest.TestCase):
 
     def test_save_roundtrip_retains_backup_and_other_slots(self):
         with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp)
+            root = Path(temp).resolve()
             old, new = root / "old", root / "new"
             for folder, data in ((old, b"previous"), (new, b"imported")):
                 (folder / "slot_00").mkdir(parents=True)
@@ -34,7 +34,7 @@ class ManagementTests(unittest.TestCase):
 
     def test_unsafe_zip_does_not_change_save(self):
         with tempfile.TemporaryDirectory() as temp:
-            root = Path(temp)
+            root = Path(temp).resolve()
             current = root / "current"
             (current / "slot_00").mkdir(parents=True)
             (current / "slot_00/progress.sav").write_bytes(b"keep")
@@ -47,7 +47,7 @@ class ManagementTests(unittest.TestCase):
 
     def test_import_into_existing_empty_profile(self):
         with tempfile.TemporaryDirectory() as temp:
-            source, destination = Path(temp) / "source", Path(temp) / "destination"
+            source, destination = Path(temp).resolve() / "source", Path(temp).resolve() / "destination"
             (source / "slot_00").mkdir(parents=True)
             (source / "slot_00/progress.sav").write_bytes(b"synthetic")
             destination.mkdir()

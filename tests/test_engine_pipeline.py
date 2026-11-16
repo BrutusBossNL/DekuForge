@@ -9,7 +9,7 @@ from dekuforge.engine import build_independent
 class IndependentBuildFailureTests(unittest.TestCase):
     def test_unsupported_sdk_stops_before_creating_or_selecting_installation(self):
         with tempfile.TemporaryDirectory() as folder:
-            workspace = Path(folder)
+            workspace = Path(folder).resolve()
             current = workspace / "current"
             current.mkdir()
             game = current / "game.exe"
