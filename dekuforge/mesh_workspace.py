@@ -4,6 +4,13 @@
 def stage_mesh(output, write):
     import hashlib
     root = output.parent.parent
+    movie = root / "engine_overrides/movie_scale.comp"
+    write(output / "runtime/shaders/df_movie_scale.comp", movie.read_text(encoding="utf-8"))
+    movie_digest = hashlib.sha256(movie.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+    movie_header = root / "build/host-shaders" / movie_digest / "df_movie_scale_spv.h"
+    if movie_header.is_file():
+        write(output / "runtime/df_movie_scale_spv.h", movie_header.read_text(encoding="utf-8"))
+    write(output / "runtime/df_movie_scale.inc", (root / "engine_overrides/movie_scale.inc").read_text(encoding="utf-8"))
     source = root / "engine_overrides/scene_scale.comp"
     write(output / "runtime/shaders/df_scene_scale.comp", source.read_text(encoding="utf-8"))
     digest = hashlib.sha256(source.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
@@ -218,9 +225,9 @@ uint64_t vk_texture_last_write'''),
         ('    if (vk_dump_armed) vk_dump_dispatch(ex, cs, p, info, d);',
          '    df_counter_direct = 0;\n    df_counter_finish(ex);\n    if (vk_dump_armed) vk_dump_dispatch(ex, cs, p, info, d);'),
         ('static void op_dispatch(VkExec *ex, const p_dispatch *d) {',
-         '#include "df_scene_scale.inc"\nstatic void op_dispatch(VkExec *ex, const p_dispatch *d) {'),
+         '#include "df_scene_scale.inc"\n#include "df_movie_scale.inc"\nstatic void op_dispatch(VkExec *ex, const p_dispatch *d) {'),
         ('    const GfxShader *cs = shader_for(ex, NVN_STAGE_CS, &present, NULL, 0);   // synchronous:',
-         '    if (df_scene_scale(ex, d)) return;\n    const GfxShader *cs = shader_for(ex, NVN_STAGE_CS, &present, NULL, 0);   // synchronous:'),
+         '    if (df_scene_scale(ex, d) || df_movie_scale(ex, d)) return;\n    const GfxShader *cs = shader_for(ex, NVN_STAGE_CS, &present, NULL, 0);   // synchronous:'),
         ('static void twins_release(VkCtx *c);', '#include "df_mesh_draw_trace.inc"\nstatic void twins_release(VkCtx *c);'),
         ('void vk_exec_draw_shutdown(void) {', 'void vk_exec_draw_shutdown(void) {\n    df_mesh_trace_shutdown();'),
         ('ex->prog = b->prog, ex->prog_stages = b->stages;', '''// Log distinct masks while diagnosing native stage binding.

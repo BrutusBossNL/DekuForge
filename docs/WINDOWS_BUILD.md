@@ -514,3 +514,40 @@ identity was `3be8bb71dc1e9c81`; hardware and driver match the reference above.
 The experiment remains opt-in, and its saved world capture has not been
 visually verified. It does not fix the roughly 68-ms movie frames or establish
 rendering parity. A Vulkan validation run is separate from these measurements.
+
+The counter validation run reached gameplay and frame 2200 without reported
+Vulkan validation errors. After the close request, rendering stopped but the
+process did not exit before the 360-second harness deadline (362.41 seconds
+including termination). This is a shutdown timeout, not a clean validation
+pass. Normal runs of the same counter configuration exited successfully.
+
+### Portable movie experiment
+
+`DEKUFORGE_PORTABLE_MOVIES=1` replaces only a recognized final tensor movie
+output: a 10-bit intermediate and a unique decoded RGBA8 source of matching
+dimensions must be bound, and the output must be a single-sample RGBA8 image
+with the same aspect ratio. Ambiguous inputs, scene HDR formats, unsupported
+views and unrelated dispatches retain their normal execution. Reconstruction
+uses bounded cubic sampling and preserves the video's existing display
+encoding; it does not apply the scene network's square operation.
+
+The new GLSL shader compiles and passes SPIR-V validation. In an actual frame
+1000 capture, `tools/check_movie_capture.py` compared its GPU output against
+an independent scalar CPU reconstruction at 1028 positions. The largest error
+was 0.55 on an 8-bit channel, RMS 0.18. This proves agreement with the decoded
+source, not visual correctness of that source or of later composition passes.
+The movie-only experiment still took about 64 ms per frame; its subsequent
+world run measured 34.12 average FPS and exited normally.
+
+The separate diagnostic `DEKUFORGE_SKIP_TENSOR_SCRATCH=1` skips direct tensor
+dispatches with no declared image output while portable movies are enabled.
+Their buffer results are not consumed by the tested portable final image.
+This is deliberately not a default: another network may consume those buffer
+results, so additional scenes and transitions must be checked before promotion.
+The measured intro interval, frames 500–900, reached 60.00 average FPS and
+59.47 FPS for the slowest one percent. The same-frame GPU reconstruction still
+matched the scalar reference (maximum 0.553, RMS 0.178 channel units).
+The following world interval, frames 2500–3300, measured 33.35 average FPS and
+27.10 FPS for the slowest one percent; the 112.60-second run exited normally.
+All 63 project tests pass. Captures remain local and not visually approved;
+the launcher and normal renderer do not silently enable these experiments.

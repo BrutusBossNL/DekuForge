@@ -135,6 +135,8 @@ def main():
               "descriptor_templates_disabled": args.no_descriptor_templates,
               "fullscreen_requested": args.fullscreen,
               "scene_reconstruction": "edge-adaptive" if environment.get("DEKUFORGE_SCENE_EASU") == "1" else "cubic",
+              "experimental_movie_reconstruction": environment.get("DEKUFORGE_PORTABLE_MOVIES") == "1",
+              "experimental_tensor_scratch_skip": environment.get("DEKUFORGE_SKIP_TENSOR_SCRATCH") == "1",
               "combined_pipelines": args.combined_pipelines,
               "synchronous_pipelines": args.synchronous_pipelines,
               "recorder_disabled": args.no_recorder,

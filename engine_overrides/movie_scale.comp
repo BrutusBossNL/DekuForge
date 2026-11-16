@@ -1,0 +1,28 @@
+#version 450
+layout(local_size_x=8, local_size_y=8) in;
+layout(binding=1) uniform sampler2D source_image;
+layout(binding=2, rgba8) uniform writeonly image2D destination_image;
+
+vec4 cubic(float x) {
+    float x2=x*x, x3=x2*x;
+    return vec4(-0.5*x+x2-0.5*x3, 1.0-2.5*x2+1.5*x3,
+                0.5*x+2.0*x2-1.5*x3, -0.5*x2+0.5*x3);
+}
+
+void main() {
+    ivec2 pixel=ivec2(gl_GlobalInvocationID.xy);
+    ivec2 size=imageSize(destination_image), input_size=textureSize(source_image,0);
+    if (any(greaterThanEqual(pixel,size))) return;
+    vec2 position=(vec2(pixel)+0.5)*vec2(input_size)/vec2(size)-0.5;
+    ivec2 base=ivec2(floor(position));
+    vec4 wx=cubic(fract(position.x)), wy=cubic(fract(position.y));
+    vec3 value=vec3(0), low=vec3(1), high=vec3(0);
+    for (int y=0;y<4;y++) for (int x=0;x<4;x++) {
+        vec3 v=texelFetch(source_image,clamp(base+ivec2(x-1,y-1),ivec2(0),input_size-1),0).rgb;
+        value+=v*wx[x]*wy[y];
+        if (x>=1 && x<=2 && y>=1 && y<=2) { low=min(low,v); high=max(high,v); }
+    }
+    // Video RGBA8 already carries its display encoding. Store those values
+    // through the UNORM view without the scene network's square operation.
+    imageStore(destination_image,pixel,vec4(clamp(value,low,high),1.0));
+}
