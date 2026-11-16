@@ -59,6 +59,20 @@ static LRESULT CALLBACK wnd_proc(HWND h, UINT m, WPARAM w, LPARAM l) {
     vk_pipeline_prewarm();
     if (df_visible) df_startup_progress(0, 0, 0);'''),
     ])
+    edit("gfx_shader.c", [
+        ('    size_t total = w.n_named + w.n_other;',
+         '    size_t total = w.n_named + w.n_other;\n    df_startup_progress(1, 0, (unsigned)total);'),
+        ('''        while (!plat_thread_join_ns(t[m], 2000000000u))
+            rt_log("gfx_shader: prewarm: %lld of %zu shaders, %llu translated, %.0f ms", (long long)w.done, total,
+                   (unsigned long long)((uint64_t)n_xlated - xl0), (double)plat_now_ms() - t0);''',
+         '''        while (!plat_thread_join_ns(t[m], 2000000000u)) {
+            unsigned done = (unsigned)__atomic_load_n(&w.done, __ATOMIC_RELAXED);
+            df_startup_progress(1, done, (unsigned)total);
+            rt_log("gfx_shader: prewarm: %u of %zu shaders, %llu translated, %.0f ms", done, total,
+                   (unsigned long long)((uint64_t)n_xlated - xl0), (double)plat_now_ms() - t0);
+        }
+    df_startup_progress(1, (unsigned)total, (unsigned)total);'''),
+    ])
 
     edit("vk_caps.c", [
         ('    const char *e = cfg_get("NX2NAVI_GPL");\n    vk_caps.gpl = gpl_lib && gpl_fast && !(e && !strcmp(e, "0"));',

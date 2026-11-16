@@ -30,7 +30,7 @@ static void df_startup_paint(HWND window) {
     DrawTextW(dc, L"DekuForge", -1, &title, DT_CENTER | DT_SINGLELINE);
     wchar_t label[160];
     const wchar_t *phase = df_startup.stage == 2 ? L"Preparing pipelines" :
-        df_startup.stage == 3 ? L"Preparing compute shaders" : L"Loading shader cache";
+        df_startup.stage == 3 ? L"Preparing compute shaders" : L"Preparing shaders";
     if (df_startup.total)
         swprintf(label, 160, L"%ls: %u / %u", phase, df_startup.done, df_startup.total);
     else swprintf(label, 160, L"%ls...", phase);

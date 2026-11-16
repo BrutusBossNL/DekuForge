@@ -357,9 +357,9 @@ case checks both ownership paths and reads a GPU-written colour back while the
 CPU backing still contains unrelated texels. The expanded probe passes 45 GPU
 checks with zero validation errors. Whole-game visual equivalence is pending.
 
-Windows now paints a forest-green startup screen with measured pipeline and
-compute-shader counts before guest execution. Shader-cache loading has an
-indeterminate label. Progress does not invent an overall percentage. The native
+Windows now paints a forest-green startup screen with measured shader, pipeline
+and compute-shader counts before guest execution. Cache discovery remains
+indeterminate until its inventory is known. Progress does not invent an overall percentage. The native
 display is limited to Windows; other platforms use a no-op progress hook until
 their window backend is implemented. A bounded test with the startup display
 reached frame 2200, captured a world frame and closed normally (exit 0), but this
@@ -417,3 +417,11 @@ over a newer 123; afterwards all twelve cases produce their independent expected
 values. Scalar/uniform half and typed-image checks still pass. The upstream
 [deferred-write investigation](https://github.com/seedds/nxnative/blob/main/docs/reference/shaders.md#a-deferred-write-under-a-false-guard)
 describes the instruction-level issue; DekuForge's whole-game retest is separate.
+
+The combined compiler translated 19,780 required inputs without failures on the
+first cold-cache boot. All 526 recorded pipelines built successfully. Translation
+took 292 seconds and first driver compilation took another 149 seconds, with a
+sampled process working set around 20 GB during compilation. This is a cold-cache
+cost, not gameplay memory or frame timing. Native-window screenshots and Windows
+OCR independently confirmed the displayed pipeline and compute counts; this
+checks the loading UI, not the correctness of the rendered game world.
