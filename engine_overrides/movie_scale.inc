@@ -1,20 +1,19 @@
-// Opt-in portable presentation of a decoded movie frame. Intermediate network
-// passes remain intact; only the final typed tensor output can be replaced.
+// Portable presentation of a decoded movie frame. Tensor scratch passes are
+// omitted in portable mode; typed final output uses the decoded source frame.
 #include "df_movie_scale_spv.h"
 static int df_movie_scale(VkExec *ex, const p_dispatch *dispatch) {
     const char *enabled=getenv("DEKUFORGE_PORTABLE_MOVIES");
-    if(!enabled || strcmp(enabled,"1") || !df_scene_network(ex)) return 0;
+    if((enabled && !strcmp(enabled,"0")) || !df_scene_network(ex)) return 0;
     const uint8_t *control,*code;
     uint32_t length;
     if(!find_stage(ex->prog,5,&control,&code,&length) || !df_control_ampere(control)) return 0;
     unsigned image_count=control[0xb6];
-    // Diagnostic only: the portable final image does not consume the network's
-    // scratch outputs. This switch requires scene-by-scene validation before it
-    // can become a default; other tensor workloads may consume those buffers.
+    // The portable final scene/movie image does not consume tensor scratch.
+    // Retain an opt-out for investigating other tensor workloads.
     const char *skip=getenv("DEKUFORGE_SKIP_TENSOR_SCRATCH");
-    if(!image_count && skip && !strcmp(skip,"1")) {
+    if(!image_count && (!skip || strcmp(skip,"0"))) {
         static unsigned reported;
-        if(reported++<4) rt_log("DekuForge: experimental tensor scratch dispatch skipped");
+        if(reported++<4) rt_log("DekuForge: portable reconstruction skips tensor scratch dispatch");
         return 1;
     }
     if(!image_count || image_count>32 || !ex->tex[5][0]) return 0;

@@ -523,13 +523,16 @@ pass. Normal runs of the same counter configuration exited successfully.
 
 ### Portable movie experiment
 
-`DEKUFORGE_PORTABLE_MOVIES=1` replaces only a recognized final tensor movie
+The default movie route replaces only a recognized final tensor movie
 output: a 10-bit intermediate and a unique decoded RGBA8 source of matching
 dimensions must be bound, and the output must be a single-sample RGBA8 image
 with the same aspect ratio. Ambiguous inputs, scene HDR formats, unsupported
 views and unrelated dispatches retain their normal execution. Reconstruction
 uses bounded cubic sampling and preserves the video's existing display
 encoding; it does not apply the scene network's square operation.
+`DEKUFORGE_PORTABLE_MOVIES=0` restores native movie execution for diagnosis.
+The earlier opt-in implementation was not active when the launcher started the
+game normally; its test-only results did not describe that normal launch.
 
 The new GLSL shader compiles and passes SPIR-V validation. In an actual frame
 1000 capture, `tools/check_movie_capture.py` compared its GPU output against
@@ -539,15 +542,24 @@ source, not visual correctness of that source or of later composition passes.
 The movie-only experiment still took about 64 ms per frame; its subsequent
 world run measured 34.12 average FPS and exited normally.
 
-The separate diagnostic `DEKUFORGE_SKIP_TENSOR_SCRATCH=1` skips direct tensor
+The portable route skips direct tensor
 dispatches with no declared image output while portable movies are enabled.
 Their buffer results are not consumed by the tested portable final image.
-This is deliberately not a default: another network may consume those buffer
-results, so additional scenes and transitions must be checked before promotion.
+This now matches the reference renderer's default tensor bypass behavior.
+`DEKUFORGE_SKIP_TENSOR_SCRATCH=0` restores intermediate execution for diagnosis;
+other tensor workloads still require separate validation.
 The measured intro interval, frames 500–900, reached 60.00 average FPS and
 59.47 FPS for the slowest one percent. The same-frame GPU reconstruction still
 matched the scalar reference (maximum 0.553, RMS 0.178 channel units).
 The following world interval, frames 2500–3300, measured 33.35 average FPS and
 27.10 FPS for the slowest one percent; the 112.60-second run exited normally.
 All 63 project tests pass. Captures remain local and not visually approved;
-the launcher and normal renderer do not silently enable these experiments.
+counter staging remains opt-in. Movie reconstruction and tensor scratch skipping
+are now renderer defaults, including direct executable and launcher starts.
+
+The ordinary-start regression test uses neither movie override. Frames 500–900
+and menu navigation at 1050–1600 both measured 60.00 average FPS, with a maximum
+16.683 ms in the latter interval. The frame-1000 diagnostic render dump stalls
+the game while copying all targets; it is excluded from navigation timing.
+The default test exited normally after 68.06 seconds. These measurements do
+not resolve the separately reported missing world surfaces and silhouettes.
