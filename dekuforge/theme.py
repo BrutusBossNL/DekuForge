@@ -4,6 +4,7 @@ import math
 import os
 import struct
 import tkinter as tk
+from tkinter import ttk
 
 from .core import ROOT
 
@@ -18,6 +19,92 @@ LOGO = ROOT / "assets" / "branding" / "logo.png"
 ICON_PNG = ROOT / "assets" / "branding" / "icon.png"
 ICON = ROOT / "assets" / "branding" / "launcher.ico"
 BACKGROUND = ROOT / "assets" / "branding" / "background.png"
+
+
+def green_gradient(menu=False):
+    """Small procedural texture, smoothly scaled to the client area."""
+    from PIL import Image
+    image = Image.new("RGB", (160, 160))
+    pixels = []
+    for y in range(160):
+        for x in range(160):
+            distance = ((x/159-.5)/.7)**2 + ((y/159-(.22 if menu else .5))/.8)**2
+            glow = max(0, 1-distance)**2
+            base, light = ((8, 17, 11), (30, 47, 27)) if menu else ((3, 10, 6), (15, 30, 19))
+            pixels.append(tuple(round(a+(b-a)*glow) for a, b in zip(base, light)))
+    image.putdata(pixels)
+    return image
+
+
+def style_controls(window):
+    """Style both ttk fields and the separate Tk combobox popdown list."""
+    style = ttk.Style(window)
+    style.theme_use("clam")
+    style.configure("Forge.TCombobox", fieldbackground=PANEL, background=BORDER,
+                    foreground=TEXT, arrowcolor=GOLD, bordercolor=BORDER,
+                    lightcolor=BORDER, darkcolor=BORDER, padding=9)
+    style.map("Forge.TCombobox", fieldbackground=[("readonly", PANEL), ("disabled", BG)],
+              foreground=[("disabled", MUTED), ("readonly", TEXT)],
+              bordercolor=[("focus", GOLD), ("active", GOLD)],
+              arrowcolor=[("disabled", MUTED), ("active", TEXT)],
+              background=[("active", "#485e32")])
+    for orientation in ("Vertical", "Horizontal"):
+        style.configure(f"{orientation}.TScrollbar", background=BORDER, troughcolor=BG,
+                        bordercolor=PANEL, arrowcolor=GOLD, lightcolor=BORDER, darkcolor=BORDER)
+        style.map(f"{orientation}.TScrollbar", background=[("active", "#536b36")])
+    for option, value in {"background": PANEL, "foreground": TEXT, "selectBackground": GOLD,
+                          "selectForeground": BG, "font": "{Segoe UI} 12", "borderWidth": 0,
+                          "highlightThickness": 1, "highlightColor": GOLD,
+                          "highlightBackground": BORDER, "relief": "flat"}.items():
+        window.option_add(f"*TCombobox*Listbox.{option}", value)
+    window.option_add("*Listbox.selectBackground", GOLD)
+    window.option_add("*Listbox.selectForeground", BG)
+    window.option_add("*Text.selectBackground", GOLD)
+    window.option_add("*Text.selectForeground", BG)
+
+
+def button_feedback(button, primary=False):
+    normal = GOLD if primary else BORDER
+    hover = "#f5cf73" if primary else "#496136"
+    state = {"hover": False, "focus": False}
+    button.configure(activebackground=hover, activeforeground=BG if primary else TEXT,
+                     highlightthickness=1, highlightbackground=normal, highlightcolor=GOLD)
+    def update(key, value):
+        state[key] = value
+        active = any(state.values()) and str(button.cget("state")) != "disabled"
+        button.configure(bg=hover if active else normal,
+                         highlightbackground=GOLD if active else normal)
+    for event, key, value in (("<Enter>", "hover", True), ("<Leave>", "hover", False),
+                              ("<FocusIn>", "focus", True), ("<FocusOut>", "focus", False)):
+        button.bind(event, lambda e, k=key, v=value: update(k, v), add="+")
+    return button
+
+
+def style_titlebar(window):
+    """Keep native resizing, snapping and system controls with branded Win11 colors."""
+    if os.name != "nt":
+        return
+    import ctypes
+    from ctypes import wintypes
+    user = ctypes.WinDLL("user32")
+    user.GetAncestor.argtypes = [wintypes.HWND, wintypes.UINT]
+    user.GetAncestor.restype = wintypes.HWND
+    try:
+        dwm = ctypes.WinDLL("dwmapi")
+    except OSError:
+        return
+    dwm.DwmSetWindowAttribute.argtypes = [wintypes.HWND, wintypes.DWORD, ctypes.c_void_p, wintypes.DWORD]
+    dwm.DwmSetWindowAttribute.restype = ctypes.c_long
+    def apply(event=None):
+        if event is not None and event.widget is not window:
+            return
+        hwnd = user.GetAncestor(window.winfo_id(), 2)
+        for attribute, number in ((20, 1), (35, 0x121c0d), (36, 0x4fb9e8), (34, 0x284a34)):
+            value = wintypes.DWORD(number)
+            dwm.DwmSetWindowAttribute(hwnd, attribute, ctypes.byref(value), ctypes.sizeof(value))
+    window.bind("<Map>", apply, add="+")
+    job = window.after_idle(apply)
+    window.bind("<Destroy>", lambda e: window.after_cancel(job) if e.widget is window else None, add="+")
 
 
 class BackgroundCanvas(tk.Canvas):
@@ -85,6 +172,30 @@ class BackgroundCanvas(tk.Canvas):
         super().destroy()
 
 
+class NavigationCanvas(BackgroundCanvas):
+    def __init__(self, parent, **options):
+        super().__init__(parent, opacity=1, **options)
+        self._art = green_gradient(menu=True)
+
+
+class NavigationLogo(BackgroundCanvas):
+    """Transparent logo above the navigation's matching gradient region."""
+    def __init__(self, parent, image):
+        super().__init__(parent, surface=parent, opacity=1, width=image.width(), height=image.height())
+        self.image = image
+        self._logo = self.create_image(0, 0, image=image, anchor="nw")
+
+    def configure(self, cnf=None, **options):
+        if "image" in options:
+            self.itemconfigure(self._logo, image=options.pop("image"))
+        return super().configure(cnf, **options)
+
+    def cget(self, key):
+        if key == "image":
+            return self.itemcget(self._logo, "image")
+        return super().cget(key)
+
+
 class ArtworkLabel(BackgroundCanvas):
     """Native Tk text over the matching backdrop crop, without opaque label boxes."""
 
@@ -147,6 +258,8 @@ def _png_image(master, path, width, height):
 
 def apply_window(window):
     window.configure(bg=BG)
+    style_controls(window)
+    style_titlebar(window)
     window.option_add("*Button.Background", PANEL)
     window.option_add("*Button.Foreground", TEXT)
     window.option_add("*Button.ActiveBackground", BORDER)
@@ -161,7 +274,10 @@ def apply_window(window):
         window.iconphoto(True, icon)
         window._brand_icon = icon
     if os.name == "nt" and ICON.is_file():
+        window.iconbitmap(str(ICON))
         window.iconbitmap(default=str(ICON))
+        from .window_icon import install
+        install(window, ICON)
 
 
 def brand_header(parent, compact=False):

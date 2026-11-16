@@ -1,0 +1,95 @@
+--- a/src/Ryujinx.Graphics.Shader/Instructions/InstEmitAmpereMem.cs
++++ b/src/Ryujinx.Graphics.Shader/Instructions/InstEmitAmpereMem.cs
+@@ -37,6 +37,8 @@
+ 
+             x(0xb60, InstName.Tex, ATex, InstProps.Tex);
+             x(0xf60, InstName.Tex, ATex, InstProps.Tex);
++            x(0x361, InstName.Tex, ATex, InstProps.Tex);
++            x(0x59f, InstName.Sured, ASured, N, writesRd: false);
+             x(0xb66, InstName.Tld, ATex, InstProps.Tex);
+             x(0xb63, InstName.Tld4, ATex, InstProps.Tex);
+             x(0xb69, InstName.Tmml, ATex, InstProps.Tex);
+@@ -499,6 +501,23 @@
+ 
+         // SULD Rd, [Ra] (0xb97 formatted with a channel mask at 72..76, 0xb99 binary with a size at 73..76) and SUST [Ra], Rb (0xb9b, 0xb9d): the handle as
+         // a texture's (40..59), the dimension at 61..64 (1D, 1D buffer, 1D array, 2D, 2D array, 3D: Maxwell's SuDim)
++        public static void ASured(EmitterContext context)
++        {
++            AmpereOp x = new(context.CurrOp);
++            int size = x.Bits(73, 76);   // 0 U32, 2 U64 (SuatomSize)
++
++            int handleReg = 0;   // 64..72: the register form's handle
++
++            if ((x.Bits(64, 96) & ~(0xf << 23) & ~(0x7 << 9) & ~handleReg) != 0x0010e000 || x.Bits(59, 61) != 0 || size != 0)
++            {
++                throw AFail(context, $"SURED form {x.Bits(64, 96):x8}");
++            }
++
++            (int handle, int cbufSlot) = ATexHandle(context, x);
++
++            EmitSured(context, (SuDim)x.Bits(61, 64), 0, (RedOp)x.Bits(87, 91), SuatomSize.U32, handle, x.Ra, x.Rb, x.Rc, false, isBindless: false, cbufSlot: cbufSlot);
++        }
++
+         public static void ASurface(EmitterContext context)
+         {
+             AmpereOp x = new(context.CurrOp);
+@@ -680,14 +699,16 @@
+         {
+             AmpereOp x = new(context.CurrOp);
+             int opcode = x.Opcode;
+-            bool bindless = opcode == 0xf60;
++            bool handleInB = opcode == 0x361;
++            bool bindless = handleInB || opcode == 0xf60;
+             Operand boundHandle = null;
+-            if (bindless) {
++            if (opcode == 0xf60) {
+                 int ur = x.Bits(40, 46);
+                 boundHandle = ur == RegisterConsts.UniformZeroIndex ? Const(0) : context.Copy(Register(ur, RegisterType.Uniform));
+                 opcode = 0xb60;
+             }
+ 
++            if (handleInB) opcode = 0xb60;
+             TexDim dim = ATexDim(context, x.Bits(61, 64));
+             SamplerType type = ConvertSamplerType(dim);
+             bool isArray = type.HasFlag(SamplerType.Array);
+@@ -751,7 +772,7 @@
+ 
+             (int handle, int cbufSlot) = bindless ? (0, TextureOperation.DefaultCbufSlot) : ATexHandle(context, x);
+             List<Operand> sources = [];
+-            if (bindless) sources.Add(boundHandle);
++            if (bindless && !handleInB) sources.Add(boundHandle);
+             Operand arrayIndex = null;
+ 
+             if (opcode == 0xb6c)
+@@ -786,8 +807,9 @@
+             else
+             {
+                 int n0 = coords + (isArray ? 1 : 0);
+-                (List<Operand> a, List<Operand> b) = ATexBlocks(context, x, n0, n1);
++                (List<Operand> a, List<Operand> b) = ATexBlocks(context, x, n0, n1 + (handleInB ? 1 : 0));
+                 int ia = 0, ib = 0;
++                if (handleInB) sources.Add(b[ib++]);
+ 
+                 if (isArray)
+                 {
+--- a/src/Ryujinx.Graphics.Shader/Instructions/InstEmitSurface.cs
++++ b/src/Ryujinx.Graphics.Shader/Instructions/InstEmitSurface.cs
+@@ -501,7 +501,8 @@
+             int srcB,
+             int srcC,
+             bool byteAddress,
+-            bool isBindless)
++            bool isBindless,
++            int cbufSlot = TextureOperation.DefaultCbufSlot)
+         {
+             // Preserve source width before descriptor-sized formats are resolved.
+             // Other backends retain their existing surface-instruction handling.
+@@ -602,7 +603,7 @@
+                 type,
+                 format,
+                 flags,
+-                TextureOperation.DefaultCbufSlot,
++                cbufSlot,
+                 imm);
+ 
+             context.ImageAtomic(type, format, flags, setAndBinding, sources);

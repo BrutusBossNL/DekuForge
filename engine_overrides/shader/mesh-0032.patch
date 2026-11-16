@@ -1,0 +1,67 @@
+--- a/src/Ryujinx.Graphics.Shader/SamplerType.cs
++++ b/src/Ryujinx.Graphics.Shader/SamplerType.cs
+@@ -18,6 +18,8 @@
+         Array = 1 << 8,
+         Multisample = 1 << 9,
+         Shadow = 1 << 10,
++        SignedInteger = 1 << 11,
++        UnsignedInteger = 1 << 12,
+     }
+ 
+     static class SamplerTypeExtensions
+--- a/src/Ryujinx.Graphics.Shader/Instructions/InstEmitAmpereMem.cs
++++ b/src/Ryujinx.Graphics.Shader/Instructions/InstEmitAmpereMem.cs
+@@ -914,6 +914,9 @@
+                 }
+             }
+ 
++            type |= context.TranslatorContext.GpuAccessor.QuerySamplerType(handle, cbufSlot)
++                & (SamplerType.SignedInteger | SamplerType.UnsignedInteger);
++
+             int count = BitOperations.PopCount((uint)mask);
+             Operand[] results = new Operand[count];
+ 
+--- a/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/Declarations.cs
++++ b/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/Declarations.cs
+@@ -182,7 +182,8 @@
+                     };
+ 
+                     imageType = context.TypeImage(
+-                        context.TypeFP32(),
++                        sampler.Type.HasFlag(SamplerType.UnsignedInteger) ? context.TypeU32()
++                            : sampler.Type.HasFlag(SamplerType.SignedInteger) ? context.TypeS32() : context.TypeFP32(),
+                         dim,
+                         sampler.Type.HasFlag(SamplerType.Shadow),
+                         sampler.Type.HasFlag(SamplerType.Array),
+--- a/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/Instructions.cs
++++ b/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/Instructions.cs
+@@ -1571,7 +1571,10 @@
+ 
+             bool colorIsVector = isGather || !isShadow;
+ 
+-            SpvInstruction resultType = colorIsVector ? context.TypeVector(context.TypeFP32(), 4) : context.TypeFP32();
++            bool integerSample = texOp.Type.HasFlag(SamplerType.SignedInteger) || texOp.Type.HasFlag(SamplerType.UnsignedInteger);
++            SpvInstruction componentType = texOp.Type.HasFlag(SamplerType.UnsignedInteger) ? context.TypeU32()
++                : texOp.Type.HasFlag(SamplerType.SignedInteger) ? context.TypeS32() : context.TypeFP32();
++            SpvInstruction resultType = colorIsVector ? context.TypeVector(componentType, 4) : componentType;
+ 
+             if (intCoords)
+             {
+@@ -1600,7 +1603,7 @@
+                         ? context.ImageDrefGather(resultType, image, pCoords, dRef, gatherMask, gatherOperands)
+                         : context.ImageGather(resultType, image, pCoords, compIdx, gatherMask, gatherOperands);
+ 
+-                    texels[index] = context.CompositeExtract(context.TypeFP32(), texel4, 3);
++                    texels[index] = context.CompositeExtract(componentType, texel4, 3);
+                 }
+ 
+                 result = context.CompositeConstruct(resultType, texels);
+@@ -1640,6 +1643,8 @@
+                 result = context.ImageSampleImplicitLod(resultType, image, pCoords, operandsMask, operands);
+             }
+ 
++            // Guest registers carry the original integer bits, not a numerical float conversion.
++            if (integerSample) result = context.Bitcast(colorIsVector ? context.TypeVector(context.TypeFP32(), 4) : context.TypeFP32(), result);
+             AggregateType swizzledResultType = AggregateType.FP32;
+ 
+             if (colorIsVector)

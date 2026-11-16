@@ -68,6 +68,10 @@ MESSAGES = {
 }}
 
 
+from .launcher_labels import extend
+extend(MESSAGES)
+
+
 def translate(language, key, **values):
     selected = language if language in MESSAGES else "en"
     text = FILE_LABELS[selected][key] if key in FILE_LABELS[selected] else MESSAGES[selected][key]

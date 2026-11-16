@@ -28,10 +28,44 @@ No CMD start script is provided.
 
 ## Game builder
 
-The launcher keeps Home, Build game and Settings inside one window. Home shows
-the selected installation folder and Play. Settings offers English, Nederlands,
+The launcher keeps Home, Updates, Saves, Build game and Settings inside one window.
+Home uses three artwork cards: Play (active game version), Update (latest release
+in the selected channel), and (Re)build (game dump path). Pointer hover and keyboard
+focus highlight the card; Tab navigates and Enter or Space activates it. Startup
+first shows a very dark green gradient, brighter at its center; the unfinished
+layout remains hidden until that cover has been painted. Artwork is revealed and
+then fades to 46%. The navigation has a subtle green gradient behind its logo and
+text. A logo starts horizontally centered with
+32 pixels of top padding at 135% of its navigation size, shrinks without fading,
+and moves into the navigation as it slides in. The three cards then rise in sequence.
+Controls, dropdown lists and the Windows 11 native title bar use the forest and
+gold palette; navigation buttons highlight on hover and keyboard focus.
+Settings offers English, Nederlands,
 Deutsch, Español and Français; changes apply immediately. The launcher can hide
-while the game runs and restore the same window after it closes.
+while the game runs and restore the same window after it closes. New preferences
+default to the system UI language, with English as the unsupported-language fallback.
+
+Updates checks public repository releases on request or at startup, with Stable
+and Preview channels. It displays the launcher version separately from the latest
+release. A version selector lists eligible releases, including older versions.
+Downloading/installing a selected release is not implemented yet; its button and
+automatic-update setting remain disabled. Existing local builds can be switched
+without rebuilding. Build cache is currently always retained.
+
+Build game also opens the installed-build library. Successful builds are recorded
+locally, and the native linking tool records experimental builds with their game
+version. Select a build and choose Set active to change what Play starts. Deleting
+an owned build requires confirmation and a separate choice to retain saves. If
+retained, its complete `profile` is copied to `local/retained-saves` before removal.
+An unsuccessful backup prevents removal. Externally selected installations cannot
+be deleted here. Switching builds does not migrate or modify their individual saves.
+
+Saves offers ZIP export and folder/ZIP import for an explicitly selected existing
+user save folder containing `slot_00/progress.sav`. Select the user folder, not
+the game installation. Import preserves slots absent from the source and retains
+the previous destination beside it as a dated backup. Close the game before an
+import. The source stays untouched. In-game compatibility and automatic account
+migration remain unverified; a successful copy is not proof that the game can load it.
 
 Choose **Build game** for the three-step wizard: game archive, installation
 folder, then building with a live log, measured elapsed time and stage estimates
@@ -45,8 +79,10 @@ that contain the NUP format. Nintendo 64 ROMs need a different engine.
 - The command-line preparation stage selects executable modules from base/update
   packages, verifies their content and writes NSO metadata and a module layout.
 - The independent build runs preparation, module decoding and SDK generation
-  before attempting the larger game modules. It currently stops at unsupported
-  SDK instructions; the game 1.1.1 port and native link are also unfinished.
+  before attempting the larger game modules. Experimental native linking now
+  succeeds and the isolated test reaches the title and game world. World rendering
+  still flickers and loses surfaces; intro movie quality also remains incorrect. The launcher
+  does not yet deliver a verified playable independent build.
 - An optional command-line compatibility build uses an existing installation.
   It is never silently substituted for an independent build.
 

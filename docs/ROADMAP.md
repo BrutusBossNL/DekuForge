@@ -21,8 +21,32 @@ rendering and a repeatable play session. Compare Kokiri Forest, Market Square,
 Hyrule Field and a dungeon with the working reference installation on the same
 machine, settings and save snapshot. Record average FPS, frame-time percentiles,
 stalls, peak committed memory and peak VRAM. The owner must be able to continue
-playing with no meaningful regression. No baseline measurements exist yet;
-numbers or parity claims must not be invented.
+playing with no meaningful regression. An initial reference run and isolated
+development measurements are recorded in `WINDOWS_BUILD.md`; the test world
+still has rendering defects. These measurements do not establish parity.
+
+### Launcher updates and save migration
+
+Implemented locally: background public-release checks, Stable/Preview selection,
+startup check preference, system-language default, existing-user-folder save
+import/export and retained destination backups. Not yet delivered: automatic
+update installation, validated rollback, account migration and in-game save
+compatibility. Automatic update and cache cleanup controls remain disabled.
+
+The Windows delivery also requires an Updates action that checks releases from
+the DekuForge repository. Show the installed launcher version, source revision,
+game build ID and available release separately. Download only source/tooling;
+build game-derived code locally. Reuse verified build products whose inputs,
+compiler options and dependencies are unchanged. Install a completed build
+atomically and retain the previous working installation when an update fails.
+
+Offer import of an existing NX2navi save folder into a separate DekuForge
+profile. Never move, modify or delete the source saves. Validate the selected
+game/version and save layout, back up the destination before replacement, and
+test loading and saving the imported copy. Preserve saves outside versioned
+application folders. Document compatibility by tested game version; do not
+promise that a save written by a newer game can always be loaded by an older
+one. Keep a pre-upgrade save snapshot for rolling back the game build.
 
 ## 2. Linux parity
 

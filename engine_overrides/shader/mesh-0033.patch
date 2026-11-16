@@ -1,0 +1,27 @@
+--- a/src/Ryujinx.Graphics.Shader/Translation/Translator.cs
++++ b/src/Ryujinx.Graphics.Shader/Translation/Translator.cs
+@@ -407,18 +407,12 @@
+ 
+                 if (a.Pred != RegisterConsts.PredicateTrueIndex && a.Opcode != Instructions.AmpereOpcodes.Bra)
+                 {
+-                    Operand label;
+-
+-                    if (opIndex == block.OpCodes.Count - 1 && block.HasNext())
+-                    {
+-                        label = context.GetLabel(block.Successors[0].Address);
+-                    }
+-                    else
+-                    {
+-                        label = Label();
+-
+-                        predSkipLbl = label;
+-                    }
++                    // Keep both predicate paths inside this block until deferred
++                    // writes have been committed. Jumping to the successor here
++                    // skips CommitAll() for inactive lanes, even when the pending
++                    // result came from an earlier unconditional instruction.
++                    Operand label = Label();
++                    predSkipLbl = label;
+ 
+                     RegisterType predType = Instructions.AmpereTable.HasUniformGuard(a.Opcode) ? RegisterType.UniformPredicate : RegisterType.Predicate;
+                     Operand pred = Register(a.Pred, predType);

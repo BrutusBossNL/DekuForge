@@ -16,8 +16,14 @@ from .core import ROOT, launch, load_settings, save_installation, update_setting
 from .engine import build_independent
 from .i18n import LANGUAGES, MESSAGES, translate
 from .native import prepare_archive
+from .preferences import DEFAULTS, resolve_language
+from .releases import list_releases
+from .build_library import BuildLibrary
+from .home_cards import ActionCard, animate_intro
+from .saves import export_save, import_save, save_files
 from .theme import BG, BORDER, GOLD, LEAF, MUTED, PANEL, TEXT, ArtworkLabel, BackgroundCanvas, apply_identity, apply_window, logo_image
 from .workflow import BuildRequest, Progress, duration, validate_destination, validate_source
+from .theme import button_feedback, NavigationCanvas, NavigationLogo
 
 
 class Launcher:
@@ -28,10 +34,25 @@ class Launcher:
         root.minsize(960, 700)
         apply_window(root)
         root.protocol("WM_DELETE_WINDOW", self.close)
-        settings = load_settings()
-        self.language = settings.get("language", "nl")
-        if self.language not in LANGUAGES:
-            self.language = "nl"
+        settings = DEFAULTS | load_settings()
+        self.preferences = settings
+        self.language_choice = settings["language"]
+        self.language = resolve_language(self.language_choice)
+        self.release_status = ""
+        self.releases = []
+        self.checked_channel = None
+        self.selected_release = ""
+        self.library = BuildLibrary(ROOT)
+        self.build_busy = False
+        self.library_status = ""
+        self.library_view = False
+        self.intro_cover = None
+        self.intro_job = None
+        self.card_job = None
+        self.release_busy = False
+        self.save_busy = False
+        self.save_status = ""
+        self.save_folder = settings.get("save_folder", "")
         self.executable = settings.get("executable", "")
         self.source = settings.get("nup", "")
         self.destination = settings.get("build_destination", str(ROOT / "build" / "game"))
@@ -52,25 +73,31 @@ class Launcher:
         self.last_log_length = 0
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
-        self.sidebar = tk.Frame(root, bg="#0d1c12", width=240)
+        self.root.grid_columnconfigure(0, minsize=240)
+        self.sidebar = NavigationCanvas(root, width=240)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
         self.sidebar.grid_propagate(False)
         self.backdrop = BackgroundCanvas(root)
-        self.backdrop.grid(row=0, column=1, sticky="nsew")
+        self.backdrop.grid(row=0, column=0, columnspan=2, sticky="nsew")
         self.backdrop.grid_rowconfigure(0, weight=1)
         self.backdrop.grid_columnconfigure(0, weight=1)
         self.content = BackgroundCanvas(self.backdrop, surface=self.backdrop)
-        self.content.grid(row=0, column=0, sticky="nsew", padx=34, pady=28)
+        self.content.grid(row=0, column=0, sticky="nsew", padx=(274, 34), pady=28)
+        tk.Misc.lift(self.sidebar)
         style = ttk.Style(root)
-        style.theme_use("clam")
         style.configure("Forge.Horizontal.TProgressbar", troughcolor=PANEL, background=GOLD,
                         bordercolor=BORDER, lightcolor=GOLD, darkcolor=GOLD)
-        style.configure("Forge.TCombobox", fieldbackground=PANEL, background=BORDER,
-                        foreground=TEXT, arrowcolor=GOLD, padding=9)
-        style.map("Forge.TCombobox", fieldbackground=[("readonly", PANEL)], foreground=[("readonly", TEXT)])
         self.render_navigation()
+        if "--self-test" not in sys.argv:
+            try:
+                self.library.discover(self.executable, self.source)
+            except (OSError, ValueError) as error:
+                self.library_status = str(error)
         self.render()
-        root.after(100, self.tick)
+        self.tick_job = root.after(100, self.tick)
+        root.bind("<Destroy>", self.on_destroy, add="+")
+        if settings["check_updates"] and "--self-test" not in sys.argv:
+            root.after(2500, self.check_updates)
 
     def t(self, key, **values):
         return translate(self.language, key, **values)
@@ -89,10 +116,11 @@ class Launcher:
         return widget
 
     def button(self, parent, text, command, primary=False, **options):
-        return tk.Button(parent, text=text, command=command, bg=GOLD if primary else BORDER,
+        button = tk.Button(parent, text=text, command=command, bg=GOLD if primary else BORDER,
                          fg=BG if primary else TEXT, activebackground=LEAF, activeforeground=BG,
                          font=("Segoe UI", 11, "bold" if primary else "normal"),
-                         relief="flat", borderwidth=0, padx=18, pady=11, cursor="hand2", **options)
+                         relief="flat", borderwidth=0, padx=18, pady=options.pop("pady", 11), cursor="hand2", **options)
+        return button_feedback(button, primary)
 
     def card(self, parent, padding=22):
         outer = BackgroundCanvas(parent, surface=self.backdrop, opacity=0.15)
@@ -103,89 +131,174 @@ class Launcher:
         return frame
 
     def render_navigation(self):
+        self.cancel_intro()
         for child in self.sidebar.winfo_children():
             child.destroy()
         image = logo_image(self.root, width=210, height=120)
         if image is not None:
-            mark = tk.Label(self.sidebar, image=image, bg="#0d1c12")
+            mark = NavigationLogo(self.sidebar, image)
             mark.image = image
+            self.logo_label = mark
             mark.pack(padx=14, pady=(32, 6))
         else:
             self.label(self.sidebar, "DekuForge", 22, GOLD).pack(padx=20, pady=30)
         self.label(self.sidebar, self.t("tagline"), 10, MUTED).pack(padx=22, pady=(0, 32))
-        for name in ("home", "build", "settings"):
+        for name in ("home", "updates", "saves", "build", "settings"):
             selected = self.page == name
             self.button(self.sidebar, self.t(name), lambda value=name: self.navigate(value),
                         primary=selected, anchor="w").pack(fill="x", padx=16, pady=5)
         self.label(self.sidebar, f"{self.t('development')}\n{__version__}", 9, MUTED).pack(side="bottom", padx=22, pady=24)
 
     def navigate(self, page):
+        self.cancel_intro()
         self.page = page
         self.render_navigation()
         self.render()
 
     def render(self):
+        if self.card_job is not None:
+            self.root.after_cancel(self.card_job)
+            self.card_job = None
         if self.progressbar is not None:
             self.progressbar.stop()
         self.log_widget = self.progressbar = self.time_label = self.phase_label = None
         for child in self.content.winfo_children():
             child.destroy()
-        self.label(self.content, self.t(self.page), 27, GOLD).pack(anchor="w", pady=(0, 20))
+        self.content.grid_configure(padx=(252, 12) if self.page == "home" else (274, 34),
+                                    pady=12 if self.page == "home" else 28)
         if self.page == "home":
             self.render_home()
         elif self.page == "settings":
             self.render_settings()
+        elif self.page == "updates":
+            self.render_updates()
+        elif self.page == "saves":
+            self.render_saves()
         else:
-            self.render_build()
+            if self.library_view:
+                self.render_library()
+            else:
+                self.render_build()
         self.backdrop._schedule_resize(None)
 
+    def build_entries(self):
+        try:
+            return self.library.entries()
+        except (ValueError, OSError) as error:
+            self.library_status = str(error)
+            return []
+
+    def build_version(self, entry=None):
+        if entry is None:
+            entry = next((e for e in self.build_entries() if e["executable"] == self.executable), {})
+        return entry.get("version") or self.t("custom_game")
+
     def render_home(self):
-        self.label(self.content, self.t("welcome"), 20).pack(anchor="w", pady=(0, 6))
-        self.label(self.content, self.t("welcome_help"), 11, MUTED, wraplength=650).pack(anchor="w", pady=(0, 28))
-        card = self.card(self.content)
-        self.label(card, self.t("installation").upper(), 10, LEAF).pack(anchor="w")
         selected = bool(self.executable and Path(self.executable).is_file())
-        self.label(card, str(Path(self.executable).parent) if selected else self.t("no_install"),
-                   12, TEXT, wraplength=620).pack(anchor="w", pady=(12, 18))
-        row = BackgroundCanvas(card, surface=self.backdrop, opacity=0.15)
-        row.pack(fill="x")
         running = self.process is not None and self.process.poll() is None
-        self.button(row, self.t("playing") if running else "▶  " + self.t("play"), self.play,
-                    primary=True, state="normal" if selected and not running else "disabled").pack(side="left")
-        self.button(row, self.t("choose_install"), self.choose_installation).pack(side="left", padx=10)
-        self.label(card, self.activity or self.t("ready" if selected else "not_ready"), 10, MUTED,
-                   wraplength=620).pack(anchor="w", pady=(16, 0))
-        next_card = self.card(self.content)
-        self.label(next_card, self.t("build"), 17).pack(anchor="w")
-        self.label(next_card, self.t("build_help"), 11, MUTED, wraplength=620).pack(anchor="w", pady=(7, 15))
-        self.button(next_card, self.t("build") + "  →", lambda: self.navigate("build")).pack(anchor="w")
-        if selected:
-            self.button(self.content, self.t("open_folder"), lambda: self.open_folder(Path(self.executable).parent)).pack(anchor="w")
+        self.home_deck = BackgroundCanvas(self.content, surface=self.backdrop)
+        self.home_deck.pack(fill="both", expand=True)
+        release = (self.releases[0]["version"] if self.releases and
+                   self.checked_channel == self.preferences["update_channel"] else
+                   self.t("no_release" if self.checked_channel == self.preferences["update_channel"] else "release_unchecked"))
+        version = self.build_version()
+        details = ((version if version == self.t("custom_game") else self.t("game_version", version=version)) if selected else self.t("no_install"),
+                   self.t("release_found", version=release),
+                   self.source or self.t("no_dump"))
+        actions = (("play", self.t("playing") if running else self.t("play"), self.play,
+                    selected and not running and not self.build_busy and not self.save_busy),
+                   ("update", self.t("action_update"), lambda: self.navigate("updates"), True),
+                   ("build", self.t("action_build"), self.open_wizard, True))
+        self.home_cards = []
+        for i, ((image, title, command, enabled), detail) in enumerate(zip(actions, details)):
+            card = ActionCard(self.home_deck, ROOT / "assets" / "branding" / f"home-{image}.png",
+                              title, detail, command, enabled,
+                              badge=self.t(self.preferences["update_channel"]) if image == "update" else "",
+                              badge_color="#87bcec" if self.preferences["update_channel"] == "stable" else GOLD)
+            card.place(relx=i / 3, x=4, y=0, relwidth=1/3, width=-8, relheight=1)
+            self.home_cards.append(card)
+
+    def open_wizard(self, fresh=False):
+        if fresh and not self.progress.active:
+            self.error, self.result, self.log_lines = "", None, []
+            self.progress = Progress()
+            self.step = 0
+            self.destination = str(ROOT / "build" / "installations" / datetime.now().strftime("%Y%m%d-%H%M%S"))
+        self.library_view = False
+        self.navigate("build")
+
+    def animate_cards(self):
+        if self.page != "home":
+            return
+        cards = list(self.home_cards)
+        def frame(step=0):
+            self.card_job = None
+            for i, card in enumerate(cards):
+                if not card.winfo_exists():
+                    return
+                t = max(0, min(1, (step - i * 5) / 12))
+                card.place_configure(y=int((1-t)**3 * max(100, self.home_deck.winfo_height())))
+            if step < 22:
+                self.card_job = self.root.after(25, lambda: frame(step + 1))
+        frame()
+
+    def cancel_intro(self):
+        if self.intro_job is not None:
+            self.root.after_cancel(self.intro_job)
+            self.intro_job = None
+        if self.intro_cover is not None:
+            self.intro_cover.destroy()
+            self.intro_cover = None
+            self.sidebar.place_forget()
+            self.sidebar.grid()
+            tk.Misc.lift(self.sidebar)
+            mark = getattr(self, "logo_label", None)
+            if mark is not None and mark.winfo_exists():
+                mark.configure(image=mark.image)
+
+    def on_destroy(self, event):
+        if event.widget is self.root:
+            # Include ttk's internal timers and redraws queued during teardown.
+            for job in self.root.tk.splitlist(self.root.tk.call("after", "info")):
+                self.root.tk.call("after", "cancel", job)
 
     def render_settings(self):
-        card = self.card(self.content)
-        self.label(card, self.t("language"), 16).pack(anchor="w")
-        self.label(card, self.t("language_help"), 11, MUTED, wraplength=620).pack(anchor="w", pady=(6, 18))
-        value = tk.StringVar(value=LANGUAGES[self.language])
-        combo = ttk.Combobox(card, values=list(LANGUAGES.values()), textvariable=value,
+        card = self.card(self.content, padding=12)
+        self.label(card, self.t("language"), 16).pack(anchor="w", pady=(0, 8))
+        choices = {"system": self.t("system"), **LANGUAGES}
+        value = tk.StringVar(value=choices.get(self.language_choice, choices["system"]))
+        combo = ttk.Combobox(card, values=list(choices.values()), textvariable=value,
                              state="readonly", style="Forge.TCombobox", font=("Segoe UI", 12), width=24)
         combo.pack(anchor="w")
 
         def change(_):
-            self.set_language(next(code for code, title in LANGUAGES.items() if title == value.get()))
+            self.set_language(next(code for code, title in choices.items() if title == value.get()))
         combo.bind("<<ComboboxSelected>>", change)
-        options = self.card(self.content)
-        self.label(options, self.t("hide"), 14, wraplength=610).pack(anchor="w", pady=(0, 14))
-        self.button(options, self.t("on" if self.hide_playing else "off"), self.toggle_hide,
-                    primary=self.hide_playing).pack(anchor="w")
+        options = self.card(self.content, padding=12)
+        for key, enabled, command, available in (
+                ("check_updates", self.preferences["check_updates"], self.toggle_updates, True),
+                ("auto_update", False, lambda: None, False),
+                ("hide", self.hide_playing, self.toggle_hide, True),
+                ("keep_cache", True, lambda: None, False)):
+            row = BackgroundCanvas(options, surface=self.backdrop, opacity=0.15)
+            row.pack(fill="x", pady=3)
+            self.label(row, self.t(key), 11).pack(side="left")
+            self.button(row, self.t("on" if enabled else "off"), command, primary=enabled,
+                        state="normal" if available else "disabled", pady=4).pack(side="right")
+        row = BackgroundCanvas(options, surface=self.backdrop, opacity=0.15)
+        row.pack(fill="x", pady=4)
+        self.label(row, self.t("update_channel")).pack(side="left")
+        self.button(row, self.t(self.preferences["update_channel"]), self.toggle_channel, pady=4).pack(side="right")
+        self.label(options, self.t("update_pending"), 9, MUTED, wraplength=620).pack(anchor="w", pady=(8, 0))
+        self.label(options, self.t("cache_help"), 9, MUTED, wraplength=620).pack(anchor="w")
         self.button(self.content, self.t("open_log"), lambda: self.open_folder(ROOT / "local" / "logs")).pack(anchor="w", pady=8)
-        self.label(self.content, self.t("about"), 10, MUTED, wraplength=630).pack(anchor="w", pady=20)
 
     def set_language(self, code):
-        if code not in LANGUAGES:
+        if code not in LANGUAGES and code != "system":
             return
         self.persist({"language": code})
-        self.language = code
+        self.language_choice = code
+        self.language = resolve_language(code)
         self.render_navigation()
         self.render()
 
@@ -194,7 +307,106 @@ class Launcher:
         self.persist({"hide_playing": self.hide_playing})
         self.render()
 
+    def toggle_updates(self):
+        self.preferences["check_updates"] = not self.preferences["check_updates"]
+        self.persist({"check_updates": self.preferences["check_updates"]})
+        self.render()
+
+    def toggle_channel(self):
+        self.preferences["update_channel"] = "preview" if self.preferences["update_channel"] == "stable" else "stable"
+        self.persist({"update_channel": self.preferences["update_channel"]})
+        self.release_status = ""
+        self.releases = []
+        self.selected_release = ""
+        self.render()
+        self.check_updates()
+
+    def render_updates(self):
+        card = self.card(self.content)
+        self.label(card, self.t("installed_version", version=__version__), 16).pack(anchor="w")
+        self.label(card, self.t("update_channel") + ": " + self.t(self.preferences["update_channel"])).pack(anchor="w", pady=12)
+        self.label(card, self.release_status or self.t("not_started"), wraplength=620).pack(anchor="w", pady=12)
+        self.button(card, self.t("working" if self.release_busy else "check_now"), self.check_updates,
+                    primary=True, state="disabled" if self.release_busy else "normal").pack(anchor="w")
+        self.label(card, self.t("release_choice"), 11).pack(anchor="w", pady=(18, 8))
+        versions = [r["version"] for r in self.releases]
+        value = tk.StringVar(value=self.selected_release or (versions[0] if versions else ""))
+        choice = ttk.Combobox(card, textvariable=value, values=versions, state="readonly" if versions else "disabled",
+                              style="Forge.TCombobox")
+        choice.pack(fill="x")
+        choice.bind("<<ComboboxSelected>>", lambda e: setattr(self, "selected_release", value.get()))
+        self.button(card, self.t("install_release"), lambda: None, state="disabled", pady=5).pack(anchor="w", pady=(10, 0))
+        self.label(self.content, self.t("update_pending"), color=MUTED, wraplength=620).pack(anchor="w")
+        self.button(self.content, self.t("local_versions"), self.open_library).pack(anchor="w", pady=12)
+
+    def check_updates(self):
+        if self.release_busy:
+            return
+        self.release_busy = True
+        channel = self.preferences["update_channel"]
+        preview = channel == "preview"
+        def work():
+            try:
+                self.events.put(("release", (channel, list_releases(preview))))
+            except Exception as error:
+                self.events.put(("release_error", (channel, str(error))))
+        threading.Thread(target=work, daemon=True).start()
+        if self.page == "updates":
+            self.render()
+
+    def render_saves(self):
+        self.label(self.content, self.t("save_help"), color=MUTED, wraplength=620).pack(anchor="w", pady=(0, 18))
+        card = self.card(self.content)
+        self.path_row(card, self.t("save_folder"), self.save_folder, self.choose_save_folder)
+        for key, action in (("export_save", "export"), ("import_zip", "zip"), ("import_folder", "folder")):
+            self.button(card, self.t(key), lambda value=action: self.save_action(value),
+                        state="normal" if self.save_folder and not self.save_busy else "disabled").pack(fill="x", pady=5)
+        if self.save_folder:
+            self.button(card, self.t("open_folder"), lambda: self.open_folder(Path(self.save_folder))).pack(anchor="w", pady=5)
+        self.label(self.content, self.save_status, wraplength=620).pack(anchor="w")
+
+    def choose_save_folder(self):
+        value = filedialog.askdirectory(parent=self.root, title=self.t("save_folder"))
+        if value:
+            try:
+                save_files(value, require_progress=False)
+                self.persist({"save_folder": value})
+                self.save_folder = value
+                self.render()
+            except (ValueError, OSError) as error:
+                self.show_error(error)
+
+    def save_action(self, action):
+        if self.management_busy():
+            return
+        if action == "export":
+            value = filedialog.asksaveasfilename(parent=self.root, defaultextension=".zip", filetypes=[("ZIP", "*.zip")])
+        elif action == "zip":
+            value = filedialog.askopenfilename(parent=self.root, filetypes=[("ZIP", "*.zip")])
+        else:
+            value = filedialog.askdirectory(parent=self.root, title=self.t("import_folder"))
+        if not value:
+            return
+        if action != "export" and not messagebox.askyesno("DekuForge", self.t("save_confirm", folder=self.save_folder), parent=self.root):
+            return
+        destination = self.save_folder
+        self.save_busy = True
+        self.save_status = self.t("working")
+        self.render()
+        def work():
+            try:
+                if action == "export":
+                    export_save(destination, value)
+                    result = value
+                else:
+                    result = str(import_save(value, destination))
+                self.events.put(("save_complete", result))
+            except Exception as error:
+                self.events.put(("save_error", str(error)))
+        threading.Thread(target=work, daemon=True).start()
+
     def render_build(self):
+        self.button(self.content, self.t("manage_builds"), self.open_library, pady=5).pack(anchor="e", pady=(0, 8))
         steps = BackgroundCanvas(self.content, surface=self.backdrop)
         steps.pack(fill="x", pady=(0, 22))
         for index, key in enumerate(("source_step", "destination_step", "progress_step")):
@@ -221,6 +433,91 @@ class Launcher:
         self.label(parent, title.upper(), 10, LEAF).pack(anchor="w")
         self.label(parent, path or "—", 11, TEXT, wraplength=610).pack(anchor="w", pady=12)
         self.button(parent, self.t("browse"), command).pack(anchor="w")
+
+    def open_library(self):
+        self.library_view = True
+        self.navigate("build")
+
+    def render_library(self):
+        self.label(self.content, self.t("manage_builds"), 19).pack(anchor="w", pady=(0, 12))
+        self.library_entries = self.build_entries()
+        list_frame = tk.Frame(self.content, bg=PANEL)
+        list_frame.pack(fill="x")
+        scroll = ttk.Scrollbar(list_frame)
+        scroll.pack(side="right", fill="y")
+        self.build_list = tk.Listbox(list_frame, bg=PANEL, fg=TEXT, selectbackground=GOLD,
+                                    selectforeground=BG, font=("Segoe UI", 11), height=7, exportselection=False)
+        self.build_list.pack(fill="x", expand=True)
+        scroll.configure(command=self.build_list.yview)
+        self.build_list.configure(yscrollcommand=scroll.set)
+        for entry in self.library_entries:
+            active = entry["executable"] == self.executable
+            self.build_list.insert("end", ("● " if active else "  ") + self.build_version(entry) + " — " + str(Path(entry["executable"]).parent))
+        self.build_list.bind("<<ListboxSelect>>", self.select_library_entry)
+        self.library_detail = self.label(self.content, self.t("build_empty") if not self.library_entries else "", 10, MUTED, wraplength=650)
+        self.library_detail.pack(anchor="w", pady=12)
+        row = BackgroundCanvas(self.content, surface=self.backdrop)
+        row.pack(fill="x")
+        self.activate_button = self.button(row, self.t("activate_build"), self.activate_build, primary=True, state="disabled")
+        self.activate_button.pack(side="left")
+        self.delete_button = self.button(row, self.t("delete_build"), self.delete_build, state="disabled")
+        self.delete_button.pack(side="right")
+        self.label(self.content, self.library_status, 10, MUTED, wraplength=650).pack(anchor="w", pady=12)
+        self.button(self.content, self.t("new_build"), lambda: self.open_wizard(fresh=True)).pack(anchor="w", pady=8)
+        self.button(self.content, self.t("choose_install"), self.choose_installation).pack(anchor="w", pady=8)
+        if self.library_entries:
+            self.build_list.selection_set(0)
+            self.select_library_entry()
+
+    def selected_build(self):
+        selection = self.build_list.curselection()
+        return self.library_entries[selection[0]] if selection else None
+
+    def management_busy(self):
+        return self.build_busy or self.save_busy or self.progress.active or (self.process is not None and self.process.poll() is None)
+
+    def select_library_entry(self, _event=None):
+        entry = self.selected_build()
+        if not entry:
+            return
+        busy = self.management_busy()
+        self.library_detail.configure(text=entry["executable"] + "\n" + (entry.get("dump") or self.t("no_dump")))
+        self.activate_button.configure(state="normal" if not busy and Path(entry["executable"]).is_file() else "disabled")
+        self.delete_button.configure(state="normal" if not busy and entry["owned"] else "disabled")
+
+    def activate_build(self):
+        entry = self.selected_build()
+        if not entry or self.management_busy():
+            return
+        try:
+            self.executable = str(save_installation(entry["executable"]))
+            self.activity = ""
+            self.render()
+        except (OSError, ValueError) as error:
+            self.show_error(error)
+
+    def delete_build(self):
+        entry = self.selected_build()
+        if not entry or self.management_busy():
+            return
+        folder = str(Path(entry["executable"]).parent)
+        if self.source and Path(self.source).resolve().is_relative_to(Path(folder).resolve()):
+            self.show_error(self.t("dump_inside_build"))
+            return
+        if not messagebox.askyesno(self.t("delete_build"), self.t("delete_confirm", path=folder), parent=self.root, default="no"):
+            return
+        keep = messagebox.askyesnocancel(self.t("saves"), self.t("keep_saves_question"), parent=self.root, default="yes")
+        if keep is None:
+            return
+        self.build_busy = True
+        self.render()
+        def worker():
+            try:
+                backup = self.library.delete(entry["id"], keep)
+                self.events.put(("build_deleted", (entry["executable"], str(backup) if backup else "")))
+            except Exception as error:
+                self.events.put(("build_delete_error", str(error)))
+        threading.Thread(target=worker, daemon=False).start()
 
     def render_progress(self):
         self.label(self.content, self.t("build_title"), 20).pack(anchor="w", pady=(0, 12))
@@ -269,10 +566,13 @@ class Launcher:
         messagebox.showerror(self.t("error"), text, parent=self.root)
 
     def choose_installation(self):
+        if self.management_busy():
+            return
         value = filedialog.askopenfilename(parent=self.root, title=self.t("select_exe"), filetypes=[(self.t("game_file"), "*.exe"), (self.t("all_files"), "*")])
         if value:
             try:
                 self.executable = str(save_installation(value))
+                self.library.register(self.executable)
                 self.activity = ""
                 self.render()
             except (OSError, ValueError) as error:
@@ -316,7 +616,7 @@ class Launcher:
         self.render()
 
     def play(self):
-        if self.process is not None and self.process.poll() is None:
+        if self.build_busy or self.save_busy or (self.process is not None and self.process.poll() is None):
             return
         try:
             self.process = launch(self.executable)
@@ -328,7 +628,7 @@ class Launcher:
             self.show_error(error)
 
     def start_build(self):
-        if self.progress.active:
+        if self.management_busy():
             return
         try:
             request = BuildRequest.create(self.source, self.destination, self.executable)
@@ -398,18 +698,56 @@ class Launcher:
             self.log_widget.configure(state="disabled")
 
     def tick(self):
+        if self.tick_job is not None:
+            self.root.after_cancel(self.tick_job)
+        self.tick_job = None
         changed = False
         for _ in range(100):
             try:
                 kind, value = self.events.get_nowait()
             except Empty:
                 break
+            if kind in ("release", "release_error"):
+                self.release_busy = False
+                channel, result = value
+                if channel != self.preferences["update_channel"]:
+                    self.check_updates()
+                    continue
+                self.checked_channel = channel
+                if kind == "release":
+                    self.releases = result
+                    self.release_status = self.t("release_found", version=result[0]["version"]) if result else self.t("release_none")
+                else:
+                    self.release_status = str(result)
+                changed = self.page in ("updates", "home") or changed
+                continue
+            if kind in ("build_deleted", "build_delete_error"):
+                self.build_busy = False
+                if kind == "build_deleted":
+                    executable, backup = value
+                    if executable == self.executable:
+                        self.executable = ""
+                        self.persist({"executable": ""})
+                    self.library_status = self.t("build_deleted") + ("\n" + self.t("saves_retained", path=backup) if backup else "")
+                else:
+                    self.library_status = str(value)
+                changed = True
+                continue
+            if kind in ("save_complete", "save_error"):
+                self.save_busy = False
+                self.save_status = self.t("save_done", path=value) if kind == "save_complete" else str(value)
+                changed = self.page == "saves" or changed
+                continue
             if kind in ("progress", "phase"):
                 self.progress.update(value)
             if kind in ("log", "checked", "failure"):
                 self.log_lines.append(str(value).rstrip() + "\n")
             if kind == "success":
                 self.result = value
+                try:
+                    self.library.register(value, self.source, owned=True)
+                except (OSError, ValueError) as error:
+                    self.library_status = str(error)
             elif kind == "failure":
                 self.error = value
             elif kind == "done":
@@ -430,7 +768,7 @@ class Launcher:
         if changed:
             self.render()
         self.refresh_progress()
-        self.root.after(100, self.tick)
+        self.tick_job = self.root.after(100, self.tick)
 
     def use_result(self):
         if self.result:
@@ -459,24 +797,29 @@ class Launcher:
             self.show_error(error)
 
     def close(self):
-        if self.progress.active:
+        if self.progress.active or self.save_busy or self.build_busy:
             messagebox.showinfo("DekuForge", self.t("active_build"), parent=self.root)
             return
+        self.cancel_intro()
+        if self.card_job is not None:
+            self.root.after_cancel(self.card_job)
         self.root.destroy()
 
 
 def main():
     apply_identity()
     root = tk.Tk(className="DekuForge")
+    root.withdraw()  # Never map the unfinished layout or empty artwork cards.
     root._launcher = Launcher(root)
     if "--self-test" in sys.argv:
+        root.deiconify()
         def self_test():
             application = root._launcher
             checked = []
             try:
                 for language in LANGUAGES:
                     application.language = language
-                    for page in ("home", "build", "settings"):
+                    for page in ("home", "updates", "saves", "build", "settings"):
                         application.navigate(page)
                         root.update_idletasks()
                         checked.append(f"{language}/{page}")
@@ -486,7 +829,12 @@ def main():
                         root.update_idletasks()
                         checked.append(f"{language}/build/{step}")
                     application.step = 0
+                    application.open_library()
+                    root.update_idletasks()
+                    checked.append(f"{language}/build/library")
+                    application.library_view = False
                 report = {"screens": checked, "logo_loaded": root._brand_icon.width() > 0,
+                          "native_icon_verified": getattr(root, "_native_icon_verified", os.name != "nt"),
                           "top_level_windows": 1 + sum(isinstance(child, tk.Toplevel) for child in root.winfo_children()),
                           "success": True}
             except Exception as error:
@@ -496,4 +844,7 @@ def main():
             (folder / "launcher-selftest.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
             root.destroy()
         root.after(100, self_test)
+    else:
+        animate_intro(root._launcher)
+        root.deiconify()
     root.mainloop()

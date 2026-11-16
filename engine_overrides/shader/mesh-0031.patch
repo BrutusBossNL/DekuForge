@@ -1,0 +1,12 @@
+--- a/src/Ryujinx.Graphics.Shader/Translation/HelperFunctionManager.cs
++++ b/src/Ryujinx.Graphics.Shader/Translation/HelperFunctionManager.cs
+@@ -528,7 +528,8 @@
+ 
+             context.MarkLabel(lblLoopHead);
+ 
+-            Operand oldValue = context.Load(StorageKind.SharedMemory, id, wordOffset);
++            // Read atomically: a plain shared load may stay stale while other lanes update the word.
++            Operand oldValue = context.AtomicCompareAndSwap(StorageKind.SharedMemory, id, wordOffset, Const(0), Const(0));
+             Operand newValue = opCallback(oldValue);
+ 
+             Operand casResult = context.AtomicCompareAndSwap(StorageKind.SharedMemory, id, wordOffset, oldValue, newValue);

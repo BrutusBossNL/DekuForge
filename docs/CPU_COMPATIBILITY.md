@@ -15,11 +15,19 @@ This ordering is stronger than RCpc. Compiled C fragments have been checked
 against ARM64 execution for 96 cases, including SP addressing, zero-register
 destinations, zero extension, flag preservation and unchanged memory.
 
-Full SDK generation was exercised: 45,907 functions, 57 chunks. After these
-extensions, 68 unsupported instructions remain: 58 in the two-source register
-class and 10 in the one-source extension class (pointer authentication). This
-remains a build failure, not a playable SDK. No unsupported instruction is
-silently replaced with zero or a no-op.
+Full SDK generation now covers 45,907 functions in 57 chunks with zero
+unsupported instructions. The remaining 58 PACGA and ten address-authentication
+sites have been implemented for the explicit static guest profile below.
+
+The static profile uses 39-bit virtual addresses, no instruction top-byte ignore,
+disabled instruction-address signing (SCTLR.EnIA/EnIB=0), and a zero generic key.
+This makes the existing hint and return behavior consistent with address-key
+PAC/AUT forms. XPACI restores the canonical address. PACGA remains active and
+computes actual QARMA authentication arithmetic. This is not a claim of hardware
+key secrecy or enabled address authentication. Compiled emitted instructions
+matched ARM64 in 1,200 complete-state cases; QARMA separately matched 204 PACGA
+cases. The test oracle's privilege and PAuth activation settings are explicit in
+`tools/check_pauth.py`; its inactive-XPACI optimization is avoided.
 
 FP16 vector FNEG now flips each halfword's sign bit without changing NaN payloads,
 flags or other lanes. Compiled emitted C matched the ARM64 oracle in 528 cases,
@@ -29,11 +37,8 @@ The full main-module pass exposed byte-vector dot products. Original portable
 SDOT/UDOT lowering has now matched ARM64 execution in 1,600 compiled-C cases,
 covering signed/unsigned bytes, 64/128-bit widths, all operand-alias patterns,
 accumulation overflow and unchanged CPU state. Indexed dot products remain
-outside this extension. The full main pass contains 249,960 functions and reports
-four unsupported sites, all these UDOT forms. The affected chunk (657 functions)
-has subsequently been regenerated and compiled with zero unsupported sites in a
-separate validation folder. The original full-generation manifest is preserved;
-the complete main output still needs a fresh generation before production linking.
+outside this extension. Full main generation has now been repeated across all
+249,960 functions and reports zero unsupported instructions.
 The separate subsdk0 movie module has 1,547 functions and zero unsupported sites.
 
 The dot-product encodings were cross-checked with LLVM's instruction tests:

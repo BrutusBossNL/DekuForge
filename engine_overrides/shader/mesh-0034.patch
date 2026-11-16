@@ -1,0 +1,48 @@
+--- a/src/Ryujinx.Graphics.Shader/Instructions/InstEmitSurface.cs
++++ b/src/Ryujinx.Graphics.Shader/Instructions/InstEmitSurface.cs
+@@ -418,7 +418,7 @@
+                     Array.Resize(ref dests, outputIndex);
+                 }
+ 
+-                TextureFormat format = isBindless ? TextureFormat.Unknown : ShaderProperties.GetTextureFormat(context.TranslatorContext.GpuAccessor, handle);
++                TextureFormat format = isBindless ? TextureFormat.Unknown : ShaderProperties.GetTextureFormat(context.TranslatorContext.GpuAccessor, handle, cbufSlot);
+ 
+                 SetBindingPair setAndBinding = isBindless ? default : context.ResourceManager.GetTextureOrImageBinding(
+                     Instruction.ImageLoad,
+@@ -694,7 +694,7 @@
+ 
+                 if (!isBindless)
+                 {
+-                    format = ShaderProperties.GetTextureFormat(context.TranslatorContext.GpuAccessor, imm);
++                    format = ShaderProperties.GetTextureFormat(context.TranslatorContext.GpuAccessor, imm, cbufSlot);
+                 }
+             }
+             else
+--- a/src/Ryujinx.Graphics.Shader/StructuredIr/ShaderProperties.cs
++++ b/src/Ryujinx.Graphics.Shader/StructuredIr/ShaderProperties.cs
+@@ -70,6 +70,12 @@
+ 
+         public static TextureFormat GetTextureFormat(IGpuAccessor gpuAccessor, int handle, int cbufSlot = -1)
+         {
++            // Formatless images still require the correct integer/float scalar type.
++            TextureFormat declared = gpuAccessor.QueryTextureFormat(handle, cbufSlot);
++            if (declared.ToString().EndsWith("Uint") || declared.ToString().EndsWith("Sint"))
++            {
++                return declared;
++            }
+             // When the formatted load extension is supported, we don't need to
+             // specify a format, we can just declare it without a format and the GPU will handle it.
+             if (gpuAccessor.QueryHostSupportsImageLoadFormatted())
+--- a/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/Declarations.cs
++++ b/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/Declarations.cs
+@@ -238,6 +238,10 @@
+             foreach (TextureDefinition image in images)
+             {
+                 int setIndex = context.TargetApi == TargetApi.Vulkan ? image.Set : 0;
++                if (image.Format != TextureFormat.Unknown)
++                {
++                    context.AddCapability(Capability.StorageImageExtendedFormats);
++                }
+ 
+                 Dim dim = GetDim(image.Type);
+ 

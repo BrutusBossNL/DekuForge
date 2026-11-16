@@ -50,6 +50,8 @@ def main():
     verify_engine_sources()
     boot_config = write_boot_profile(prepared)
     engine = stage_engine()
+    from tools.build_host_shaders import build_host_shaders
+    build_host_shaders(engine, tools)
     runtime = engine / "runtime"
     output = ROOT / "build" / "windows-runtime"
     if output.resolve() != output:

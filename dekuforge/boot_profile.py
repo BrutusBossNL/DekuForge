@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 import struct
 
-from .gameplan import FIRST_ADDRESS, inspect_nso
+from .gameplan import FIRST_ADDRESS, TITLE, inspect_nso
 from .modules import normalize_module
 
 
@@ -52,6 +52,7 @@ def module_boot_metadata(payload, name):
 
 
 def write_boot_profile(prepared):
+    from .boot_calls import callsites
     prepared = Path(prepared).resolve()
     plan = json.loads((prepared / "build-plan.json").read_text(encoding="utf-8"))
     inputs = {item["name"]: item for item in plan["inputs"]}
@@ -71,10 +72,25 @@ def write_boot_profile(prepared):
         raise ValueError("Boot profile output must not be a link")
     output.mkdir(exist_ok=True)
     header = "// Local assertions derived from verified module metadata. Do not commit.\n#pragma once\n"
+    main = next(row for row in rows if row["name"] == "main")
+    if not main["build_id"].lower().startswith("e0f3ccfaf50065ae4ea01eb5aeb13b1a"):
+        raise ValueError("The native runtime currently supports only the verified game 1.1.1 build")
+    if any(int(item["package"], 16) & ~0xFFF != TITLE for item in inputs.values()):
+        raise ValueError("Boot inputs belong to a different application")
+    header += f"#define DF_APPLICATION_ID {TITLE:#x}ull\n"
     header += "#define DF_BOOT_INIT_ROWS " + ", ".join(
         '{"' + row["name"] + '", ' + str(row["constructor_count"]) + '}' for row in rows) + "\n"
+    sites = {}
+    for label, symbol in (("CHECKPOINT", "_ZN2nn2oe20SetFocusHandlingModeENS0_17FocusHandlingModeE"),
+                          ("NVN", "nvnBootstrapLoader")):
+        offsets = callsites(prepared / "normalized-exefs" / "main", symbol)
+        if not offsets:
+            raise ValueError("No verified call sites for boot milestone: " + label)
+        sites[label.lower()] = offsets
+        header += f"#define DF_BOOT_{label}_RET_OK(offset) (" + " || ".join(
+            f"((offset) == {offset:#x}ull)" for offset in offsets) + ")\n"
     for filename, content in (("df_boot_profile.h", header),
-                              ("boot-profile.json", json.dumps({"modules": rows, "playable": False}, indent=2) + "\n")):
+                              ("boot-profile.json", json.dumps({"modules": rows, "callsites": sites, "playable": False}, indent=2) + "\n")):
         target = output / filename
         if target.resolve() != target:
             raise ValueError("Boot profile target must not be a link")

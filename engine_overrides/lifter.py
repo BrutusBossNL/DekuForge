@@ -21,6 +21,21 @@ from dekuforge.arm64_models import decode_half_negate, decode_byte_dot
 
 
 class Lifter(_base.Lifter):
+    def dp_reg(self, word, pc):
+        # The static guest profile has SCTLR.EnIA/EnIB disabled, matching its
+        # existing unsigned returns and hint forms. PACGA is independent of
+        # those switches and still computes a real generic authentication code.
+        if word & 0xFFE0FC00 == 0x9AC03000:
+            rd, rn, rm = word & 31, (word >> 5) & 31, (word >> 16) & 31
+            expression = f"(df_qarma_computePAC({X(rn)}, {XS(rm)}, 0, 0) & UINT64_C(0xffffffff00000000))"
+            return Insn("op", set_reg(1, rd, expression))
+        if word & 0xFFFFFC00 in (0xDAC10000, 0xDAC10400, 0xDAC11000, 0xDAC11400):
+            return Insn("op", "/* PAC/AUT: address-key signing disabled by the static guest profile. */")
+        if word & 0xFFFFFFE0 == 0xDAC143E0:
+            rd = word & 31
+            return Insn("op", set_reg(1, rd, f"df_strip_instruction_pac({X(rd)})"))
+        return super().dp_reg(word, pc)
+
     def branch_sys(self, word, pc):
         if word in (0xD65F0BFF, 0xD65F0FFF):
             return Insn("ret")

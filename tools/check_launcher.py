@@ -29,8 +29,9 @@ def main():
             result = json.loads(report.read_text(encoding="utf-8"))
             assert result["success"], result
             assert result["logo_loaded"] and result["top_level_windows"] == 1
-            assert len(result["screens"]) == 25
-            print("Native GUI launcher: embedded icon verified; 25 screens, 5 languages, 1 window")
+            assert result["native_icon_verified"], "Native Windows frame has no brand icons"
+            assert len(result["screens"]) == 40
+            print("Native GUI launcher: embedded icon verified; 40 screens, 5 languages, 1 window")
             return
         time.sleep(0.1)
     raise RuntimeError("Native launcher self-test did not produce a fresh report")

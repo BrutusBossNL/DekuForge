@@ -1,0 +1,104 @@
+--- a/src/Ryujinx.Graphics.Shader/Instructions/InstEmitAmpereMem.cs
++++ b/src/Ryujinx.Graphics.Shader/Instructions/InstEmitAmpereMem.cs
+@@ -53,6 +53,7 @@
+             x(0x992, InstName.Membar, AMembar, N, writesRd: false);
+             x(0x38c, InstName.Atoms, AAtoms, N);
+             x(0xf8c, InstName.Atoms, AAtomsPopcInc, N, writesRd: false);
++            x(0x3a9, InstName.Atom, AAtomgCas, N);
+             x(0x301, InstName.Bfe, ABrev, N);
+             x(0x2be, InstName.Bfe, AUbrev, N, uniform: true);
+             x(0x883, InstName.P2r, AUp2ur, N, uniform: true);
+@@ -221,7 +222,7 @@
+         // The 64-bit address of a global access: Ra (a pair with bit raPairBit, else 32 bits) plus a uniform register pair at urLo (a pair with bit 72) in
+         // the uniform form (bit 91), plus the signed offset (40..64). The low word stays (UR + Ra + offset), the form Ryujinx's global-to-storage pass
+         // traces back to a storage buffer table entry in c[0].
+-        private static (Operand Low, Operand High) AGlobalAddress(EmitterContext context, AmpereOp x, int raPairBit, int urLo, int extraOffset)
++        private static (Operand Low, Operand High) AGlobalAddress(EmitterContext context, AmpereOp x, int raPairBit, int urLo, int extraOffset, int descBit)
+         {
+             bool uniformForm = x.Bit(91);
+             bool raPair = uniformForm ? x.Bit(raPairBit) : x.Bit(72);
+@@ -230,7 +231,7 @@
+             Operand lo = Register(x.Ra, RegisterType.Gpr);
+             Operand hi = raPair && x.Ra != RegisterConsts.RegisterZeroIndex ? Register(x.Ra + 1, RegisterType.Gpr) : Const(0);
+ 
+-            if (uniformForm)
++            if (uniformForm && !x.Bit(descBit))
+             {
+                 int ur = x.Bits(urLo, urLo + 6);
+ 
+@@ -301,7 +302,7 @@
+ 
+             for (int index = 0; index < count; index++)
+             {
+-                (los[index], his[index]) = AGlobalAddress(context, x, 90, 32, index * 4);
++                (los[index], his[index]) = AGlobalAddress(context, x, 90, 32, index * 4, 76);
+             }
+ 
+             for (int index = 0; index < count; index++)
+@@ -339,7 +340,7 @@
+                 bool isRz = x.Rb + index >= RegisterConsts.RegisterZeroIndex;
+                 Operand value = isRz ? Const(0) : Register(x.Rb + index, RegisterType.Gpr);
+ 
+-                (Operand lo, Operand hi) = AGlobalAddress(context, x, 90, 64, index * 4);
++                (Operand lo, Operand hi) = AGlobalAddress(context, x, 90, 64, index * 4, 76);
+ 
+                 context.Store(storageKind, lo, hi, value);
+             }
+@@ -349,7 +350,7 @@
+         public static void ARed(EmitterContext context)
+         {
+             AmpereOp x = new(context.CurrOp);
+-            (Operand lo, Operand hi) = AGlobalAddress(context, x, 90, 64, 0);
++            (Operand lo, Operand hi) = AGlobalAddress(context, x, 90, 64, 0, 71);
+ 
+             EmitAtomicOp(context, StorageKind.GlobalMemory, (AtomOp)x.Bits(87, 90), (AtomSize)x.Bits(73, 76), lo, hi, Register(x.Rb, RegisterType.Gpr));
+         }
+@@ -358,7 +359,7 @@
+         public static void AAtomg(EmitterContext context)
+         {
+             AmpereOp x = new(context.CurrOp);
+-            (Operand lo, Operand hi) = AGlobalAddress(context, x, 70, 64, 0);
++            (Operand lo, Operand hi) = AGlobalAddress(context, x, 70, 64, 0, 71);
+ 
+             Operand res = EmitAtomicOp(context, StorageKind.GlobalMemory, (AtomOp)x.Bits(87, 91), (AtomSize)x.Bits(73, 76), lo, hi, Register(x.Rb, RegisterType.Gpr));
+ 
+@@ -390,7 +391,7 @@
+         {
+             AmpereOp x = new(context.CurrOp);
+ 
+-            if (x.Rd != RegisterConsts.RegisterZeroIndex || x.Bits(32, 64) != 0 || (x.Bits(64, 96) & ~0xc000) != 0x0d00003f)
++            if (x.Rd != RegisterConsts.RegisterZeroIndex || (x.Bits(64, 96) & ~0xc000) != 0x0d00003f)
+             {
+                 throw AFail(context, "ATOMS.POPC.INC form");
+             }
+@@ -403,6 +404,7 @@
+                 addr = context.ShiftLeft(addr, Const(stride + 1));
+             }
+ 
++            addr = context.IAdd(addr, Const((int)x.SignedField(40, 64)));
+             Operand id = Const(context.ResourceManager.SharedMemoryId);
+ 
+             EmitAtomicOp(context, StorageKind.SharedMemory, AtomOp.Add, AtomSize.U32, id, context.ShiftRightU32(addr, Const(2)), Const(1));
+@@ -573,6 +575,22 @@
+ 
+         // MEMBAR: orders this thread's memory accesses for the others. Scope 76..78: 0 the workgroup (a group memory barrier), any
+         // wider one a device memory barrier, as Maxwell's MEMBAR.CTA / .GL / .SYS (Pokemon Pokopia's compute shader 9b2f28c9920548aa)
++        public static void AAtomgCas(EmitterContext context)
++        {
++            AmpereOp x = new(context.CurrOp);
++
++            if (x.Bits(73, 76) != 0)
++            {
++                throw AFail(context, $"ATOMG.CAS size {x.Bits(73, 76)}");
++            }
++
++            (Operand lo, Operand hi) = AGlobalAddress(context, x, 70, 64, 0, 71);
++            Operand expected = context.Copy(x.Rb >= RegisterConsts.RegisterZeroIndex ? Const(0) : Register(x.Rb, RegisterType.Gpr));
++            Operand value = x.Bits(64, 72) >= RegisterConsts.RegisterZeroIndex ? Const(0) : Register(x.Bits(64, 72), RegisterType.Gpr);
++
++            ASet(context, x, context.AtomicCompareAndSwap(StorageKind.GlobalMemory, lo, hi, expected, value));
++        }
++
+         public static void AMembar(EmitterContext context)
+         {
+             AmpereOp x = new(context.CurrOp);

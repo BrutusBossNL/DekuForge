@@ -65,7 +65,7 @@ Changes to future instruction lifting need differential tests against an
 independent ARM64 implementation. Changes to runtime memory or rendering need
 isolated in-game validation and measurements from repeatable scenes.
 
-`python run_launcher.py --self-test` renders 25 views across the five languages
+`python run_launcher.py --self-test` renders 40 views across the five languages
 without starting a game or changing preferences. `tools/check_launcher.py` checks
 the native executable, embedded icon and the same one-window flow. Compile
 emitted LDAPR test fragments with `tools/check_ldapr.py --compiler PATH` and
