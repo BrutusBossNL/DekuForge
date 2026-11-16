@@ -30,7 +30,7 @@ class RomfsTests(unittest.TestCase):
 
     def test_build_verify_and_reuse(self):
         with tempfile.TemporaryDirectory() as folder, patch("dekuforge.romfs.RESERVE", 0):
-            root = Path(folder)
+            root = Path(folder).resolve()
             source = root / "own.nup"
             game_archive(source)
             output = root / "image"
@@ -53,7 +53,7 @@ class RomfsTests(unittest.TestCase):
 
     def test_verified_checkpoint_survives_interruption(self):
         with tempfile.TemporaryDirectory() as folder, patch("dekuforge.romfs.RESERVE", 0):
-            root = Path(folder)
+            root = Path(folder).resolve()
             source = root / "own.nup"
             game_archive(source)
             output = root / "image"
@@ -74,7 +74,7 @@ class RomfsTests(unittest.TestCase):
 
     def test_completed_image_recovers_manifest_after_interruption(self):
         with tempfile.TemporaryDirectory() as folder, patch("dekuforge.romfs.RESERVE", 0):
-            root = Path(folder)
+            root = Path(folder).resolve()
             source = root / "own.nup"
             game_archive(source)
             output = root / "image"
@@ -89,7 +89,7 @@ class RomfsTests(unittest.TestCase):
 
     def test_corrupt_source_cannot_be_committed_as_complete_image(self):
         with tempfile.TemporaryDirectory() as folder, patch("dekuforge.romfs.RESERVE", 0):
-            root = Path(folder)
+            root = Path(folder).resolve()
             source = root / "own.nup"
             game_archive(source)
             payload = bytearray(source.read_bytes())
@@ -103,7 +103,7 @@ class RomfsTests(unittest.TestCase):
 
     def test_existing_user_directory_is_preserved(self):
         with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
+            root = Path(folder).resolve()
             source = root / "own.nup"
             game_archive(source)
             output = root / "existing"

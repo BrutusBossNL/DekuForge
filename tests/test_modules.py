@@ -81,7 +81,7 @@ class ModuleTests(unittest.TestCase):
 
     def test_independent_preparation_is_repeatable_and_detects_modified_input(self):
         with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
+            root = Path(folder).resolve()
             archive = root / "synthetic.nup"
             game_archive(archive)
             prepared = prepare_game(archive, lambda *_: None, root)

@@ -35,7 +35,7 @@ def fixture(path, name="hello.bin", payload=b"DekuForge test", codec=0, child=1)
 class NupTests(unittest.TestCase):
     def test_stored_and_compressed_streams(self):
         with tempfile.TemporaryDirectory() as folder:
-            path = Path(folder) / "test.nup"
+            path = Path(folder).resolve() / "test.nup"
             for codec in (0, 1):
                 payload = b"a" * (3 * 1024 * 1024)
                 fixture(path, payload=payload, codec=codec)
@@ -46,7 +46,7 @@ class NupTests(unittest.TestCase):
 
     def test_index_checksum_and_payload_checksum_are_separate(self):
         with tempfile.TemporaryDirectory() as folder:
-            path = Path(folder) / "test.nup"
+            path = Path(folder).resolve() / "test.nup"
             fixture(path)
             contents = bytearray(path.read_bytes())
             contents[-1] ^= 1
@@ -61,7 +61,7 @@ class NupTests(unittest.TestCase):
 
     def test_unsafe_names_and_directory_cycles(self):
         with tempfile.TemporaryDirectory() as folder:
-            path = Path(folder) / "test.nup"
+            path = Path(folder).resolve() / "test.nup"
             for name in ("../escape", "NUL.bin", "file:stream", "bad\\path"):
                 fixture(path, name=name)
                 with self.assertRaises(ArchiveError):
@@ -73,7 +73,7 @@ class NupTests(unittest.TestCase):
 
     def test_native_check_and_extract_do_not_need_backend(self):
         with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
+            root = Path(folder).resolve()
             path = root / "test.nup"
             fixture(path)
             messages = []

@@ -11,7 +11,7 @@ from dekuforge.core import load_settings, save_installation, update_settings
 class BuilderTests(unittest.TestCase):
     def test_selection_rejects_missing_empty_or_wrong_extension(self):
         with tempfile.TemporaryDirectory() as folder:
-            path = Path(folder) / "empty.nup"
+            path = Path(folder).resolve() / "empty.nup"
             path.touch()
             for value in ("", str(path), str(path.with_suffix(".zip"))):
                 with self.assertRaises(ValueError):
@@ -19,7 +19,7 @@ class BuilderTests(unittest.TestCase):
 
     def test_settings_keep_nup_when_game_selection_changes(self):
         with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
+            root = Path(folder).resolve()
             settings = root / "settings.json"
             exe = root / "game.exe"
             exe.touch()
@@ -29,7 +29,7 @@ class BuilderTests(unittest.TestCase):
 
     def test_never_reuses_unowned_output(self):
         with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
+            root = Path(folder).resolve()
             output = root / "build" / "game"
             output.mkdir(parents=True)
             saved = output / "save.dat"
@@ -40,7 +40,7 @@ class BuilderTests(unittest.TestCase):
 
     def test_backend_version_cannot_escape_installation(self):
         with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
+            root = Path(folder).resolve()
             (root / "app").mkdir()
             (root / "app" / "current.txt").write_text("../outside")
             with self.assertRaises(ValueError):
@@ -50,7 +50,7 @@ class BuilderTests(unittest.TestCase):
         # A tiny original test backend exercises the process boundary. It never
         # reads game contents and does not use the installed external runtime.
         with tempfile.TemporaryDirectory(prefix="deku forge ") as folder:
-            root = Path(folder)
+            root = Path(folder).resolve()
             backend = root / "external"
             tools = backend / "app" / "test" / "tools"
             tools.mkdir(parents=True)
@@ -89,7 +89,7 @@ class BuilderTests(unittest.TestCase):
 
     def test_duplicate_build_is_refused(self):
         with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
+            root = Path(folder).resolve()
             nup = root / "own.nup"
             nup.write_bytes(b"test")
             (root / "local").mkdir()
@@ -102,7 +102,7 @@ class BuilderTests(unittest.TestCase):
 
     def test_low_disk_space_does_not_create_game_output(self):
         with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
+            root = Path(folder).resolve()
             nup = root / "own.nup"
             nup.write_bytes(b"test")
             with patch.object(Backend, "validate"), patch("dekuforge.builder.MIN_FREE_BYTES", 10 ** 30):
