@@ -346,7 +346,26 @@ disappear/flicker and the intro movie remains pixelated. The corrected-layout
 test measured 27.82 average presentation FPS over frames 2500–3300, with 21.26
 FPS for the slowest one percent. This remains a defective-image measurement,
 not a playable-build result. The texture probe fixture now retains its pool's
-CPU access flags, matching actual texture initialization; GPU retesting is pending.
+CPU access flags, matching actual texture initialization. The corrected native
+probe passed 343 deswizzle cases, 186,758 ASTC blocks and 41 GPU checks.
+
+Compute image-store bindings now mark their images GPU-owned, as attachment and
+transfer writes already did. Previously only their fence was recorded; stale
+CPU storage could replace compute output and aliases could miss it. Read-only
+storage-image bindings retain their original ownership. A native regression
+case checks both ownership paths and reads a GPU-written colour back while the
+CPU backing still contains unrelated texels. The expanded probe passes 45 GPU
+checks with zero validation errors. Whole-game visual equivalence is pending.
+
+Windows now paints a forest-green startup screen with measured pipeline and
+compute-shader counts before guest execution. Shader-cache loading has an
+indeterminate label. Progress does not invent an overall percentage. The native
+display is limited to Windows; other platforms use a no-op progress hook until
+their window backend is implemented. A bounded test with the startup display
+reached frame 2200, captured a world frame and closed normally (exit 0), but this
+does not establish correct rendering. Fullscreen presentation was confirmed at
+2560x1440 in the preceding validation run, which reached frame 2204 without a
+reported fatal error before the test timeout.
 
 The owner's `NX2Navi/Play/ocarina.exe` was also tested using its existing settings
 and a separate save copy. Its log confirms real DLSS processing, 1280x720 scene

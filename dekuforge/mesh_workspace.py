@@ -31,6 +31,35 @@ def stage_mesh(output, write):
             text = text.replace(old, new, count)
         write(path, text)
 
+    write(output / "runtime/df_startup_progress.inc", (root / "engine_overrides/startup_progress.inc").read_text(encoding="utf-8"))
+    edit("gfx.h", [('void gfx_window_start(void);', '''#ifdef _WIN32
+void df_startup_progress(unsigned stage, unsigned done, unsigned total);
+#else
+static inline void df_startup_progress(unsigned stage, unsigned done, unsigned total) {
+    (void)stage; (void)done; (void)total;
+}
+#endif
+void gfx_window_start(void);''')])
+    edit("gfx_window_win.c", [
+        ('static LRESULT CALLBACK wnd_proc(HWND h, UINT m, WPARAM w, LPARAM l) {',
+         '''#include "df_startup_progress.inc"
+static LRESULT CALLBACK wnd_proc(HWND h, UINT m, WPARAM w, LPARAM l) {
+    if (m == DF_STARTUP_MESSAGE) {
+        const unsigned *values = (const unsigned *)l;
+        df_startup.stage = values[0]; df_startup.done = values[1]; df_startup.total = values[2];
+        if (df_startup.stage) { InvalidateRect(h, NULL, FALSE); UpdateWindow(h); }
+        return 0;
+    }
+    if (m == WM_PAINT && df_startup.stage) { df_startup_paint(h); return 0; }'''),
+    ])
+    edit("boot.c", [
+        ('    vk_pipeline_prewarm();', '''    const char *df_gpu = rt_config()->gpu;
+    int df_visible = !rt_config()->shot && !(df_gpu && !strcmp(df_gpu, "null"));
+    if (df_visible) { gfx_window_start(); df_startup_progress(1, 0, 0); }
+    vk_pipeline_prewarm();
+    if (df_visible) df_startup_progress(0, 0, 0);'''),
+    ])
+
     edit("vk_caps.c", [
         ('    const char *e = cfg_get("NX2NAVI_GPL");\n    vk_caps.gpl = gpl_lib && gpl_fast && !(e && !strcmp(e, "0"));',
          '    vk_caps.gpl = gpl_lib && gpl_fast && cfg_bool("NX2NAVI_GPL");'),
@@ -51,6 +80,42 @@ def stage_mesh(output, write):
          '    const uint32_t seg[4] = {gob_off(0, 0), gob_off(16, 0), gob_off(32, 0), gob_off(48, 0)};'),
     ])
     edit("tex_probe.c", [
+        ('    // BC1, 64x48: blocks uploaded as they are, read back from the image',
+         '''    // A storage-image result must remain GPU-owned when later sampled.
+    tex_t stored = make_tex(tpool, 0x80000, 0x25, 16, 16, 1, 99);
+    uint8_t *expected[4] = {0};
+    if (fill_storage(&stored, expected)) return 1;
+    const VkTexImage *storage_img = vk_texture_get(&stored);
+    GCHECK(storage_img && !storage_img->gpu_owned, "storage fixture starts CPU-owned");
+    vk_texture_lock();
+    vk_texture_storage_bound_locked(storage_img, 0);
+    GCHECK(!storage_img->gpu_owned, "read-only image binding preserves ownership");
+    vk_texture_storage_bound_locked(storage_img, 1);
+    GCHECK(storage_img->gpu_owned, "image store transfers ownership to GPU");
+    vk_texture_unlock();
+    VkCommandBuffer sc = vk_upload_begin();
+    VkMemoryBarrier2 sm = {.sType=VK_STRUCTURE_TYPE_MEMORY_BARRIER_2,
+        .srcStageMask=VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, .srcAccessMask=VK_ACCESS_2_MEMORY_WRITE_BIT,
+        .dstStageMask=VK_PIPELINE_STAGE_2_TRANSFER_BIT, .dstAccessMask=VK_ACCESS_2_TRANSFER_WRITE_BIT};
+    VkDependencyInfo sd = {.sType=VK_STRUCTURE_TYPE_DEPENDENCY_INFO, .memoryBarrierCount=1, .pMemoryBarriers=&sm};
+    vkCmdPipelineBarrier2(sc, &sd);
+    VkClearColorValue colour = {.float32={1, 0, 1, 1}};
+    VkImageSubresourceRange sr = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
+    vkCmdClearColorImage(sc, storage_img->image, VK_IMAGE_LAYOUT_GENERAL, &colour, 1, &sr);
+    sm.srcStageMask=VK_PIPELINE_STAGE_2_TRANSFER_BIT; sm.srcAccessMask=VK_ACCESS_2_TRANSFER_WRITE_BIT;
+    sm.dstStageMask=VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT; sm.dstAccessMask=VK_ACCESS_2_MEMORY_READ_BIT;
+    vkCmdPipelineBarrier2(sc, &sd);
+    vk_upload_end();
+    for (unsigned si=0; si<16*16; si++) {
+        expected[0][si*4]=255; expected[0][si*4+1]=0;
+        expected[0][si*4+2]=255; expected[0][si*4+3]=255;
+    }
+    if (read_back(&stored, 0, expected, 0, "storage result ignores old CPU texels")) return 1;
+    vk_texture_release(&stored);
+    free(expected[0]);
+    g_gpu_checks += 3;
+
+    // BC1, 64x48: blocks uploaded as they are, read back from the image'''),
         ('    t.pool = pool, t.off = (int64_t)off, t.mem = pool->mem + off, t.serial = serial;',
          '    t.pool = pool, t.pool_flags = pool->flags, t.off = (int64_t)off, t.mem = pool->mem + off, t.serial = serial;'),
         ('// Byte offset inside a 64 x 8 GOB from the bit layout: x[3:0] -> 0-3, y[0] -> 4, x[4] -> 5, y[2:1] -> 6-7, x[5] -> 8.',
@@ -77,6 +142,19 @@ def stage_mesh(output, write):
          '"texture clear value kind (uint %d) does not match format %d: skipped; words %08x %08x %08x %08x", p->is_uint, (int)img->format, p->c.u[0], p->c.u[1], p->c.u[2], p->c.u[3]')])
     edit("gfx.h", [("GFX_STAGE_FS, GFX_STAGE_CS };", "GFX_STAGE_FS, GFX_STAGE_CS, GFX_STAGE_TS, GFX_STAGE_MS };")])
     edit("vk_texture.c", [
+        ('// tex_info). Its storage is not marked GPU-owned: only the write fence for ReadTexels.',
+         '// tex_info). Written bindings become GPU-owned; read-only bindings only record their fence.'),
+        ('void vk_texture_storage_bound_locked(const VkTexImage *img) {',
+         'void vk_texture_storage_bound_locked(const VkTexImage *img, int written) {'),
+        ('    if (f > e->wr_fence) e->wr_fence = f;\n}\n\nuint64_t vk_texture_last_write',
+         '''    if (f > e->wr_fence) e->wr_fence = f;
+    // Storage writes are authoritative just like attachment and copy writes.
+    // Otherwise a later CPU-page freshness check can replace the compute result
+    // with old block-linear storage, and aliases never see the GPU's result.
+    if (written) vk_texture_gpu_written(&e->t);
+}
+
+uint64_t vk_texture_last_write'''),
         ('if ((d->flags & NVN_TEXTURE_FLAGS_IMAGE) && (ff & VK_FORMAT_FEATURE_STORAGE_IMAGE_BIT) && samples == 1)',
          '''// NVN2 compute destinations do not use the pinned NVN1 IMAGE flag.
     // Allocate supported single-sample colour images for storage use up front;
@@ -234,6 +312,10 @@ static int resolve_locked(uint64_t addr, uint64_t size, VkMemSpan *out) {
             && df_control_ampere(control) ? 4 : 0x200;
         VkBufferCopy cp = {ip.offset, B.c0_off[2] + dimensions, sizeof(VkDispatchIndirectCommand)};"""),
     ])
+    edit("vk.h", [('void vk_texture_storage_bound_locked(const VkTexImage *img);',
+                    'void vk_texture_storage_bound_locked(const VkTexImage *img, int written);')])
+    edit("vk_exec_draw.c", [('vk_texture_storage_bound_locked(img);',
+                            'vk_texture_storage_bound_locked(img, (r->flags & 4) != 0);')])
     edit("vk_exec.h", [("#define VK_C0_BYTES 0x800u", "#define VK_C0_BYTES 0xa00u")])
     edit("nvn_obj.h", [("int32_t prim, first, count, base_instance, instances; } p_draw;", "int32_t prim, first, count, base_instance, instances; uint64_t df_ind; } p_draw;")])
     edit("vk.h", [("has_device_fault,", "has_device_fault, has_mesh_shader,"),
@@ -440,13 +522,30 @@ static const GfxShader *shader_for(VkExec *ex, int st, int *present, int *pendin
     edit("vk_pipeline.c", [
         ('static void lb_stop(void) {', '''static void df_prebuild_wait(void) {
     for (int i = 0; i < LB.threads; i++) {
-        if (LB.th[i]) plat_thread_join(LB.th[i]);
+        if (LB.th[i]) {
+            while (!plat_thread_join_ns(LB.th[i], 100000000u)) {
+                plat_mutex_lock_shared(&LB.stat);
+                unsigned done = (unsigned)LB.done, total = (unsigned)LB.n;
+                plat_mutex_unlock_shared(&LB.stat);
+                df_startup_progress(3, done, total);
+            }
+        }
         LB.th[i] = NULL;
     }
     LB.threads = 0;
 }
 
 static void lb_stop(void) {'''),
+        ('    for (int i = 0; i < nt; i++)\n        while (!plat_thread_join_ns(t[i], 2000000000u))\n            rt_log("vk_pipeline: prewarm: %u of %u pipelines, %.0f ms", K.built + K.failed, queued, now_ms() - t1);',
+         '''    df_startup_progress(2, 0, queued);
+    for (int i = 0; i < nt; i++) {
+        while (!plat_thread_join_ns(t[i], 100000000u)) {
+            plat_mutex_lock(&P.lock);
+            unsigned complete = K.built + K.failed;
+            plat_mutex_unlock(&P.lock);
+            df_startup_progress(2, complete, queued);
+        }
+    }'''),
         ('static void lb_start(const uint32_t pr_hist[16], const uint32_t fs_hist[4]);',
          'static void lb_start(const uint32_t pr_hist[16], const uint32_t fs_hist[4]);\nstatic void df_prebuild_wait(void);'),
         ('if (ensure_init()) lb_start(pr_hist, fs_hist);',
