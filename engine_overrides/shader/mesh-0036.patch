@@ -1,0 +1,98 @@
+--- a/src/Ryujinx.Graphics.Shader/Translation/Translator.cs
++++ b/src/Ryujinx.Graphics.Shader/Translation/Translator.cs
+@@ -345,7 +345,7 @@
+         // copied to the registers before the first instruction that waits on the barrier, at DEPBAR, and at the end of the block.
+         private static void EmitOpsAmpere(EmitterContext context, Block block)
+         {
+-            List<(Register Reg, Operand Value)>[] pending = new List<(Register, Operand)>[7];
++            List<(Register Reg, Operand Value, Operand Guard)>[] pending = new List<(Register, Operand, Operand)>[7];
+             int shadows = 0;
+             Stack<int> freeShadows = new();
+ 
+@@ -353,9 +353,9 @@
+             {
+                 if (pending[barrier] != null)
+                 {
+-                    foreach ((Register reg, Operand value) in pending[barrier])
+-                    {
+-                        context.Copy(Register(reg), value);
++                    foreach ((Register reg, Operand value, Operand guard) in pending[barrier])
++                    {
++                        context.Copy(Register(reg), guard == null ? value : context.ConditionalSelect(guard, value, Register(reg)));
+                         freeShadows.Push(value.GetRegister().Index);
+                     }
+ 
+@@ -401,6 +401,18 @@
+                     continue;
+                 }
+ 
++                // A delayed result only commits where its issue-time predicate held.
++                // Snapshot before deferring destinations: the instruction may itself
++                // overwrite its predicate, and later instructions may change it too.
++                Operand issueGuard = null;
++                if (writeBarrier < 6 && a.Pred != RegisterConsts.PredicateTrueIndex &&
++                    a.Opcode != Instructions.AmpereOpcodes.Bra)
++                {
++                    RegisterType type = Instructions.AmpereTable.HasUniformGuard(a.Opcode) ? RegisterType.UniformPredicate : RegisterType.Predicate;
++                    Operand predicate = Register(a.Pred, type);
++                    issueGuard = Local();
++                    context.Copy(issueGuard, a.PredInv ? context.ConditionalSelect(predicate, Const(0), Const(1)) : predicate);
++                }
+                 int opStart = context.OperationsCount;
+ 
+                 Operand predSkipLbl = null;
+@@ -438,7 +450,7 @@
+ 
+                 if (writeBarrier < 6 && !op.Props.HasFlag(InstProps.Bra))
+                 {
+-                    DeferAmpereWrites(context, opStart, pending, writeBarrier, ref shadows, freeShadows);
++                    DeferAmpereWrites(context, opStart, pending, writeBarrier, ref shadows, freeShadows, issueGuard);
+                 }
+             }
+ 
+@@ -449,12 +461,13 @@
+         private static void DeferAmpereWrites(
+             EmitterContext context,
+             int opStart,
+-            List<(Register Reg, Operand Value)>[] pendingAll,
++            List<(Register Reg, Operand Value, Operand Guard)>[] pendingAll,
+             int barrier,
+             ref int shadows,
+-            Stack<int> freeShadows)
+-        {
+-            List<(Register Reg, Operand Value)> pending = pendingAll[barrier] ??= [];
++            Stack<int> freeShadows,
++            Operand issueGuard)
++        {
++            List<(Register Reg, Operand Value, Operand Guard)> pending = pendingAll[barrier] ??= [];
+ 
+             int end = context.OperationsCount;
+             Dictionary<Register, Operand> locals = new();
+@@ -516,14 +529,14 @@
+                 context.InsertOperation(at++, new Operation(Instruction.Copy, local, Register(reg)));
+ 
+                 // A register written again before its earlier deferred write landed: the later write wins, the earlier shadow is free
+-                foreach (List<(Register Reg, Operand Value)> list in pendingAll)
+-                {
+-                    if (list == null)
++                foreach (List<(Register Reg, Operand Value, Operand Guard)> list in pendingAll)
++                {
++                    if (list == null || issueGuard != null)
+                     {
+                         continue;
+                     }
+ 
+-                    foreach ((Register r, Operand v) in list.FindAll(p => p.Reg.Equals(reg)))
++                    foreach ((Register r, Operand v, Operand guard) in list.FindAll(p => p.Reg.Equals(reg)))
+                     {
+                         freeShadows.Push(v.GetRegister().Index);
+                     }
+@@ -531,7 +544,7 @@
+                     list.RemoveAll(p => p.Reg.Equals(reg));
+                 }
+ 
+-                pending.Add((reg, local));
++                pending.Add((reg, local, issueGuard));
+             }
+         }
+ 

@@ -407,3 +407,13 @@ The local game shader cache must be rebuilt under the new compiler identity;
 these isolated checks alone do not establish that movie or world corruption is
 fixed. The last pre-correction world interval measured 27.02 average FPS and
 23.69 FPS for the slowest one percent over 801 frames at fullscreen presentation.
+
+`mesh-0036.patch` snapshots a deferred instruction's issue-time predicate and
+commits the result only for active lanes. A later guarded pending write also
+preserves an earlier pending result that may still win. The extended synthetic
+scoreboard test changes the predicate before the wait and tests complementary
+pending writes. Before the correction a skipped operation restores stale 42
+over a newer 123; afterwards all twelve cases produce their independent expected
+values. Scalar/uniform half and typed-image checks still pass. The upstream
+[deferred-write investigation](https://github.com/seedds/nxnative/blob/main/docs/reference/shaders.md#a-deferred-write-under-a-false-guard)
+describes the instruction-level issue; DekuForge's whole-game retest is separate.

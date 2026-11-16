@@ -64,7 +64,50 @@ def main():
             expected = value.bit_count()
             if stores != [str(expected)]:
                 raise AssertionError(f"{key}: expected shared[0]={expected}, got {stores}; see {glsl}")
-    print("Eight synthetic deferred-write paths match independent population counts.")
+    for predicate, consecutive in ((False, False), (True, False), (False, True), (True, True)):
+        key = f"guarded-result-{int(predicate)}-consecutive-{int(consecutive)}"
+        compare = lambda value: (7 if value else 0) << 76 | 7 << 84 | 7 << 87
+        source = folder / (key + ".code")
+        sequence = [
+            instruction(0x20c, ra=255, value=255, extra=compare(predicate)),
+            instruction(0x802, rd=7, value=42),
+        ]
+        if consecutive:
+            sequence += [
+                instruction(0x802, rd=8, value=15),
+                instruction(0x802, rd=9, value=255),
+                instruction(0x309, pred=0, rd=7, value=8, barrier=1),
+                instruction(0x309, pred=8, rd=7, value=9, barrier=1),
+            ]
+        else:
+            sequence += [
+            instruction(0x309, pred=0, rd=7, value=7, barrier=1),
+            instruction(0x802, rd=7, value=123),
+            ]
+        source.write_bytes(b"".join(sequence + [
+            # The wait must use the issue-time guard, even after P0 changes.
+            instruction(0x20c, ra=255, value=255, extra=compare(not predicate)),
+            instruction(0x388, ra=255, value=7, extra=(4 << 73) | (1 << 117)),
+            instruction(0x94d, extra=7 << 87),
+        ]))
+        jobs = folder / (key + ".json")
+        jobs.write_text(json.dumps([dict(key=key, stage="cs", ampere=True,
+            code=str(source), local=[1, 1, 1], shared=4)]), encoding="utf-8")
+        run(args.translator.resolve(), jobs, folder)
+        module = folder / (key + ".spv")
+        run(args.tools / "spirv-val.exe", "--target-env", "vulkan1.2", module)
+        optimized = folder / (key + ".opt.spv")
+        run(args.tools / "spirv-opt.exe", "--eliminate-dead-branches", "--ssa-rewrite",
+            "--ccp", "--simplify-instructions", module, "-o", optimized)
+        glsl = folder / (key + ".glsl")
+        run(args.tools / "spirv-cross.exe", optimized, "--vulkan-semantics", "--output", glsl)
+        text = glsl.read_text()
+        shared_name = re.search(r"shared uint (\w+)\[1\];", text).group(1)
+        stores = re.findall(re.escape(shared_name) + r"\[0\] = (\d+)u?;", text)
+        expected = ((15).bit_count() if predicate else (255).bit_count()) if consecutive else ((42).bit_count() if predicate else 123)
+        if stores != [str(expected)]:
+            raise AssertionError(f"{key}: expected {expected}, got {stores}; see {glsl}")
+    print("Twelve synthetic deferred-write and issue-time guard paths match independent results.")
 
 
 if __name__ == "__main__":
