@@ -448,3 +448,22 @@ uses, and side-effecting producers keep theirs. Deferred-write and half-swizzle
 regressions also pass. This corrects the independently reproduced issue described
 in the upstream [multi-output optimization investigation](https://github.com/seedds/nxnative/blob/main/docs/reference/shaders.md#dead-code-removal-dropped-a-coordinate-of-a-multi-output-instruction).
 Its effect on the game picture remains subject to an isolated retest.
+
+### Floating-point reductions
+
+The translator omitted F32 atomic additions, emitting no update for the
+synthetic global-reduction fixture. `mesh-0038.patch` implements the operation
+with integer compare-and-swap over the original float bits. Retry comparison is
+bitwise, including for NaN. Global inputs/results flush subnormals to signed
+zero; shared-memory arithmetic retains them, following
+[NVIDIA's atomic-add semantics](https://docs.nvidia.com/cuda/archive/12.8.1/parallel-thread-execution/index.html#data-movement-and-conversion-instructions-atom).
+
+`tools/check_shader_float_atomics.py` validates SPIR-V for reductions and returned
+global/shared atomics. Its optional assembly check interprets the emitted IR
+against an independent memory model: ordinary addition, forced contention,
+signed flush-to-zero, underflow, shared subnormals and NaN termination all pass.
+The old translator fails the missing-update check. These are compiler tests;
+they do not replace GPU execution or prove corrected in-game exposure. The
+upstream [float-reduction investigation](https://github.com/seedds/nxnative/blob/main/docs/reference/shaders.md#float-atomics-in-storage-memory)
+identifies these operations in scene exposure analysis. No native float-atomic
+performance optimization is enabled by this correction.

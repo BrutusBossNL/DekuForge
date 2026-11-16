@@ -1,0 +1,42 @@
+--- a/src/Ryujinx.Graphics.Shader/Instructions/InstEmitMemory.cs
++++ b/src/Ryujinx.Graphics.Shader/Instructions/InstEmitMemory.cs
+@@ -217,6 +217,10 @@
+                     {
+                         res = context.AtomicAdd(storageKind, e0, e1, value);
+                     }
++                    else if (type == AtomSize.F32FtzRn)
++                    {
++                        res = EmitFloatAtomicAdd(context, storageKind, e0, e1, value);
++                    }
+                     else
+                     {
+                         context.TranslatorContext.GpuAccessor.Log($"Invalid reduction type: {type}.");
+@@ -303,6 +307,28 @@
+             }
+ 
+             return res;
++        }
++
++        // Use integer CAS to update the float bits without an illegal pointer cast.
++        // Compare the original bits, so NaNs cannot make the retry loop permanent.
++        private static Operand EmitFloatAtomicAdd(EmitterContext context, StorageKind storage,
++            Operand address0, Operand address1, Operand value)
++        {
++            Operand Flush(Operand bits)
++            {
++                if (storage != StorageKind.GlobalMemory) return bits;
++                Operand exponent = context.BitwiseAnd(bits, Const(0x7f800000));
++                return context.ConditionalSelect(context.ICompareEqual(exponent, Const(0)),
++                    context.BitwiseAnd(bits, Const(unchecked((int)0x80000000))), bits);
++            }
++            Operand increment = Flush(value);
++            Operand retry = Label();
++            context.MarkLabel(retry);
++            Operand expected = context.AtomicCompareAndSwap(storage, address0, address1, Const(0), Const(0));
++            Operand sum = Flush(context.FPAdd(Flush(expected), increment));
++            Operand observed = context.AtomicCompareAndSwap(storage, address0, address1, expected, sum);
++            context.BranchIfTrue(retry, context.ICompareNotEqual(observed, expected));
++            return observed;
+         }
+ 
+         private static void EmitLoad(
