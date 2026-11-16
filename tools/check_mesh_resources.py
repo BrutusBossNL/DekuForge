@@ -1,6 +1,7 @@
 """Check descriptor cleanup with real SPIR-V tools and synthetic shader inputs."""
 import argparse
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -64,6 +65,13 @@ void main() { result_buffer.value = live_input.value; }
         run("glslang", "-V", "--target-env", "vulkan1.2", "-S", kind, source, "-o", compiled)
         run("spirv-val", "--target-env", "vulkan1.2", compiled)
         validate_resource_bindings(compiled, {"sbufs": [{"binding": 1}]})
+        if kind == "mesh":
+            assembly = folder / "mesh.spvasm"
+            run("spirv-dis", compiled, "-o", assembly)
+            text = assembly.read_text()
+            position = re.search(r"OpMemberDecorate (\S+) (\d+) BuiltIn Position", text)
+            if not position or f"OpMemberDecorate {position[1]} {position[2]} Invariant" not in text:
+                raise AssertionError("Native mesh output lost position invariance")
     print("Task/mesh bounds-feedback shaders compiled and SPIR-V validated")
 
 

@@ -467,3 +467,14 @@ they do not replace GPU execution or prove corrected in-game exposure. The
 upstream [float-reduction investigation](https://github.com/seedds/nxnative/blob/main/docs/reference/shaders.md#float-atomics-in-storage-memory)
 identifies these operations in scene exposure analysis. No native float-atomic
 performance optimization is enabled by this correction.
+
+The isolated optimizer-only game run completed normally at 27.25 average FPS
+and 23.95 FPS for the slowest one percent over frames 2500–3300. Intro timing
+remained around 67–69 ms per frame. Its capture is not visually verified.
+
+The native mesh wrapper now declares position invariant, matching the existing
+vertex-stage contract. Depth-only and colour programs can depend on matching
+positions. `tools/check_mesh_resources.py` compiles the synthetic wrapper,
+validates SPIR-V and verifies the invariant decoration on the actual position
+member. This closes an interface gap; the combined in-game retest is still
+required before attributing the remaining flicker to it.

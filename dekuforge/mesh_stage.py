@@ -117,6 +117,9 @@ def vulkan_stage(kernel, info, checks_binding=None):
     vertices, primitives, topology = info["vertices"], info["primitives"], info["topology"]
     topology_name = {1: "points", 2: "lines", 3: "triangles"}[topology]
     prefix += f"layout({topology_name}, max_vertices={vertices}, max_primitives={primitives}) out;\n"
+    # Depth-only and colour passes must agree on the position, as native vertex
+    # stages already require. Keep that contract when wrapping a mesh kernel.
+    prefix += "out gl_MeshPerVertexEXT { invariant vec4 gl_Position; float gl_PointSize; } gl_MeshVerticesEXT[];\n"
     generic = sorted({n for n, c in info["vertex"] if isinstance(n, int)})
     per_primitive = sorted({n for n, c in info["primitive"]})
     if set(generic) & set(per_primitive):
