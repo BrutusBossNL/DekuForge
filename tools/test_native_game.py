@@ -152,7 +152,7 @@ def main():
               "portable_tensor_scratch_skip": environment.get("DEKUFORGE_PORTABLE_MOVIES") != "0" and environment.get("DEKUFORGE_SKIP_TENSOR_SCRATCH") != "0",
               "combined_pipelines": args.combined_pipelines,
               "synchronous_pipelines": args.synchronous_pipelines,
-              "recorder_disabled": args.no_recorder,
+              "recorder_disabled": args.no_recorder or args.profile_frame is not None,
               "uniform_snapshot_disabled": args.no_uniform_snapshot,
               "mesh_count_diagnostics": args.trace_mesh_counts,
               "mesh_output_diagnostics": args.trace_mesh_output,

@@ -644,3 +644,34 @@ Frames 2500?3300 measured 29.64 average FPS and 25.59 FPS for the slowest one
 percent. Its character-region white-pixel fraction was 0.56%. The local capture
 is `build/windows-game/test-ledger-defaults-frame2200.png`; it remains visually
 unapproved because the session image viewer cannot open additional images.
+
+### Remaining rendering and movement failures
+
+The owner reports improved imagery but persistent flicker, missing terrain and
+foliage, and up to only 17 FPS during actual play. The earlier stationary scene
+measurements do not establish playability or match this wider workload.
+
+`DEKUFORGE_TRACE_CONDITION_FRAME=N` now logs sixteen replay frames of draw,
+colour-clear and depth-clear decisions, plus counter-read sources. The moving
+trace at frames 2600?2615 skipped no draws through render conditions; six depth
+clears per frame were conditionally skipped. This rules out that specific draw
+skip route in this interval, not missing geometry in general.
+
+Per-pass GPU profiling crashed in the NVIDIA driver with asynchronous command
+recording. Profiling now forces synchronous recording; ordinary play retains
+its existing recorder setting. A synchronous moving run exited normally after
+114.09 seconds. Frames 2800?3300 averaged 25.67 FPS, with a 4.30 FPS one-percent
+low and a 761.072 ms maximum frame. The largest spikes included new shader and
+pipeline compilation; the main 1536x864 colour pass took 9.889 ms at frame 2650.
+These results are diagnostic and not a successful gameplay acceptance test.
+
+Disabling uniform snapshots with the counter ledger active did not materially
+change the fixed-frame image metrics. That diagnostic remains off by default.
+Its world interval measured 28.68 FPS; no visual repair is claimed.
+
+The automatic synchronous-profile guard was exercised without `--no-recorder`:
+frame-650 timestamps completed and the subsequent depth-dump run exited
+normally after 131.61 seconds. The captured colour-pass depth target differs
+from the earlier primary depth target; intervening passes and copy ordering
+must be checked before interpreting this as an error. PNG depth previews are
+individually normalized and cannot be compared as raw depth values.

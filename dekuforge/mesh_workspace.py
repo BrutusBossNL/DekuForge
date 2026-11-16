@@ -564,6 +564,14 @@ static const GfxShader *shader_for(VkExec *ex, int st, int *present, int *pendin
     }""")])
     edit("vk.h", [('void vk_device_fault_report(VkResult r);', 'void vk_device_fault_report(VkResult r);\nvoid df_mesh_trace_report(void);')])
     edit("vk_exec.h", [('void vk_exec_frame_log(', 'void df_condition_frame_end(void);\nvoid vk_exec_frame_log(')])
+    edit("vk_exec.h", [('void df_condition_frame_end(void);', 'void df_condition_frame_end(void);\nvoid df_condition_work(unsigned kind, int skipped);')])
+    edit("vk_exec_draw.c", [('    if (ex->render_disabled) return 0;', '    df_condition_work(0, ex->render_disabled);\n    if (ex->render_disabled) return 0;')])
+    edit("vk_exec.c", [
+        ('    vk_exec_frame.clears++;\n    if (ex->render_disabled) return;', '    vk_exec_frame.clears++;\n    df_condition_work(1, ex->render_disabled);\n    if (ex->render_disabled) return;'),
+        ('static void clear_ds(VkExec *ex, const p_clear_ds *c) {', 'static void clear_ds(VkExec *ex, const p_clear_ds *c) {\n    df_condition_work(2, ex->render_disabled);'),
+    ])
+    edit("vk_rec.c", [('        mode = rt_knob("VK_RECORDER", vk_caps.amd ? "0" : "1");',
+        '        mode = rt_knob("VK_RECORDER", vk_caps.amd ? "0" : "1");\n        if (getenv("DEKUFORGE_PROFILE_FRAME")) {\n            mode = 0;\n            rt_log("DekuForge: per-pass GPU profiling uses synchronous recording");\n        }')])
     edit("vk_backend.c", [('    vk_exec_frame_log(t, frame);', '    df_condition_frame_end();\n    vk_exec_frame_log(t, frame);')])
     for name in ("condition_records.h", "condition_records.inc"):
         write(output / "runtime" / ("df_"+name), (root / "engine_overrides" / name).read_text(encoding="utf-8"))
