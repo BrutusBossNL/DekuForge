@@ -23,6 +23,7 @@ def main():
     parser.add_argument("--synchronous-pipelines", action="store_true", help="Build newly encountered pipelines on the replay thread")
     parser.add_argument("--no-recorder", action="store_true", help="Record Vulkan commands synchronously for diagnosis")
     parser.add_argument("--no-uniform-snapshot", action="store_true", help="Diagnose live uniform reads versus submit-time snapshots")
+    parser.add_argument("--compressed-textures", action="store_true", help="Test GPU texture decoding into BC3")
     parser.add_argument("--trace-mesh-counts", action="store_true", help="Copy indirect draw records for a device-loss report")
     parser.add_argument("--trace-mesh-output", action="store_true", help="Read bounded primitive/position samples after GPU completion")
     parser.add_argument("--trace-mesh-frame", type=int, help="Capture bounded position bit patterns for one frame")
@@ -64,6 +65,8 @@ def main():
         environment["NX2NAVI_VK_RECORDER"] = "0"
     if args.no_uniform_snapshot:
         environment["NX2NAVI_UBO_SNAPSHOT"] = "0"
+    if args.compressed_textures:
+        environment["NX2NAVI_ASTC_BC"] = "1"
     if args.trace_mesh_counts:
         environment["DEKUFORGE_TRACE_MESH_COUNTS"] = "1"
     if args.trace_mesh_output:
@@ -137,9 +140,10 @@ def main():
               "validation": args.validation, "gpu_validation": args.gpu_validation,
               "gpu_validation_shader": args.gpu_validation_shader,
               "memory_mode": "import" if args.raw_global_memory else "default",
-              "experimental_counter_staging": environment.get("DEKUFORGE_STAGE_COMPUTE_COUNTERS") == "1",
-              "experimental_counter_max_bytes": environment.get("DEKUFORGE_STAGE_COMPUTE_COUNTER_MAX", "64"),
-              "experimental_counter_raw_reads": environment.get("DEKUFORGE_STAGE_COMPUTE_RAW_READS") == "1",
+              "counter_staging": environment.get("DEKUFORGE_STAGE_COMPUTE_COUNTERS", "1") == "1",
+              "counter_max_bytes": environment.get("DEKUFORGE_STAGE_COMPUTE_COUNTER_MAX", "8192"),
+              "counter_raw_reads": environment.get("DEKUFORGE_STAGE_COMPUTE_RAW_READS", "1") == "1",
+              "compressed_textures_requested": args.compressed_textures,
               "descriptor_templates_disabled": args.no_descriptor_templates,
               "diagnostic_depth_equal": environment.get("DEKUFORGE_DIAGNOSTIC_DEPTH_EQUAL"),
               "fullscreen_requested": args.fullscreen,

@@ -504,6 +504,17 @@ static const GfxShader *shader_for(VkExec *ex, int st, int *present, int *pendin
         int present = 0;
         s.task = shader_for(ex, 3, &present, NULL, 1);
         if (present && !s.task) rt_fatal("Native task shader translation failed");
+        const char *trace_frame = getenv("DEKUFORGE_TRACE_MESH_FRAME");
+        if (trace_frame && __atomic_load_n(&gfx_counters.frames, __ATOMIC_RELAXED) == strtoull(trace_frame, NULL, 10)) {
+            VkViewport vp = draw_viewport(ex);
+            const uint8_t *vi = gfx_shader_input_id(vs);
+            const uint8_t *fi = fs ? gfx_shader_input_id(fs) : NULL;
+            rt_log("Mesh raster state: vs %02x%02x%02x%02x fs %02x%02x%02x%02x depth %llu format %d test %u write %u compare %u bias-enable %u bias %.9g %.9g %.9g viewport %.9g %.9g %.9g %.9g range %.9g %.9g",
+                vi[0], vi[1], vi[2], vi[3], fi ? fi[0] : 0, fi ? fi[1] : 0, fi ? fi[2] : 0, fi ? fi[3] : 0,
+                (unsigned long long)ex->depth.image, s.depth_fmt, s.ds.dt, s.ds.dw, s.ds.df, s.poly.offset_en,
+                ex->poly_offset.units, ex->poly_offset.clamp, ex->poly_offset.factor,
+                vp.x, vp.y, vp.width, vp.height, vp.minDepth, vp.maxDepth);
+        }
     }"""),
         ("    bind_vertex_buffers(ex);", "    if (!df_mesh_draw) bind_vertex_buffers(ex);"),
         ("    vk_exec_oq_draw(ex);", "    if (df_mesh_draw) df_mesh_info = info;\n    vk_exec_oq_draw(ex);"),
@@ -552,6 +563,29 @@ static const GfxShader *shader_for(VkExec *ex, int st, int *present, int *pendin
         return;
     }""")])
     edit("vk.h", [('void vk_device_fault_report(VkResult r);', 'void vk_device_fault_report(VkResult r);\nvoid df_mesh_trace_report(void);')])
+    edit("vk_exec.h", [('void vk_exec_frame_log(', 'void df_condition_frame_end(void);\nvoid vk_exec_frame_log(')])
+    edit("vk_backend.c", [('    vk_exec_frame_log(t, frame);', '    df_condition_frame_end();\n    vk_exec_frame_log(t, frame);')])
+    for name in ("condition_records.h", "condition_records.inc"):
+        write(output / "runtime" / ("df_"+name), (root / "engine_overrides" / name).read_text(encoding="utf-8"))
+    edit("vk_exec_xfer.c", [
+        ('static void write_counter(uint64_t addr, uint64_t counter) {\n    uint64_t rec[2] = {counter, (uint64_t)((unsigned __int128)kern_now_ns() * 12 / 625)};\n    memcpy((void *)(uintptr_t)addr, rec, sizeof rec);\n}',
+         '#include "df_condition_records.inc"\nstatic void write_counter(uint64_t addr, uint64_t counter, uint64_t serial) {\n    df_condition_publish(addr, counter, serial);\n}'),
+        ('write_counter(*addr, 0);', 'write_counter(addr[0], 0, addr[1]);'),
+        ('#define PENDING 256\nstatic struct { uint64_t addr, fence; int unknown; } pending[PENDING];\nstatic unsigned pending_head;', '// Counter state is tracked by the replay ledger above.'),
+        ('typedef struct { uint64_t addr; int reset, lost;', 'typedef struct { uint64_t addr, serial; int reset, lost;'),
+        ('write_counter(s->addr, oq_count);', 'write_counter(s->addr, oq_count, s->serial);'),
+        ('    s->addr = addr, s->reset = reset,', '    s->serial = df_condition_serial(addr);\n    s->addr = addr, s->reset = reset,'),
+        ('    if (samples) oq_report(ex, p->addr);', '    uint64_t serial = df_condition_report(p->addr, samples);\n    if (samples) oq_report(ex, p->addr);'),
+        ('uint64_t *a = malloc(sizeof *a);', 'uint64_t *a = malloc(2 * sizeof *a);'),
+        ('        *a = p->addr;', '        a[0] = p->addr; a[1] = serial;'),
+        ('    pending[pending_head++ % PENDING] = (typeof(pending[0])){p->addr, ex->fence, samples};', ''),
+        ('''    uint64_t done = vk_sync_fence_done();
+    for (unsigned k = 1; k <= PENDING; k++) {   // newest first: the last report to addr decides
+        unsigned i = (pending_head - k) % PENDING;
+        if (pending[i].addr == addr && pending[i].fence > done) return *v = 0, pending[i].unknown ? 2 : 1;
+    }''', '    int replay = df_condition_read(addr, v);\n    if (replay) return replay;'),
+        ('        vkCmdFillBuffer(ex->cb, d.buffer, d.offset, n, p->value);', '        vkCmdFillBuffer(ex->cb, d.buffer, d.offset, n, p->value);\n        df_condition_fill(dst, n, p->value);'),
+    ])
     edit("vk_device.c", [('    vk_pass_marks_report();', '    vk_pass_marks_report();\n    df_mesh_trace_report();')])
     edit("vk_pipeline.c", [
         ('static void lb_stop(void) {', '''static void df_prebuild_wait(void) {

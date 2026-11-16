@@ -70,6 +70,8 @@ static int df_counter_raw_map(VkExec *ex,VkDescriptorBufferInfo map,VkDescriptor
 #include "compute_counter_stage.inc"
 int main(void) {
     _putenv("DEKUFORGE_STAGE_COMPUTE_COUNTERS=1");
+    _putenv("DEKUFORGE_STAGE_COMPUTE_COUNTER_MAX=64");
+    _putenv("DEKUFORGE_STAGE_COMPUTE_RAW_READS=0");
     VkExec ex={.fence=7};
     GfxShaderRes writable={1,0},readonly={0,0},raw={0,255};
     VkPipeInfo pipe={.n_bindings=2,.bindings={{1,GFX_RES_SSBO,&writable},{1,GFX_RES_SSBO,&readonly}}};
@@ -123,6 +125,14 @@ int main(void) {
     df_counter_prepare(&ex,&pipe,slots);assert(!allocated); // indirect path
     df_counter_direct=1;_putenv("DEKUFORGE_STAGE_COMPUTE_COUNTERS=0");
     df_counter_prepare(&ex,&pipe,slots);assert(!allocated);
+    _putenv("DEKUFORGE_STAGE_COMPUTE_COUNTERS=");
+    _putenv("DEKUFORGE_STAGE_COMPUTE_COUNTER_MAX=");
+    _putenv("DEKUFORGE_STAGE_COMPUTE_RAW_READS=");
+    pipe.bindings[1].res=&raw;
+    slots[0].buffer=(VkDescriptorBufferInfo){1,0,8192};
+    slots[1].buffer=(VkDescriptorBufferInfo){2,0,128};
+    df_counter_prepare(&ex,&pipe,slots);assert(allocated);
+    df_counter_finish(&ex);completion(completion_arg);completion=NULL;
     return 0;
 }
 ''', encoding="utf-8")

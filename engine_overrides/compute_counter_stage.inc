@@ -1,6 +1,6 @@
-// Opt-in experiment: run a small, unaliased compute counter in device memory.
-// Indirect dispatches and raw writes retain their original bindings. An extra
-// opt-in permits raw reads only with a private remapped address table.
+// Run a bounded, unaliased compute counter in device memory. Indirect
+// dispatches and raw writes retain their original bindings. Raw reads require
+// a private remapped address table. Explicit zero settings disable staging.
 static int df_counter_direct;
 typedef struct {
     VkDescriptorBufferInfo original;
@@ -15,8 +15,8 @@ static void df_counter_free(void *argument) {
 }
 static void df_counter_prepare(VkExec *ex, const VkPipeInfo *info, VkDescSlot *descriptors) {
     const char *enabled = getenv("DEKUFORGE_STAGE_COMPUTE_COUNTERS");
-    if (!df_counter_direct || !enabled || strcmp(enabled, "1")) return;
-    uint64_t maximum = 64;
+    if (!df_counter_direct || (enabled && strcmp(enabled, "1"))) return;
+    uint64_t maximum = 8192;
     const char *limit = getenv("DEKUFORGE_STAGE_COMPUTE_COUNTER_MAX");
     if (limit && *limit) {
         char *end;
@@ -25,7 +25,7 @@ static void df_counter_prepare(VkExec *ex, const VkPipeInfo *info, VkDescSlot *d
         maximum = parsed;
     }
     const char *raw_setting=getenv("DEKUFORGE_STAGE_COMPUTE_RAW_READS");
-    int raw_allowed=raw_setting && !strcmp(raw_setting,"1");
+    int raw_allowed=!raw_setting || !strcmp(raw_setting,"1");
     unsigned raw_index=0,raw_count=0;
     unsigned index = 0, chosen = 0, candidates = 0;
     for (unsigned i = 0; i < info->n_bindings; i++) {

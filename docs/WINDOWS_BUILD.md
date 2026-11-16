@@ -598,3 +598,49 @@ stage now restores this decoration to Fma results, preserving single-rounding
 FFMA semantics. A synthetic precise-FMA shader reproduces the loss and checks
 the repair, its idempotence, and SPIR-V validity. All 63 unit tests pass.
 The in-game regression with ordinary depth tests remains a separate gate.
+
+The FMA repair alone did not resolve the reported flicker: the user supplied a
+new capture with missing rock surfaces and white character regions. Its 1004
+position samples were finite and untruncated, with 185 exact position patterns
+shared across different shaders. Viewport and depth-range tracing did not show
+a mismatch between the scene's depth and colour passes.
+
+A separate experiment retained conservative visibility decisions for reports
+within one replayed frame. The white-pixel fraction in the fixed character
+region fell from 13.15% to 0.53%, but that is not visual confirmation. The
+temporary override has been replaced by an original replay counter ledger:
+timestamp values and completed occlusion values belong to their report, not
+to subsequently re-armed CPU memory. Serial numbers reject stale callbacks;
+later buffer fills are merged before a deferred report writes guest memory.
+The ledger is protected across replay/completion threads and reuses completed
+old-frame entries without evicting pending reports. Synthetic native tests
+cover completion, CPU re-arm isolation, partial fills, stale callbacks,
+capacity exhaustion and 4096 address rotations.
+
+The first ledger run exited cleanly after 135.61 seconds and retained a 0.58%
+white-pixel fraction. Frames 2500–3300 measured 29.40 average FPS, 22.66 FPS for
+the slowest one percent, with experimental counter staging enabled. All 63
+unit tests pass. Visual acceptance and reference performance parity remain open.
+The preceding raster/visibility diagnostics reached their harness deadlines;
+they are not clean-shutdown evidence.
+
+The bounded compute-counter staging path is now enabled by default, with an
+8192-byte maximum and guarded raw-read remapping. Explicit environment values
+of zero still disable staging or raw-read remapping for diagnosis. Overlap,
+raw-write and unsupported-dispatch guards remain in force. Native regression
+tests cover the new defaults as well as fallback and deferred copy-back.
+
+A normal recorder-enabled run with BC3 texture decoding requested measured
+29.33 average FPS and 25.20 FPS for the slowest one percent (frames 2500?3300).
+The character-region white-pixel fraction was 0.58%. This run reached its
+181.22-second harness deadline; it does not establish clean shutdown. BC3 did
+not demonstrate a substantial speed gain and its default policy is unchanged.
+These image statistics are diagnostic only: temporal flicker and complete
+world rendering still require visual acceptance.
+
+The subsequent ordinary-default run (recorder enabled, no compression override
+or conditional-render diagnostic) exited normally after 104.08 seconds.
+Frames 2500?3300 measured 29.64 average FPS and 25.59 FPS for the slowest one
+percent. Its character-region white-pixel fraction was 0.56%. The local capture
+is `build/windows-game/test-ledger-defaults-frame2200.png`; it remains visually
+unapproved because the session image viewer cannot open additional images.
