@@ -84,20 +84,21 @@ that contain the NUP format. Nintendo 64 ROMs need a different engine.
 - Command-line extraction streams and verifies files into a fresh build folder.
 - The command-line preparation stage selects executable modules from base/update
   packages, verifies their content and writes NSO metadata and a module layout.
-- The independent build runs preparation, module decoding and SDK generation
-  before attempting the larger game modules. Experimental native linking now
-  succeeds and the isolated test reaches the title and game world. World rendering
-  still flickers and loses surfaces; intro movie quality also remains incorrect. The launcher
-  does not yet deliver a verified playable independent build.
-- An optional command-line compatibility build uses an existing installation.
-  It is never silently substituted for an independent build.
+- The launcher now uses the complete pinned stable 0.10.1 build pipeline, including
+  native linking and shader preparation. The DekuForge UI and save/build management
+  remain in place. The first isolated migration build is being validated; no
+  rendering acceptance is claimed until its gameplay tests pass.
+- Historical 0.3.10-based CPU and renderer experiments remain available for diagnosis.
+  They are not substituted for the selected stable backend.
 
-Included engine source contains an ARM64 lifter, C generator, host runtime,
-Vulkan renderer, shader translator and native build tools. This baseline is not
-yet validated for game 1.1.1. Full SDK generation found 68 unsupported instructions
-across 45,907 functions after return and acquire-load extensions. No independently
-built playable executable is available yet. Existing installations can still be
-started from Home; no game is automatically closed for testing.
+The stable source revision and every selected source file are pinned by content.
+The source is obtained from a local checkout when available, otherwise from the
+exact upstream commit archive. Its accompanying terms and notices are retained.
+The local shader translator is built from that stable source, rather than the
+experimental compute-to-GLSL mesh wrapper. See
+[the migration record](docs/STABLE_ENGINE_MIGRATION.md) for prerequisites and limits.
+Existing installations can still be started from Home; no user game is
+automatically closed for testing.
 
 Module normalization decodes segments and checks declared hashes. Full extraction
 keeps package trees separate; RomFS update composition still needs validation.

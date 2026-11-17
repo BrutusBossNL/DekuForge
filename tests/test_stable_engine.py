@@ -1,4 +1,5 @@
 import io
+import hashlib
 import tempfile
 import unittest
 import zipfile
@@ -18,7 +19,10 @@ class StableEngineTests(unittest.TestCase):
             z.writestr("generated/main.c","must never be staged")
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder).resolve()
-            with patch.object(stable_engine,"ROOT",root), patch.object(stable_engine.subprocess,"check_output",return_value=archive.getvalue()) as git:
+            with zipfile.ZipFile(io.BytesIO(archive.getvalue())) as fixture:
+                expected={name:hashlib.sha256(fixture.read(name)).hexdigest()
+                          for name in fixture.namelist() if not name.startswith("generated/")}
+            with patch.object(stable_engine,"source_manifest",return_value=expected), patch.object(stable_engine,"ROOT",root), patch.object(stable_engine,"REFERENCE"), patch.object(stable_engine.subprocess,"check_output",return_value=archive.getvalue()) as git:
                 result=stable_engine.stage_stable()
             self.assertIn(stable_engine.REVISION,git.call_args.args[0])
             self.assertEqual((result/"VERSION").read_text(),"0.10.1")
@@ -35,3 +39,14 @@ class StableEngineTests(unittest.TestCase):
                     stable_engine.build_stable("own.nup",lambda *args:None,output)
                 source.assert_not_called()
             self.assertEqual(keep.read_bytes(),b"preserve")
+
+    def test_modified_source_is_rejected_before_it_can_be_used(self):
+        archive=io.BytesIO()
+        with zipfile.ZipFile(archive,"w") as z:
+            z.writestr("runtime/main.c","unexpected source")
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder).resolve()
+            with patch.object(stable_engine,"ROOT",root), patch.object(stable_engine,"REFERENCE"), patch.object(stable_engine,"source_manifest",return_value={"runtime/main.c":"0"*64}), patch.object(stable_engine.subprocess,"check_output",return_value=archive.getvalue()):
+                with self.assertRaisesRegex(ValueError,"hash mismatch"):
+                    stable_engine.stage_stable()
+                self.assertFalse((root/"build/engine-0.10.1/runtime/main.c").exists())

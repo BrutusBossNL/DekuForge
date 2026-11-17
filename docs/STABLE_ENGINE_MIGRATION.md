@@ -9,8 +9,11 @@ and investigation; they are not the launcher game-build route.
 
 `build_independent` now delegates explicitly to `dekuforge/stable_engine.py`.
 It exports the pinned source into owned `build/engine-0.10.1`, preserving source
-notices and LICENSE-ADDITIONS. The local reference repository supplies the Git
-objects; the source manifest records the revision and original file hashes.
+notices and LICENSE-ADDITIONS. The local reference repository can supply the Git objects. Without it, the
+exact commit archive is downloaded from GitHub. Every selected source file is
+checked against `dekuforge/stable_engine_source.json`; missing or changed bytes
+stop staging before a build can run. The source manifest records the revision
+and original file hashes.
 The source is not committed or relabeled as MIT. Original DekuForge orchestration
 remains under its existing license.
 
@@ -36,9 +39,17 @@ and cheat-manager integration follows verified core rendering.
 
 Destination: `build/stable-windows-game`, separate from both existing games.
 Game input identified as 1.1.1 build e0f3ccfa. The 26.24 GB RomFS image was checked
-and completed. CPU lifting completed and the native build is in progress.
-The stable shader translator has been built from the pinned source.
-No visual acceptance, gameplay performance or playable-release claim yet.
+and completed. CPU lifting and native compilation/linking completed (719 files, compile stage
+848 seconds). The executable is approximately 305 MB. Stable shader preparation
+is now running against 42,142 shader combinations.
+The stable shader translator has been built from the pinned source. Its own
+synthetic smoke test passed: constant fragment output, image reads, array-layer
+query, malformed-request recovery and SPIR-V validation. The 67 project tests
+also pass, including source-integrity and destination-protection checks.
+The isolated profile and graphics/controller settings were copied from local test
+data and the working reference; active installations and saves were not changed.
+The matching pinned DLSS library and its vendor notice are present. No visual
+acceptance, gameplay performance or playable-release claim yet.
 
 Older generated render PNG sets were removed to provide build space; the latest
 raw-depth capture and test logs were retained. Existing game installations,
@@ -50,6 +61,7 @@ input dump and save profiles were preserved.
 - Copy a save into the isolated profile and compare the same moving scene.
 - Confirm terrain, sky, foliage, shadows, movies, timing, controllers and audio.
 - Activate only the verified installation; retain the previous one for rollback.
-- Remove local reference/toolchain assumptions from fresh-machine provisioning.
+- Complete fresh-machine compiler/SDK provisioning; source retrieval no longer
+  requires an installed NX2navi checkout.
 - Integrate custom game menus and cheats without changing the validated renderer.
 - Verify the complete launcher wizard from the user's NUP selection.
