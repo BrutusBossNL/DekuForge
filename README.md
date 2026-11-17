@@ -41,10 +41,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 **Private Windows preview, undergoing installation and update acceptance testing.**
 The stable reference-based game has passed local play tests. The DekuForge 0.11.0
 candidate adds the custom in-game interface and Cheat Manager. The launcher and
-engine have independent versions; the launcher is currently 0.2.0-preview.1.
+engine have independent versions: launcher **0.2.0-preview.2**, buildkit **0.2.1**
+and engine **0.11.0**.
 The repository stays private until the Windows setup, update and rollback paths
 are stable and component distribution terms are resolved. No public installer
 release is available yet.
+
+Private test previews can be offered to authorized GitHub users on the Preview
+channel. See [release history](docs/CHANGELOG.md) and
+[how updates work](docs/DISTRIBUTION.md#updating-without-uninstalling).
 
 ## Features
 

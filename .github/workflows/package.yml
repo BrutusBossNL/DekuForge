@@ -1,11 +1,6 @@
 name: Windows setup preview
 on:
   workflow_dispatch:
-    inputs:
-      tag:
-        description: Release tag for the updater descriptor
-        required: true
-        default: v0.2.0-preview.1
 permissions:
   contents: read
 jobs:
@@ -27,9 +22,7 @@ jobs:
       - run: python tools/prepare_installation.py
       - run: python tools/build_launcher.py --toolchain local/build-tools/native/msys64/ucrt64/bin
       - run: python tools/check_launcher.py
-      - run: python tools/build_setup.py --toolchain local/build-tools/native/msys64/ucrt64/bin --tag "$env:RELEASE_TAG"
-        env:
-          RELEASE_TAG: ${{ inputs.tag }}
+      - run: python tools/build_setup.py --toolchain local/build-tools/native/msys64/ucrt64/bin
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: DekuForge-Windows-preview

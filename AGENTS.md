@@ -62,6 +62,19 @@ The project's original source is open source under the root MIT license.
 - Generated code is changed through its generator, not edited by hand.
 - Do not stop the user's game or start GPU-heavy preparation during play.
 
+## Release identities
+
+Before distributing changed launcher behavior, increment the launcher version
+in `dekuforge/components.json` (including the preview sequence). Increment the
+buildkit for build-orchestration changes and the engine for game/runtime changes.
+Do not reuse an installed preview identity for different delivered application
+code. Never replace assets of a published release: publish a new version instead.
+Draft assets may be prepared before release, but draft releases are deliberately
+excluded from the updater. A private, published prerelease is visible only to
+authorized repository users on the Preview channel; it does not make the repo
+public. Keep game files out of every release. Component metadata is authoritative
+for UI, executable packaging and release tags; avoid duplicate workflow defaults.
+
 ## Documentation accuracy
 
 Every behavior, dependency, packaging or support-status change must update all

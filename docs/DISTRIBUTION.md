@@ -29,6 +29,37 @@ engine inputs or build dependencies change. Existing per-stage build state track
 input identity and generated products; verified shader preparations can be reused
 only when GPU source, translator and shader seed inputs still match.
 
+## Updating without uninstalling
+
+Normal updates do not require uninstalling DekuForge. The release ZIP replaces
+the native launcher, interface/source modules, build scripts, branding and the
+uninstaller. A helper waits for the launcher to exit, installs the verified
+package, prepares the selected Python runtime, runs the invisible health check
+and restarts the launcher. Failed application updates retain recovery copies.
+
+Build-tool installation is demand-driven: changing the distributed buildkit does
+not eagerly download every compiler during an application update. The next local
+build verifies/provisions the pinned tool dependencies and reuses matching tools
+and build products. Game rebuilding is determined by relevant source/build-input
+hashes, not just a higher launcher version. Existing builds, saves, settings and
+the original NUP are retained. A game update builds into a separate destination
+and activates it only after success; the local full-rebuild acceptance limits
+below still apply.
+
+Use **Updates**, choose **Preview** for prereleases, check for releases and install
+the selected version. Draft releases are never listed, even with credentials.
+While this repository is private, non-draft test previews require the user's
+authorized GitHub CLI sign-in or token. There is no embedded maintainer token.
+
+If the updater cannot access a private preview, close the launcher and run the
+new setup over the same application folder. This upgrades the application without
+uninstalling it or discarding its local game builds. Keep normal save backups.
+
+Every delivered application update gets a distinct launcher version. Published
+release assets are immutable: later changes use the next preview/version. The
+separate buildkit and engine numbers describe their own changes; a launcher-only
+UI improvement does not advance the game engine version.
+
 ## Windows code signing
 
 Checked on 2026-11-17: the local setup, launcher and uninstaller report

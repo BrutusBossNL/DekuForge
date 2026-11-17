@@ -143,10 +143,29 @@ class UpdateTests(unittest.TestCase):
             self.assertEqual(list(outside.iterdir()),[])
 
     def test_automatic_updates_only_take_newer_semantic_versions(self):
+        self.assertTrue(newer_version("v0.2.0-preview.2","0.2.0-preview.1"))
         self.assertTrue(newer_version("v0.2.0","0.2.0-preview.1"))
         self.assertTrue(newer_version("v0.2.0-preview.10","0.2.0-preview.2"))
         self.assertFalse(newer_version("v0.1.0","0.2.0"))
         self.assertFalse(newer_version("v0.3.0-unknown","bad-version"))
+
+    def test_application_update_replaces_executable_ui_and_tools_without_touching_game(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder).resolve()/"app";archive=Path(folder).resolve()/"release.zip"
+            fixture_package(archive, extra={"dekuforge/ui.py":b"# old interface", "tools/bootstrap_build_tools.py":b"# old tooling"})
+            install(archive,root,log=lambda _:None)
+            game=root/"build/game";game.mkdir(parents=True)
+            (game/"DekuForgeGame.exe").write_bytes(b"existing local game")
+            (game/"progress.sav").write_bytes(b"existing save")
+            executable=bytearray((root/"DekuForge.exe").read_bytes());executable[420]=42
+            fixture_package(archive, extra={"DekuForge.exe":bytes(executable), "dekuforge/ui.py":b"# new interface", "tools/bootstrap_build_tools.py":b"# new tooling"})
+            result=install(archive,root,log=lambda _:None)
+            self.assertEqual((root/"DekuForge.exe").read_bytes(),bytes(executable))
+            self.assertEqual((root/"dekuforge/ui.py").read_bytes(),b"# new interface")
+            self.assertEqual((root/"tools/bootstrap_build_tools.py").read_bytes(),b"# new tooling")
+            self.assertFalse(result["requires_rebuild"])
+            self.assertEqual((game/"DekuForgeGame.exe").read_bytes(),b"existing local game")
+            self.assertEqual((game/"progress.sav").read_bytes(),b"existing save")
 
     def test_github_credentials_are_removed_on_asset_redirect(self):
         request=Request("https://api.github.com/repos/owner/repo/releases/assets/1",headers={"Authorization":"Bearer private"})
