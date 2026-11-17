@@ -5,6 +5,10 @@ The project's original source is open source under the root MIT license.
 
 ## Architecture
 
+- The active game backend is stable 0.10.1, pinned in `dekuforge/stable_engine.py`.
+- `tools/build_stable_translator.py` builds its unmodified shader translation logic.
+- Follow `docs/STABLE_ENGINE_MIGRATION.md`; the old `engine/` import is diagnostic history.
+
 - `dekuforge/core.py`: installation selection and local preferences.
 - `dekuforge/nup.py`: bounded NUP v1 parsing and verified streaming reads.
 - `dekuforge/native.py`: archive inspection and extraction.

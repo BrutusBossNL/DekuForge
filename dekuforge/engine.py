@@ -16,11 +16,12 @@ from .modules import normalize_prepared
 
 
 def engine_report(root=ROOT):
-    engine = root / "engine"
+    engine = root / "build/engine-0.10.1"
     components = {"arm64_lifter": "recomp/lifter.py", "code_generator": "recomp/gen.py",
                   "host_runtime": "runtime/boot.c", "vulkan_renderer": "runtime/vk_device.c",
-                  "shader_translator": "tools/xlate/Program.cs", "native_linker_driver": "tools/build_game.py"}
-    return {"source_components": {name: (engine / relative).is_file() for name, relative in components.items()},
+                  "shader_translator": "tools/xlate/Program.cs", "native_linker_driver": "tools/make_game.py"}
+    return {"engine_version": "0.10.1", "engine_revision": "5ae55db41c7d11c4e997d2676019939a936e560b",
+            "source_components": {name: (engine / relative).is_file() for name, relative in components.items()},
             "python_dependencies": {name: importlib.util.find_spec(name) is not None
                                     for name in ("numpy", "lz4", "zbic")},
             "tools": {name: shutil.which(name) is not None for name in ("clang", "ninja", "dotnet")},
@@ -44,22 +45,22 @@ def verify_engine_sources(root=ROOT):
 def build_independent(filename, notify, workspace=ROOT, destination=None):
     from .workflow import validate_destination
     target = validate_destination(destination or workspace / "build" / "game", load_installation())
-    notify("phase", {"phase": "prepared"})
-    prepared = prepare_game(filename, notify, workspace)
-    notify("phase", {"phase": "normalizing"})
-    normalize_prepared(prepared, notify)
-    report = engine_report()
-    notify("log", json.dumps(report, indent=2) + "\n")
-    notify("log", f"Requested installation: {target}\n")
-    # Validate the SDK before spending time on the larger game module. Failed
-    # generation never advances to a native link or selects an installation.
-    notify("phase", {"phase": "generating"})
-    generate_prepared(prepared, notify, modules="sdk", jobs=1)
-    generate_prepared(prepared, notify, modules="main,subsdk0", jobs=1)
-    if not report["game_1_1_1_port_validated"]:
-        raise RuntimeError("CPU generation finished, but the game 1.1.1 host, NVN2 renderer and shader integration "
-                           "are not validated. Native linking is blocked; no playable executable was produced.")
-    raise RuntimeError("Native game linking is not implemented")
+    # The explicitly selected production base is the complete stable 0.10.1 path.
+    # The old experimental engine remains available for diagnostic tooling only.
+    from .stable_engine import build_stable
+    lock = Path(workspace) / "local/build.lock"
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        owner = lock.open("x", encoding="utf-8")
+    except FileExistsError:
+        raise ValueError("Er loopt al een build of controle.") from None
+    try:
+        with owner:
+            owner.write(str(os.getpid()))
+            owner.flush()
+            return build_stable(filename, notify, target)
+    finally:
+        lock.unlink(missing_ok=True)
 
 
 def generate_prepared(prepared, notify, modules="main,subsdk0,sdk", limit=0, jobs=1):

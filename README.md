@@ -28,6 +28,12 @@ No CMD start script is provided.
 
 ## Game builder
 
+The game backend is being migrated to the complete stable 0.10.1 engine. The
+DekuForge launcher and management UI are retained. See
+[stable-engine migration](docs/STABLE_ENGINE_MIGRATION.md) for the pinned revision,
+current validation status and fresh-machine limitations. The migration build is
+experimental until the rendering and gameplay checks pass.
+
 The launcher keeps Home, Updates, Saves, Build game and Settings inside one window.
 Home uses three artwork cards: Play (active game version), Update (latest release
 in the selected channel), and (Re)build (game dump path). Pointer hover and keyboard

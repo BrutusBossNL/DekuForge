@@ -71,6 +71,18 @@ MESSAGES = {
 from .launcher_labels import extend
 extend(MESSAGES)
 
+_BUILD_PHASES = {
+    "en": ("Compiling game", "Preparing shaders", "Preparing button prompts", "Building game files"),
+    "nl": ("Game compileren", "Shaders voorbereiden", "Knopaanwijzingen voorbereiden", "Gamebestanden opbouwen"),
+    "de": ("Spiel kompilieren", "Shader vorbereiten", "Tastenhinweise vorbereiten", "Spieldateien erstellen"),
+    "es": ("Compilando el juego", "Preparando shaders", "Preparando indicaciones de botones", "Creando archivos del juego"),
+    "fr": ("Compilation du jeu", "Préparation des shaders", "Préparation des indications de touches", "Création des fichiers du jeu"),
+}
+for _language, _labels in _BUILD_PHASES.items():
+    MESSAGES[_language].update(zip(("compiling", "shaders", "prompts", "extracting"), _labels))
+
+
+
 
 def translate(language, key, **values):
     selected = language if language in MESSAGES else "en"
