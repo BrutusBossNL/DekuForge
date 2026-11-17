@@ -78,6 +78,9 @@ class ModuleTests(unittest.TestCase):
         struct.pack_into("<I", raw, 16, len(raw) + 1)
         with self.assertRaises(ArchiveError):
             inspect_nso("test", raw, FIRST_ADDRESS)
+        for base in (-4096, 1, True, 1 << 39):
+            with self.assertRaises(ArchiveError):
+                inspect_nso("test", executable(), base)
 
     def test_independent_preparation_is_repeatable_and_detects_modified_input(self):
         with tempfile.TemporaryDirectory() as folder:

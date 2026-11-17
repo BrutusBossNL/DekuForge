@@ -22,6 +22,13 @@ below remain for audit, not as approved inputs to the new implementation. See
 gate, not an achieved property of this initial branch. Keep current games/saves
 and main's runtime, preferences and tools outside branch experiments.
 
+Before investigating a subsystem, consult `docs/INDEPENDENT_EVIDENCE.md` and its
+linked historical measurements. Reuse unchanged original components and scoped
+results; do not repeat rejected renderer workarounds without new evidence.
+Never reuse gameplay acceptance for another renderer/build or run legacy
+harnesses against main's installed game. Keep main stable; all experiments stay
+in this worktree's ignored output directories.
+
 The Architecture section below describes the inherited main route. These branch
 overrides take precedence wherever they conflict with that historical route.
 

@@ -3,6 +3,9 @@
 > This is the independent-engine development branch. Its overriding roadmap and
 > equal-or-better acceptance gates are in [INDEPENDENT_ENGINE.md](docs/INDEPENDENT_ENGINE.md).
 > The inherited release roadmap below applies to the stable reference on main.
+> Consult [earlier evidence](docs/INDEPENDENT_EVIDENCE.md) before repeating old
+> renderer experiments. The repository is now public; historical private-release
+> wording below does not describe its current visibility.
 
 This roadmap records planned work, not promises of support or delivery dates.
 The repository remains private until Windows release gates and component

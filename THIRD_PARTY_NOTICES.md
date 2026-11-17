@@ -6,6 +6,13 @@
 > Existing notices/history remain intact; no blanket relicensing or clean-room
 > claim is made. Independent runtime/installer distribution is not ready.
 
+The independent integer/control-flow/scalar-memory generator, bounded native
+runner, guest-memory/relative-relocation model and read-only analyzer are original
+DekuForge code under the root MIT license. Arm ISA/ABI documents supply encoding
+and behavior facts, not imported runtime code. Unicorn is a separately licensed
+development oracle, not the game's CPU backend. Reuse and measurement scope are
+indexed in [INDEPENDENT_EVIDENCE.md](docs/INDEPENDENT_EVIDENCE.md).
+
 ## Active Windows backend and scope of the root license
 
 The default builder stages NX2navi **0.10.1**, revision

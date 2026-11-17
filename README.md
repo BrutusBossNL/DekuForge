@@ -18,9 +18,11 @@ original implementation and explicitly approved, redistributable components.
 - The default independent backend reports its real capabilities with `--doctor`.
 - Original NUP inspection, package selection, verified module preparation and the
   launcher/save-management tooling are retained for development.
-- A new original A64-to-C block translator supports a small, explicit 64-bit
-  instruction subset. Unknown instructions stop generation; this is not a
-  full CPU backend. Its emitted C is checked against an independent ARM64 oracle.
+- The original A64-to-C translator covers integer arithmetic/flags, branches and
+  scalar memory with a bounded native correctness runner, checked against an
+  independent ARM64 oracle. It is not a complete CPU backend.
+- A guest-memory prototype loads verified NSO segments and relative relocations.
+  Read-only module analysis reuses extracted inputs without rebuilding them.
 - No automatic fallback to the old experimental 0.3.10 or stable 0.10.1 renderer.
 - Vendor runtime/tool downloads, main-channel app updates and installer packaging
   are disabled until independent replacements are ready.
@@ -44,6 +46,8 @@ Main remains the reference until the independent implementation passes the same
 scenarios. See [INDEPENDENT_ENGINE.md](docs/INDEPENDENT_ENGINE.md) for the component
 inventory, acceptance gates and contributor work. Windows comes first; Linux and
 iOS testing contributors are welcome after the desktop core is ready.
+Earlier failed approaches and reusable measurements are indexed in
+[INDEPENDENT_EVIDENCE.md](docs/INDEPENDENT_EVIDENCE.md); main remains untouched.
 
 This is a non-commercial hobby project. We oppose piracy, encourage purchasing
 the game/console and do not provide dump/acquisition instructions. We are not

@@ -43,6 +43,8 @@ class Module:
 
 
 def inspect_nso(name, payload, base):
+    if type(base) is not int or not 0 <= base < ADDRESS_LIMIT or base % 4096:
+        raise ArchiveError(f"{name}: invalid module base")
     if len(payload) < 256 or payload[:4] != b"NSO0":
         raise ArchiveError(f"{name}: expected an NSO executable module")
     version, _, flags = struct.unpack_from("<III", payload, 4)

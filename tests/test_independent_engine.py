@@ -36,7 +36,7 @@ class IndependentContractTests(unittest.TestCase):
         self.assertTrue(events)
 
     def test_unknown_or_neighboring_instructions_stop_before_output(self):
-        for word in (0, 0xffffffff, 0xb1000400, 0x11000400, 0x92800000, 0xd65f03e0):
+        for word in (0, 0xffffffff, 0x0bc00000, 0x0b008000, 0x12c00000, 0xd65f03e0):
             with self.assertRaises(UnsupportedInstruction): emit_c([word])
         for words in ([], [0xd65f03c0,0x91000400], [0x91000400]*257):
             with self.assertRaises(ValueError): emit_c(words)

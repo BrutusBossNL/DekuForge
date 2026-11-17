@@ -6,6 +6,12 @@
 > `python run_builder.py --doctor` and the source tests. See
 > [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md) for the current independent route.
 
+The independent development route also provides read-only module analysis:
+`python tools/analyze_independent.py --exefs PATH --out local/analysis.json`.
+This reuses extracted input; it neither builds nor validates a playable game.
+Use a new report filename. Consult [earlier evidence](INDEPENDENT_EVIDENCE.md)
+before repeating retired experiments; keep the stable main installation untouched.
+
 Windows x64 is the current acceptance target. Linux source checks run in CI;
 Linux gameplay, iOS and VR are not validated DekuForge targets yet.
 

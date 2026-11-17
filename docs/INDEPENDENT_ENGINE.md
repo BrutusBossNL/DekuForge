@@ -4,6 +4,8 @@ This branch develops alongside main. Its initial independent engine is incomplet
 it must not replace a working installation or be published as a playable installer.
 Main's stable 0.10.1-based game supplies behavior/performance evidence, not an
 automatic source-code dependency. No existing user game or save is part of a test.
+Consult [INDEPENDENT_EVIDENCE.md](INDEPENDENT_EVIDENCE.md) before repeating earlier
+investigations; it records reusable work, failed approaches and measurement scope.
 
 ## Initial code and provenance inventory
 
@@ -12,7 +14,8 @@ automatic source-code dependency. No existing user game or save is part of a tes
 | Launcher, preferences, saves, updater | Original `dekuforge/` tooling | Retained project code; bundled dependencies still need individual terms |
 | NUP/archive and module preparation | Original `nup.py`, `gameplan.py`, `modules.py`, `romfs.py` | Retained; lz4/zbic and other libraries retain their separate licenses |
 | CPU block generator | New `independent_cpu.py` | Original implementation from ISA facts, not a port of the NX2navi lifter |
-| CPU state | Own minimal C ABI emitted by the generator | Partial integer/PC/SP/NZCV state only; vectors, memory and runtime ABI still missing |
+| CPU state and native correctness runner | Own integer/PC/SP/NZCV C ABI and explicit checked memory regions | Original; SIMD/FP, full dispatch and platform ABI still missing |
+| Guest memory/module prototype | New `guest_memory.py` | Original bounded permissions, NSO/BSS mappings and RELATIVE relocations; not a complete native linker |
 | Historical `engine/` | Immutable earlier MIT import | Reference only; not selected as the new backend |
 | Stable 0.10.1 backend/patches | Inherited reference integration | Excluded from independent build route; scoped grants do not clear surrounding code |
 | Shader/Vulkan/guest services | Not implemented in this backend | Audit reusable upstream components or implement independently |
@@ -27,20 +30,36 @@ The inherited tree/history is not automatically cleared by new work on this bran
 
 ## First working CPU component
 
-The original decoder/generator currently supports 64-bit ADD/SUB immediate without
-flag updates, MOVZ/MOVK and RET. ADD/SUB register 31 is SP; MOVZ/MOVK register 31
-is the zero register and writes are discarded. Block bounds and terminators are
-checked before output. Unsupported neighbors and other instructions are rejected.
+The original decoder/generator supports 32/64-bit ADD/SUB immediate and shifted
+register forms, NZCV updates, shifted logical operations, MOVN/MOVZ/MOVK, ADR/ADRP,
+direct/indirect calls/returns, condition/zero/bit branches and NOP. Scalar memory
+operations cover unsigned scaled, unscaled/pre/post-indexed offsets and literal
+loads, including sign extension. Unsupported encodings and constrained writeback
+aliases are rejected. Register 31 follows each instruction's SP/zero-register rule.
+Blocks stop at branches/services. A bounded native development dispatcher executes
+loops/calls and resumes after an exact guest-instruction budget. It is not the
+final game's optimized dispatcher. SVC, unknown PCs and memory faults stop explicitly.
+
+`emit_machine` requires explicit guest regions and validates a complete memory
+access before touching bytes or applying register writeback. Little-endian byte
+accesses avoid unaligned host casts. The Python memory prototype maps verified
+NSO segments RX/R/RW, zeroes BSS and applies RELATIVE relocations transactionally.
+Symbol/TLS imports, dynamic-table discovery, scheduling and full linking are absent.
 Generated C carries the game-output marker and stays local even for synthetic
 development inputs. Successful translation of a tiny block is not game readiness.
 
 ISA references: [Arm ADD immediate](https://documentation-service.arm.com/static/68ffa09902789941c1920a53),
-[Arm MOVZ](https://support.arm.com/documentation/dui0801/j/A64-General-Instructions/MOVZ).
+[Arm instruction reference](https://documentation-service.arm.com/static/5f3fa899428f7a6b3328fd44),
+[Arm load/store addressing](https://support.arm.com/documentation/ddi0487/mb/-Part-C-The-AArch64-Instruction-Set/-C1-3-Address-generation/-C1-3-3-Load-store-addressing-modes)
+and [Arm ELF64 ABI](https://github.com/ARM-software/abi-aa/blob/main/aaelf64/aaelf64.rst).
 The native differential test compiles emitted C and compares registers, SP, PC
 and NZCV with Unicorn on synthetic inputs. The oracle is a development dependency.
-Local validation covers 291 instruction encodings across four initial states
-(1,164 native/oracle comparisons), plus 1,164 rejected wrong-PC calls that must
-leave state unchanged. These checks cover only the instruction subset above.
+The original 1,164 native/oracle comparisons and wrong-PC checks are retained.
+Additional native tests cover overflow, width/shift boundaries, all 16 conditions
+under all 16 NZCV combinations, link aliases, budgeted loops/calls, scalar memory
+forms and fault atomicity. A synthetic NSO is mapped, relocated and executed
+natively through checked stores/loads to an SVC boundary. This is not the game;
+the checks cover only the instruction subsets above.
 Other registers/state and instruction families are not validated by that test.
 
 ## Build and tooling boundaries
@@ -50,6 +69,17 @@ multi-gigabyte extraction because host, graphics and linking stages are absent.
 Explicit `--prepare` can exercise original verified input preparation. Legacy
 compatibility/generation/runtime CLI routes are rejected; historical developer
 tools are retained only for provenance and isolated research.
+
+`python tools/analyze_independent.py --exefs PATH --out local/analysis.json` reads
+already extracted modules without changing them or extracting the game again.
+It records static text-word decoder coverage and module layouts, not gameplay or
+dynamic instruction coverage: text can contain data/literal pools. Reports are
+local, require a new filename, and may only be written under this worktree's
+ignored `local/` or `build/`, outside the input directory.
+Reports fingerprint their decoder, analyzer, module-normalization and layout
+source as well as each input module. Reuse only results for the same source/input
+identities; changing the decoder invalidates prior coverage, not all old gameplay
+or movie benchmarks.
 
 Installer packaging and vendor-based tool/runtime provisioning are blocked.
 Main's application update channel is disabled so it cannot replace this branch
