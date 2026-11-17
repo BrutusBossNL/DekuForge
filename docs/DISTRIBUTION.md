@@ -131,6 +131,12 @@ failed-update recovery and local game-rebuild acceptance are complete.
 
 ## Reporting and uninstallation
 
+Save migration now detects the selected owned game's destination profile and
+searches a user-chosen NX2navi/Play/save folder in a bounded background worker.
+Users review source profiles before an explicit copy, with a retained destination
+backup. See [saves.md](saves.md) for scope, supported layouts and compatibility
+limits. This is folder/transaction validation, not a new in-game save-load result.
+
 The preview has a user-reviewed issue form with hardware/version information and
 bounded, filtered text logs. It offers a prefilled GitHub browser page or direct
 submission using the user's existing GitHub CLI/token. It does not include an

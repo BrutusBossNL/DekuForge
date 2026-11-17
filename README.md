@@ -65,7 +65,10 @@ release is available yet.
 - An uninstaller for managed builds/tools, with verified save backup and explicit
   protection for original game archives, even inside the installation folder.
 - Save import/export with destination backups, including compatible NX2navi
-  profiles. Import copies files; it never moves or deletes the original saves.
+  profiles. Choose an old NX2navi/Play folder and review the profiles found;
+  the selected DekuForge game's destination is detected automatically.
+  Import copies files; it never moves or deletes the original saves.
+  See [save migration](docs/saves.md).
 - The stable engine's in-game graphics, resolution, upscaling, audio and control
   settings, with a DekuForge interface and performance display.
 - Built-in Cheat Manager, including Equipment and World groups: bomb arrows,

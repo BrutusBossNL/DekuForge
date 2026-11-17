@@ -16,6 +16,39 @@ from dekuforge.ui import Launcher
 
 @unittest.skipUnless(os.name == "nt", "Windows desktop integration")
 class LauncherWorkflowTests(unittest.TestCase):
+    def test_save_import_finds_old_installation_and_requires_confirmation(self):
+        active = self.game.parent
+        (active/'.dekuforge-stable-build').touch()
+        destination = active/'profile/save'/('a'*32)
+        destination.mkdir(parents=True)
+        source = self.folder/'NX2navi/Play/profile/save'/('b'*32)
+        (source/'slot_00').mkdir(parents=True)
+        (source/'slot_00/progress.sav').write_bytes(b'synthetic old save')
+        self.app.navigate('saves')
+        self.assertEqual(self.app.save_folder,str(destination))
+        with patch('dekuforge.ui.filedialog.askdirectory',return_value=str(self.folder/'NX2navi')):
+            self.app.search_save_folder()
+        deadline=time.monotonic()+3
+        while self.app.save_busy and time.monotonic()<deadline:
+            self.root.update();self.app.tick()
+        self.assertEqual(self.app.save_source,str(source))
+        self.assertFalse((destination/'slot_00').exists())
+        with patch('dekuforge.ui.game_running',return_value=False), patch('dekuforge.ui.messagebox.askyesno',return_value=False), patch('dekuforge.ui.import_save') as copy:
+            self.app.save_action('selected')
+            copy.assert_not_called()
+        with patch('dekuforge.ui.game_running',return_value=True), patch('dekuforge.ui.messagebox.askyesno') as confirm:
+            self.app.save_action('selected')
+            confirm.assert_not_called()
+            self.assertEqual(self.app.save_status,self.app.t('save_close_game'))
+        with patch('dekuforge.ui.game_running',return_value=False), patch('dekuforge.ui.messagebox.askyesno',return_value=True):
+            self.app.save_action('selected')
+            deadline=time.monotonic()+3
+            while self.app.save_busy and time.monotonic()<deadline:
+                self.root.update();self.app.tick()
+        self.assertEqual((destination/'slot_00/progress.sav').read_bytes(),b'synthetic old save')
+        self.assertEqual((source/'slot_00/progress.sav').read_bytes(),b'synthetic old save')
+        self.assertEqual(len(list(destination.parent.glob(destination.name+'.backup-*'))),1)
+
     def test_setup_health_check_visits_all_languages_without_showing_a_window(self):
         source = Path(__file__).resolve().parents[1]
         script = """import sys

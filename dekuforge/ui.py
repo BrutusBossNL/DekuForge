@@ -23,7 +23,7 @@ from .update_service import prepare_release, start_worker, newer_version
 from .game_updates import run_rebuild, game_running
 from .build_library import BuildLibrary
 from .home_cards import ActionCard, animate_intro
-from .saves import export_save, import_save, save_files
+from .saves import export_save, import_save, discover_saves, game_save_profiles
 from .theme import BG, BORDER, GOLD, LEAF, MUTED, PANEL, TEXT, ArtworkLabel, BackgroundCanvas, apply_identity, apply_window, logo_image
 from .workflow import BuildRequest, Progress, duration, validate_destination, validate_source
 from .theme import button_feedback, NavigationCanvas, NavigationLogo, PagePanel, ScrolledText
@@ -67,6 +67,8 @@ class Launcher:
         self.save_busy = False
         self.save_status = ""
         self.save_folder = settings.get("save_folder", "")
+        self.save_sources = []
+        self.save_source = ""
         self.executable = settings.get("executable", "")
         self.source = settings.get("nup", "")
         self.destination = settings.get("build_destination", str(ROOT / "build" / "game"))
@@ -573,39 +575,86 @@ class Launcher:
         threading.Thread(target=work,daemon=True).start()
 
     def render_saves(self):
-        self.label(self.content, self.t("save_help"), color=MUTED, wraplength=620).pack(anchor="w", pady=(0, 18))
+        self.label(self.content, self.t("save_easy_help"), color=MUTED, wraplength=620).pack(anchor="w", pady=(0, 18))
         card = self.card(self.content)
-        self.path_row(card, self.t("save_folder"), self.save_folder, self.choose_save_folder)
-        for key, action in (("export_save", "export"), ("import_zip", "zip"), ("import_folder", "folder")):
-            self.button(card, self.t(key), lambda value=action: self.save_action(value),
-                        state="normal" if self.save_folder and not self.save_busy else "disabled").pack(fill="x", pady=5)
+        destinations = game_save_profiles(self.executable)
+        paths = [item["folder"] for item in destinations]
+        if self.save_folder not in paths:
+            self.save_folder = paths[0] if len(paths) == 1 else ""
+        self.label(card, self.t("save_destination"), 14, GOLD).pack(anchor="w", pady=(0, 10))
+        if len(paths) > 1:
+            choice = tk.StringVar(value=self.save_folder)
+            combo = ttk.Combobox(card, textvariable=choice, values=paths, state="readonly", style="Forge.TCombobox")
+            combo.pack(fill="x", pady=(0, 10))
+            def select_destination(_event=None):
+                self.save_folder = choice.get(); self.render()
+            combo.bind("<<ComboboxSelected>>", select_destination)
+        self.label(card, self.save_folder or self.t("save_destination_missing" if not paths else "save_choose_profile"),
+                   10, MUTED, wraplength=620).pack(anchor="w")
+        self.label(card, self.t("save_source_heading"), 14, GOLD).pack(anchor="w", pady=(24, 10))
+        self.button(card, self.t("save_find_nx"), self.search_save_folder, primary=True,
+                    state="disabled" if self.management_busy() else "normal").pack(anchor="w", pady=(0, 8))
+        self.label(card, self.t("save_find_help"), 10, MUTED, wraplength=620).pack(anchor="w", pady=(0, 12))
+        if self.save_sources:
+            labels = [self.t("save_profile_summary", count=len(item["slots"]),
+                           date=datetime.fromtimestamp(item["modified"]).strftime("%d-%m-%Y %H:%M"))
+                      + " — " + item["folder"] for item in self.save_sources]
+            index = next((i for i,item in enumerate(self.save_sources) if item["folder"] == self.save_source), 0)
+            self.save_source = self.save_sources[index]["folder"]
+            if len(labels) > 1:
+                selection = tk.StringVar(value=labels[index])
+                combo = ttk.Combobox(card, textvariable=selection, values=labels, state="readonly", style="Forge.TCombobox")
+                combo.pack(fill="x", pady=(0, 10))
+                def select_source(_event=None):
+                    self.save_source = self.save_sources[labels.index(selection.get())]["folder"]; self.render()
+                combo.bind("<<ComboboxSelected>>", select_source)
+            self.label(card, labels[index], 10, TEXT, wraplength=620).pack(anchor="w", pady=(0, 10))
+            self.button(card, self.t("save_import_selected"), lambda: self.save_action("selected"), primary=True,
+                        state="normal" if self.save_folder and not self.management_busy() else "disabled").pack(anchor="w", pady=(0, 12))
+        self.button(card, self.t("import_zip"), lambda: self.save_action("zip"),
+                    state="normal" if self.save_folder and not self.management_busy() else "disabled").pack(anchor="w", pady=5)
         if self.save_folder:
-            self.button(card, self.t("open_folder"), lambda: self.open_folder(Path(self.save_folder))).pack(anchor="w", pady=5)
+            self.button(card, self.t("export_save"), lambda: self.save_action("export"),
+                        state="disabled" if self.management_busy() else "normal").pack(anchor="w", pady=(18, 5))
+            self.button(card, self.t("save_open_current"), lambda: self.open_folder(Path(self.save_folder))).pack(anchor="w", pady=5)
         self.label(self.content, self.save_status, wraplength=620).pack(anchor="w")
 
-    def choose_save_folder(self):
-        value = filedialog.askdirectory(parent=self.root, title=self.t("save_folder"))
-        if value:
+    def search_save_folder(self):
+        if self.management_busy(): return
+        value = filedialog.askdirectory(parent=self.root, title=self.t("save_find_nx"))
+        if not value: return
+        self.save_busy = True
+        self.save_status = self.t("save_searching")
+        self.save_sources = []; self.save_source = ""
+        self.render()
+        excluded = Path(self.executable).absolute().parent if self.executable and (Path(self.executable).parent / '.dekuforge-stable-build').is_file() else None
+        def work():
             try:
-                save_files(value, require_progress=False)
-                self.persist({"save_folder": value})
-                self.save_folder = value
-                self.render()
-            except (ValueError, OSError) as error:
-                self.show_error(error)
+                result = discover_saves(value)
+                if excluded:
+                    result["profiles"] = [item for item in result["profiles"] if not Path(item["folder"]).is_relative_to(excluded)]
+                self.events.put(("save_scan_complete", result))
+            except Exception as error: self.events.put(("save_error", str(error)))
+        threading.Thread(target=work, daemon=True).start()
 
     def save_action(self, action):
         if self.management_busy():
             return
+        if not self.save_folder:
+            return
+        if action != "export" and game_running():
+            self.save_status = self.t("save_close_game"); self.render(); return
         if action == "export":
             value = filedialog.asksaveasfilename(parent=self.root, defaultextension=".zip", filetypes=[("ZIP", "*.zip")])
         elif action == "zip":
             value = filedialog.askopenfilename(parent=self.root, filetypes=[("ZIP", "*.zip")])
+        elif action == "selected":
+            value = self.save_source
         else:
             value = filedialog.askdirectory(parent=self.root, title=self.t("import_folder"))
         if not value:
             return
-        if action != "export" and not messagebox.askyesno("DekuForge", self.t("save_confirm", folder=self.save_folder), parent=self.root):
+        if action != "export" and not messagebox.askyesno("DekuForge", self.t("save_import_confirm", source=value, folder=self.save_folder), parent=self.root):
             return
         destination = self.save_folder
         self.save_busy = True
@@ -617,6 +666,8 @@ class Launcher:
                     export_save(destination, value)
                     result = value
                 else:
+                    if game_running():
+                        raise ValueError("save_close_game")
                     result = str(import_save(value, destination))
                 self.events.put(("save_complete", result))
             except Exception as error:
@@ -1000,7 +1051,15 @@ class Launcher:
                 continue
             if kind in ("save_complete", "save_error"):
                 self.save_busy = False
-                self.save_status = self.t("save_done", path=value) if kind == "save_complete" else str(value)
+                self.save_status = self.t("save_done", path=value) if kind == "save_complete" else self.t(value) if value in MESSAGES["en"] else str(value)
+                changed = self.page == "saves" or changed
+                continue
+            if kind == "save_scan_complete":
+                self.save_busy = False
+                self.save_sources = value["profiles"]
+                self.save_source = self.save_sources[0]["folder"] if self.save_sources else ""
+                self.save_status = self.t("save_search_found", count=len(self.save_sources)) if self.save_sources else self.t("save_search_none")
+                if value["limited"]: self.save_status += " " + self.t("save_search_limited")
                 changed = self.page == "saves" or changed
                 continue
             if kind in ("progress", "phase"):

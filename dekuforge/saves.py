@@ -1,6 +1,7 @@
 """Bounded save-only import/export with retained rollback directories."""
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
+import os
 import re
 import shutil
 import tempfile
@@ -8,6 +9,90 @@ import uuid
 import zipfile
 
 LIMIT = 128 * 1024 * 1024
+
+
+def profile_summary(folder, require_progress=True):
+    files = save_files(folder, require_progress=require_progress)
+    progress = [file for file, name in files if name.endswith('/progress.sav')]
+    return {"folder": str(Path(folder).absolute()), "slots": [file.parent.name for file in progress],
+            "modified": max((file.stat().st_mtime for file in progress), default=0),
+            "files": len(files), "bytes": sum(file.stat().st_size for file, _ in files)}
+
+
+def game_save_profiles(executable):
+    """Only inspect committed user profiles of the selected owned game."""
+    if not executable or not Path(executable).is_file():
+        return []
+    game = Path(executable).absolute().parent
+    if not (game / '.dekuforge-stable-build').is_file():
+        return []
+    folder = game / 'profile/save'
+    if folder.resolve() != folder or not folder.is_dir():
+        return []
+    result = []
+    try:
+        with os.scandir(folder) as entries:
+            children = []
+            for entry in entries:
+                children.append(Path(entry.path))
+                if len(children) >= 128:
+                    break
+    except OSError:
+        return []
+    for child in sorted(children):
+        if re.fullmatch(r'[0-9a-fA-F]{32}', child.name) and not is_link(child) and child.is_dir():
+            try:
+                result.append(profile_summary(child, require_progress=False))
+            except (OSError, ValueError):
+                continue
+        if len(result) >= 32:
+            break
+    return result
+
+
+def discover_saves(folder, max_entries=6000, max_depth=7):
+    """Bounded, read-only search; never follow links or inspect game assets."""
+    folder = Path(folder).absolute()
+    if folder.resolve() != folder or not folder.is_dir():
+        raise ValueError('save_search_folder')
+    skip = {'romfs', 'exefs', 'build-cache', 'shader-cache', 'generated', 'python',
+            'pydeps', 'toolchain', 'node_modules', '.git', 'save-backup', 'save-tx', 'cache'}
+    pending, profiles, visited, limited = [(folder, 0)], [], 0, False
+    while pending:
+        current, depth = pending.pop()
+        if any((current / f'slot_0{i}/progress.sav').is_file() for i in range(6)):
+            try:
+                profiles.append(profile_summary(current))
+            except (OSError, ValueError):
+                pass
+            if len(profiles) >= 32:
+                limited = True
+                break
+            continue
+        if depth >= max_depth:
+            limited = True
+            continue
+        try:
+            children = []
+            with os.scandir(current) as entries:
+                for entry in entries:
+                    visited += 1
+                    if visited > max_entries:
+                        limited = True
+                        pending.clear()
+                        break
+                    path = Path(entry.path)
+                    if (entry.is_dir(follow_symlinks=False) and not is_link(path)
+                            and entry.name.lower() not in skip and '.backup-' not in entry.name.lower()):
+                        children.append(path)
+            if visited <= max_entries:
+                # Visit the normal installed-game route before unrelated source trees.
+                children.sort(key=lambda path: (path.name.lower() in {'play', 'profile', 'save'}, path.name.casefold()))
+                pending.extend((path, depth+1) for path in children)
+        except OSError:
+            continue
+    profiles.sort(key=lambda item: (-item['modified'], item['folder'].casefold()))
+    return {"profiles": profiles, "limited": limited}
 
 
 def is_link(path):
