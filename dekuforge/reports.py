@@ -90,7 +90,7 @@ def read_log(path, maximum=MAX_LOG):
 
 def collect(root, executable="", incident=None):
     metadata={"versions":{"launcher":COMPONENTS["launcher"]["version"],"engine":COMPONENTS["engine"]["version"],
-        "base_engine":COMPONENTS["engine"]["base_version"],"buildkit":COMPONENTS["buildkit"]["version"]},
+        "base_engine":COMPONENTS["engine"].get("base_version", "independent"),"buildkit":COMPONENTS["buildkit"]["version"]},
         "system":hardware(),"incident":incident or {},
               "collected_utc":datetime.now(timezone.utc).isoformat()}
     paths=[];folder=Path(executable).parent if executable else None

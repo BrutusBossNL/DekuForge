@@ -1,5 +1,10 @@
 # Local builds and launcher distribution
 
+> Independent branch override: this inherited guide describes main's release
+> system. Installer/runtime provisioning and main-channel updates are disabled
+> here. The independent engine cannot yet produce a playable or distributable
+> game builder. See [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md).
+
 Distribute the small Windows launcher package, not a built game. The package
 contains `DekuForge.exe`, launcher source, original extensions, branding and build
 orchestration. `tools/package_launcher.py` uses an explicit allowlist and checks

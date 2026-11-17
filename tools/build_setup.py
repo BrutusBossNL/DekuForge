@@ -15,6 +15,8 @@ from dekuforge import COMPONENTS
 
 
 def main():
+    if COMPONENTS['engine'].get('backend') == 'independent':
+        raise RuntimeError('Independent branch setup is not ready; vendor-backend packaging is disabled')
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--toolchain",type=Path,required=True)
     parser.add_argument("--tag",default="v"+COMPONENTS["launcher"]["version"])

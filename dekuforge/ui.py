@@ -118,7 +118,7 @@ class Launcher:
         self.render()
         self.tick_job = root.after(100, self.tick)
         root.bind("<Destroy>", self.on_destroy, add="+")
-        if settings["check_updates"] and "--self-test" not in sys.argv:
+        if settings["check_updates"] and COMPONENTS['launcher'].get('updates', True) and "--self-test" not in sys.argv:
             root.after(2500, self.check_updates)
         if "--self-test" not in sys.argv:
             root.after(3000, self.resume_game_update)
@@ -391,6 +391,10 @@ class Launcher:
         self.button(self.content, self.t("local_versions"), self.open_library).pack(anchor="w", pady=12)
 
     def install_selected_release(self, automatic=False):
+        if not COMPONENTS['launcher'].get('updates', True):
+            self.release_status = self.t('independent_updates_disabled')
+            self.render()
+            return
         if self.management_busy():
             return
         release = next((r for r in self.releases if r["version"] == self.selected_release), self.releases[0] if self.releases else None)
@@ -452,6 +456,10 @@ class Launcher:
             return True
 
     def check_updates(self):
+        if not COMPONENTS['launcher'].get('updates', True):
+            self.release_status = self.t('independent_updates_disabled')
+            if self.page == 'updates': self.render()
+            return
         if self.release_busy:
             return
         self.release_busy = True

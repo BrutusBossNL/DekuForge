@@ -1,25 +1,29 @@
 {
   "schema": 1,
   "launcher": {
-    "version": "0.2.0",
-    "stage": "early-access",
+    "version": "0.3.0-independent.1",
+    "stage": "development",
     "bug_reports": true,
-    "uninstaller": true
+    "uninstaller": true,
+    "updates": false
   },
   "engine": {
-    "version": "0.11.0",
-    "base_version": "0.10.1",
-    "base_revision": "5ae55db41c7d11c4e997d2676019939a936e560b"
+    "version": "0.1.0-independent.1",
+    "backend": "independent",
+    "reference_version": "main: 0.11.0 / NX2navi 0.10.1",
+    "playable": false
   },
   "buildkit": {
-    "version": "0.2.1"
+    "version": "0.3.0-independent.1"
   },
   "python": {
-    "version": "3.14.9",
-    "id": "3.14.9-cda05f04",
-    "url": "https://github.com/tangerineturtle1/NX2navi/releases/download/v0.10.1/NX2navi-runtime-py3.14.9-7a37dbc9.zip",
-    "sha256": "cda05f04bad6bc6d2f38b23d9db6fefc8c3a707b40d132a1a596f8fbfb261e78",
-    "size": 40138880
+    "version": "3.14+",
+    "id": "development-interpreter",
+    "source": "external development Python with Tk and Pillow",
+    "status": "not-packaged",
+    "url": null,
+    "sha256": null,
+    "size": 0
   },
   "dotnet": {
     "version": "10.0.404"

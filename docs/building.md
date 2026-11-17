@@ -1,5 +1,11 @@
 # Building DekuForge from source
 
+> Independent branch: these inherited Windows setup instructions describe main.
+> Vendor provisioning/packaging is disabled here. Use an external development
+> Python 3.14+ with Tk and the requirements files, then run
+> `python run_builder.py --doctor` and the source tests. See
+> [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md) for the current independent route.
+
 Windows x64 is the current acceptance target. Linux source checks run in CI;
 Linux gameplay, iOS and VR are not validated DekuForge targets yet.
 

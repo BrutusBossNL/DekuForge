@@ -12,13 +12,14 @@ from dekuforge.native import prepare_archive
 from dekuforge.gameplan import prepare_game
 from dekuforge.engine import build_independent, engine_report, generate_prepared
 from dekuforge.romfs import build_romfs
+from dekuforge import COMPONENTS
 import json
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--nup")
-    parser.add_argument("--backend", default=str(default_backend()))
+    parser.add_argument("--backend", default="" if COMPONENTS['engine'].get('backend') == 'independent' else str(default_backend()))
     action = parser.add_mutually_exclusive_group()
     action.add_argument("--check", action="store_true")
     action.add_argument("--extract", action="store_true")
@@ -34,6 +35,8 @@ def main():
     parser.add_argument("--limit", type=int, default=0, help="function limit for generation smoke checks")
     parser.add_argument("--out", type=Path, help="independent installation destination, or image directory with --romfs")
     args = parser.parse_args()
+    if COMPONENTS['engine'].get('backend') == 'independent' and (args.compat or args.generate or args.runtime):
+        parser.error('Legacy backend generation/runtime routes are reference-only in this branch. Use --doctor for the independent status.')
     if args.doctor:
         print(json.dumps(engine_report(), indent=2))
         return 0

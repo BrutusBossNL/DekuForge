@@ -1,5 +1,11 @@
 # Provenance and reuse
 
+> Independent branch status: the stable backend described below is inherited
+> reference material, not the default build route here. The new original CPU
+> component and reuse gates are documented in [INDEPENDENT_ENGINE.md](docs/INDEPENDENT_ENGINE.md).
+> Existing notices/history remain intact; no blanket relicensing or clean-room
+> claim is made. Independent runtime/installer distribution is not ready.
+
 ## Active Windows backend and scope of the root license
 
 The default builder stages NX2navi **0.10.1**, revision

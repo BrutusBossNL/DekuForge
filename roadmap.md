@@ -1,5 +1,9 @@
 # DekuForge roadmap
 
+> This is the independent-engine development branch. Its overriding roadmap and
+> equal-or-better acceptance gates are in [INDEPENDENT_ENGINE.md](docs/INDEPENDENT_ENGINE.md).
+> The inherited release roadmap below applies to the stable reference on main.
+
 This roadmap records planned work, not promises of support or delivery dates.
 The repository remains private until Windows release gates and component
 distribution requirements are satisfied.

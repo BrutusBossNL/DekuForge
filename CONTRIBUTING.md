@@ -1,5 +1,12 @@
 # Contributing to DekuForge
 
+For the `independent` branch, start with
+[INDEPENDENT_ENGINE.md](docs/INDEPENDENT_ENGINE.md). This branch must meet or exceed
+main's results before replacing it. Record provenance for reused code and accept
+only identified open-source/redistribution grants. Do not port restricted code
+by changing its style, names or layout. The inherited main-specific details below
+describe the reference release path, not a working independent game builder.
+
 Thank you for helping. DekuForge develops independently of NX2navi, using its
 stable 0.10.1 source as a reference and foundation. Preserve credits and notices
 for upstream and other reused components. Original contributions use the root

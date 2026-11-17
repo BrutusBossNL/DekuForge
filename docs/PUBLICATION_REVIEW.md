@@ -1,7 +1,10 @@
 # First Early Access publication review
 
 Target: DekuForge 0.2.0 — Early Access. The owner has requested public release.
-The repository has not been made public during this review.
+The owner subsequently made the repository public separately. That visibility
+change does not resolve the findings below. The `independent` branch now starts
+replacing the dependencies identified here; it is not yet a cleared replacement
+engine. See [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md).
 
 ## Content and validation
 

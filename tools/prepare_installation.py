@@ -9,6 +9,9 @@ from dekuforge.stable_engine import stage_stable, ensure_native_tools, prepare_r
 
 
 def main():
+    from dekuforge import COMPONENTS
+    if COMPONENTS['engine'].get('backend') == 'independent':
+        raise RuntimeError('Independent runtime/toolchain provisioning is not packaged. No NX2navi source or runtime will be downloaded.')
     source=stage_stable()
     prepare_release_data(source,lambda kind,value:print(value,flush=True))
     ensure_native_tools(source,lambda kind,value:print(value,flush=True))

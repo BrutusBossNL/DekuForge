@@ -25,7 +25,9 @@ class DistributionTests(unittest.TestCase):
 
     def test_launcher_engine_and_buildkit_versions_have_separate_roles(self):
         self.assertEqual(__version__, COMPONENTS["launcher"]["version"])
-        self.assertEqual(COMPONENTS["engine"]["base_version"], "0.10.1")
+        self.assertEqual(COMPONENTS["engine"]["backend"], "independent")
+        self.assertNotIn("base_version", COMPONENTS["engine"])
+        self.assertIsNone(COMPONENTS["python"]["url"])
         self.assertNotEqual(COMPONENTS["launcher"]["version"], COMPONENTS["engine"]["version"])
         self.assertIn("version", COMPONENTS["buildkit"])
 

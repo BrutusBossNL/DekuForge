@@ -3,6 +3,28 @@
 Reforging a legend. An independent desktop launcher and local game-build project.
 The project's original source is open source under the root MIT license.
 
+
+## Independent branch overrides
+
+This branch is `independent`, not the stable main build. The default backend is
+`dekuforge/independent_engine.py`; vendor runtime/source downloads, main-channel
+application updates and installer packaging are disabled until independent
+replacements exist. Never fall back to the old 0.3.10 or stable 0.10.1 engine.
+Use the stable main game as a behavioral/performance reference only. Reuse only
+code with a recorded open-source or redistribution grant; comply with its terms.
+Rewriting, renaming or restructuring restricted code is not provenance clearance.
+Record source, revision, scope, license and validation for every imported part.
+
+Do not claim clean-room provenance: this branch inherits repository history and
+contributors may have seen reference source. The historical source and notices
+below remain for audit, not as approved inputs to the new implementation. See
+`docs/INDEPENDENT_ENGINE.md`. Equal or better results than main are the acceptance
+gate, not an achieved property of this initial branch. Keep current games/saves
+and main's runtime, preferences and tools outside branch experiments.
+
+The Architecture section below describes the inherited main route. These branch
+overrides take precedence wherever they conflict with that historical route.
+
 ## Architecture
 
 - The base game backend is stable 0.10.1, pinned in `dekuforge/stable_engine.py`.

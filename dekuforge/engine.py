@@ -13,9 +13,13 @@ import sys
 from .core import ROOT, load_installation
 from .gameplan import prepare_game
 from .modules import normalize_prepared
+from . import COMPONENTS
 
 
 def engine_report(root=ROOT):
+    if COMPONENTS['engine'].get('backend') == 'independent':
+        from .independent_engine import report
+        return report(root)
     engine = root / "build/engine-0.10.1"
     revision = "5ae55db41c7d11c4e997d2676019939a936e560b"
     active = load_installation(root / "local/settings.json")
@@ -64,6 +68,9 @@ def verify_engine_sources(root=ROOT):
 
 
 def build_independent(filename, notify, workspace=ROOT, destination=None):
+    if COMPONENTS['engine'].get('backend') == 'independent':
+        from .independent_engine import build
+        return build(filename, notify, destination)
     from .workflow import validate_destination
     target = validate_destination(destination or workspace / "build" / "game", load_installation())
     # The explicitly selected production base is the complete stable 0.10.1 path.
