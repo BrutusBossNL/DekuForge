@@ -13,7 +13,15 @@ notices and LICENSE-ADDITIONS. The local reference repository can supply the Git
 exact commit archive is downloaded from GitHub. Every selected source file is
 checked against `dekuforge/stable_engine_source.json`; missing or changed bytes
 stop staging before a build can run. The source manifest records the revision
-and original file hashes.
+and original file hashes. The separately pinned official 0.10.1 application archive
+supplies the release-only pipeline list, controller art, toolchain lock and credits.
+Its size and SHA-256 are verified before selective bounded extraction. Neither
+that archive nor the derived pipeline metadata enters the Git repository. Runtime
+binaries from the archive are not extracted or substituted for our native build.
+A changed release-data identity invalidates shader preparation while preserving
+completed native compilation and extracted input. The stable shader-stage key alone
+does not include the presence of this release-only data, so this explicit
+invalidation is necessary.
 The source is not committed or relabeled as MIT. Original DekuForge orchestration
 remains under its existing license.
 
@@ -73,8 +81,14 @@ adapted to DekuForge without changing the renderer.
 Important test distinction: `--shot` disables asynchronous pipeline building for
 deterministic captures. `tools/test_stable_game.py` now defaults to the ordinary
 startup route, with periodic captures; `--deterministic-shot` remains explicit.
-Ordinary startup/prewarm verification follows the deterministic baseline before
-activation. `--capture` enables bounded frame recording and settings-page captures.
+The first ordinary start reproduced temporary incomplete draws while compiling
+pipelines: it had no pipeline keys from the source-only build. Its next start
+prebuilt 500 recorded pipelines (zero failures or remaining jobs) before play,
+measured 47.36 average FPS and a 20.63 FPS one-percent low over 951 gameplay
+intervals, and logged zero incomplete frames shown at the available checkpoint.
+This exposed the missing release-only list: the verified 0.10.1 release supplies
+9,814 pipeline records and 7,447 associated shader variants. The complete
+release preparation is now being tested before activation. `--capture` enables bounded frame recording and settings-page captures.
 
 The launcher build route is the same `build_independent` route exercised by
 `run_builder.py`. Successful builds receive version metadata and enter the build
@@ -83,7 +97,8 @@ An unchanged archive identity can use the stable builder's `--rebuild` mode;
 a changed archive or incomplete extraction uses the selected NUP again.
 
 The stable translator's synthetic smoke test passed, including malformed-request
-recovery and SPIR-V validation. All 69 project tests pass. The separate launcher
+recovery and SPIR-V validation. The project test suite covers archive integrity, safe extraction, input reuse,
+release-data invalidation and destination protection. The separate launcher
 self-test rendered 40 views in five languages with the correct project logo,
 verified native icon and one top-level window.
 

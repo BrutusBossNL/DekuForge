@@ -13,6 +13,9 @@ from .core import ROOT
 
 REVISION = "5ae55db41c7d11c4e997d2676019939a936e560b"
 REFERENCE = ROOT.parent / "NX2Navi/Contribute/NX2navi-cheat-manager"
+RELEASE_URL = "https://github.com/tangerineturtle1/NX2navi/releases/download/v0.10.1/NX2navi-app-0.10.1.zip"
+RELEASE_SHA256 = "0aad51adec03196d2cb1a65dc6e697c0da2146cb1614b22105beab067151f0f7"
+RELEASE_SIZE = 98116018
 
 
 def source_manifest():
@@ -85,6 +88,48 @@ def stage_stable():
     return output
 
 
+def prepare_release_data(source, notify):
+    """Retain the release's prewarm metadata and button art outside the source repository."""
+    archive = ROOT / "local/build-tools/NX2navi-app-0.10.1.zip"
+    archive.parent.mkdir(parents=True, exist_ok=True)
+    def verified(path):
+        if not path.is_file() or path.stat().st_size != RELEASE_SIZE:
+            return False
+        with path.open("rb") as stream:
+            return hashlib.file_digest(stream, "sha256").hexdigest() == RELEASE_SHA256
+    if not verified(archive):
+        notify("log", "Downloading verified stable 0.10.1 pipeline metadata and controller art\n")
+        partial = archive.with_suffix(".part")
+        with urlopen(RELEASE_URL, timeout=90) as response, partial.open("wb") as output:
+            size = 0
+            while block := response.read(1024 * 1024):
+                size += len(block)
+                if size > RELEASE_SIZE:
+                    raise ValueError("Stable release archive exceeds its size limit")
+                output.write(block)
+        if not verified(partial):
+            raise ValueError("Stable release archive checksum mismatch")
+        partial.replace(archive)
+    with zipfile.ZipFile(archive) as package:
+        selected = [item for item in package.infolist() if not item.is_dir() and (
+            item.filename in {"tools/data/pipeline_list.bin", "toolchain.lock.json", "THIRD_PARTY_NOTICES.md"}
+            or item.filename.startswith("prompt-art/") and Path(item.filename).suffix.lower() in {".png", ".txt"})]
+        if len(selected) > 1024 or sum(item.file_size for item in selected) > 32 * 1024**2:
+            raise ValueError("Stable release data exceeds its limits")
+        if not any(item.filename == "tools/data/pipeline_list.bin" for item in selected):
+            raise ValueError("Stable release pipeline list is missing")
+        for item in selected:
+            name = "RELEASE-NOTICES.md" if item.filename == "THIRD_PARTY_NOTICES.md" else item.filename
+            target = source / name
+            if not target.resolve().is_relative_to(source.resolve()) or (item.external_attr >> 16) & 0o170000 == 0o120000:
+                raise ValueError("Unsafe stable release data path")
+            data = package.read(item)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if not target.is_file() or target.read_bytes() != data:
+                target.write_bytes(data)
+    notify("log", "Stable release pipeline list and controller art are ready\n")
+
+
 def prepare_dlss(source, notify):
     """Use the stable kit's exact vendor-library pin and retain its notice."""
     spec=importlib.util.spec_from_file_location("stable_dlss_pin",source / "tools/dlss_pin.py")
@@ -126,6 +171,20 @@ def build_input_arguments(filename, output):
     return ["--nup",str(filename)]
 
 
+def release_preparation_changed(output):
+    marker = output / ".dekuforge-release-data"
+    if marker.is_file() and marker.read_text(encoding="ascii").strip() == RELEASE_SHA256:
+        return False
+    state_path = output / "build-cache/state.json"
+    if state_path.is_file():
+        state = json.loads(state_path.read_text(encoding="utf-8"))
+        state.get("steps", {}).pop("shaders", None)
+        temporary = state_path.with_suffix(".tmp")
+        temporary.write_text(json.dumps(state, indent=1), encoding="utf-8")
+        temporary.replace(state_path)
+    return True
+
+
 def build_stable(filename, notify, destination):
     output = Path(destination).absolute()
     if output.resolve() != output:
@@ -139,6 +198,9 @@ def build_stable(filename, notify, destination):
     notify("phase", {"phase":"checking"})
     notify("log", "Preparing stable 0.10.1 source " + REVISION + "\n")
     source = stage_stable()
+    prepare_release_data(source, notify)
+    if release_preparation_changed(output):
+        notify("log", "Preparing the complete stable release pipeline list before play\n")
     prepare_dlss(source,notify)
     notify("phase", {"phase":"shaders"})
     preparation = [sys.executable, str(ROOT / "tools/build_stable_translator.py")]
@@ -187,6 +249,7 @@ def build_stable(filename, notify, destination):
     temporary=output / "dekuforge-build-info.tmp"
     temporary.write_text(json.dumps(info,indent=2),encoding="utf-8")
     temporary.replace(output / "dekuforge-build-info.json")
+    (output / ".dekuforge-release-data").write_text(RELEASE_SHA256 + "\n", encoding="ascii")
     from .build_library import BuildLibrary
     BuildLibrary(ROOT).register(exe,dump=str(filename),version="0.10.1 / 1.1.1",owned=True)
     return exe

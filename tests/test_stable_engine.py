@@ -69,3 +69,34 @@ class StableEngineTests(unittest.TestCase):
             state["steps"].pop("romfs")
             record.write_text(json.dumps(state),encoding="utf-8")
             self.assertEqual(stable_engine.build_input_arguments(source,output),["--nup",str(source)])
+
+    def test_verified_release_data_includes_pipeline_art_and_notices_but_no_runtime_binary(self):
+        package=io.BytesIO()
+        with zipfile.ZipFile(package,"w") as z:
+            z.writestr("tools/data/pipeline_list.bin",b"synthetic metadata")
+            z.writestr("prompt-art/pad/button.png",b"synthetic art")
+            z.writestr("THIRD_PARTY_NOTICES.md","retained release credit")
+            z.writestr("bin/runtime.dll",b"must not be extracted")
+        data=package.getvalue()
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder).resolve();source=root/"source";source.mkdir()
+            archive=root/"local/build-tools/NX2navi-app-0.10.1.zip"
+            archive.parent.mkdir(parents=True);archive.write_bytes(data)
+            with patch.object(stable_engine,"ROOT",root),patch.object(stable_engine,"RELEASE_SIZE",len(data)),patch.object(stable_engine,"RELEASE_SHA256",hashlib.sha256(data).hexdigest()),patch.object(stable_engine,"urlopen") as download:
+                stable_engine.prepare_release_data(source,lambda *args:None)
+                download.assert_not_called()
+            self.assertEqual((source/"tools/data/pipeline_list.bin").read_bytes(),b"synthetic metadata")
+            self.assertEqual((source/"RELEASE-NOTICES.md").read_text(),"retained release credit")
+            self.assertFalse((source/"bin").exists())
+
+    def test_changed_release_reprepares_shaders_without_discarding_native_or_extracted_work(self):
+        with tempfile.TemporaryDirectory() as folder:
+            output=Path(folder).resolve();cache=output/"build-cache";cache.mkdir()
+            path=cache/"state.json"
+            state={"steps":{"exefs":"kept","romfs":"kept","compile":"kept","shaders":"old"}}
+            path.write_text(json.dumps(state),encoding="utf-8")
+            self.assertTrue(stable_engine.release_preparation_changed(output))
+            updated=json.loads(path.read_text())
+            self.assertEqual(updated["steps"],{"exefs":"kept","romfs":"kept","compile":"kept"})
+            (output/".dekuforge-release-data").write_text(stable_engine.RELEASE_SHA256,encoding="ascii")
+            self.assertFalse(stable_engine.release_preparation_changed(output))
