@@ -92,6 +92,25 @@ free space for your dump, tool cache and game build; updates retain a separate
 working build until the replacement succeeds. See [building.md](docs/building.md).
 Linux, iOS and VR are not supported releases yet.
 
+### Windows SmartScreen - unsigned preview
+
+The current preview installer, launcher and uninstaller are **not digitally
+signed**. Windows may show **"Windows protected your PC"** and **"Unknown
+publisher"** when you open a downloaded EXE. This is a known distribution
+limitation; an unrecognized-app warning alone is not a malware finding or proof
+that a file is safe.
+
+Only continue if you trust the project, obtained the file from our official
+release and verified it against the release checksum. If Windows offers it,
+**More info > Run anyway** allows that file to run. Managed PCs may prohibit
+this. Do not disable Microsoft Defender or SmartScreen. Stop if the file source
+or checksum is unexpected, or security software reports a specific threat.
+
+Trusted publisher signing is planned. Even signed new releases can receive
+SmartScreen warnings while reputation develops. See Microsoft's
+[SmartScreen explanation](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation)
+and our [distribution notes](docs/DISTRIBUTION.md#windows-code-signing).
+
 ## Uninstalling - Windows
 
 Open **Settings > Apps > Installed apps > DekuForge > Uninstall**, or run
@@ -114,6 +133,8 @@ report offered after a detected crash. Check the diagnostics before submitting.
 
 - Full first-time Windows installation and automatic-update acceptance are still
   being tested. Local package checks do not replace a clean-machine game test.
+- Preview EXEs are unsigned and can trigger SmartScreen; see the
+  [installation note above](#windows-smartscreen---unsigned-preview).
 - Game validation currently covers limited hardware and scenes; FPS and driver
   compatibility need broader testing. A local 20-second candidate test averaged
   51.9 FPS on an RTX 2080; this is not a general performance guarantee.

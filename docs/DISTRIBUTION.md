@@ -29,6 +29,53 @@ engine inputs or build dependencies change. Existing per-stage build state track
 input identity and generated products; verified shader preparations can be reused
 only when GPU source, translator and shader seed inputs still match.
 
+## Windows code signing
+
+Checked on 2026-11-17: the local setup, launcher and uninstaller report
+`NotSigned` in Windows Authenticode inspection. Branding and SHA-256 inventories
+are not publisher signatures. The current preview documents possible SmartScreen
+warnings in the README; it does not claim a verified publisher.
+
+Signing is feasible once a trusted signing identity is available. Microsoft
+[Artifact Signing](https://learn.microsoft.com/en-us/azure/artifact-signing/quickstart)
+requires identity validation. Public Trust currently accepts EU organizations;
+individual developers must be located in the US or Canada, so a Netherlands-based
+individual cannot assume eligibility. Microsoft's
+[comparison](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/code-signing-options)
+lists an indicative starting cost of about USD 9.99/month; confirm eligibility
+and current charges before subscribing. A suitable trusted certificate provider
+is another route, subject to its identity and key-storage requirements.
+
+[SignPath Foundation](https://signpath.org/terms) offers free signing to qualifying
+open-source projects. It requires open-source licensing for all components,
+maintained/released software and an approved build/review process. Our private
+preview and restricted backend terms must not be presented as automatically
+qualifying. A self-signed certificate does not establish public Windows trust.
+
+Planned signing order, not yet implemented in the packaging scripts:
+
+1. Build `DekuForge.exe` and `DekuForge-Uninstall.exe`, sign both with SHA-256
+   and a trusted timestamp, and verify their Authenticode signatures.
+2. Package those exact signed files, then generate the ZIP inventory and hashes.
+3. Embed that ZIP in `DekuForge-Setup.exe`, sign and verify the completed setup.
+4. Generate `DekuForge-release.json` from the final signed setup and final ZIP.
+   Publish those exact bytes together; do not alter an EXE after signing or use
+   hashes from an earlier unsigned package.
+
+This needs explicit packaging hooks: `tools/build_setup.py` currently recompiles
+the uninstaller and immediately packages it. Signing an old uninstaller before
+running that script would be overwritten. Configure signing credentials outside
+the repository, with restricted CI permissions; never commit private keys or
+tokens. No certificate has been purchased or signing account configured.
+
+Sign only the project's distributed launcher/tooling artifacts. The locally
+generated game is not a release asset and is not uploaded for signing.
+According to Microsoft's
+[SmartScreen documentation](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation),
+trusted signatures can show the verified publisher and build reputation, but
+new files can still receive warnings. EV certificates no longer provide an
+automatic SmartScreen bypass. Never promise a warning-free first installation.
+
 ## Bootstrap and cache
 
 The native launcher looks for its pinned runtime in `python/<component-id>`.
