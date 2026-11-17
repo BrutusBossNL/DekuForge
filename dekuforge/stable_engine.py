@@ -55,7 +55,7 @@ def stage_stable():
             if prefix and not item.filename.startswith(prefix):
                 raise ValueError("Unexpected archive root")
             relative = Path(item.filename[len(prefix):])
-            if relative.parts[0] not in {"runtime", "recomp", "tools", "docs"} and relative.name not in {
+            if relative.parts[0] not in {"runtime", "recomp", "tools", "docs"} and relative.as_posix() not in {"launcher/__init__.py", "launcher/net.py", "launcher/toolchain.py"} and relative.name not in {
                 "VERSION", "LICENSE", "LICENSE-ADDITIONS", "THIRD_PARTY_NOTICES.md", "config.example.toml"}:
                 continue
             target = output / relative
@@ -156,6 +156,36 @@ def prepare_dlss(source, notify):
     (folder / pin.NOTICE).write_text(pin.notice_text(),encoding="utf-8")
 
 
+def ensure_native_tools(source, notify):
+    required=("bin/clang.exe","bin/clang++.exe","bin/SDL3.dll","lib/libSDL3.dll.a","include/vma")
+    own=ROOT / "local/build-tools/native/msys64/ucrt64"
+    existing=Path(os.environ.get("LOCALAPPDATA","")) / "Programs/NX2navi/toolchain/msys64/ucrt64"
+    candidates=[own,existing]
+    toolchain=next((folder for folder in candidates if all((folder/name).exists() for name in required)),None)
+    if toolchain is None:
+        command=[sys.executable,str(ROOT / "tools/bootstrap_stable_toolchain.py")]
+        with subprocess.Popen(command,cwd=ROOT,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
+                text=True,encoding="utf-8",errors="replace",creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0)) as worker:
+            for line in worker.stdout:
+                notify("log",line)
+            if worker.wait():
+                raise RuntimeError("Native build tool preparation failed")
+        toolchain=own
+    if not all((toolchain/name).exists() for name in required):
+        raise RuntimeError("Native build tools are incomplete")
+    shaders=ROOT / "local/build-tools/shaders/ucrt64/bin"
+    if not all((shaders/name).is_file() for name in ("glslc.exe","glslangValidator.exe","spirv-val.exe","ld.lld.exe")):
+        with subprocess.Popen([sys.executable,str(ROOT / "tools/bootstrap_shader_tools.py")],cwd=ROOT,
+                stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,encoding="utf-8",errors="replace",
+                creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0)) as worker:
+            for line in worker.stdout:
+                notify("log",line)
+            if worker.wait():
+                raise RuntimeError("Shader build tool preparation failed")
+    notify("log","Native build tools: " + str(toolchain) + "\n")
+    return toolchain
+
+
 def build_input_arguments(filename, output):
     """Reuse extracted input only for the same archive identity recorded by the stable builder."""
     filename=Path(filename).absolute()
@@ -211,7 +241,7 @@ def build_stable(filename, notify, destination):
             notify("log",line)
         if worker.wait():
             raise RuntimeError("Stable shader translator preparation failed")
-    toolchain = Path(os.environ["LOCALAPPDATA"]) / "Programs/NX2navi/toolchain/msys64/ucrt64"
+    toolchain = ensure_native_tools(source, notify)
     env = os.environ.copy()
     env["PATH"] = str(ROOT / "local/build-tools/shaders/ucrt64/bin") + os.pathsep + str(toolchain / "bin") + os.pathsep + env.get("PATH", "")
     command = [sys.executable, str(source / "tools/make_game.py"), *build_input_arguments(filename,output),

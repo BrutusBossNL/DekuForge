@@ -33,10 +33,9 @@ def main():
         shutil.copy2(driver.XLATE/name,work/name)
     dotnet=ROOT/"local/build-tools/dotnet-10.0.404/dotnet.exe"
     if not dotnet.is_file():
-        installed=shutil.which("dotnet")
-        if not installed:
-            raise RuntimeError("The .NET 10 SDK is required to build the stable shader translator")
-        dotnet=Path(installed)
+        subprocess.run([sys.executable,str(ROOT/"tools/bootstrap_build_tools.py"),"--dotnet"],check=True)
+    if not dotnet.is_file():
+        raise RuntimeError("The pinned .NET SDK could not be prepared")
     env=os.environ.copy();env["DOTNET_ROOT"]=str(dotnet.parent)
     env["DOTNET_CLI_HOME"]=str(ROOT/"local/dotnet-home")
     publish=driver.BUILD/"publish"

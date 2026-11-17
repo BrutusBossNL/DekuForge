@@ -106,14 +106,32 @@ Older experimental render PNG sets and their reproducible shader cache were
 removed to provide build space. The latest raw-depth capture, test logs, input
 dump, original game and save profiles were retained.
 
+## Native tool provisioning
+
+The stable release toolchain lock pins 31 native packages (170 MB compressed).
+The three original bootstrap modules are included in the verified source manifest;
+`tools/bootstrap_stable_toolchain.py` installs them under
+`local/build-tools/native/msys64/ucrt64`. Previously downloaded archives can be
+reused only after matching their pinned size and SHA-256. A valid existing compiler
+may be read as a fallback; an installed external launcher is not required.
+The shader compiler/linker tools and pinned .NET SDK are provisioned when missing.
+Python dependencies, including Pillow/fonttools for controller prompts, are listed
+in `requirements-engine.txt`.
+
+The owned native toolchain was installed using 31 verified cached packages, without
+changing the reference installation. Clang, clang++, SDL3.dll and the SDL import
+library matched the reference bytes. The owned compiler then compiled and ran a
+SDL/Vulkan probe successfully (SDL 3.4.20, Vulkan loader 1.4.341). A fresh machine's
+full network download and final installer still need independent acceptance.
+
 ## Remaining delivery work
 
 - Complete ordinary startup/prewarm and launcher Play validation of the final binary.
 - Test additional scenes, save/write/load, controllers and audio interactively;
   movie decoding already logs 1920x1080 AV1 at approximately 60 presented FPS.
 - Activate only the tested installation; retain the previous entry for rollback.
-- Complete fresh-machine compiler/SDK provisioning; this PC currently reuses its
-  installed native toolchain and an independently installed .NET SDK.
+- Validate native-tool downloads and first-time setup in a clean Windows environment;
+  owned local tool provisioning has passed the pinned-package and compile/run checks.
 - Bring over custom cheats and related game-menu extensions after the desktop
   baseline gates, without replacing the validated stable renderer.
 - Validate a complete first-time wizard build on a clean installation.

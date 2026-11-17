@@ -2,3 +2,7 @@
 numpy>=2.0
 lz4>=4.0
 zbic==1.0.1.post1
+
+# Controller prompt generation from the stable release art.
+Pillow>=12.0
+fonttools>=4.0
