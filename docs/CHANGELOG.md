@@ -2,6 +2,17 @@
 
 Component versions are independent. Published releases are not replaced in place.
 
+## Launcher 0.2.0 — first Early Access release
+
+Buildkit 0.2.1; engine 0.11.0. This release uses a normal version, without a
+preview suffix, and the launcher shows the Early Access stage. The preceding
+private test releases remain recorded below for update compatibility and history.
+
+The Windows launcher, installer, guided NX2navi save import, update path, issue
+reports and Cheat Manager integration are included. Broader platform and in-game
+acceptance limits remain documented in the README and roadmap. Publication is
+pending the concrete component-rights review in [PUBLICATION_REVIEW.md](PUBLICATION_REVIEW.md).
+
 ## Launcher 0.2.0-preview.2 / buildkit 0.2.1
 
 Engine: 0.11.0 over the pinned stable NX2navi 0.10.1 reference. No new game-engine

@@ -114,6 +114,7 @@ The owner now prioritizes the stable Windows baseline, DekuForge in-game UI and
 Cheat Manager before Linux parity, public distribution and iOS. Follow
 `docs/ROADMAP.md`. The owner
 now requires Windows setup, update, rollback and local game-rebuild acceptance
-before changing repository visibility. Keep the repository private throughout
-preview development. Keep source-test results separate from
+before changing repository visibility. The owner has now requested the first Early Access release and public repository.
+The concrete unresolved component-rights findings are recorded in
+`docs/PUBLICATION_REVIEW.md`; do not erase or misrepresent those findings. Keep source-test results separate from
 in-game platform validation. Do not upload game inputs or derived game code to CI.

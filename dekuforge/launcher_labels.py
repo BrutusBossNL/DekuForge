@@ -1,5 +1,6 @@
 """Localized launcher management screens (English, Dutch, German, Spanish, French)."""
 ROWS = {
+    "early_access": ("Early Access", "Early Access", "Early Access", "Acceso anticipado", "Accès anticipé"),
     "custom_game": ("Custom game", "Custom game", "Eigenes Spiel", "Juego personalizado", "Jeu personnalisé"),
     "dump_inside_build": ("Move the selected game dump outside this build before deleting it.", "Verplaats de gekozen gamedump buiten deze build voordat je die verwijdert.", "Verschiebe den gewählten Spiel-Dump vor dem Löschen aus diesem Build.", "Mueve el volcado seleccionado fuera de esta compilación antes de eliminarla.", "Déplacez le dump sélectionné hors de cette compilation avant de la supprimer."),
     "play": ("Play", "Spelen", "Spielen", "Jugar", "Jouer"),

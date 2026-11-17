@@ -9,7 +9,7 @@ distribution requirements are satisfied.
 - Validate setup from a single EXE on a clean Windows machine: chosen install
   folder, own runtime, verified tool downloads, first local build and Play.
 - Establish trusted Windows publisher signing and integrate signing/timestamping
-  before final release hashes. Until then, document unsigned-preview SmartScreen
+  before final release hashes. Until then, document unsigned-release SmartScreen
   prompts; signing itself does not guarantee immediate SmartScreen reputation.
 - Test Stable/Preview updates, downgrade, interruption recovery and failed-build
   rollback without losing settings, profiles or the previous working game.

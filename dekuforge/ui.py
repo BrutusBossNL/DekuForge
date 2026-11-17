@@ -10,7 +10,7 @@ import sys
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
-from . import __version__
+from . import __version__, COMPONENTS
 from . import reports
 import webbrowser
 from .core import ROOT, launch, load_settings, save_installation, update_settings
@@ -171,7 +171,8 @@ class Launcher:
             selected = self.page == name
             self.button(self.sidebar, self.t(name), lambda value=name: self.navigate(value),
                         primary=selected, anchor="w").pack(fill="x", padx=16, pady=5)
-        self.label(self.sidebar, f"{self.t('development')}\n{__version__}", 9, MUTED).pack(side="bottom", padx=22, pady=24)
+        stage = "early_access" if COMPONENTS["launcher"].get("stage") == "early-access" else "development"
+        self.label(self.sidebar, f"{self.t(stage)}\n{__version__}", 9, MUTED).pack(side="bottom", padx=22, pady=24)
 
     def navigate(self, page):
         self.cancel_intro()

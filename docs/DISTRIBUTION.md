@@ -64,7 +64,7 @@ UI improvement does not advance the game engine version.
 
 Checked on 2026-11-17: the local setup, launcher and uninstaller report
 `NotSigned` in Windows Authenticode inspection. Branding and SHA-256 inventories
-are not publisher signatures. The current preview documents possible SmartScreen
+are not publisher signatures. The current Early Access candidate documents possible SmartScreen
 warnings in the README; it does not claim a verified publisher.
 
 Signing is feasible once a trusted signing identity is available. Microsoft
@@ -130,7 +130,7 @@ own runtime, then passed the 40-screen, five-language, single-window self-test.
 This was an isolated-folder test on the development Windows machine, not a clean
 Windows VM or a complete fresh-machine game build.
 
-The preview now includes application installation/update transactions, durable
+The application includes installation/update transactions, durable
 recovery journals, pre-update backups and a post-install launcher health check.
 The health check renders its views with the root window withdrawn, records
 whether it was ever mapped, and fails if it becomes visible. Setup and updates
@@ -168,7 +168,7 @@ Users review source profiles before an explicit copy, with a retained destinatio
 backup. See [saves.md](saves.md) for scope, supported layouts and compatibility
 limits. This is folder/transaction validation, not a new in-game save-load result.
 
-The preview has a user-reviewed issue form with hardware/version information and
+The launcher has a user-reviewed issue form with hardware/version information and
 bounded, filtered text logs. It offers a prefilled GitHub browser page or direct
 submission using the user's existing GitHub CLI/token. It does not include an
 embedded maintainer token or submit automatically. Nonzero game exit codes and

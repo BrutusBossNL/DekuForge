@@ -38,14 +38,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Project status
 
-**Private Windows preview, undergoing installation and update acceptance testing.**
+**DekuForge 0.2.0 — first Windows Early Access release, prepared for publication.**
 The stable reference-based game has passed local play tests. The DekuForge 0.11.0
 candidate adds the custom in-game interface and Cheat Manager. The launcher and
-engine have independent versions: launcher **0.2.0-preview.2**, buildkit **0.2.1**
+engine have independent versions: launcher **0.2.0**, buildkit **0.2.1**
 and engine **0.11.0**.
-The repository stays private until the Windows setup, update and rollback paths
-are stable and component distribution terms are resolved. No public installer
-release is available yet.
+The repository currently remains private: the upstream distribution terms noted
+in [the publication review](docs/PUBLICATION_REVIEW.md) are still unresolved.
+No public installer release is available yet. Early Access describes the release
+stage; it does not promise complete platform or gameplay coverage.
 
 Private test previews can be offered to authorized GitHub users on the Preview
 channel. See [release history](docs/CHANGELOG.md) and
@@ -102,9 +103,9 @@ free space for your dump, tool cache and game build; updates retain a separate
 working build until the replacement succeeds. See [building.md](docs/building.md).
 Linux, iOS and VR are not supported releases yet.
 
-### Windows SmartScreen - unsigned preview
+### Windows SmartScreen - unsigned release
 
-The current preview installer, launcher and uninstaller are **not digitally
+The current Early Access installer, launcher and uninstaller are **not digitally
 signed**. Windows may show **"Windows protected your PC"** and **"Unknown
 publisher"** when you open a downloaded EXE. This is a known distribution
 limitation; an unrecognized-app warning alone is not a malware finding or proof
@@ -143,8 +144,8 @@ report offered after a detected crash. Check the diagnostics before submitting.
 
 - Full first-time Windows installation and automatic-update acceptance are still
   being tested. Local package checks do not replace a clean-machine game test.
-- Preview EXEs are unsigned and can trigger SmartScreen; see the
-  [installation note above](#windows-smartscreen---unsigned-preview).
+- Release EXEs are unsigned and can trigger SmartScreen; see the
+  [installation note above](#windows-smartscreen---unsigned-release).
 - A build tool can stop with Windows interruption status `0xC000013A`.
   Completed stages are retained: retry with the same archive and build folder.
   The native build worker hides tool consoles; the status alone cannot identify
