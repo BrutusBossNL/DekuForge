@@ -75,6 +75,34 @@ class UpdateTests(unittest.TestCase):
             self.assertEqual((profile/"progress.sav").read_bytes(),b"save")
             self.assertEqual(json.loads((root/"local/settings.json").read_text())["executable"],str(result))
 
+    def test_game_update_keeps_mod_payload_and_order_in_the_new_build(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            active = root/'working/DekuForgeGame.exe'
+            active.parent.mkdir()
+            active.write_bytes(b'working game')
+            (active.parent/'.dekuforge-stable-build').touch()
+            mod = active.parent/'mods/Textures/romfs/Actor/sample.txt'
+            mod.parent.mkdir(parents=True)
+            mod.write_bytes(b'synthetic mod asset')
+            (active.parent/'nx2navi.ini').write_text('mods_order = Textures\nmods_disabled = Textures\n')
+            (active.parent/'.dekuforge-mod-imports.json').write_text('{"pack.zip":{"mod":"Textures","sha256":"test"}}')
+            source = root/'own.nup'
+            source.write_bytes(b'synthetic archive')
+            atomic_json(root/'local/settings.json', {'executable':str(active),'nup':str(source)})
+            atomic_json(root/'local/pending-game-update.json', {'components':COMPONENTS,'requires_rebuild':True,'status':'pending'})
+            def build(source, notify, destination):
+                self.assertEqual((destination/'mods/Textures/romfs/Actor/sample.txt').read_bytes(), b'synthetic mod asset')
+                self.assertIn('mods_disabled = Textures', (destination/'nx2navi.ini').read_text())
+                self.assertIn('pack.zip', (destination/'.dekuforge-mod-imports.json').read_text())
+                result = destination/'DekuForgeGame.exe'
+                result.write_bytes(b'new game')
+                return result
+            with patch('dekuforge.game_updates.game_running', return_value=False), patch('dekuforge.game_updates.build_stable', side_effect=build):
+                result = run_rebuild(lambda *_: None, root)
+            self.assertNotEqual(result.parent, active.parent)
+            self.assertEqual(mod.read_bytes(), b'synthetic mod asset')
+
     def test_install_and_downgrade_preserve_game_settings_and_saves(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder).resolve()/"app";archive=Path(folder).resolve()/"release.zip"

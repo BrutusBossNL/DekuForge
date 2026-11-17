@@ -22,6 +22,11 @@ The project's original source is open source under the root MIT license.
 - `dekuforge/gameplan.py`: package selection, NSO metadata and independent build preparation.
 - `dekuforge/builder.py`: optional compatibility adapter, not the independent builder.
 - `dekuforge/ui.py`: single-window home, settings and three-step build wizard.
+- `dekuforge/mods.py`, `mod_archives.py`, `mod_ui.py`: original bounded mod library,
+  import, worker-thread UI and adapter to the existing game's configuration and
+  build-receipt interface. No upstream launcher mod code is imported. Keep payloads
+  local, preserve original downloads, block plugins/changed code, and validate
+  builder receipts before Play. Do not change the stable renderer for mod UI work.
 - `dekuforge/i18n.py`: English, Dutch, German, Spanish and French launcher text.
 - `dekuforge/workflow.py`: validated requests and measured stage-level progress.
 - `engine_overrides/`: original extensions composed over the immutable engine.
@@ -102,7 +107,7 @@ Changes to future instruction lifting need differential tests against an
 independent ARM64 implementation. Changes to runtime memory or rendering need
 isolated in-game validation and measurements from repeatable scenes.
 
-`python run_launcher.py --self-test` renders 40 core views and five report forms across the five languages
+`python run_launcher.py --self-test` renders 45 core views and five report forms across the five languages
 without starting a game or changing preferences. `tools/check_launcher.py` checks
 that this health check never maps a visible window: setup/update checks must not
 flash pages or language changes in front of the user. It also checks

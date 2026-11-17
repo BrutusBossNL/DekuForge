@@ -27,9 +27,11 @@ from .saves import export_save, import_save, discover_saves, game_save_profiles
 from .theme import BG, BORDER, GOLD, LEAF, MUTED, PANEL, TEXT, ArtworkLabel, BackgroundCanvas, apply_identity, apply_window, logo_image
 from .workflow import BuildRequest, Progress, duration, validate_destination, validate_source
 from .theme import button_feedback, NavigationCanvas, NavigationLogo, PagePanel, ScrolledText
+from .mod_ui import ModsUI
+from .mods import ModLibrary
 
 
-class Launcher:
+class Launcher(ModsUI):
     def __init__(self, root):
         self.root = root
         root.title("DekuForge")
@@ -65,6 +67,13 @@ class Launcher:
         self.update_busy = False
         self.update_job = None
         self.save_busy = False
+        self.mods_busy = False
+        self.mods_entries = []
+        self.mods_loaded_for = None
+        self.mod_selected = ''
+        self.mods_status = ''
+        self.mods_log = []
+        self.mods_log_widget = None
         self.save_status = ""
         self.save_folder = settings.get("save_folder", "")
         self.save_sources = []
@@ -167,7 +176,7 @@ class Launcher:
         else:
             self.label(self.sidebar, "DekuForge", 22, GOLD).pack(padx=20, pady=30)
         self.label(self.sidebar, self.t("tagline"), 10, MUTED).pack(padx=22, pady=(0, 32))
-        for name in ("home", "updates", "saves", "build", "settings", "report"):
+        for name in ("home", "updates", "saves", "mods", "build", "settings", "report"):
             selected = self.page == name
             self.button(self.sidebar, self.t(name), lambda value=name: self.navigate(value),
                         primary=selected, anchor="w").pack(fill="x", padx=16, pady=5)
@@ -187,6 +196,7 @@ class Launcher:
         if self.progressbar is not None:
             self.progressbar.stop()
         self.log_widget = self.progressbar = self.time_label = self.phase_label = None
+        self.mods_log_widget = None
         for child in self.page_host.winfo_children():
             child.destroy()
         self.page_host.grid_configure(padx=(252, 12) if self.page == "home" else (264, 24),
@@ -209,6 +219,8 @@ class Launcher:
             self.render_saves()
         elif self.page == "report":
             self.render_report()
+        elif self.page == "mods":
+            self.render_mods()
         else:
             if self.library_view:
                 self.render_library()
@@ -240,8 +252,8 @@ class Launcher:
         details = ((version if version == self.t("custom_game") else self.t("game_version", version=version)) if selected else self.t("no_install"),
                    self.t("release_found", version=release),
                    self.source or self.t("no_dump"))
-        actions = (("play", self.t("playing") if running else self.t("play"), self.play,
-                    selected and not running and not self.update_busy and not self.build_busy and not self.save_busy),
+        actions = (("play", self.t('mods_working') if self.mods_busy else self.t("playing") if running else self.t("play"), self.play,
+                    selected and not self.management_busy()),
                    ("update", self.t("action_update"), lambda: self.navigate("updates"), True),
                    ("build", self.t("action_build"), self.open_wizard, True))
         self.home_cards = []
@@ -296,6 +308,8 @@ class Launcher:
             # Include ttk's internal timers and redraws queued during teardown.
             for job in self.root.tk.splitlist(self.root.tk.call("after", "info")):
                 self.root.tk.call("after", "cancel", job)
+            getattr(self.root, '_brand_images', {}).clear()
+            self.root._brand_icon = None
 
     def render_settings(self):
         card = self.card(self.content, padding=12)
@@ -744,7 +758,7 @@ class Launcher:
         return self.library_entries[selection[0]] if selection else None
 
     def management_busy(self):
-        return self.report_busy or self.update_busy or self.build_busy or self.save_busy or self.progress.active or (self.process is not None and self.process.poll() is None)
+        return self.mods_busy or self.report_busy or self.update_busy or self.build_busy or self.save_busy or self.progress.active or (self.process is not None and self.process.poll() is None)
 
     def select_library_entry(self, _event=None):
         entry = self.selected_build()
@@ -886,8 +900,24 @@ class Launcher:
         self.render()
 
     def play(self):
-        if self.update_busy or self.build_busy or self.save_busy or (self.process is not None and self.process.poll() is None):
+        if self.management_busy():
             return
+        try:
+            library = ModLibrary(self.executable)
+            if library.folder.exists():
+                self.mods_work('prepare', play_after=True)
+                return
+        except (OSError, ValueError) as error:
+            if str(error) == 'mods_external_dir':
+                # Advanced external roots keep the runtime's existing behavior;
+                # this bounded manager never copies or changes those locations.
+                self.launch_ready()
+                return
+            self.show_error(error)
+            return
+        self.launch_ready()
+
+    def launch_ready(self):
         try:
             self.process = launch(self.executable)
             reports.record_run(ROOT,self.process,self.executable)
@@ -978,6 +1008,32 @@ class Launcher:
                 kind, value = self.events.get_nowait()
             except Empty:
                 break
+            if kind == 'mods_log':
+                self.mods_log = (self.mods_log + [value])[-200:]
+                if self.mods_log_widget is not None:
+                    self.mods_log_widget.configure(state='normal')
+                    self.mods_log_widget.insert('end', value)
+                    self.mods_log_widget.see('end')
+                    self.mods_log_widget.configure(state='disabled')
+                continue
+            if kind == 'mods_finished':
+                self.mods_busy = False
+                self.mods_loaded_for, self.mods_entries, play_after = value
+                self.mods_status = self.t('mods_ready')
+                if play_after:
+                    self.launch_ready()
+                changed = self.page == 'mods' or changed
+                continue
+            if kind == 'mods_error':
+                self.mods_busy = False
+                self.mods_loaded_for = self.executable
+                error, play_after = value
+                self.mods_status = self.t(error) if error in MESSAGES['en'] else error
+                if play_after:
+                    self.page = 'mods'
+                    self.render_navigation()
+                changed = self.page == 'mods' or changed
+                continue
             if kind == "report_ready":
                 self.report_context,self.report_authenticated = value
                 self.report_busy = False
@@ -1132,7 +1188,7 @@ class Launcher:
             self.show_error(error)
 
     def close(self):
-        if self.report_busy or self.update_busy or self.progress.active or self.save_busy or self.build_busy:
+        if self.mods_busy or self.report_busy or self.update_busy or self.progress.active or self.save_busy or self.build_busy:
             messagebox.showinfo("DekuForge", self.t("active_build"), parent=self.root)
             return
         self.cancel_intro()
@@ -1170,7 +1226,7 @@ def main():
             try:
                 for language in LANGUAGES:
                     application.language = language
-                    for page in ("home", "updates", "saves", "build", "settings"):
+                    for page in ("home", "updates", "saves", "mods", "build", "settings"):
                         application.navigate(page)
                         root.update_idletasks()
                         checked.append(f"{language}/{page}")

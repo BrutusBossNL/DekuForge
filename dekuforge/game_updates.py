@@ -47,8 +47,21 @@ def rebuild_pending(notify, root=ROOT):
                 previous=active.parent
                 owned=(previous/".dekuforge-stable-build").is_file()
                 dirs=[p for p in previous.iterdir() if p.is_dir() and
-                      (p.name=="profile" or owned and (p.name in {"romfs","exefs","build-cache","shader-cache"}
+                      (p.name=="profile" or owned and (p.name in {"romfs","exefs","build-cache","shader-cache","mods"}
                        or p.name.startswith("romfs-patches-")))]
+                if owned:
+                    from .mods import ModLibrary
+                    from .mod_archives import validate_library
+                    try:
+                        mods = ModLibrary(active, running=lambda: False).folder
+                    except ValueError:
+                        mods = None  # Keep an external runtime setting; never copy or modify that directory.
+                    if (previous/'mods').is_dir():
+                        validate_library(previous/'mods')
+                    if mods is not None and mods.is_dir():
+                        validate_library(mods)  # Never follow a mod's links outside the build.
+                        if not any(mods.is_relative_to(folder) for folder in dirs):
+                            dirs.append(mods)
                 for folder in dirs:
                     if folder.is_symlink() or getattr(folder,"is_junction",lambda:False)():
                         raise ValueError("Linked cache directories cannot be copied for an update")
@@ -62,12 +75,13 @@ def rebuild_pending(notify, root=ROOT):
                 (staging/".dekuforge-update-copy").touch()
                 notify("log","Copying reusable build cache and a separate save profile; previous installation retained\n")
                 for folder in dirs:
-                    shutil.copytree(folder,staging/folder.name,dirs_exist_ok=True)
+                    shutil.copytree(folder,staging/folder.relative_to(previous),dirs_exist_ok=True)
                 if owned:
                     for path in previous.iterdir():
                         if path.is_file() and (path.suffix in {".dll",".bin",".id"}
                             or path.name in {"nx2navi_xlate.exe","nx2navi.ini","nvngx_dlss-NOTICE.txt",
-                                "romfs-check.json",".dekuforge-gpu-inputs.json",".dekuforge-release-data"}):
+                                "romfs-check.json",".dekuforge-gpu-inputs.json",".dekuforge-release-data",
+                                ".dekuforge-mod-imports.json"}):
                             shutil.copy2(path,staging/path.name)
                 (staging/".dekuforge-owned").write_text("DekuForge update build\n",encoding="utf-8")
                 (staging/".dekuforge-stable-build").touch()

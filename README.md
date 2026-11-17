@@ -41,11 +41,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 **DekuForge 0.2.0 - first Windows Early Access release.**
 The stable reference-based game has passed local play tests. The DekuForge 0.11.0
 candidate adds the custom in-game interface and Cheat Manager. The launcher and
-engine have independent versions: development launcher **0.2.1**, buildkit **0.2.1**
+engine have independent versions: development launcher **0.3.0**, buildkit **0.2.2**
 and engine **0.11.0**.
 The repository is public and **0.2.0** is the latest published Early Access release.
-Launcher **0.2.1** fixes the scrolling page background in source and local builds;
-it has not yet been released. The component terms noted in
+Launcher **0.3.0** adds the original mod manager and includes the 0.2.1 scrolling
+fix in source/local builds; it has not yet been released. The component terms noted in
 [the publication review](docs/PUBLICATION_REVIEW.md) remain unchanged. Early Access
 does not promise complete platform or gameplay coverage.
 
@@ -59,6 +59,8 @@ See [release history](docs/CHANGELOG.md) and
   Python, compiler or command-file launcher is needed for installation.
 - A branded launcher with Play, Updates, Saves, a build wizard and build library.
 - Unified padded page panels, with themed scrolling and fixed artwork for longer pages.
+- An original [mod manager](docs/mods.md): folder/ZIP import, optional 7-Zip for
+  7z/RAR, On/Off switches, RomFS load order/conflicts and explicit code-mod rebuilding.
 - System-language default, with English, Dutch, German, Spanish and French UI.
 - Verified, cached build-tool downloads and incremental game rebuilding.
 - Stable/Preview release selection, manual update/downgrade, optional automatic

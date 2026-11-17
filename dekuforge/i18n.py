@@ -296,6 +296,10 @@ for _language, _text in {
     MESSAGES[_language]["build_interrupted"] = _text
 
 
+from .mod_labels import extend as _extend_mods
+_extend_mods(MESSAGES)
+
+
 def translate(language, key, **values):
     selected = language if language in MESSAGES else "en"
     text = FILE_LABELS[selected][key] if key in FILE_LABELS[selected] else MESSAGES[selected].get(key,MESSAGES["en"].get(key,key.replace("_"," ").title()))

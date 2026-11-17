@@ -1,5 +1,15 @@
 # Provenance and reuse
 
+## Original launcher mod manager
+
+`dekuforge/mods.py`, `mod_archives.py`, `mod_ui.py` and `mod_labels.py` are original
+DekuForge code under the root MIT license. No NX2navi launcher mod implementation
+is imported. The adapter reads/writes the existing runtime's configuration and
+builder-receipt interfaces; the game backend remains the reused component below.
+ZIP handling uses Python's standard library. Optional 7z/RAR import calls a user's
+installed 7-Zip executable; 7-Zip is not bundled or relicensed by this project.
+Mod payloads stay local and are never part of source or release packages.
+
 ## Active Windows backend and scope of the root license
 
 The default builder stages NX2navi **0.10.1**, revision

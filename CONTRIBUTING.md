@@ -29,6 +29,12 @@ Do not repost a rejected attachment or quote its contents into a new report.
 
 ## Reporting bugs
 
+For mod issues, include the launcher/game versions, mod layout, enabled state,
+load order, reported conflicts and relevant filtered logs. See [mods.md](docs/mods.md).
+Do not attach mod payloads containing game assets or generated game code. Describe
+the issue with synthetic fixtures when possible. The manager is original project
+code; the existing runtime's mod interface is a separate integration boundary.
+
 Include DekuForge launcher and engine versions, local build ID, game version,
 Windows version, CPU/GPU and driver, reproduction steps and relevant **text** logs.
 The launcher's **Report a problem** page collects these details and bounded text

@@ -32,9 +32,9 @@ def main():
             assert result["window_was_mapped"] is False, "Health check showed a launcher window"
             assert result["logo_loaded"] and result["top_level_windows"] == 1
             assert result["native_icon_verified"], "Native Windows frame has no brand icons"
-            assert len(result["screens"]) == 40
+            assert len(result["screens"]) == 45
             assert len(result.get("report_screens",[])) == 5
-            print("Native GUI launcher: icon verified; 40 core views and 5 report forms, 5 languages, 1 window")
+            print("Native GUI launcher: icon verified; 45 core views and 5 report forms, 5 languages, 1 window")
             return
         time.sleep(0.1)
     raise RuntimeError("Native launcher self-test did not produce a fresh report")

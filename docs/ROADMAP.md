@@ -38,6 +38,12 @@ development measurements are recorded in `WINDOWS_BUILD.md`; the old experimenta
 
 ### Launcher updates and save migration
 
+The original Mods page is implemented in launcher 0.3.0: import, switches, RomFS
+priority/conflicts, explicit code rebuilding and managed-update preservation.
+See [mods.md](mods.md) for the tested contracts and remaining per-mod gameplay
+acceptance. This does not replace the stable renderer or import upstream launcher
+mod-management code.
+
 Implemented locally: background public-release checks, Stable/Preview selection,
 startup check preference, system-language default, existing-user-folder save
 import/export and retained destination backups. The preview now implements application update installation, opt-in automatic

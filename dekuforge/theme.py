@@ -193,6 +193,9 @@ class BackgroundCanvas(tk.Canvas):
         if self._resize_job is not None:
             self.after_cancel(self._resize_job)
         super().destroy()
+        # PhotoImage finalizers call Tk. Release them here on the UI thread,
+        # rather than during a later garbage collection in an import worker.
+        self._image = None
 
 
 class NavigationCanvas(BackgroundCanvas):
@@ -312,6 +315,10 @@ class NavigationLogo(BackgroundCanvas):
         if key == "image":
             return self.itemcget(self._logo, "image")
         return super().cget(key)
+
+    def destroy(self):
+        super().destroy()
+        self.image = None
 
 
 class ArtworkLabel(BackgroundCanvas):

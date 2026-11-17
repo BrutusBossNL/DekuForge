@@ -13,10 +13,11 @@ pull requests and attached diagnostic files.
 
 ## Component versions
 
-Launcher 0.2.1 is the source/local-build update for the page-scrolling artwork
-fix (#2). The latest published release remains 0.2.0 until a new release is
-published. This interface-only change leaves engine 0.11.0 and buildkit 0.2.1
-unchanged and does not require a game rebuild.
+Launcher 0.3.0 and buildkit 0.2.2 are the source/local-build mod-management update,
+including the 0.2.1 scrolling fix. The latest published release remains 0.2.0 until
+a new release is published. Engine 0.11.0 is unchanged. Ordinary RomFS mods need
+no game rebuild; changed code mods do. See [mods.md](mods.md). The invisible
+health check now covers 45 core views and five report forms in five languages.
 
 `dekuforge/components.json` records independent identities:
 

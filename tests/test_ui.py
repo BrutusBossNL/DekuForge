@@ -16,6 +16,64 @@ from dekuforge.ui import Launcher
 
 @unittest.skipUnless(os.name == "nt", "Windows desktop integration")
 class LauncherWorkflowTests(unittest.TestCase):
+    def wait_for_mods(self):
+        deadline = time.monotonic() + 5
+        while self.app.mods_busy and time.monotonic() < deadline:
+            self.root.update()
+            self.app.tick()
+        self.assertFalse(self.app.mods_busy)
+
+    def test_mod_import_toggle_and_order_in_the_single_window(self):
+        import zipfile
+        source = self.folder/'Test pack.zip'
+        with zipfile.ZipFile(source, 'w') as archive:
+            archive.writestr('Wrapper/romfs/Actor/example.txt', b'synthetic mod')
+        self.app.navigate('mods')
+        self.root.update_idletasks()
+        self.wait_for_mods()
+        with patch('dekuforge.game_updates.game_running', return_value=False):
+            self.app.mods_work('import', str(source))
+            self.wait_for_mods()
+            self.assertEqual(len(self.app.mods_entries), 1)
+            self.assertFalse(self.app.mods_entries[0].enabled)
+            self.app.mod_selected = 'Test pack'
+            self.app.modify_mod('toggle')
+            self.wait_for_mods()
+        self.assertTrue(self.app.mods_entries[0].enabled)
+        self.assertIn('mods_order = Test pack', (self.game.parent/'nx2navi.ini').read_text())
+        for language in LANGUAGES:
+            self.app.set_language(language)
+            self.app.navigate('mods')
+            self.root.update_idletasks()
+            self.assertEqual(self.app.mod_toggle_button.cget('text'), self.app.t('mods_disable'))
+        self.assertFalse(any(isinstance(w, tk.Toplevel) for w in self.root.winfo_children()))
+
+    def test_play_waits_for_mod_preparation_and_changed_code_prevents_launch(self):
+        folder = self.game.parent/'mods/Code/exefs'
+        folder.mkdir(parents=True)
+        (folder/'example.pchtxt').write_text('synthetic code patch')
+        with patch('dekuforge.game_updates.game_running', return_value=False), patch('dekuforge.ui.launch') as launch:
+            self.app.play()
+            self.wait_for_mods()
+            launch.assert_not_called()
+        self.assertEqual(self.app.page, 'mods')
+        self.assertEqual(self.app.mods_status, self.app.t('mods_rebuild_needed'))
+
+    def test_romfs_mod_configuration_is_ready_before_process_launch(self):
+        folder = self.game.parent/'mods/Textures/romfs/Actor'
+        folder.mkdir(parents=True)
+        (folder/'sample.txt').write_bytes(b'synthetic asset')
+        process = Mock(pid=123)
+        process.poll.return_value = None
+        def launch(_):
+            self.assertIn('mods_order = Textures', (self.game.parent/'nx2navi.ini').read_text())
+            return process
+        with patch('dekuforge.game_updates.game_running', return_value=False), patch('dekuforge.ui.launch', side_effect=launch) as start:
+            self.app.play()
+            self.wait_for_mods()
+            start.assert_called_once_with(str(self.game))
+        self.assertIs(self.app.process, process)
+
     def test_save_import_finds_old_installation_and_requires_confirmation(self):
         active = self.game.parent
         (active/'.dekuforge-stable-build').touch()
@@ -68,7 +126,7 @@ ui.main()
         proof = json.loads((self.folder/"local/launcher-selftest.json").read_text())
         self.assertTrue(proof["success"])
         self.assertFalse(proof["window_was_mapped"])
-        self.assertEqual(len(proof["screens"]), 40)
+        self.assertEqual(len(proof["screens"]), 45)
         self.assertEqual(len(proof["report_screens"]), 5)
 
     def setUp(self):

@@ -1,8 +1,12 @@
 # DekuForge roadmap
 
+Launcher 0.3.0 adds the original [mod manager](docs/mods.md). Broader community-mod
+gameplay testing remains welcome; recognized packaging alone does not prove that
+every asset/code patch is compatible. Engine development remains separately scoped.
+
 This roadmap records planned work, not promises of support or delivery dates.
-The repository remains private until Windows release gates and component
-distribution requirements are satisfied.
+The repository is public. Platform and release claims still depend on Windows
+acceptance gates and applicable component distribution terms.
 
 ## Windows - current priority
 

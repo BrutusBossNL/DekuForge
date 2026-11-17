@@ -2,6 +2,19 @@
 
 Component versions are independent. Published releases are not replaced in place.
 
+## Launcher 0.3.0 / buildkit 0.2.2 - original mod manager (not yet released)
+
+Implements [issue #1](https://github.com/BrutusBossNL/DekuForge/issues/1) with own
+launcher code: add a folder/ZIP or use installed 7-Zip for 7z/RAR, normalize nested
+layouts, switch mods On/Off, set priority and inspect RomFS file conflicts.
+Play prepares mods before starting the game. Code mods require an explicit local
+rebuild with receipt validation and rollback on handled build failure. Managed
+game updates preserve mods and import receipts. Engine 0.11.0 is unchanged.
+
+The native health check now visits 45 core views plus five report forms in five
+languages, including Mods. See [mods.md](mods.md) for layout, limits and validation
+scope; this manager does not make the underlying game engine independent.
+
 ## Launcher 0.2.1 - scroll-background fix (not yet released)
 
 Engine 0.11.0 and buildkit 0.2.1 are unchanged. Fixes
