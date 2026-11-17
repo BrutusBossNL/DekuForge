@@ -21,11 +21,12 @@ def main():
     parser.add_argument("--capture",action="store_true",help="Record bounded consecutive frames and in-game settings pages")
     parser.add_argument("--deterministic-shot",action="store_true",help="Use synchronous pipelines for a deterministic final screenshot")
     parser.add_argument("--seconds",type=int,default=20,help="World-time duration, from 10 to 180 seconds")
+    parser.add_argument("--installation",type=Path,default=ROOT/"build/stable-windows-game")
     args=parser.parse_args()
     if not 10 <= args.seconds <= 180:
         parser.error("--seconds must be between 10 and 180")
-    folder=ROOT/"build/stable-windows-game"
-    if folder.resolve()!=folder or not (folder/".dekuforge-stable-build").is_file():
+    folder=args.installation.absolute()
+    if not folder.is_relative_to(ROOT/"build") or folder.resolve()!=folder or not (folder/".dekuforge-stable-build").is_file():
         raise ValueError("Use only the owned stable migration build")
     exe=folder/"DekuForgeGame.exe"
     if not exe.is_file():
@@ -86,7 +87,7 @@ def main():
     record={"requested_world_seconds":args.seconds,"normal_start":not args.deterministic_shot,"engine_revision":REVISION,
         "runtime_sha256":executable_hash,
         "world_started":world is not None,"world_frame_stats":fps,
-        "gpu":gpu[1] if gpu else None,"driver":gpu[2] if gpu else None,"engine":"0.10.1","exit_code":code,"timed_out":timed_out,"fatal_error":fatal,
+        "gpu":gpu[1] if gpu else None,"driver":gpu[2] if gpu else None,"engine":json.loads((folder/"dekuforge-build-info.json").read_text(encoding="utf-8")).get("engine_version","0.10.1"),"exit_code":code,"timed_out":timed_out,"fatal_error":fatal,
         "elapsed":round(time.monotonic()-started,2),"screenshot":str(shot),
         "screenshot_exists":shot.is_file(),"visually_verified":False}
     (folder/"test-stable.json").write_text(json.dumps(record,indent=2),encoding="utf-8")

@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "launcher": {"version": "0.1.0-dev"},
+  "engine": {"version": "0.11.0", "base_version": "0.10.1", "base_revision": "5ae55db41c7d11c4e997d2676019939a936e560b"},
+  "buildkit": {"version": "0.1.0"},
+  "python": {
+    "version": "3.14.9",
+    "id": "3.14.9-cda05f04",
+    "url": "https://github.com/tangerineturtle1/NX2navi/releases/download/v0.10.1/NX2navi-runtime-py3.14.9-7a37dbc9.zip",
+    "sha256": "cda05f04bad6bc6d2f38b23d9db6fefc8c3a707b40d132a1a596f8fbfb261e78",
+    "size": 40138880
+  },
+  "dotnet": {"version": "10.0.404"},
+  "content_policy": "Launcher, original extensions and build tooling only. No ROMs, game assets, saves, generated game code, shaders, pipeline caches or game executables."
+}

@@ -4,4 +4,4 @@
 engine/** -text -whitespace
 engine/SOURCE.json text eol=lf whitespace
 # Unified patches need their significant blank context lines preserved.
-engine_overrides/shader/*.patch -whitespace
+engine_overrides/**/*.patch -whitespace

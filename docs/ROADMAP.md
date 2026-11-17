@@ -1,6 +1,8 @@
 # Delivery priorities
 
-The order below is the owner's explicit delivery order. Preparing portable tests
+The owner has since prioritized DekuForge's in-game UI and Cheat Manager directly
+after the stable Windows baseline, before Linux parity. The 0.11.0 candidate uses
+the stable 0.10.1 renderer with a separate extension layer. Preparing portable tests
 does not make a platform supported. Every game validation result must identify
 the source revision, engine revision, game build ID, hardware and driver.
 

@@ -5,7 +5,10 @@ The project's original source is open source under the root MIT license.
 
 ## Architecture
 
-- The active game backend is stable 0.10.1, pinned in `dekuforge/stable_engine.py`.
+- The base game backend is stable 0.10.1, pinned in `dekuforge/stable_engine.py`.
+- Compose owned UI and cheats through `dekuforge/runtime_layer.py`; keep the
+  stable renderer unchanged. Component versions belong in `dekuforge/components.json`.
+- Ship only the launcher/tooling allowlist; never include local game build results.
 - `tools/build_stable_translator.py` builds its unmodified shader translation logic.
 - Include the separately verified 0.10.1 release pipeline data and controller art;
   the Git source checkout alone lacks these inputs and produced incomplete first-play frames.
@@ -79,8 +82,9 @@ the native executable, embedded icon and the same one-window flow. Compile
 emitted LDAPR test fragments with `tools/check_ldapr.py --compiler PATH` and
 compare the resulting state with the ARM64 oracle.
 
-Delivery order is authoritative: Windows parity, Linux parity, custom cheats and
-fixes, public open-source repository, then iOS. Follow `docs/ROADMAP.md`. The owner
+The owner now prioritizes the stable Windows baseline, DekuForge in-game UI and
+Cheat Manager before Linux parity, public distribution and iOS. Follow
+`docs/ROADMAP.md`. The owner
 has authorized publication only at priority 4, after the preceding gates pass;
 keep the repository private until then. Keep source-test results separate from
 in-game platform validation. Do not upload game inputs or derived game code to CI.

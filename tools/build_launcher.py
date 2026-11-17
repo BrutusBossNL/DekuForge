@@ -1,6 +1,7 @@
 """Package the unchanged brand artwork as a Windows icon and compile the bootstrap."""
 
 import argparse
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -28,6 +29,11 @@ def main():
         return
     output = ROOT / "build" / "launcher"
     output.mkdir(parents=True, exist_ok=True)
+    pins=json.loads((ROOT/"dekuforge/components.json").read_text(encoding="utf-8"))
+    runtime_id=pins["python"]["id"]
+    if not all(c.isalnum() or c in ".-" for c in runtime_id):
+        raise ValueError("Invalid runtime component identity")
+    (output/"runtime_pin.h").write_text('#define DEKU_PYTHON_ID L"'+runtime_id+'"\n',encoding="ascii")
     resource = output / "brand.rc"
     resource.write_text('101 ICON "' + icon.as_posix() + '"\n' + '''
 1 VERSIONINFO
@@ -58,7 +64,7 @@ END
     subprocess.run([str(args.toolchain / "windres.exe"), "-i", str(resource), "-o", str(obj)], check=True, env=environment)
     executable = ROOT / "DekuForge.exe"
     subprocess.run([str(args.toolchain / "clang.exe"), "-O2", "-Wall", "-Wextra", "-Werror", "-municode", "-mwindows",
-                    str(ROOT / "launcher" / "main.c"), str(obj), "-o", str(executable)], check=True, env=environment)
+                    "-I",str(output),str(ROOT / "launcher" / "main.c"), str(obj), "-o", str(executable)], check=True, env=environment)
     print("Built:", executable)
 
 

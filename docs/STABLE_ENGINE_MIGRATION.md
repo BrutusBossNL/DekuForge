@@ -163,8 +163,8 @@ The stable release toolchain lock pins 31 native packages (170 MB compressed).
 The three original bootstrap modules are included in the verified source manifest;
 `tools/bootstrap_stable_toolchain.py` installs them under
 `local/build-tools/native/msys64/ucrt64`. Previously downloaded archives can be
-reused only after matching their pinned size and SHA-256. A valid existing compiler
-may be read as a fallback; an installed external launcher is not required.
+reused only after matching their pinned size and SHA-256. The owned installer checks the pinned lock on every build; an installed external
+launcher is not required.
 The shader compiler/linker tools and pinned .NET SDK are provisioned when missing.
 Python dependencies, including Pillow/fonttools for controller prompts, are listed
 in `requirements-engine.txt`.
@@ -184,3 +184,26 @@ full network download and final installer still need independent acceptance.
 - Bring over custom cheats and related game-menu extensions after the desktop
   baseline gates, without replacing the validated stable renderer.
 - Validate a complete first-time wizard build on a clean installation.
+
+## DekuForge 0.11.0 candidate and independent launcher bootstrap
+
+The isolated 0.11.0 candidate composes the owned Cheat Manager patch and a new
+forest-green ImGui skin over the pinned stable core. This includes Equipment and
+World groups, the existing black-aura bomb-arrow implementation and the dynamic
+maximum-heart refill fix. Individual cheat scenarios still need acceptance tests.
+The settings header, boot skin and both performance displays use DekuForge branding.
+
+A normal-start 20-second world capture completed with exit 0 and averaged 51.37 FPS.
+The captured world and Cheats tab were visually checked: complete terrain, rocks,
+grass, clouds, Link and controller prompts. This short result includes capture
+and UI-test overhead and is not a new multi-scene parity claim. The baseline build
+remains the selected fallback until candidate acceptance.
+
+An incremental rebuild using DekuForge's own versioned Python runtime took 26.1
+seconds: two files compiled, 722 retained, and unchanged shader/pipeline products
+were preserved only after source, translator and seed comparison. Separate engine,
+launcher, buildkit, input-game and local build identities are recorded in metadata.
+
+See [DISTRIBUTION.md](DISTRIBUTION.md) for the launcher-only package and successful
+empty-folder runtime-download test. Full fresh-machine game-building acceptance
+and automatic release installation remain separate work.

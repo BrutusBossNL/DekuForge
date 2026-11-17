@@ -1,7 +1,6 @@
 """Install MSYS2 shader tools from the official package index into an owned folder."""
 import hashlib
 import argparse
-import io
 import json
 from pathlib import Path
 import tarfile
@@ -17,30 +16,21 @@ def main():
     args = parser.parse_args()
     output = ROOT / "local" / "build-tools" / "shaders"
     output.mkdir(parents=True, exist_ok=True)
-    with urllib.request.urlopen(HOST + "ucrt64.db", timeout=60) as response:
-        data = response.read(16 * 1024 * 1024)
-    wanted = {"mingw-w64-ucrt-x86_64-" + name for name in ("shaderc", "glslang", "spirv-tools", "spirv-cross", "lld")}
+    pins = json.loads((ROOT / "dekuforge/shader_tools.lock.json").read_text(encoding="utf-8"))
+    packages = {name: {"FILENAME": [pin["package"]], "SHA256SUM": [pin["sha256"]]}
+                for name, pin in pins.items()}
     if args.validation:
-        wanted.add("mingw-w64-ucrt-x86_64-vulkan-validation-layers")
-    packages = {}
-    with tarfile.open(fileobj=io.BytesIO(data), mode="r:*") as database:
-        for member in database:
-            if member.name.endswith("/desc"):
-                fields = database.extractfile(member).read().decode().split("\n\n")
-                record = {field.splitlines()[0].strip("%"): field.splitlines()[1:]
-                          for field in fields if len(field.splitlines()) >= 2}
-                if record.get("NAME", [""])[0] in wanted:
-                    packages[record["NAME"][0]] = record
-    if packages.keys() != wanted:
-        raise ValueError("Required shader packages are missing from the official index")
+        raise ValueError("Validation-layer installation is a separate developer setup")
     for name, record in sorted(packages.items()):
         filename, expected = record["FILENAME"][0], record["SHA256SUM"][0]
         if Path(filename).name != filename:
             raise ValueError("Invalid package filename")
         marker = output / (name + ".json")
         if marker.is_file():
-            print("Available:", name, flush=True)
-            continue
+            installed = json.loads(marker.read_text(encoding="utf-8"))
+            if installed.get("package") == filename and installed.get("sha256") == expected:
+                print("Available (pinned):", name, flush=True)
+                continue
         archive = output / filename
         if not archive.is_file():
             with urllib.request.urlopen(HOST + filename, timeout=120) as response:

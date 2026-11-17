@@ -1,6 +1,8 @@
 __pycache__/
 *.pyc
 .venv/
+python/
+pydeps/
 local/
 build/
 generated/

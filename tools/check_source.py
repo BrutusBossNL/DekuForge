@@ -10,9 +10,9 @@ ROOT = Path(__file__).resolve().parents[1]
 FORBIDDEN = {".nup", ".nsp", ".nsz", ".xci", ".xcz", ".nca", ".nso", ".npdm",
              ".exe", ".dll", ".keys", ".sav", ".spv", ".profdata", ".profraw",
              ".rom", ".z64", ".n64", ".v64", ".ncz", ".tik", ".nro",
-             ".o", ".obj", ".a", ".lib", ".zip", ".7z", ".rar", ".bin"}
+             ".o", ".obj", ".a", ".lib", ".zip", ".7z", ".rar", ".bin", ".pyd", ".whl"}
 PREFIXES = ("local/", "build/", "generated/", "engine/build/", "engine/generated/",
-            "engine/refs/", "engine/toolchain/")
+            "engine/refs/", "engine/toolchain/", "python/", "pydeps/")
 GENERATED = re.compile(rb"(?m)^\s*(?://|/\*|\*)\s*(?:DEKUFORGE|NX2NAVI)_RECOMP_GENERATED_FROM_GAME_CODE\b")
 
 

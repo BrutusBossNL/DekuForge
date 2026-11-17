@@ -20,19 +20,20 @@ Start the Windows launcher with `DekuForge.exe`. The native executable has
 the project's embedded icon and starts without a console window. The desktop
 window sets its own application identity rather than inheriting the caller's.
 Select an existing game installation to play without changing saves or settings.
-Development from source can use `python run_launcher.py` with Python and Tk
-installed. The local native bootstrap can read a developer interpreter path from
-ignored `local/python-path.txt`; otherwise it checks the project's bundled Python
-or `.venv`. The final user distribution must include the needed launcher runtime.
+On first start the native launcher downloads and verifies its pinned runtime;
+subsequent starts reuse it. Build tools are prepared separately when needed.
+See [distribution and component versions](docs/DISTRIBUTION.md). No ROMs, game
+assets, generated shaders or compiled game binaries are included in the launcher
+package. Development from source can also use `python run_launcher.py`.
 No CMD start script is provided.
 
 ## Game builder
 
-The game backend is being migrated to the complete stable 0.10.1 engine. The
-DekuForge launcher and management UI are retained. See
-[stable-engine migration](docs/STABLE_ENGINE_MIGRATION.md) for the pinned revision,
-current validation status and fresh-machine limitations. The migration build is
-experimental until the rendering and gameplay checks pass.
+The game backend uses the pinned stable 0.10.1 engine. Its local play test passed,
+and the owner confirmed the baseline plays correctly. The separate DekuForge
+0.11.0 candidate adds our forest-green in-game UI, performance display and Cheat
+Manager; functional cheat checks are still in progress. The baseline remains
+available. See [stable-engine migration](docs/STABLE_ENGINE_MIGRATION.md).
 
 The launcher keeps Home, Updates, Saves, Build game and Settings inside one window.
 Home uses three artwork cards: Play (active game version), Update (latest release

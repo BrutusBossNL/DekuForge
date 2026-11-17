@@ -160,29 +160,25 @@ def prepare_dlss(source, notify):
 def ensure_native_tools(source, notify):
     required=("bin/clang.exe","bin/clang++.exe","bin/SDL3.dll","lib/libSDL3.dll.a","include/vma")
     own=ROOT / "local/build-tools/native/msys64/ucrt64"
-    existing=Path(os.environ.get("LOCALAPPDATA","")) / "Programs/NX2navi/toolchain/msys64/ucrt64"
-    candidates=[own,existing]
-    toolchain=next((folder for folder in candidates if all((folder/name).exists() for name in required)),None)
-    if toolchain is None:
-        command=[sys.executable,str(ROOT / "tools/bootstrap_stable_toolchain.py")]
-        with subprocess.Popen(command,cwd=ROOT,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
-                text=True,encoding="utf-8",errors="replace",creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0)) as worker:
-            for line in worker.stdout:
-                notify("log",line)
-            if worker.wait():
-                raise RuntimeError("Native build tool preparation failed")
-        toolchain=own
+    # The pinned installer compares lock identity and reuses verified packages.
+    toolchain=own
+    command=[sys.executable,str(ROOT / "tools/bootstrap_stable_toolchain.py")]
+    with subprocess.Popen(command,cwd=ROOT,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,
+            text=True,encoding="utf-8",errors="replace",creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0)) as worker:
+        for line in worker.stdout:
+            notify("log",line)
+        if worker.wait():
+            raise RuntimeError("Native build tool preparation failed")
+    toolchain=own
     if not all((toolchain/name).exists() for name in required):
         raise RuntimeError("Native build tools are incomplete")
-    shaders=ROOT / "local/build-tools/shaders/ucrt64/bin"
-    if not all((shaders/name).is_file() for name in ("glslc.exe","glslangValidator.exe","spirv-val.exe","ld.lld.exe")):
-        with subprocess.Popen([sys.executable,str(ROOT / "tools/bootstrap_shader_tools.py")],cwd=ROOT,
-                stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,encoding="utf-8",errors="replace",
-                creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0)) as worker:
-            for line in worker.stdout:
-                notify("log",line)
-            if worker.wait():
-                raise RuntimeError("Shader build tool preparation failed")
+    with subprocess.Popen([sys.executable,str(ROOT / "tools/bootstrap_shader_tools.py")],cwd=ROOT,
+            stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,encoding="utf-8",errors="replace",
+            creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0)) as worker:
+        for line in worker.stdout:
+            notify("log",line)
+        if worker.wait():
+            raise RuntimeError("Shader build tool preparation failed")
     notify("log","Native build tools: " + str(toolchain) + "\n")
     return toolchain
 
@@ -255,10 +251,18 @@ def build_stable(filename, notify, destination):
     notify("phase", {"phase":"checking"})
     notify("log", "Preparing stable 0.10.1 source " + REVISION + "\n")
     source = stage_stable()
+    from .runtime_layer import compose, ENGINE_VERSION, BUILD_KIT_VERSION
+    layer = compose(source)
     prepare_release_data(source, notify)
     if release_preparation_changed(output):
         notify("log", "Preparing the complete stable release pipeline list before play\n")
     prepare_dlss(source,notify)
+    if importlib.util.find_spec("zbic") is None:
+        with subprocess.Popen([sys.executable,str(ROOT/"tools/prepare_decompressor.py")],cwd=ROOT,
+                stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True,encoding="utf-8",errors="replace",
+                creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0)) as dependencies:
+            for line in dependencies.stdout: notify("log",line)
+            if dependencies.wait(): raise RuntimeError("Game decompressor preparation failed")
     notify("phase", {"phase":"shaders"})
     preparation = [sys.executable, str(ROOT / "tools/build_stable_translator.py")]
     with subprocess.Popen(preparation, cwd=ROOT, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -271,7 +275,7 @@ def build_stable(filename, notify, destination):
     toolchain = ensure_native_tools(source, notify)
     env = os.environ.copy()
     env["PATH"] = str(ROOT / "local/build-tools/shaders/ucrt64/bin") + os.pathsep + str(toolchain / "bin") + os.pathsep + env.get("PATH", "")
-    command = [sys.executable, str(source / "tools/make_game.py"), *build_input_arguments(filename,output),
+    command = [sys.executable, str(ROOT / "tools/run_stable_build.py"), *build_input_arguments(filename,output),
         "--out", str(output), "--msys", str(toolchain), "--jobs", "6", "--events"]
     notify("log", "Building pinned stable engine 0.10.1: " + REVISION + "\n")
     pipeline_progress = False
@@ -315,12 +319,18 @@ def build_stable(filename, notify, destination):
     exe = output / "DekuForgeGame.exe"
     if not exe.is_file():
         raise RuntimeError("Stable build did not produce its executable")
-    info = {"engine_version":"0.10.1","engine_revision":REVISION,
+    from . import __version__
+    with exe.open("rb") as binary:
+        runtime_hash = hashlib.file_digest(binary,"sha256").hexdigest()
+    info = {"engine_version":ENGINE_VERSION,"engine_revision":REVISION,
+            "base_engine_version":"0.10.1","launcher_version":__version__,
+            "build_kit_version":BUILD_KIT_VERSION,"source_layer_sha256":layer["layer_sha256"],
+            "build_id":runtime_hash[:12],"runtime_sha256":runtime_hash,
             "game_version":"1.1.1","experimental":True}
     temporary=output / "dekuforge-build-info.tmp"
     temporary.write_text(json.dumps(info,indent=2),encoding="utf-8")
     temporary.replace(output / "dekuforge-build-info.json")
     (output / ".dekuforge-release-data").write_text(RELEASE_SHA256 + "\n", encoding="ascii")
     from .build_library import BuildLibrary
-    BuildLibrary(ROOT).register(exe,dump=str(filename),version="0.10.1 / 1.1.1",owned=True)
+    BuildLibrary(ROOT).register(exe,dump=str(filename),version=ENGINE_VERSION+" / 1.1.1",owned=True)
     return exe
