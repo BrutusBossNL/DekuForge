@@ -590,6 +590,17 @@ static const GfxShader *shader_for(VkExec *ex, int st, int *present, int *pendin
         ('    if (pending) *pending = 0;',
          '    if (pending) *pending = 0;\n    if (getenv("DEKUFORGE_SYNC_PIPELINES")) await = 1;'),
     ])
+    edit("vk_dump.c", [
+        ('    vmaInvalidateAllocation(vma, j->alloc, 0, VK_WHOLE_SIZE);',
+         '''    vmaInvalidateAllocation(vma, j->alloc, 0, VK_WHOLE_SIZE);
+    // Preserve exact D32 values: the PNG previews normalize each image independently.
+    if (getenv("DEKUFORGE_DUMP_RAW_DEPTH") && j->f->vk == VK_FORMAT_D32_SFLOAT) {
+        char raw_path[600];
+        snprintf(raw_path, sizeof raw_path, "%s/%s.f32", dir, j->name);
+        FILE *raw = fopen(raw_path, "wb");
+        if (raw) { fwrite(j->map, 1, j->bytes, raw); fclose(raw); }
+    }'''),
+    ])
     edit("frame_rate.c", [
         ('    if (rt_trace & RT_TRACE_PERF) speed_report(display_ns, step, interval);',
          '    if ((rt_trace & RT_TRACE_PERF) || getenv("DEKUFORGE_TRACE_CLOCK")) speed_report(display_ns, step, interval);'),
@@ -614,6 +625,13 @@ static const GfxShader *shader_for(VkExec *ex, int st, int *present, int *pendin
         unsigned i = (pending_head - k) % PENDING;
         if (pending[i].addr == addr && pending[i].fence > done) return *v = 0, pending[i].unknown ? 2 : 1;
     }''', '    int replay = df_condition_read(addr, v);\n    if (replay) return replay;'),
+        ('    d.nz = s.nz;', '''    d.nz = s.nz;
+    if (df_condition_trace_on() && (s.aspect & VK_IMAGE_ASPECT_DEPTH_BIT))
+        rt_log("Depth copy frame %llu: addr %#llx -> %#llx, region %d,%d %ux%u -> %d,%d %ux%u, image %llu -> %llu",
+            (unsigned long long)df_conditions.epoch,
+            (unsigned long long)s.img->addr, (unsigned long long)d.img->addr,
+            s.x,s.y,s.w,s.h,d.x,d.y,d.w,d.h,
+            (unsigned long long)s.img->image,(unsigned long long)d.img->image);'''),
         ('        vkCmdFillBuffer(ex->cb, d.buffer, d.offset, n, p->value);', '        vkCmdFillBuffer(ex->cb, d.buffer, d.offset, n, p->value);\n        df_condition_fill(dst, n, p->value);'),
     ])
     edit("vk_device.c", [('    vk_pass_marks_report();', '    vk_pass_marks_report();\n    df_mesh_trace_report();')])

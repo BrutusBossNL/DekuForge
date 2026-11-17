@@ -6,6 +6,9 @@ the source revision, engine revision, game build ID, hardware and driver.
 
 ## 1. Windows parity
 
+The current blocker analysis and the evidence required before further renderer
+changes are recorded in [RENDERER_GAP_ANALYSIS.md](RENDERER_GAP_ANALYSIS.md).
+
 The user entry point is `DekuForge.exe`, with the project's embedded icon and no
 console or CMD script. A final distribution includes the launcher dependencies;
 developer interpreter overrides are not an end-user installation workflow.
