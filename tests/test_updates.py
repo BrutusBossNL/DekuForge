@@ -36,7 +36,7 @@ def fixture_package(path, text="new", extra=None):
 class UpdateTests(unittest.TestCase):
     def test_pinned_text_patches_need_no_git_and_check_every_context_before_writing(self):
         with tempfile.TemporaryDirectory() as folder:
-            root=Path(folder);(root/"first.c").write_text("before\n",encoding="utf-8")
+            root=Path(folder).resolve();(root/"first.c").write_text("before\n",encoding="utf-8")
             (root/"second.c").write_text("preserve\n",encoding="utf-8")
             patch_text="--- a/first.c\n+++ b/first.c\n@@ -1 +1 @@\n-before\n+after\n--- a/second.c\n+++ b/second.c\n@@ -1 +1 @@\n-wrong\n+after\n"
             with self.assertRaises(ValueError):apply_patch(root,patch_text)
@@ -47,7 +47,7 @@ class UpdateTests(unittest.TestCase):
 
     def test_failed_engine_build_keeps_active_game_and_save(self):
         with tempfile.TemporaryDirectory() as folder:
-            root=Path(folder);active=root/"working/game.exe";active.parent.mkdir();active.write_bytes(b"working")
+            root=Path(folder).resolve();active=root/"working/game.exe";active.parent.mkdir();active.write_bytes(b"working")
             profile=active.parent/"profile";profile.mkdir();(profile/"progress.sav").write_bytes(b"original save")
             source=root/"own.nup";source.write_bytes(b"synthetic")
             atomic_json(root/"local/settings.json",{"executable":str(active),"nup":str(source)})
@@ -60,7 +60,7 @@ class UpdateTests(unittest.TestCase):
 
     def test_new_engine_is_activated_only_after_success_with_separate_profile(self):
         with tempfile.TemporaryDirectory() as folder:
-            root=Path(folder);active=root/"working/game.exe";active.parent.mkdir();active.write_bytes(b"working")
+            root=Path(folder).resolve();active=root/"working/game.exe";active.parent.mkdir();active.write_bytes(b"working")
             profile=active.parent/"profile";profile.mkdir();(profile/"progress.sav").write_bytes(b"save")
             source=root/"own.nup";source.write_bytes(b"synthetic")
             atomic_json(root/"local/settings.json",{"executable":str(active),"nup":str(source)})
@@ -77,7 +77,7 @@ class UpdateTests(unittest.TestCase):
 
     def test_install_and_downgrade_preserve_game_settings_and_saves(self):
         with tempfile.TemporaryDirectory() as folder:
-            root=Path(folder)/"app";archive=Path(folder)/"release.zip"
+            root=Path(folder).resolve()/"app";archive=Path(folder).resolve()/"release.zip"
             for name in ("local/settings.json","build/game/profile/slot_00/progress.sav","build/game/DekuForgeGame.exe"):
                 p=root/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(b"keep")
             fixture_package(archive,"old");install(archive,root,log=lambda _:None)
@@ -91,7 +91,7 @@ class UpdateTests(unittest.TestCase):
 
     def test_mid_install_failure_restores_original_and_removes_new_members(self):
         with tempfile.TemporaryDirectory() as folder:
-            root=Path(folder)/"app";archive=Path(folder)/"release.zip"
+            root=Path(folder).resolve()/"app";archive=Path(folder).resolve()/"release.zip"
             fixture_package(archive,"old");install(archive,root,log=lambda _:None)
             fixture_package(archive,"new",{"docs/new.md":b"new file"})
             with self.assertRaises(OSError):install(archive,root,log=lambda _:None,fail_after=2)
@@ -101,7 +101,7 @@ class UpdateTests(unittest.TestCase):
 
     def test_interrupted_transaction_is_recovered_before_next_install(self):
         with tempfile.TemporaryDirectory() as folder:
-            root=Path(folder)/"app";identity="a"*32
+            root=Path(folder).resolve()/"app";identity="a"*32
             backup=root/"local/update-backups"/identity;backup.mkdir(parents=True)
             (backup/"run_launcher.py").write_text("before",encoding="utf-8")
             (root/"run_launcher.py").write_text("partially replaced",encoding="utf-8")
@@ -111,7 +111,7 @@ class UpdateTests(unittest.TestCase):
 
     def test_tampered_member_is_rejected_before_existing_app_is_changed(self):
         with tempfile.TemporaryDirectory() as folder:
-            archive=Path(folder)/"bad.zip";fixture_package(archive)
+            archive=Path(folder).resolve()/"bad.zip";fixture_package(archive)
             with zipfile.ZipFile(archive,"a") as z:z.writestr("run_launcher.py",b"tampered")
             with self.assertRaises(ValueError):validate_package(archive)
 
@@ -121,12 +121,12 @@ class UpdateTests(unittest.TestCase):
                      "tools/thing.py:payload","tools./app.py","tools/file.py ","tools//file.py"):
             self.assertFalse(allowed(name),name)
         with tempfile.TemporaryDirectory() as folder:
-            archive=Path(folder)/"bad.zip";fixture_package(archive,extra={"build/game.py":b"no"})
+            archive=Path(folder).resolve()/"bad.zip";fixture_package(archive,extra={"build/game.py":b"no"})
             with self.assertRaises(ValueError):validate_package(archive)
 
     def test_build_inputs_control_rebuild_instead_of_launcher_version(self):
         with tempfile.TemporaryDirectory() as folder:
-            root=Path(folder)/"app";archive=Path(folder)/"release.zip"
+            root=Path(folder).resolve()/"app";archive=Path(folder).resolve()/"release.zip"
             fixture_package(archive);install(archive,root,log=lambda _:None)
             inventory=fixture_package(archive,"new launcher",{"README.md":b"new documentation"})
             self.assertFalse(needs_rebuild(root,inventory))
@@ -135,7 +135,7 @@ class UpdateTests(unittest.TestCase):
 
     def test_linked_destination_does_not_write_outside_installation(self):
         with tempfile.TemporaryDirectory() as folder:
-            base=Path(folder);root=base/"app";root.mkdir();outside=base/"outside";outside.mkdir()
+            base=Path(folder).resolve();root=base/"app";root.mkdir();outside=base/"outside";outside.mkdir()
             try:(root/"dekuforge").symlink_to(outside,target_is_directory=True)
             except OSError:self.skipTest("Symlinks unavailable")
             archive=base/"app.zip";fixture_package(archive)
@@ -155,12 +155,12 @@ class UpdateTests(unittest.TestCase):
 
     def test_unsigned_asset_metadata_is_refused_before_network_access(self):
         with tempfile.TemporaryDirectory() as folder, patch("dekuforge.update_service.github_request") as network:
-            with self.assertRaises(ValueError):download_asset({"size":10,"url":"https://evil.test"},Path(folder)/"app.zip")
+            with self.assertRaises(ValueError):download_asset({"size":10,"url":"https://evil.test"},Path(folder).resolve()/"app.zip")
             network.assert_not_called()
 
     def test_release_descriptor_and_package_are_bound_to_the_selected_tag(self):
         with tempfile.TemporaryDirectory() as folder:
-            root=Path(folder);(root/"tools").mkdir();(root/"dekuforge").mkdir()
+            root=Path(folder).resolve();(root/"tools").mkdir();(root/"dekuforge").mkdir()
             (root/"tools/update_worker.py").write_text("# worker",encoding="utf-8")
             (root/"dekuforge/update_package.py").write_text("# verifier",encoding="utf-8")
             archive=root/"fixture.zip";fixture_package(archive)
