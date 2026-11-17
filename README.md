@@ -17,6 +17,12 @@
 
 ## About and credits
 
+DekuForge is a **non-commercial hobby project**. We earn no income from it.
+We oppose piracy and encourage you to support Nintendo by purchasing the game
+and the console. Use only your own ROM/dump of a legally obtained copy, from
+your own console. We do not explain how to dump, obtain or download game files.
+We have no intention of undermining Nintendo or causing it harm.
+
 DekuForge uses the stable **NX2navi 0.10.1** source as its reference and engine
 foundation. Thank you to the NX2navi authors, upstream engine and tooling authors,
 and everyone who contributed code, research, tests, fixes, documentation or feedback.
