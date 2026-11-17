@@ -675,3 +675,21 @@ normally after 131.61 seconds. The captured colour-pass depth target differs
 from the earlier primary depth target; intervening passes and copy ordering
 must be checked before interpreting this as an error. PNG depth previews are
 individually normalized and cannot be compared as raw depth values.
+
+### Task and mesh constant-bank isolation
+
+Comparison with the working reference exposed a stage-cache alias: task, mesh
+and compute all selected bank slot 2. Task and mesh storage bindings can be
+identical while their driver-bank table offsets differ (0x670 and 0x770), so
+input-cache equality returned the wrong stage's bank without refilling it.
+The composed runtime now provides five independent stage slots. The native
+bank check exercises the actual cache function with identical descriptor
+inputs, verifies separate allocations and repeated-stage reuse, and checks
+the task/mesh table offsets. All 63 project tests pass.
+
+The ordinary recorder-enabled moving test exited normally after 100.24 seconds.
+Frames 2800?3300 measured 28.70 average FPS, an 18.72 FPS one-percent low and a
+67.375 ms maximum. Shader caches were warm, so this cannot isolate the cache
+repair's performance impact. The local image is
+`build/windows-game/test-stage-banks-frame2650.png`; visual acceptance remains
+pending. No overall playability or renderer parity is claimed.

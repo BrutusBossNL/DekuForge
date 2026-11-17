@@ -563,6 +563,16 @@ static const GfxShader *shader_for(VkExec *ex, int st, int *present, int *pendin
         return;
     }""")])
     edit("vk.h", [('void vk_device_fault_report(VkResult r);', 'void vk_device_fault_report(VkResult r);\nvoid df_mesh_trace_report(void);')])
+    # Driver banks have distinct layouts for vertex, fragment, compute, task and mesh.
+    edit("vk_exec_draw.c", [
+        ('uint8_t c0[3][VK_C0_BYTES];', 'uint8_t c0[5][VK_C0_BYTES];'),
+        ('VkBuffer c0_buf[3];', 'VkBuffer c0_buf[5];'),
+        ('VkDeviceSize c0_off[3];', 'VkDeviceSize c0_off[5];'),
+        ('int c0_valid[3];', 'int c0_valid[5];'),
+        ('} c0_in[3];', '} c0_in[5];'),
+        ('int k = st == NVN_STAGE_VS ? 0 : st == NVN_STAGE_FS ? 1 : 2;',
+         'int k = st == NVN_STAGE_VS ? 0 : st == NVN_STAGE_FS ? 1 : st == 3 ? 3 : st == 4 ? 4 : 2;'),
+    ])
     edit("vk_exec.h", [('void vk_exec_frame_log(', 'void df_condition_frame_end(void);\nvoid vk_exec_frame_log(')])
     edit("vk_exec.h", [('void df_condition_frame_end(void);', 'void df_condition_frame_end(void);\nvoid df_condition_work(unsigned kind, int skipped);')])
     edit("vk_exec_draw.c", [('    if (ex->render_disabled) return 0;', '    df_condition_work(0, ex->render_disabled);\n    if (ex->render_disabled) return 0;')])
