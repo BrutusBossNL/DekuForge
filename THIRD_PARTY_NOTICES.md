@@ -38,7 +38,8 @@ surrounding upstream implementation. The complete patch and its provenance must
 be considered together.
 
 The verified official application archive supplies release-only pipeline
-metadata, controller art, tool locks and credits for local preparation. It is
+metadata, controller art, tool locks, the Frame Generation libraries with their
+notices, and credits for local preparation. It is
 not included in the launcher package. Its Input Prompts Pack terms refer to
 redistribution in NX2navi releases; those terms must not be assumed to grant
 equivalent rights to a new project. No game-derived outputs are distributed.
@@ -56,6 +57,12 @@ replace it with this overview or infer a common license for all dependencies.
 The active build can download NVIDIA DLSS 310.9.1 under the NVIDIA RTX SDKs
 License, pinned by upstream `tools/dlss_pin.py`, with its notice copied beside the
 local game. It is not MIT licensed and is not bundled in our small launcher ZIP.
+Frame Generation dependencies are extracted locally from the separately verified
+upstream application archive: the upstream `nx2navi_dlssg.dll` bridge, NVIDIA
+Streamline interposer/plugins and `nvngx_dlssg.dll`. The complete upstream
+`dlssg-NOTICE.txt`, `streamline-LICENSE.txt` (MIT) and
+`nvidia-rtx-sdks-LICENSE.txt` accompany them beside the game. Neither the bridge
+nor vendor binaries are bundled in our launcher package or committed here.
 Optional SDK features remain subject to their own terms and hardware support.
 Upstream feature availability does not establish that every option has been
 tested in DekuForge.

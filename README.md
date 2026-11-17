@@ -41,11 +41,13 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 **DekuForge 0.2.0 - first Windows Early Access release.**
 The stable reference-based game has passed local play tests. The DekuForge 0.11.0
 candidate adds the custom in-game interface and Cheat Manager. The launcher and
-engine have independent versions: development launcher **0.3.0**, buildkit **0.2.2**
+engine have independent versions: preview launcher **0.3.0-preview.1**, buildkit **0.2.3**
 and engine **0.11.0**.
 The repository is public and **0.2.0** is the latest published Early Access release.
-Launcher **0.3.0** adds the original mod manager and includes the 0.2.1 scrolling
-fix in source/local builds; it has not yet been released. The component terms noted in
+Preview **0.3.0-preview.1** adds the original mod manager, the scrolling fix and
+complete NVIDIA Frame Generation dependency preparation. Select the Preview
+update channel to receive it; Stable stays on 0.2.0. Existing games need the
+managed game rebuild after this update to receive the missing libraries. The component terms noted in
 [the publication review](docs/PUBLICATION_REVIEW.md) remain unchanged. Early Access
 does not promise complete platform or gameplay coverage.
 

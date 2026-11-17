@@ -18,6 +18,11 @@ REFERENCE = ROOT.parent / "NX2Navi/Contribute/NX2navi-cheat-manager"
 RELEASE_URL = "https://github.com/tangerineturtle1/NX2navi/releases/download/v0.10.1/NX2navi-app-0.10.1.zip"
 RELEASE_SHA256 = "0aad51adec03196d2cb1a65dc6e697c0da2146cb1614b22105beab067151f0f7"
 RELEASE_SIZE = 98116018
+FRAMEGEN_FILES = (
+    'nx2navi_dlssg.dll', 'sl.interposer.dll', 'sl.common.dll', 'sl.dlss_g.dll',
+    'sl.pcl.dll', 'sl.reflex.dll', 'nvngx_dlssg.dll', 'dlssg-NOTICE.txt',
+    'streamline-LICENSE.txt', 'nvidia-rtx-sdks-LICENSE.txt',
+)
 
 
 def build_failure_message(returncode, detail=""):
@@ -111,7 +116,7 @@ def stage_stable():
 
 
 def prepare_release_data(source, notify):
-    """Retain the release's prewarm metadata and button art outside the source repository."""
+    """Prepare verified prewarm data, button art and the complete Frame Generation set."""
     archive = ROOT / "local/build-tools/NX2navi-app-0.10.1.zip"
     archive.parent.mkdir(parents=True, exist_ok=True)
     def verified(path):
@@ -133,8 +138,12 @@ def prepare_release_data(source, notify):
             raise ValueError("Stable release archive checksum mismatch")
         partial.replace(archive)
     with zipfile.ZipFile(archive) as package:
+        framegen = {'bin/dlssg/' + name for name in FRAMEGEN_FILES}
+        if not framegen.issubset(package.namelist()):
+            raise ValueError("Stable release Frame Generation libraries or notices are missing")
         selected = [item for item in package.infolist() if not item.is_dir() and (
             item.filename in {"tools/data/pipeline_list.bin", "toolchain.lock.json", "THIRD_PARTY_NOTICES.md"}
+            or item.filename in framegen
             or item.filename.startswith("prompt-art/") and Path(item.filename).suffix.lower() in {".png", ".txt"})]
         if len(selected) > 1024 or sum(item.file_size for item in selected) > 32 * 1024**2:
             raise ValueError("Stable release data exceeds its limits")
@@ -149,7 +158,19 @@ def prepare_release_data(source, notify):
             target.parent.mkdir(parents=True, exist_ok=True)
             if not target.is_file() or target.read_bytes() != data:
                 target.write_bytes(data)
-    notify("log", "Stable release pipeline list and controller art are ready\n")
+    notify("log", "Stable release pipeline list, controller art and NVIDIA Frame Generation files are ready\n")
+
+
+def verify_framegen_runtime(source, output):
+    """A successful build must deliver the complete verified set beside its executable."""
+    for name in FRAMEGEN_FILES:
+        original, placed = source/'bin/dlssg'/name, output/name
+        if (not original.is_file() or not placed.is_file() or placed.is_symlink()
+                or placed.stat().st_size != original.stat().st_size):
+            raise ValueError('Frame Generation runtime is incomplete: ' + name)
+        with original.open('rb') as expected, placed.open('rb') as actual:
+            if hashlib.file_digest(expected, 'sha256').digest() != hashlib.file_digest(actual, 'sha256').digest():
+                raise ValueError('Frame Generation runtime verification failed: ' + name)
 
 
 def prepare_dlss(source, notify):
@@ -344,6 +365,8 @@ def build_stable(filename, notify, destination):
     exe = output / "DekuForgeGame.exe"
     if not exe.is_file():
         raise RuntimeError("Stable build did not produce its executable")
+    verify_framegen_runtime(source, output)
+    notify('log', 'Verified NVIDIA Frame Generation libraries and notices beside the game\n')
     from . import __version__
     with exe.open("rb") as binary:
         runtime_hash = hashlib.file_digest(binary,"sha256").hexdigest()

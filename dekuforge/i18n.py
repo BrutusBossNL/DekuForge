@@ -299,6 +299,11 @@ for _language, _text in {
 from .mod_labels import extend as _extend_mods
 _extend_mods(MESSAGES)
 
+for _language, _text in {'en': 'Preview release', 'nl': 'Previewversie',
+                         'de': 'Vorschauversion', 'es': 'Version preliminar',
+                         'fr': 'Version preliminaire'}.items():
+    MESSAGES[_language]['preview_release'] = _text
+
 
 def translate(language, key, **values):
     selected = language if language in MESSAGES else "en"

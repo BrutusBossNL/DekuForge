@@ -100,13 +100,15 @@ class StableEngineTests(unittest.TestCase):
             record.write_text(json.dumps(state),encoding="utf-8")
             self.assertEqual(stable_engine.build_input_arguments(source,output),["--nup",str(source)])
 
-    def test_verified_release_data_includes_pipeline_art_and_notices_but_no_runtime_binary(self):
+    def test_verified_release_data_includes_framegen_pipeline_art_and_notices(self):
         package=io.BytesIO()
         with zipfile.ZipFile(package,"w") as z:
             z.writestr("tools/data/pipeline_list.bin",b"synthetic metadata")
             z.writestr("prompt-art/pad/button.png",b"synthetic art")
             z.writestr("THIRD_PARTY_NOTICES.md","retained release credit")
             z.writestr("bin/runtime.dll",b"must not be extracted")
+            for name in stable_engine.FRAMEGEN_FILES:
+                z.writestr('bin/dlssg/'+name, b'synthetic '+name.encode())
         data=package.getvalue()
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder).resolve();source=root/"source";source.mkdir()
@@ -117,7 +119,46 @@ class StableEngineTests(unittest.TestCase):
                 download.assert_not_called()
             self.assertEqual((source/"tools/data/pipeline_list.bin").read_bytes(),b"synthetic metadata")
             self.assertEqual((source/"RELEASE-NOTICES.md").read_text(),"retained release credit")
-            self.assertFalse((source/"bin").exists())
+            self.assertFalse((source/'bin/runtime.dll').exists())
+            for name in stable_engine.FRAMEGEN_FILES:
+                self.assertEqual((source/'bin/dlssg'/name).read_bytes(), b'synthetic '+name.encode())
+            # Reused verified archives also repair a missing or damaged staged DLL.
+            (source/'bin/dlssg/sl.common.dll').write_bytes(b'damaged')
+            with patch.object(stable_engine,"ROOT",root),patch.object(stable_engine,"RELEASE_SIZE",len(data)),patch.object(stable_engine,"RELEASE_SHA256",hashlib.sha256(data).hexdigest()),patch.object(stable_engine,"urlopen") as download:
+                stable_engine.prepare_release_data(source,lambda *args:None)
+                download.assert_not_called()
+            self.assertEqual((source/'bin/dlssg/sl.common.dll').read_bytes(), b'synthetic sl.common.dll')
+
+    def test_missing_framegen_set_is_rejected_before_release_data_is_written(self):
+        package=io.BytesIO()
+        with zipfile.ZipFile(package,'w') as z:
+            z.writestr('tools/data/pipeline_list.bin', b'synthetic metadata')
+        data=package.getvalue()
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder).resolve();source=root/'source';source.mkdir()
+            archive=root/'local/build-tools/NX2navi-app-0.10.1.zip'
+            archive.parent.mkdir(parents=True);archive.write_bytes(data)
+            with patch.object(stable_engine,'ROOT',root),patch.object(stable_engine,'RELEASE_SIZE',len(data)),patch.object(stable_engine,'RELEASE_SHA256',hashlib.sha256(data).hexdigest()):
+                with self.assertRaisesRegex(ValueError, 'Frame Generation'):
+                    stable_engine.prepare_release_data(source,lambda *args:None)
+            self.assertEqual(list(source.iterdir()), [])
+
+    def test_game_runtime_requires_every_framegen_library_and_notice_to_match(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder).resolve();source=root/'source';output=root/'game'
+            (source/'bin/dlssg').mkdir(parents=True);output.mkdir()
+            for name in stable_engine.FRAMEGEN_FILES:
+                (source/'bin/dlssg'/name).write_bytes(name.encode())
+                (output/name).write_bytes(name.encode())
+            stable_engine.verify_framegen_runtime(source,output)
+            for name in stable_engine.FRAMEGEN_FILES:
+                (output/name).unlink()
+                with self.assertRaisesRegex(ValueError, 'incomplete'):
+                    stable_engine.verify_framegen_runtime(source,output)
+                (output/name).write_bytes(b'x'*len(name))
+                with self.assertRaisesRegex(ValueError, 'verification failed'):
+                    stable_engine.verify_framegen_runtime(source,output)
+                (output/name).write_bytes(name.encode())
 
     def test_changed_release_reprepares_shaders_without_discarding_native_or_extracted_work(self):
         with tempfile.TemporaryDirectory() as folder:

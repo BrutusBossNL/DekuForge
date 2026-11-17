@@ -13,11 +13,15 @@ pull requests and attached diagnostic files.
 
 ## Component versions
 
-Launcher 0.3.0 and buildkit 0.2.2 are the source/local-build mod-management update,
-including the 0.2.1 scrolling fix. The latest published release remains 0.2.0 until
-a new release is published. Engine 0.11.0 is unchanged. Ordinary RomFS mods need
-no game rebuild; changed code mods do. See [mods.md](mods.md). The invisible
-health check now covers 45 core views and five report forms in five languages.
+Launcher 0.3.0-preview.1 and buildkit 0.2.3 include mod management, the scrolling
+fix and complete NVIDIA Frame Generation dependency preparation. The GitHub
+release is a prerelease, excluded from Stable updates; 0.2.0 remains the stable
+release. Engine 0.11.0 is unchanged. Existing games need the managed game rebuild
+after updating to receive the missing Frame Generation libraries and notices.
+The builder verifies all seven libraries and three notice/license files beside
+the executable before reporting success. See [frame-generation.md](frame-generation.md)
+and [mods.md](mods.md). The invisible health check covers 45 core views and five
+report forms in five languages.
 
 `dekuforge/components.json` records independent identities:
 

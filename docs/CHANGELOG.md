@@ -2,7 +2,22 @@
 
 Component versions are independent. Published releases are not replaced in place.
 
-## Launcher 0.3.0 / buildkit 0.2.2 - original mod manager (not yet released)
+## Launcher 0.3.0-preview.1 / buildkit 0.2.3 - Preview
+
+Includes all changes since 0.2.0 listed below. Fixes
+[issue #3](https://github.com/BrutusBossNL/DekuForge/issues/3): local build preparation
+now stages the complete pinned NVIDIA Frame Generation library set and its notices
+from the verified 0.10.1 application archive. Completed builds verify those files
+beside the game. Previously only the separate DLSS upscaling library was prepared.
+Existing builds need the managed game rebuild after updating. The stable renderer
+and engine version 0.11.0 are unchanged. Hardware/driver requirements still apply;
+dependency checks do not establish generated-frame performance on every GPU.
+
+This is a GitHub prerelease for the Preview channel only; Stable remains 0.2.0.
+The launcher explicitly labels itself Preview. No ROM, game assets, generated
+game source, shaders, pipelines or compiled game binaries are release assets.
+
+## Launcher 0.3.0 / buildkit 0.2.2 - original mod manager (included in 0.3.0-preview.1)
 
 Implements [issue #1](https://github.com/BrutusBossNL/DekuForge/issues/1) with own
 launcher code: add a folder/ZIP or use installed 7-Zip for 7z/RAR, normalize nested
@@ -15,7 +30,7 @@ The native health check now visits 45 core views plus five report forms in five
 languages, including Mods. See [mods.md](mods.md) for layout, limits and validation
 scope; this manager does not make the underlying game engine independent.
 
-## Launcher 0.2.1 - scroll-background fix (not yet released)
+## Launcher 0.2.1 - scroll-background fix (included in 0.3.0-preview.1)
 
 Engine 0.11.0 and buildkit 0.2.1 are unchanged. Fixes
 [issue #2](https://github.com/BrutusBossNL/DekuForge/issues/2): the page artwork
