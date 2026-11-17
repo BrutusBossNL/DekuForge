@@ -1014,7 +1014,7 @@ class Launcher:
                 except (OSError, ValueError) as error:
                     self.library_status = str(error)
             elif kind == "failure":
-                self.error = value
+                self.error = self.t(value) if value in MESSAGES["en"] else value
             elif kind == "done":
                 self.progress.finish()
                 self.build_busy = False

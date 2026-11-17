@@ -10,6 +10,22 @@ from dekuforge import stable_engine
 
 
 class StableEngineTests(unittest.TestCase):
+    def test_interrupted_child_is_reported_without_misclassifying_shader_errors(self):
+        self.assertEqual(stable_engine.build_failure_message(1,
+            "CalledProcessError: glslc returned non-zero exit status 3221225786."), "build_interrupted")
+        self.assertEqual(stable_engine.build_failure_message(-1073741510), "build_interrupted")
+        self.assertNotEqual(stable_engine.build_failure_message(1, "Shader syntax error"), "build_interrupted")
+
+    def test_native_build_worker_hides_console_without_discarding_process_flags(self):
+        from tools import run_stable_build
+        calls = []
+        class Process:
+            def __init__(self, *args, **kwargs): calls.append(kwargs)
+        with patch.object(run_stable_build.os, "name", "nt"), patch.object(run_stable_build.subprocess, "Popen", Process), patch.object(run_stable_build.subprocess, "CREATE_NO_WINDOW", 0x08000000, create=True):
+            run_stable_build.hide_build_windows()
+            run_stable_build.subprocess.Popen(["synthetic-tool"], creationflags=512)
+        self.assertEqual(calls[0]["creationflags"], 0x08000000 | 512)
+
     def test_verified_source_archive_is_cached_and_restores_pristine_inputs(self):
         archive=io.BytesIO()
         with zipfile.ZipFile(archive,"w") as z:z.writestr("upstream/VERSION","0.10.1")

@@ -4,6 +4,7 @@ import io
 import importlib.util
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -17,6 +18,15 @@ REFERENCE = ROOT.parent / "NX2Navi/Contribute/NX2navi-cheat-manager"
 RELEASE_URL = "https://github.com/tangerineturtle1/NX2navi/releases/download/v0.10.1/NX2navi-app-0.10.1.zip"
 RELEASE_SHA256 = "0aad51adec03196d2cb1a65dc6e697c0da2146cb1614b22105beab067151f0f7"
 RELEASE_SIZE = 98116018
+
+
+def build_failure_message(returncode, detail=""):
+    """Preserve an interrupted child status even when the builder exits with 1."""
+    child = re.search(r"(?:exit status|exit code)\s+(-?\d+)", detail)
+    status = int(child.group(1)) if child else returncode
+    if status & 0xffffffff == 0xc000013a:
+        return "build_interrupted"
+    return "Stable engine build failed; see build log"
 
 
 def source_manifest():
@@ -290,6 +300,7 @@ def build_stable(filename, notify, destination):
         "--out", str(output), "--msys", str(toolchain), "--jobs", "6", "--events"]
     notify("log", "Building pinned stable engine 0.10.1: " + REVISION + "\n")
     pipeline_progress = False
+    error_detail = ""
     with subprocess.Popen(command, cwd=source, env=env, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace",
             creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0)) as process:
@@ -306,6 +317,8 @@ def build_stable(filename, notify, destination):
             if line.startswith("@@"):
                 try:
                     event = json.loads(line[2:])
+                    if event.get("ev") == "error":
+                        error_detail = str(event.get("message", ""))[:16384]
                     phases = {"check":"checking", "exefs":"prepared", "romfs":"extracting",
                               "lift":"generating", "compile":"compiling", "shaders":"shaders",
                               "prompts":"prompts", "scan":"checking"}
@@ -325,8 +338,9 @@ def build_stable(filename, notify, destination):
                         notify("phase", {"phase":phase})
                 except (ValueError, TypeError):
                     pass
-        if process.wait():
-            raise RuntimeError("Stable engine build failed; see build log")
+        returncode = process.wait()
+        if returncode:
+            raise RuntimeError(build_failure_message(returncode, error_detail))
     exe = output / "DekuForgeGame.exe"
     if not exe.is_file():
         raise RuntimeError("Stable build did not produce its executable")

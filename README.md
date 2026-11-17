@@ -135,6 +135,10 @@ report offered after a detected crash. Check the diagnostics before submitting.
   being tested. Local package checks do not replace a clean-machine game test.
 - Preview EXEs are unsigned and can trigger SmartScreen; see the
   [installation note above](#windows-smartscreen---unsigned-preview).
+- A build tool can stop with Windows interruption status `0xC000013A`.
+  Completed stages are retained: retry with the same archive and build folder.
+  The native build worker hides tool consoles; the status alone cannot identify
+  what caused an external interruption. See [build recovery](docs/building.md#resuming-an-interrupted-build).
 - Game validation currently covers limited hardware and scenes; FPS and driver
   compatibility need broader testing. A local 20-second candidate test averaged
   51.9 FPS on an RTX 2080; this is not a general performance guarantee.

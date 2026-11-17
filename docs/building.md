@@ -55,6 +55,20 @@ and [BuildKit notes](https://github.com/tangerineturtle1/NX2navi/blob/main/docs/
 are useful background, but their current main branch can differ from our pin.
 Do not replace our backend with a newer upstream checkout without validation.
 
+## Resuming an interrupted build
+
+Keep the launcher open while building. If a tool exits with `0xC000013A`
+(`3221225786` or `-1073741510`), Windows reported an interruption; this alone does
+not identify its source or establish a shader/compiler defect. The launcher
+preserves the detailed log and reports the interruption separately. Native tools
+started by the pinned build worker run without interactive console windows.
+
+Retry with the same unchanged archive and owned build destination. Completed
+extraction/RomFS stages can be reused when their recorded input identity matches;
+other stages and objects are reused only when their build keys match. Do not
+delete the build folder or select a new destination just to retry. Failed or
+partial stages are not marked complete. Recovery is not an automatic retry loop.
+
 ## Verification and content boundary
 
 ```text

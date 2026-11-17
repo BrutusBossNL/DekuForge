@@ -12,6 +12,18 @@ sys.path.insert(0,str(ROOT))
 from dekuforge.runtime_layer import gpu_input_signature
 
 
+def hide_build_windows():
+    """Keep native tools in this worker detached from interactive consoles."""
+    if os.name != "nt":
+        return
+    parent = subprocess.Popen
+    class BuildProcess(parent):
+        def __init__(self, *args, **kwargs):
+            kwargs["creationflags"] = kwargs.get("creationflags", 0) | subprocess.CREATE_NO_WINDOW
+            super().__init__(*args, **kwargs)
+    subprocess.Popen = BuildProcess
+
+
 def require_gpu_idle():
     if os.name != "nt":
         return
@@ -24,6 +36,7 @@ def require_gpu_idle():
 
 
 def main():
+    hide_build_windows()
     source=ROOT/"build/engine-0.10.1"
     spec=importlib.util.spec_from_file_location("dekuforge_pinned_builder",source/"tools/make_game.py")
     driver=importlib.util.module_from_spec(spec);spec.loader.exec_module(driver)

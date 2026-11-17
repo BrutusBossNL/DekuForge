@@ -286,6 +286,16 @@ for _language,_text in {"en":"Uninstall DekuForge","nl":"DekuForge verwijderen",
     MESSAGES[_language]["uninstall"]=_text
 
 
+for _language, _text in {
+    "en": "A build tool was unexpectedly interrupted by Windows (0xC000013A). Completed work is retained. Keep the launcher open and retry with the same archive and build folder. See the build log for details.",
+    "nl": "Een bouwtool is onverwacht onderbroken door Windows (0xC000013A). Voltooid werk blijft bewaard. Laat de launcher open en probeer opnieuw met hetzelfde archief en dezelfde bouwmap. Bekijk de bouwlog voor details.",
+    "de": "Ein Build-Werkzeug wurde unter Windows unerwartet unterbrochen (0xC000013A). Fertige Arbeit bleibt erhalten. Lassen Sie den Launcher offen und versuchen Sie es mit demselben Archiv und Build-Ordner erneut. Details stehen im Build-Protokoll.",
+    "es": "Una herramienta se interrumpio inesperadamente en Windows (0xC000013A). El trabajo completado se conserva. Mantenga el lanzador abierto y reintente con el mismo archivo y carpeta de compilacion. Consulte el registro para mas detalles.",
+    "fr": "Un outil de compilation a ete interrompu sous Windows (0xC000013A). Le travail termine est conserve. Gardez le lanceur ouvert et reessayez avec la meme archive et le meme dossier de compilation. Consultez le journal pour les details.",
+}.items():
+    MESSAGES[_language]["build_interrupted"] = _text
+
+
 def translate(language, key, **values):
     selected = language if language in MESSAGES else "en"
     text = FILE_LABELS[selected][key] if key in FILE_LABELS[selected] else MESSAGES[selected].get(key,MESSAGES["en"].get(key,key.replace("_"," ").title()))
