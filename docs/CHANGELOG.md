@@ -2,6 +2,16 @@
 
 Component versions are independent. Published releases are not replaced in place.
 
+## Launcher 0.2.1 - scroll-background fix (not yet released)
+
+Engine 0.11.0 and buildkit 0.2.1 are unchanged. Fixes
+[issue #2](https://github.com/BrutusBossNL/DekuForge/issues/2): the page artwork
+stays fixed while content scrolls. Translucent child surfaces are realigned after
+scrollbar, mouse-wheel and keyboard-focus scrolling, including surfaces behind
+ordinary layout frames. Cached viewport pixels are reused during scrolling.
+Pixel regression tests cover both scroll directions and background refreshes.
+Existing games, saves and game settings do not need rebuilding for this fix.
+
 ## Launcher 0.2.0 — first Early Access release
 
 Buildkit 0.2.1; engine 0.11.0. This release uses a normal version, without a
@@ -10,8 +20,10 @@ private test releases remain recorded below for update compatibility and history
 
 The Windows launcher, installer, guided NX2navi save import, update path, issue
 reports and Cheat Manager integration are included. Broader platform and in-game
-acceptance limits remain documented in the README and roadmap. Publication is
-pending the concrete component-rights review in [PUBLICATION_REVIEW.md](PUBLICATION_REVIEW.md).
+acceptance limits remain documented in the README and roadmap. Release v0.2.0
+is published. Unresolved component terms remain recorded in
+[PUBLICATION_REVIEW.md](PUBLICATION_REVIEW.md); publication does not change them
+or the scope of testing.
 
 ## Launcher 0.2.0-preview.2 / buildkit 0.2.1
 

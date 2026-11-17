@@ -38,18 +38,18 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Project status
 
-**DekuForge 0.2.0 — first Windows Early Access release, prepared for publication.**
+**DekuForge 0.2.0 - first Windows Early Access release.**
 The stable reference-based game has passed local play tests. The DekuForge 0.11.0
 candidate adds the custom in-game interface and Cheat Manager. The launcher and
-engine have independent versions: launcher **0.2.0**, buildkit **0.2.1**
+engine have independent versions: development launcher **0.2.1**, buildkit **0.2.1**
 and engine **0.11.0**.
-The repository currently remains private: the upstream distribution terms noted
-in [the publication review](docs/PUBLICATION_REVIEW.md) are still unresolved.
-No public installer release is available yet. Early Access describes the release
-stage; it does not promise complete platform or gameplay coverage.
+The repository is public and **0.2.0** is the latest published Early Access release.
+Launcher **0.2.1** fixes the scrolling page background in source and local builds;
+it has not yet been released. The component terms noted in
+[the publication review](docs/PUBLICATION_REVIEW.md) remain unchanged. Early Access
+does not promise complete platform or gameplay coverage.
 
-Private test previews can be offered to authorized GitHub users on the Preview
-channel. See [release history](docs/CHANGELOG.md) and
+See [release history](docs/CHANGELOG.md) and
 [how updates work](docs/DISTRIBUTION.md#updating-without-uninstalling).
 
 ## Features
@@ -58,7 +58,7 @@ channel. See [release history](docs/CHANGELOG.md) and
 - A standalone `DekuForge-Setup.exe` with installation-folder selection; no manual
   Python, compiler or command-file launcher is needed for installation.
 - A branded launcher with Play, Updates, Saves, a build wizard and build library.
-- Unified padded page panels, with themed scrolling for longer pages.
+- Unified padded page panels, with themed scrolling and fixed artwork for longer pages.
 - System-language default, with English, Dutch, German, Spanish and French UI.
 - Verified, cached build-tool downloads and incremental game rebuilding.
 - Stable/Preview release selection, manual update/downgrade, optional automatic
@@ -156,8 +156,8 @@ report offered after a detected crash. Check the diagnostics before submitting.
 - Several Cheat Manager scenarios still need independent in-game verification.
 - Save compatibility is checked by game version/layout; a save made by a newer
   game is not guaranteed to load after downgrading. Keep your save backups.
-- Private release downloads require authorized GitHub access during development;
-  public releases will not require a GitHub account.
+- Downloads from private forks require authorized GitHub access; public releases
+  do not require a GitHub account.
 
 ## Roadmap
 

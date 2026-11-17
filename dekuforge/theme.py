@@ -166,20 +166,28 @@ class BackgroundCanvas(tk.Canvas):
         key = (self.winfo_width(), self.winfo_height(), owner.winfo_width(), owner.winfo_height(),
                self.winfo_rootx()-owner.winfo_rootx(), self.winfo_rooty()-owner.winfo_rooty(),
                self._opacity, getattr(self, "reveal", None), id(owner._art))
-        if key == self._draw_key:
-            return
-        subdued = self._region()
-        if subdued is None:
-            return
-        self._image = rgb_photo(self, subdued)
-        self._draw_key = key
-        self.itemconfigure(self._item, image=self._image)
-        self.tag_lower(self._item)
-        for child in self.winfo_children():
+        # Canvas items use scrolling content coordinates; the artwork belongs to
+        # the fixed viewport. Moving the item does not require new pixel data.
+        self.coords(self._item, self.canvasx(0), self.canvasy(0))
+        if key != self._draw_key:
+            subdued = self._region()
+            if subdued is not None:
+                self._image = rgb_photo(self, subdued)
+                self._draw_key = key
+                self.itemconfigure(self._item, image=self._image)
+                self.tag_lower(self._item)
+        # A scrolled child window can move without changing its own dimensions,
+        # even when our pixels are cached. Plain layout frames must not stop the
+        # refresh from reaching its translucent descendants.
+        self._redraw_descendants(self)
+
+    @staticmethod
+    def _redraw_descendants(widget):
+        for child in widget.winfo_children():
             if isinstance(child, BackgroundCanvas):
-                if child._resize_job is not None:
-                    child.after_cancel(child._resize_job)
                 child._redraw()
+            else:
+                BackgroundCanvas._redraw_descendants(child)
 
     def destroy(self):
         if self._resize_job is not None:
@@ -198,6 +206,7 @@ class PagePanel(tk.Frame):
     def __init__(self, parent, surface, padding=28):
         super().__init__(parent, bg=BORDER, highlightthickness=0, borderwidth=0)
         self.padding = padding
+        self._scroll_job = None
         self.viewport = BackgroundCanvas(self, surface=surface, opacity=.15)
         self.viewport.pack(side="left", fill="both", expand=True, padx=1, pady=1)
         style = ttk.Style(self)
@@ -213,9 +222,9 @@ class PagePanel(tk.Frame):
         self._window = self.viewport.create_window(padding, padding, window=self.body, anchor="nw")
         self.viewport.bind("<Configure>", self._resize, add="+")
         self.body.bind("<Configure>", self._body_changed, add="+")
-        self._root = self.winfo_toplevel()
-        self._wheel = self._root.bind("<MouseWheel>", self._mousewheel, add="+")
-        self._focus = self._root.bind("<FocusIn>", self._focus_changed, add="+")
+        self._event_root = self.winfo_toplevel()
+        self._wheel = self._event_root.bind("<MouseWheel>", self._mousewheel, add="+")
+        self._focus = self._event_root.bind("<FocusIn>", self._focus_changed, add="+")
 
     def _resize(self, event):
         self.viewport.itemconfigure(self._window, width=max(1, event.width-2*self.padding))
@@ -232,6 +241,14 @@ class PagePanel(tk.Frame):
             self.scroll.pack(side="right", fill="y", padx=(0,1), pady=6)
         elif not needed and self.scroll.winfo_manager():
             self.scroll.pack_forget()
+        if self._scroll_job is None:
+            self._scroll_job = self.after_idle(self._redraw_scrolled)
+
+    def _redraw_scrolled(self):
+        self._scroll_job = None
+        # Run once after Tk has placed the scrolled child window. All input
+        # routes (scrollbar, wheel and focus reveal) pass through yscrollcommand.
+        self.viewport._redraw()
 
     def _contains(self, widget):
         return widget is self.body or widget is not None and str(widget).startswith(str(self.body)+".")
@@ -259,8 +276,11 @@ class PagePanel(tk.Frame):
             self.reveal(event.widget)
 
     def destroy(self):
-        self._root.unbind("<MouseWheel>", self._wheel)
-        self._root.unbind("<FocusIn>", self._focus)
+        if self._scroll_job is not None:
+            self.after_cancel(self._scroll_job)
+            self._scroll_job = None
+        self._event_root.unbind("<MouseWheel>", self._wheel)
+        self._event_root.unbind("<FocusIn>", self._focus)
         super().destroy()
 
 

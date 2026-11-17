@@ -13,6 +13,11 @@ pull requests and attached diagnostic files.
 
 ## Component versions
 
+Launcher 0.2.1 is the source/local-build update for the page-scrolling artwork
+fix (#2). The latest published release remains 0.2.0 until a new release is
+published. This interface-only change leaves engine 0.11.0 and buildkit 0.2.1
+unchanged and does not require a game rebuild.
+
 `dekuforge/components.json` records independent identities:
 
 | Component | Purpose |
@@ -48,8 +53,9 @@ below still apply.
 
 Use **Updates**, choose **Preview** for prereleases, check for releases and install
 the selected version. Draft releases are never listed, even with credentials.
-While this repository is private, non-draft test previews require the user's
-authorized GitHub CLI sign-in or token. There is no embedded maintainer token.
+Public releases do not require GitHub sign-in. Non-draft releases from a private
+fork require the user's authorized GitHub CLI sign-in or token. There is no
+embedded maintainer token.
 
 If the updater cannot access a private preview, close the launcher and run the
 new setup over the same application folder. This upgrades the application without
