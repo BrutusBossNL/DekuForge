@@ -96,7 +96,8 @@ def _generate_prepared(prepared, notify, modules, limit, jobs):
         raise ValueError("Generated output must not be a link")
     args = [sys.executable, "-I", str(ROOT / "engine_entry.py"), "recomp/gen.py",
             "--exefs", str(exefs), "--out", str(output), "--modules", modules,
-            "--jobs", str(jobs), "--limit", str(limit)]
+            "--jobs", str(jobs), "--limit", str(limit),
+            "--patches", str(ROOT / "engine_overrides/frame_timing_v111.txt")]
     with subprocess.Popen(args, cwd=str(ROOT), stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                           text=True, encoding="utf-8", errors="replace",
                           creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)) as process:

@@ -693,3 +693,17 @@ Frames 2800?3300 measured 28.70 average FPS, an 18.72 FPS one-percent low and a
 repair's performance impact. The local image is
 `build/windows-game/test-stage-banks-frame2650.png`; visual acceptance remains
 pending. No overall playability or renderer parity is claimed.
+
+### Real-time gameplay bridge
+
+The manual session confirmed that no patch table was previously linked. The
+original four-site timing table now connects both nominal-refresh step readers
+to the host clock's existing elapsed-time value in 60 Hz units at page offset 8.
+Generation verifies the expected 1.1.1 instruction words, and normal launcher
+build generation now supplies this table. An independent Unicorn ARM64 test
+checks both loads at 17, 28, 30, 60 and 120 FPS; all 64 project tests pass.
+
+Initial live gameplay samples at 15.8?16.1 FPS report 0.998?0.999 game seconds
+per wall second after loading. This verifies the clock bridge, not gameplay
+smoothness or full physics/UI parity. Loading spikes still lose time at the
+existing bounded step. Renderer defects and low FPS remain unresolved.

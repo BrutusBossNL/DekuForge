@@ -1,0 +1,8 @@
+# Original local timing integration for the verified 1.1.1 executable.
+# The existing host clock publishes seconds*60 at patch-page byte 8.
+# Replace the two nominal-refresh divisions with that elapsed-time value.
+set realtime NX2NAVI_REALTIME 1
+site realtime main 6e6cc0 1e220c21 @page:x10
+site realtime main 6e6cc4 1e201828 bd400948
+site realtime main 3b4eaf4 5e21d800 @page:x9
+site realtime main 3b4eaf8 1e201820 bd400920
