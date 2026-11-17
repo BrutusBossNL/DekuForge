@@ -13,14 +13,15 @@ The user entry point is `DekuForge.exe`, with the project's embedded icon and no
 console or CMD script. A final distribution includes the launcher dependencies;
 developer interpreter overrides are not an end-user installation workflow.
 
-Deliver a standalone build from the owner's NUP input, using included source
-and independently provisioned open-source build tools. No external application
-may silently perform the build. Local preparation, CPU generation, RomFS
-assembly and native linking now produce an experimental executable that boots
-and loads a copied save. Rendering correctness, movie performance, world
-stability and reference parity remain open. The launcher build wizard still
-stops after CPU generation; it must be connected to the validated native path
-before this priority is delivered.
+Deliver a local build from the owner's NUP input using the pinned stable 0.10.1
+source backend and independently provisioned tools. The launcher wizard is now
+connected to the complete extraction, CPU generation, native linking and shader
+preparation pipeline. Its first full isolated build completed; the initial world
+screenshots now show the missing terrain, foliage and sky correctly. Warm moving
+world tests measured approximately 36 FPS on this machine. See
+[STABLE_ENGINE_MIGRATION.md](STABLE_ENGINE_MIGRATION.md) for the exact evidence,
+test-mode distinction and remaining acceptance checks. Fresh-machine toolchain
+provisioning is still required for a distributable installer.
 
 Acceptance requires install, launch, title, save/load, controller mapping, audio,
 rendering and a repeatable play session. Compare Kokiri Forest, Market Square,
@@ -28,8 +29,7 @@ Hyrule Field and a dungeon with the working reference installation on the same
 machine, settings and save snapshot. Record average FPS, frame-time percentiles,
 stalls, peak committed memory and peak VRAM. The owner must be able to continue
 playing with no meaningful regression. An initial reference run and isolated
-development measurements are recorded in `WINDOWS_BUILD.md`; the test world
-still has rendering defects. These measurements do not establish parity.
+development measurements are recorded in `WINDOWS_BUILD.md`; the old experimental measurements do not establish parity for the new backend.
 
 ### Launcher updates and save migration
 

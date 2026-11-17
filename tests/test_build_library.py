@@ -69,3 +69,18 @@ class BuildLibraryTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 self.library.check_root(path)
         self.assertTrue(self.exe.is_file())
+
+    def test_completed_stable_build_is_discovered_without_selecting_or_changing_saves(self):
+        stable = self.root / "build" / "stable"
+        stable.mkdir()
+        executable = stable / "DekuForgeGame.exe"
+        executable.write_bytes(b"synthetic")
+        (stable / ".dekuforge-stable-build").touch()
+        (stable / "dekuforge-build-info.json").write_text(json.dumps({
+            "engine_version":"0.10.1", "game_version":"1.1.1"}),encoding="utf-8")
+        entries = self.library.discover()
+        self.assertEqual(len(entries),1)
+        self.assertEqual(entries[0]["version"],"0.10.1 / 1.1.1")
+        self.assertTrue(entries[0]["owned"])
+        self.assertEqual((self.profile / "progress.sav").read_bytes(),b"keep me")
+        self.assertFalse((self.root / "local/settings.json").exists())

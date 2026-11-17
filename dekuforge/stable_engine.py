@@ -67,6 +67,7 @@ def stage_stable():
             if relative.suffix in {".c", ".cpp", ".py"}:
                 text = data.decode("utf-8")
                 text = text.replace('"NX2navi Recomp', '"DekuForge').replace('"NX2navi"', '"DekuForge"')
+                text = text.replace('"NX2navi %s  -  game %s"', '"DekuForge %s  -  game %s"')
                 if relative.as_posix() == "tools/make_game.py":
                     text = text.replace("'ocarina.exe'", "'DekuForgeGame.exe'")
                 data = text.encode("utf-8")
@@ -110,6 +111,21 @@ def prepare_dlss(source, notify):
     (folder / pin.NOTICE).write_text(pin.notice_text(),encoding="utf-8")
 
 
+def build_input_arguments(filename, output):
+    """Reuse extracted input only for the same archive identity recorded by the stable builder."""
+    filename=Path(filename).absolute()
+    stat=filename.stat()
+    identity=f"nup {filename} {stat.st_size} {int(stat.st_mtime)}"
+    try:
+        state=json.loads((output / "build-cache/state.json").read_text(encoding="utf-8"))
+        steps=state.get("steps",{})
+        if state.get("version")==2 and state.get("input")==identity and all(key in steps for key in ("exefs","romfs")):
+            return ["--rebuild"]
+    except (OSError,ValueError,AttributeError,TypeError):
+        pass
+    return ["--nup",str(filename)]
+
+
 def build_stable(filename, notify, destination):
     output = Path(destination).absolute()
     if output.resolve() != output:
@@ -120,6 +136,8 @@ def build_stable(filename, notify, destination):
     output.mkdir(parents=True, exist_ok=True)
     marker.touch()
     (output / ".dekuforge-owned").write_text("DekuForge stable build\n",encoding="utf-8")
+    notify("phase", {"phase":"checking"})
+    notify("log", "Preparing stable 0.10.1 source " + REVISION + "\n")
     source = stage_stable()
     prepare_dlss(source,notify)
     notify("phase", {"phase":"shaders"})
@@ -134,7 +152,7 @@ def build_stable(filename, notify, destination):
     toolchain = Path(os.environ["LOCALAPPDATA"]) / "Programs/NX2navi/toolchain/msys64/ucrt64"
     env = os.environ.copy()
     env["PATH"] = str(ROOT / "local/build-tools/shaders/ucrt64/bin") + os.pathsep + str(toolchain / "bin") + os.pathsep + env.get("PATH", "")
-    command = [sys.executable, str(source / "tools/make_game.py"), "--nup", str(filename),
+    command = [sys.executable, str(source / "tools/make_game.py"), *build_input_arguments(filename,output),
         "--out", str(output), "--msys", str(toolchain), "--jobs", "6", "--events"]
     notify("log", "Building pinned stable engine 0.10.1: " + REVISION + "\n")
     with subprocess.Popen(command, cwd=source, env=env, stdout=subprocess.PIPE,

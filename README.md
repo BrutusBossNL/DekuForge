@@ -86,8 +86,9 @@ that contain the NUP format. Nintendo 64 ROMs need a different engine.
   packages, verifies their content and writes NSO metadata and a module layout.
 - The launcher now uses the complete pinned stable 0.10.1 build pipeline, including
   native linking and shader preparation. The DekuForge UI and save/build management
-  remain in place. The first isolated migration build is being validated; no
-  rendering acceptance is claimed until its gameplay tests pass.
+  remain in place. The first isolated migration build completed and its world
+  screenshots now show complete terrain, foliage and sky. Warm play tests measured
+  approximately 36 FPS on the local RTX 2080; broader parity remains under test.
 - Historical 0.3.10-based CPU and renderer experiments remain available for diagnosis.
   They are not substituted for the selected stable backend.
 

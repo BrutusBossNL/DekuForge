@@ -35,33 +35,70 @@ workspace, and the project icon is supplied. The DekuForge launcher, settings,
 build library and save management remain the project's own UI. Further game-menu
 and cheat-manager integration follows verified core rendering.
 
-## Local migration run
+## Local migration run (2026-11-17)
 
 Destination: `build/stable-windows-game`, separate from both existing games.
-Game input identified as 1.1.1 build e0f3ccfa. The 26.24 GB RomFS image was checked
-and completed. CPU lifting and native compilation/linking completed (719 files, compile stage
-848 seconds). The executable is approximately 305 MB. Stable shader preparation
-is now running against 42,142 shader combinations.
-The stable shader translator has been built from the pinned source. Its own
-synthetic smoke test passed: constant fragment output, image reads, array-layer
-query, malformed-request recovery and SPIR-V validation. The 67 project tests
-also pass, including source-integrity and destination-protection checks.
-The isolated profile and graphics/controller settings were copied from local test
-data and the working reference; active installations and saves were not changed.
-The matching pinned DLSS library and its vendor notice are present. No visual
-acceptance, gameplay performance or playable-release claim yet.
+Game input: 1.1.1 build `e0f3ccfa`. The 26.24 GB RomFS image was assembled and
+checked. Native compilation/linking completed (719 files, 848 seconds).
+The first complete build took 46.3 minutes. All 42,142 shader variants were
+prepared and built for the driver: zero failures, zero skipped variants.
+The final content scan checked 186,583 files and found no damaged content.
 
-Older generated render PNG sets were removed to provide build space; the latest
-raw-depth capture and test logs were retained. Existing game installations,
-input dump and save profiles were preserved.
+Hardware: NVIDIA GeForce RTX 2080, driver 617.42, Windows. Output is 1080p
+with DLSS Quality (1280x720 scene reconstructed to 1920x1080). Frame generation
+is off. Testing uses a separate copy of the existing test profile; the original
+installation, preferences and saves remain untouched.
+
+Three bounded game runs exited normally. The cold first run included substantial
+pipeline compilation stalls. The next moving-world run measured 35.93 average
+FPS, 25.75 FPS one-percent low, and 53.705 ms maximum frame interval over all
+720 presentation intervals after the world clock started (20.039 seconds).
+The recorder-enabled repeat measured 35.80 FPS and a 25.40 FPS one-percent low
+over 718 intervals (20.056 seconds). These are presentation cadence measurements,
+not GPU timings. Loading/title frames are excluded by the explicitly recorded
+world-clock boundary rather than by removing slow gameplay samples.
+
+The assistant's image viewer now works. The final world screenshot and a contact
+sheet from two recorded sequences show complete terrain, rock textures, grass,
+Link and cloud detail. No former large disappearing surfaces were visible in the
+reviewed images. This is scoped visual evidence, not a claim that every scene or
+all temporal artifacts have been tested. The first complete 90-frame trace reports
+about 0.99 game seconds per wall second and no frames with zero draws.
+
+Four in-game settings pages were rendered and captured. The stable engine provides
+Screen, Game, Sound and Controls, including video/upscaler options. F1 opens this
+menu; F10 controls the performance overlay. The visible menu version label is
+adapted to DekuForge without changing the renderer.
+
+Important test distinction: `--shot` disables asynchronous pipeline building for
+deterministic captures. `tools/test_stable_game.py` now defaults to the ordinary
+startup route, with periodic captures; `--deterministic-shot` remains explicit.
+Ordinary startup/prewarm verification follows the deterministic baseline before
+activation. `--capture` enables bounded frame recording and settings-page captures.
+
+The launcher build route is the same `build_independent` route exercised by
+`run_builder.py`. Successful builds receive version metadata and enter the build
+library; discovery also recognizes completed stable builds after a restart.
+An unchanged archive identity can use the stable builder's `--rebuild` mode;
+a changed archive or incomplete extraction uses the selected NUP again.
+
+The stable translator's synthetic smoke test passed, including malformed-request
+recovery and SPIR-V validation. All 69 project tests pass. The separate launcher
+self-test rendered 40 views in five languages with the correct project logo,
+verified native icon and one top-level window.
+
+Older experimental render PNG sets and their reproducible shader cache were
+removed to provide build space. The latest raw-depth capture, test logs, input
+dump, original game and save profiles were retained.
 
 ## Remaining delivery work
 
-- Finish native compilation and the stable shader/pipeline preparation.
-- Copy a save into the isolated profile and compare the same moving scene.
-- Confirm terrain, sky, foliage, shadows, movies, timing, controllers and audio.
-- Activate only the verified installation; retain the previous one for rollback.
-- Complete fresh-machine compiler/SDK provisioning; source retrieval no longer
-  requires an installed NX2navi checkout.
-- Integrate custom game menus and cheats without changing the validated renderer.
-- Verify the complete launcher wizard from the user's NUP selection.
+- Complete ordinary startup/prewarm and launcher Play validation of the final binary.
+- Test additional scenes, save/write/load, controllers and audio interactively;
+  movie decoding already logs 1920x1080 AV1 at approximately 60 presented FPS.
+- Activate only the tested installation; retain the previous entry for rollback.
+- Complete fresh-machine compiler/SDK provisioning; this PC currently reuses its
+  installed native toolchain and an independently installed .NET SDK.
+- Bring over custom cheats and related game-menu extensions after the desktop
+  baseline gates, without replacing the validated stable renderer.
+- Validate a complete first-time wizard build on a clean installation.

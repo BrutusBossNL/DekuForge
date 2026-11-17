@@ -81,6 +81,17 @@ _BUILD_PHASES = {
 for _language, _labels in _BUILD_PHASES.items():
     MESSAGES[_language].update(zip(("compiling", "shaders", "prompts", "extracting"), _labels))
 
+_STABLE_BUILD_HELP = {
+    "en": "Build the game from your own archive. The first build also prepares its shaders.",
+    "nl": "Bouw het spel vanuit je eigen gamearchief. De eerste build bereidt ook de shaders voor.",
+    "de": "Erstelle das Spiel aus deinem eigenen Spielarchiv. Beim ersten Build werden auch die Shader vorbereitet.",
+    "es": "Crea el juego desde tu archivo. La primera compilaci\u00f3n tambi\u00e9n prepara los shaders.",
+    "fr": "Construisez le jeu depuis votre archive. La premi\u00e8re compilation pr\u00e9pare aussi les shaders.",
+}
+for _language, _help in _STABLE_BUILD_HELP.items():
+    MESSAGES[_language]["engine_pending"] = _help
+
+
 
 
 

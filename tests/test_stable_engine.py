@@ -1,3 +1,4 @@
+import json
 import io
 import hashlib
 import tempfile
@@ -50,3 +51,21 @@ class StableEngineTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError,"hash mismatch"):
                     stable_engine.stage_stable()
                 self.assertFalse((root/"build/engine-0.10.1/runtime/main.c").exists())
+
+    def test_rebuild_reuses_only_the_same_completed_archive_extraction(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder).resolve()
+            source=root/"own.nup";source.write_bytes(b"synthetic input")
+            output=root/"game";cache=output/"build-cache";cache.mkdir(parents=True)
+            stat=source.stat()
+            state={"version":2,"input":f"nup {source} {stat.st_size} {int(stat.st_mtime)}",
+                   "steps":{"exefs":"complete","romfs":"complete"}}
+            record=cache/"state.json"
+            record.write_text(json.dumps(state),encoding="utf-8")
+            self.assertEqual(stable_engine.build_input_arguments(source,output),["--rebuild"])
+            source.write_bytes(b"replaced input with a different size")
+            self.assertEqual(stable_engine.build_input_arguments(source,output),["--nup",str(source)])
+            source.write_bytes(b"synthetic input")
+            state["steps"].pop("romfs")
+            record.write_text(json.dumps(state),encoding="utf-8")
+            self.assertEqual(stable_engine.build_input_arguments(source,output),["--nup",str(source)])

@@ -58,9 +58,10 @@ class BuildLibrary:
         if build.is_dir():
             for folder in build.iterdir():
                 exe = folder / "DekuForgeGame.exe"
-                if (folder / ".dekuforge-native").is_file() and exe.is_file():
+                if ((folder / ".dekuforge-native").is_file() or (folder / ".dekuforge-stable-build").is_file()) and exe.is_file():
                     info = folder / "dekuforge-build-info.json"
-                    version = json.loads(info.read_text(encoding="utf-8")).get("game_version", "") if info.is_file() else ""
+                    metadata = json.loads(info.read_text(encoding="utf-8")) if info.is_file() else {}
+                    version = " / ".join(str(metadata[key]) for key in ("engine_version", "game_version") if metadata.get(key))
                     self.register(exe, dump if str(exe) == selected else "", version=version, owned=True)
         if selected and Path(selected).is_file():
             self.register(selected, dump)
