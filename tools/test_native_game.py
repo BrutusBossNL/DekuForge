@@ -59,6 +59,7 @@ def main():
     if args.combined_pipelines:
         environment["NX2NAVI_GPL"] = "0"
     if args.synchronous_pipelines:
+        environment["DEKUFORGE_SYNC_PIPELINES"] = "1"
         environment["NX2NAVI_PIPE_WAIT"] = "draw"
         environment["NX2NAVI_PIPE_SKIP"] = "strict"
     if args.no_recorder:

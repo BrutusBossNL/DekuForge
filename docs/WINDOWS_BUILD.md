@@ -707,3 +707,16 @@ Initial live gameplay samples at 15.8?16.1 FPS report 0.998?0.999 game seconds
 per wall second after loading. This verifies the clock bridge, not gameplay
 smoothness or full physics/UI parity. Loading spikes still lose time at the
 existing bounded step. Renderer defects and low FPS remain unresolved.
+
+The diagnostic `--synchronous-pipelines` now actually compiles new graphics
+pipelines synchronously and awaits shader translation; previously it only
+changed the GPL library-wait policy, which had no effect on monolithic pipeline
+creation with GPL disabled. This is opt-in pending visual comparison. Its
+moving test exited normally after 72.71 seconds; frames 1800?2100 averaged
+29.75 FPS. Capture: `test-sync-realtime-frame2200.png`. A screenshot alone cannot
+establish absence of temporal flicker.
+
+`DEKUFORGE_TRACE_CLOCK=1` reports the clock ratio without enabling the expensive
+GPU/performance instrumentation. An ordinary-renderer gameplay interval at
+32.4 FPS measured speed 0.999. The earlier 15?16 FPS instrumentation result is
+not representative of ordinary play. Source regression count remains 64.

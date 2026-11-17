@@ -582,6 +582,18 @@ static const GfxShader *shader_for(VkExec *ex, int st, int *present, int *pendin
     ])
     edit("vk_rec.c", [('        mode = rt_knob("VK_RECORDER", vk_caps.amd ? "0" : "1");',
         '        mode = rt_knob("VK_RECORDER", vk_caps.amd ? "0" : "1");\n        if (getenv("DEKUFORGE_PROFILE_FRAME")) {\n            mode = 0;\n            rt_log("DekuForge: per-pass GPU profiling uses synchronous recording");\n        }')])
+    edit("vk_pipeline.c", [
+        ('return graphics(s, info, A.on, pending, wait_ms);',
+         'return graphics(s, info, getenv("DEKUFORGE_SYNC_PIPELINES") ? 0 : A.on, pending, wait_ms);'),
+    ])
+    edit("vk_exec_draw.c", [
+        ('    if (pending) *pending = 0;',
+         '    if (pending) *pending = 0;\n    if (getenv("DEKUFORGE_SYNC_PIPELINES")) await = 1;'),
+    ])
+    edit("frame_rate.c", [
+        ('    if (rt_trace & RT_TRACE_PERF) speed_report(display_ns, step, interval);',
+         '    if ((rt_trace & RT_TRACE_PERF) || getenv("DEKUFORGE_TRACE_CLOCK")) speed_report(display_ns, step, interval);'),
+    ])
     edit("vk_backend.c", [('    vk_exec_frame_log(t, frame);', '    df_condition_frame_end();\n    vk_exec_frame_log(t, frame);')])
     for name in ("condition_records.h", "condition_records.inc"):
         write(output / "runtime" / ("df_"+name), (root / "engine_overrides" / name).read_text(encoding="utf-8"))
