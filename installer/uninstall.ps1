@@ -1,6 +1,12 @@
 param([Parameter(Mandatory=$true)][string]$Root,[switch]$Silent,[switch]$Confirm,
       [switch]$RemoveSaves,[string]$Backup,[switch]$PlanOnly,[switch]$NoShellCleanup)
 $ErrorActionPreference='Stop'
+function File-Sha256([string]$Path) {
+    $algorithm=[Security.Cryptography.SHA256]::Create()
+    $stream=[IO.File]::OpenRead($Path)
+    try { return [BitConverter]::ToString($algorithm.ComputeHash($stream)).Replace('-','').ToLowerInvariant() }
+    finally { $stream.Dispose();$algorithm.Dispose() }
+}
 trap {
     if (-not $Silent) { Add-Type -AssemblyName System.Windows.Forms;[Windows.Forms.MessageBox]::Show($_.Exception.Message,'DekuForge uninstall') | Out-Null }
     else { Write-Output $_.Exception.Message }
@@ -112,7 +118,7 @@ function Invoke-Uninstall([bool]$Keep,[string]$Destination) {
                 $copy=Join-Path $destination $relative
                 [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($copy)) | Out-Null
                 Copy-Item -LiteralPath $file.FullName -Destination $copy
-                if ((Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $copy -Algorithm SHA256).Hash) { throw 'Save backup verification failed; nothing was removed' }
+                if ((File-Sha256 $file.FullName) -ne (File-Sha256 $copy)) { throw 'Save backup verification failed; nothing was removed' }
             }
         }
         $plan | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $backupRoot 'DekuForge-saves.json')

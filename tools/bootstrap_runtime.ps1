@@ -1,5 +1,11 @@
 param([Parameter(Mandatory=$true)][string]$Root)
 $ErrorActionPreference = 'Stop'
+function File-Sha256([string]$Path) {
+    $algorithm=[Security.Cryptography.SHA256]::Create()
+    $stream=[IO.File]::OpenRead($Path)
+    try { return [BitConverter]::ToString($algorithm.ComputeHash($stream)).Replace('-','').ToLowerInvariant() }
+    finally { $stream.Dispose();$algorithm.Dispose() }
+}
 $ProgressPreference = 'SilentlyContinue'
 $projectRoot = [IO.Path]::GetFullPath($Root).TrimEnd('\')
 if (-not (Test-Path -LiteralPath (Join-Path $projectRoot 'run_launcher.py'))) { throw 'Invalid DekuForge directory' }
@@ -35,10 +41,10 @@ try {
     $cache = Assert-LocalPath (Join-Path $localFolder 'build-tools')
     [IO.Directory]::CreateDirectory($cache) | Out-Null
     $archive = Join-Path $cache ('python-runtime-' + $pin.version + '.zip')
-    if (-not ((Test-Path -LiteralPath $archive) -and ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant() -eq $expected))) {
+    if (-not ((Test-Path -LiteralPath $archive) -and ((File-Sha256 $archive) -eq $expected))) {
         $partial = Assert-LocalPath ($archive + '.part')
         Invoke-WebRequest -UseBasicParsing -Uri $pin.url -OutFile $partial
-        if ((Get-Item -LiteralPath $partial).Length -ne $pin.size -or (Get-FileHash -LiteralPath $partial -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected) { throw 'Runtime download checksum mismatch' }
+        if ((Get-Item -LiteralPath $partial).Length -ne $pin.size -or (File-Sha256 $partial) -ne $expected) { throw 'Runtime download checksum mismatch' }
         Move-Item -LiteralPath $partial -Destination $archive -Force
     }
     Add-Type -AssemblyName System.IO.Compression.FileSystem

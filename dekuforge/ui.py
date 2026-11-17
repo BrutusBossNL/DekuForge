@@ -9,7 +9,6 @@ import threading
 import sys
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
-from tkinter.scrolledtext import ScrolledText
 
 from . import __version__
 from . import reports
@@ -27,7 +26,7 @@ from .home_cards import ActionCard, animate_intro
 from .saves import export_save, import_save, save_files
 from .theme import BG, BORDER, GOLD, LEAF, MUTED, PANEL, TEXT, ArtworkLabel, BackgroundCanvas, apply_identity, apply_window, logo_image
 from .workflow import BuildRequest, Progress, duration, validate_destination, validate_source
-from .theme import button_feedback, NavigationCanvas, NavigationLogo
+from .theme import button_feedback, NavigationCanvas, NavigationLogo, PagePanel, ScrolledText
 
 
 class Launcher:
@@ -98,8 +97,12 @@ class Launcher:
         self.backdrop.grid_propagate(False)
         self.backdrop.grid_rowconfigure(0, weight=1)
         self.backdrop.grid_columnconfigure(0, weight=1)
-        self.content = BackgroundCanvas(self.backdrop, surface=self.backdrop)
-        self.content.grid(row=0, column=0, sticky="nsew", padx=(274, 34), pady=28)
+        self.page_host = tk.Frame(self.backdrop, bg=BG)
+        self.page_host.grid(row=0, column=0, sticky="nsew", padx=(264, 24), pady=24)
+        self.page_host.grid_rowconfigure(0, weight=1)
+        self.page_host.grid_columnconfigure(0, weight=1)
+        self.content = None
+        self.page_panel = None
         tk.Misc.lift(self.sidebar)
         style = ttk.Style(root)
         style.configure("Forge.Horizontal.TProgressbar", troughcolor=PANEL, background=GOLD,
@@ -123,9 +126,9 @@ class Launcher:
         return translate(self.language, key, **values)
 
     def label(self, parent, text, size=11, color=TEXT, **options):
-        # Text always has a solid backing, including help/status outside cards.
-        widget = tk.Label(parent, text=text, bg=PANEL, fg=color,
-                          font=("Segoe UI", size), justify="left", anchor="w", **options)
+        widget = (ArtworkLabel(parent, text, size, color, **options) if isinstance(parent, BackgroundCanvas)
+                  else tk.Label(parent, text=text, bg=parent.cget("bg"), fg=color,
+                                font=("Segoe UI", size), justify="left", anchor="w", **options))
         if "wraplength" in options:
             maximum = options["wraplength"]
             def wrap(event):
@@ -139,15 +142,14 @@ class Launcher:
         button = tk.Button(parent, text=text, command=command, bg=GOLD if primary else BORDER,
                          fg=BG if primary else TEXT, activebackground=LEAF, activeforeground=BG,
                          font=("Segoe UI", 11, "bold" if primary else "normal"),
+                         disabledforeground=BG if primary else MUTED,
                          relief="flat", borderwidth=0, padx=18, pady=options.pop("pady", 11), cursor="hand2", **options)
         return button_feedback(button, primary)
 
     def card(self, parent, padding=22):
-        outer = BackgroundCanvas(parent, surface=self.backdrop, opacity=0.15)
-        outer.configure(highlightbackground=BORDER, highlightthickness=1)
-        outer.pack(fill="x", pady=(0, 16))
-        frame = BackgroundCanvas(outer, surface=self.backdrop, opacity=0.15)
-        frame.pack(fill="both", expand=True, padx=padding, pady=padding)
+        # Sections share the page surface; spacing replaces stacked inner boxes.
+        frame = BackgroundCanvas(parent, surface=self.backdrop, opacity=0.15)
+        frame.pack(fill="x", pady=(8, 24))
         return frame
 
     def render_navigation(self):
@@ -182,13 +184,18 @@ class Launcher:
         if self.progressbar is not None:
             self.progressbar.stop()
         self.log_widget = self.progressbar = self.time_label = self.phase_label = None
-        for child in self.content.winfo_children():
+        for child in self.page_host.winfo_children():
             child.destroy()
-        self.content.grid_configure(padx=(252, 12) if self.page == "home" else (274, 34),
-                                    pady=12 if self.page == "home" else 28)
-        self.content._opacity = .46 if self.page == "home" else .15
-        self.content.configure(highlightbackground=BORDER,
-                               highlightthickness=0 if self.page == "home" else 1)
+        self.page_host.grid_configure(padx=(252, 12) if self.page == "home" else (264, 24),
+                                      pady=12 if self.page == "home" else 24)
+        self.page_panel = None
+        if self.page == "home":
+            self.content = BackgroundCanvas(self.page_host, surface=self.backdrop)
+            self.content.grid(row=0, column=0, sticky="nsew")
+        else:
+            self.page_panel = PagePanel(self.page_host, self.backdrop)
+            self.page_panel.grid(row=0, column=0, sticky="nsew")
+            self.content = self.page_panel.body
         if self.page == "home":
             self.render_home()
         elif self.page == "settings":
@@ -752,7 +759,7 @@ class Launcher:
         self.log_widget.insert("end", "".join(self.log_lines[-700:]))
         self.log_widget.configure(state="disabled")
         self.last_log_length = len(self.log_lines)
-        row = tk.Frame(self.content, bg=BG)
+        row = BackgroundCanvas(self.content, surface=self.backdrop)
         row.pack(fill="x", pady=(14, 0))
         if not self.progress.active:
             if self.result:

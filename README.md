@@ -52,6 +52,7 @@ release is available yet.
 - A standalone `DekuForge-Setup.exe` with installation-folder selection; no manual
   Python, compiler or command-file launcher is needed for installation.
 - A branded launcher with Play, Updates, Saves, a build wizard and build library.
+- Unified padded page panels, with themed scrolling for longer pages.
 - System-language default, with English, Dutch, German, Spanish and French UI.
 - Verified, cached build-tool downloads and incremental game rebuilding.
 - Stable/Preview release selection, manual update/downgrade, optional automatic

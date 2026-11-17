@@ -13,7 +13,11 @@ check branding at each target size when packaging.
 `background.png` is the owner-provided launcher backdrop. It fills the main
 client area edge to edge with a centered crop and a 46% blend over forest green.
 Its viewport stays fixed during page changes. Panels show aligned artwork at
-15%; text and buttons have solid readable backings. Image transfers use direct
+15%. Each regular page uses one padded panel, with text drawn directly on that
+dark surface rather than individual label rectangles. Long pages scroll within
+the panel using a narrow green/gold scrollbar; keyboard focus reveals controls.
+Sections share the surface and use spacing instead of nested borders. Buttons
+and input fields keep readable solid surfaces. Image transfers use direct
 RGB pixels rather than compressing PNGs during every redraw.
 
 Startup begins with a dark green gradient, reveals the background and fades it

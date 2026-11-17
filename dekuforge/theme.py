@@ -6,6 +6,7 @@ import os
 import struct
 import tkinter as tk
 from tkinter import ttk
+from tkinter.scrolledtext import ScrolledText as NativeScrolledText
 
 from .core import ROOT
 
@@ -119,10 +120,10 @@ def style_titlebar(window):
 class BackgroundCanvas(tk.Canvas):
     """Static, darkened artwork behind normal, opaque interface controls."""
 
-    def __init__(self, parent, *, surface=None, opacity=0.46, **options):
+    def __init__(self, parent, *, surface=None, opacity=None, **options):
         super().__init__(parent, bg=BG, highlightthickness=0, borderwidth=0, **options)
         self._surface = surface
-        self._opacity = opacity
+        self._opacity = opacity if opacity is not None else getattr(parent, "_opacity", .46) if surface is not None else .46
         self._art = None
         self._fitted = None
         self._image = None
@@ -190,6 +191,89 @@ class NavigationCanvas(BackgroundCanvas):
     def __init__(self, parent, **options):
         super().__init__(parent, opacity=1, **options)
         self._art = green_gradient(menu=True)
+
+
+class PagePanel(tk.Frame):
+    """One padded artwork panel with overflow scrolling and focus visibility."""
+    def __init__(self, parent, surface, padding=28):
+        super().__init__(parent, bg=BORDER, highlightthickness=0, borderwidth=0)
+        self.padding = padding
+        self.viewport = BackgroundCanvas(self, surface=surface, opacity=.15)
+        self.viewport.pack(side="left", fill="both", expand=True, padx=1, pady=1)
+        style = ttk.Style(self)
+        style.layout("Forge.Vertical.TScrollbar", [("Vertical.Scrollbar.trough", {
+            "sticky":"ns", "children":[("Vertical.Scrollbar.thumb", {"expand":True,"sticky":"nswe"})]})])
+        style.configure("Forge.Vertical.TScrollbar", width=9, background=BORDER,
+                        troughcolor=BG, borderwidth=0, gripcount=0)
+        style.map("Forge.Vertical.TScrollbar", background=[("active", GOLD), ("pressed", GOLD)])
+        self.scroll = ttk.Scrollbar(self, orient="vertical", command=self.viewport.yview,
+                                    style="Forge.Vertical.TScrollbar")
+        self.viewport.configure(yscrollcommand=self._scrolled, yscrollincrement=24)
+        self.body = BackgroundCanvas(self.viewport, surface=surface, opacity=.15)
+        self._window = self.viewport.create_window(padding, padding, window=self.body, anchor="nw")
+        self.viewport.bind("<Configure>", self._resize, add="+")
+        self.body.bind("<Configure>", self._body_changed, add="+")
+        self._root = self.winfo_toplevel()
+        self._wheel = self._root.bind("<MouseWheel>", self._mousewheel, add="+")
+        self._focus = self._root.bind("<FocusIn>", self._focus_changed, add="+")
+
+    def _resize(self, event):
+        self.viewport.itemconfigure(self._window, width=max(1, event.width-2*self.padding))
+        self._body_changed()
+
+    def _body_changed(self, _event=None):
+        self.viewport.configure(scrollregion=(0, 0, self.viewport.winfo_width(),
+                                              self.body.winfo_reqheight()+2*self.padding))
+
+    def _scrolled(self, first, last):
+        self.scroll.set(first, last)
+        needed = float(first) > 0 or float(last) < 1
+        if needed and not self.scroll.winfo_manager():
+            self.scroll.pack(side="right", fill="y", padx=(0,1), pady=6)
+        elif not needed and self.scroll.winfo_manager():
+            self.scroll.pack_forget()
+
+    def _contains(self, widget):
+        return widget is self.body or widget is not None and str(widget).startswith(str(self.body)+".")
+
+    def _mousewheel(self, event):
+        if (event.widget is not self.viewport and not self._contains(event.widget)) or isinstance(event.widget, (tk.Text, tk.Listbox, ttk.Combobox)):
+            return
+        if self.scroll.winfo_manager():
+            self.viewport.yview_scroll(-int(event.delta/120) or (-1 if event.delta>0 else 1), "units")
+            return "break"
+
+    def reveal(self, widget):
+        """Scroll a keyboard-focused action into view without moving the backdrop."""
+        self.update_idletasks()
+        top = widget.winfo_rooty()-self.viewport.winfo_rooty()
+        bottom = top+widget.winfo_height()
+        height = self.viewport.winfo_height()
+        shift = top-12 if top < 12 else bottom-height+12 if bottom > height-12 else 0
+        if shift:
+            total = self.body.winfo_reqheight()+2*self.padding
+            self.viewport.yview_moveto((self.viewport.canvasy(0)+shift)/max(1,total))
+
+    def _focus_changed(self, event):
+        if self._contains(event.widget):
+            self.reveal(event.widget)
+
+    def destroy(self):
+        self._root.unbind("<MouseWheel>", self._wheel)
+        self._root.unbind("<FocusIn>", self._focus)
+        super().destroy()
+
+
+class ScrolledText(NativeScrolledText):
+    """Text editor/log view with the same narrow scrollbar as page panels."""
+    def __init__(self, parent, **options):
+        super().__init__(parent, **options)
+        self.frame.configure(bg=PANEL)
+        self.vbar.destroy()
+        self.vbar = ttk.Scrollbar(self.frame, orient="vertical", command=self.yview,
+                                  style="Forge.Vertical.TScrollbar")
+        self.vbar.pack(side="right", fill="y", padx=(6,0))
+        self.configure(yscrollcommand=self.vbar.set)
 
 
 class NavigationLogo(BackgroundCanvas):

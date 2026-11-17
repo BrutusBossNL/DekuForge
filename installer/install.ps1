@@ -1,6 +1,12 @@
 param([Parameter(Mandatory=$true)][string]$Payload, [Parameter(Mandatory=$true)][string]$Root,
       [switch]$NoLaunch, [switch]$SkipTools, [switch]$NoShortcut)
 $ErrorActionPreference = 'Stop'
+function File-Sha256([string]$Path) {
+    $algorithm=[Security.Cryptography.SHA256]::Create()
+    $stream=[IO.File]::OpenRead($Path)
+    try { return [BitConverter]::ToString($algorithm.ComputeHash($stream)).Replace('-','').ToLowerInvariant() }
+    finally { $stream.Dispose();$algorithm.Dispose() }
+}
 $ProgressPreference = 'SilentlyContinue'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $installRoot = [IO.Path]::GetFullPath($Root).TrimEnd('\')

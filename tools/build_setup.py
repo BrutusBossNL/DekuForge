@@ -32,7 +32,7 @@ def main():
     script=(ROOT/"installer/install.ps1").read_text(encoding="utf-8")
     digest=hashlib.sha256(archive.read_bytes()).hexdigest()
     script=script.replace("$ProgressPreference = 'SilentlyContinue'","$ProgressPreference = 'SilentlyContinue'\n"
-        +"if ((Get-FileHash -LiteralPath $Payload -Algorithm SHA256).Hash.ToLowerInvariant() -ne '"+digest+"') { throw 'Installer payload checksum mismatch' }")
+        +"if ((File-Sha256 $Payload) -ne '"+digest+"') { throw 'Installer payload checksum mismatch' }")
     (out/"install.ps1").write_text(script,encoding="utf-8")
     resource=out/"setup.rc"
     resource.write_text('101 ICON "'+(ROOT/"assets/branding/launcher.ico").as_posix()+'"\n'

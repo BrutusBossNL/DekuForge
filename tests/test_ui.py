@@ -85,6 +85,11 @@ class LauncherWorkflowTests(unittest.TestCase):
                 self.app.navigate(page)
                 self.root.update_idletasks()
                 for button in buttons(self.app.content):
+                    if self.app.page_panel:
+                        self.app.page_panel.reveal(button)
+                        self.assertLessEqual(button.winfo_rootx()+button.winfo_width(),
+                            self.app.page_panel.viewport.winfo_rootx()+self.app.page_panel.viewport.winfo_width(),
+                            (language, page, button.cget("text")))
                     self.assertLessEqual(button.winfo_rooty() + button.winfo_height(),
                                          self.root.winfo_rooty() + self.root.winfo_height(),
                                          (language, page, button.cget("text")))
@@ -134,7 +139,7 @@ class LauncherWorkflowTests(unittest.TestCase):
         self.assertEqual(self.app.page, "build")
 
     def test_navigation_keeps_background_viewport_and_readable_text(self):
-        from dekuforge.theme import PANEL
+        from dekuforge.theme import ArtworkLabel
         self.root.deiconify()
         self.root.update()
         expected = (self.app.backdrop.winfo_width(), self.app.backdrop.winfo_height())
@@ -144,8 +149,10 @@ class LauncherWorkflowTests(unittest.TestCase):
             self.root.update_idletasks()
             self.assertEqual((self.app.backdrop.winfo_width(), self.app.backdrop.winfo_height()), expected)
             text = self.app.label(self.app.content, "Readable status")
-            self.assertIsInstance(text, tk.Label)
-            self.assertEqual(text.cget("background"), PANEL)
+            if page != "home":
+                self.assertIsNotNone(self.app.page_panel)
+                self.assertEqual(self.app.content._opacity, .15)
+            self.assertIsInstance(text, ArtworkLabel)
             text.destroy()
 
     def test_intro_cancel_restores_layout_and_home_cards(self):
@@ -167,6 +174,27 @@ class LauncherWorkflowTests(unittest.TestCase):
         self.app.animate_cards()
         self.app.navigate("saves")
         self.assertIsNone(self.app.card_job)
+
+    def test_long_panel_scrolls_and_keyboard_focus_reveals_bottom_action(self):
+        self.app.navigate("build")
+        self.root.deiconify()
+        self.root.update()
+        panel = self.app.page_panel
+        for i in range(25):
+            self.app.label(self.app.content, f"Long page section {i}").pack(pady=8)
+        action = self.app.button(self.app.content, "Last action", lambda: None)
+        action.pack(pady=8)
+        self.root.update()
+        self.assertTrue(panel.scroll.winfo_manager())
+        start = panel.viewport.yview()[0]
+        panel.body.event_generate("<MouseWheel>", delta=-120)
+        self.root.update()
+        self.assertGreater(panel.viewport.yview()[0], start)
+        panel.reveal(action)
+        self.root.update_idletasks()
+        self.assertGreaterEqual(action.winfo_rooty(), panel.viewport.winfo_rooty())
+        self.assertLessEqual(action.winfo_rooty()+action.winfo_height(),
+                             panel.viewport.winfo_rooty()+panel.viewport.winfo_height())
 
     def test_popdown_and_navigation_use_brand_colors(self):
         from tkinter import ttk
