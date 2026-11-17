@@ -59,6 +59,17 @@ class LauncherWorkflowTests(unittest.TestCase):
             self.assertFalse(any(isinstance(widget, tk.Toplevel) for widget in self.root.winfo_children()))
         self.app.progress.finish()
 
+    def test_automatic_install_is_opt_in_and_failed_release_does_not_loop(self):
+        import json
+        self.assertFalse(self.app.preferences["auto_update"])
+        self.app.toggle_auto_update()
+        self.assertTrue(self.app.preferences["auto_update"])
+        self.save_mock.assert_called_with({"auto_update":True})
+        path=self.folder/"local/update-result.json";path.parent.mkdir(exist_ok=True)
+        path.write_text(json.dumps({"success":False,"release":"v0.3.0"}),encoding="utf-8")
+        self.assertFalse(self.app.automatic_update_allowed({"version":"v0.3.0"}))
+        self.assertTrue(self.app.automatic_update_allowed({"version":"v0.3.1"}))
+
     def test_management_controls_fit_minimum_window(self):
         self.root.geometry("960x700")
         self.root.deiconify()

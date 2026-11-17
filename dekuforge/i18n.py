@@ -106,6 +106,69 @@ for _language, _label in _PIPELINE_PHASE_LABELS.items():
     MESSAGES[_language]["pipelines"] = _label
 
 
+_UPDATE_MESSAGES = {'en': {'update_pending': 'Updates verify downloads, preserve your saves and keep the working game until a '
+                          'rebuild succeeds.',
+        'release_incompatible': 'This release has no compatible updater package.',
+        'update_confirm': 'Install {version}? The launcher will restart. Changed engine code is rebuilt '
+                          'locally from your own game archive. Your current game and saves are retained.',
+        'update_downloading': 'Downloading and verifying the release...',
+        'update_download_progress': 'Downloading and verifying: {percent}%',
+        'update_error': 'Update stopped; the previous installation is retained. {error}',
+        'rebuild_update': 'Rebuild for installed release',
+        'update_rebuild_wait': 'Close the game and select your game archive to finish the engine update.',
+        'update_game_ready': 'Updated game is ready. The previous build remains available.'},
+ 'nl': {'update_pending': 'Updates controleren downloads, bewaren je saves en behouden de werkende game tot '
+                          'de rebuild slaagt.',
+        'release_incompatible': 'Deze release heeft geen geschikt updatepakket.',
+        'update_confirm': '{version} installeren? De launcher herstart. Gewijzigde enginecode wordt lokaal '
+                          'gebouwd vanuit je eigen gamearchief. Je huidige game en saves blijven behouden.',
+        'update_downloading': 'Release downloaden en controleren...',
+        'update_download_progress': 'Downloaden en controleren: {percent}%',
+        'update_error': 'Update gestopt; de vorige installatie is behouden. {error}',
+        'rebuild_update': 'Herbouwen voor geinstalleerde release',
+        'update_rebuild_wait': 'Sluit de game en kies je gamearchief om de engine-update af te ronden.',
+        'update_game_ready': 'Bijgewerkte game gereed. De vorige build blijft beschikbaar.'},
+ 'de': {'update_pending': 'Updates pruefen Downloads, behalten Spielstaende und erhalten das laufende Spiel '
+                          'bis zum erfolgreichen Neubau.',
+        'release_incompatible': 'Diese Version hat kein kompatibles Updatepaket.',
+        'update_confirm': '{version} installieren? Der Launcher startet neu. Geaenderter Engine-Code wird '
+                          'lokal aus Ihrem Spielarchiv gebaut. Spiel und Spielstaende bleiben erhalten.',
+        'update_downloading': 'Version wird geladen und geprueft...',
+        'update_download_progress': 'Laden und pruefen: {percent}%',
+        'update_error': 'Update gestoppt; die vorherige Installation bleibt erhalten. {error}',
+        'rebuild_update': 'Spiel fuer installierte Version neu bauen',
+        'update_rebuild_wait': 'Spiel schliessen und eigenes Spielarchiv waehlen, um das Update '
+                               'abzuschliessen.',
+        'update_game_ready': 'Aktualisiertes Spiel bereit. Der vorherige Build bleibt verfuegbar.'},
+ 'es': {'update_pending': 'Las actualizaciones verifican descargas y conservan las partidas y el juego '
+                          'anterior hasta completar la compilacion.',
+        'release_incompatible': 'Esta version no tiene un paquete de actualizacion compatible.',
+        'update_confirm': 'Instalar {version}? El lanzador se reiniciara. Los cambios del motor se compilan '
+                          'localmente desde tu archivo del juego. Se conservan el juego y las partidas.',
+        'update_downloading': 'Descargando y verificando la version...',
+        'update_download_progress': 'Descargando y verificando: {percent}%',
+        'update_error': 'Actualizacion detenida; se conserva la instalacion anterior. {error}',
+        'rebuild_update': 'Compilar para la version instalada',
+        'update_rebuild_wait': 'Cierra el juego y elige tu archivo para finalizar la actualizacion del '
+                               'motor.',
+        'update_game_ready': 'Juego actualizado listo. La compilacion anterior sigue disponible.'},
+ 'fr': {'update_pending': 'Les mises a jour verifient les fichiers et conservent les sauvegardes et le jeu '
+                          'precedent avant la fin de la compilation.',
+        'release_incompatible': 'Cette version ne contient pas de paquet de mise a jour compatible.',
+        'update_confirm': 'Installer {version} ? Le lanceur redemarrera. Les changements du moteur sont '
+                          'compiles localement depuis votre archive. Le jeu et les sauvegardes sont '
+                          'conserves.',
+        'update_downloading': 'Telechargement et verification de la version...',
+        'update_download_progress': 'Telechargement et verification : {percent}%',
+        'update_error': 'Mise a jour arretee ; installation precedente conservee. {error}',
+        'rebuild_update': 'Recompiler pour la version installee',
+        'update_rebuild_wait': 'Fermez le jeu et choisissez votre archive pour terminer la mise a jour du '
+                               'moteur.',
+        'update_game_ready': 'Jeu mis a jour pret. La compilation precedente reste disponible.'}}
+for _language, _messages in _UPDATE_MESSAGES.items():
+    MESSAGES[_language].update(_messages)
+
+
 def translate(language, key, **values):
     selected = language if language in MESSAGES else "en"
     text = FILE_LABELS[selected][key] if key in FILE_LABELS[selected] else MESSAGES[selected][key]

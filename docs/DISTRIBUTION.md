@@ -52,7 +52,29 @@ own runtime, then passed the 40-screen, five-language, single-window self-test.
 This was an isolated-folder test on the development Windows machine, not a clean
 Windows VM or a complete fresh-machine game build.
 
-Automatic release installation and rollback are still pending. The release list
-and version selector already exist; installation controls stay disabled until
-that path is tested. Do not interpret the local package test as an update-system
-acceptance result. The repository and package remain private during development.
+The preview now includes application installation/update transactions, durable
+recovery journals, pre-update backups and a post-install launcher health check.
+Stable/Preview filtering and manual release selection also support downgrades.
+Automatic updates are opt-in and install only a newer semantic launcher version.
+The native setup was tested from an empty destination: it downloaded its own
+runtime and complete toolchain, installed successfully in 57 seconds on the
+local machine, and passed all 40 UI views. A clean Windows VM is still a separate
+gate; this timing is not a first-install duration promise.
+
+Game rebuilds use a separate owned destination. Existing profiles and verified
+caches are copied locally, the old game stays selected during the build, and only
+a successful result is activated. A failed build preserves the previous game.
+Existing game executables are never downloaded as release assets.
+
+Release assets are the setup EXE, launcher ZIP and `DekuForge-release.json`.
+Users only download the EXE manually. The updater checks GitHub's asset digest,
+the descriptor, every ZIP member and package component identity. It rejects
+unexpected paths, content signatures and missing inventory entries. Packages are
+cached by SHA-256; matching installed application files are not replaced.
+A frozen external helper waits for the launcher to exit before application writes.
+
+Private testing can use an existing authorized GitHub CLI session or GH_TOKEN;
+tokens are never saved in launcher settings and are stripped on asset redirects.
+Draft releases are not offered by the normal release selector. Public installers
+will not need a GitHub account. Keep the repository private until setup/update,
+failed-update recovery and local game-rebuild acceptance are complete.

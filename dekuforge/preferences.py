@@ -3,7 +3,7 @@ import locale
 import os
 
 DEFAULTS = {"language": "system", "check_updates": True, "hide_playing": True,
-            "keep_cache": True, "update_channel": "stable"}
+            "auto_update": False, "keep_cache": True, "update_channel": "stable"}
 
 
 def system_language():

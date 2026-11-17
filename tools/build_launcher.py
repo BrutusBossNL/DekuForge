@@ -35,7 +35,9 @@ def main():
         raise ValueError("Invalid runtime component identity")
     (output/"runtime_pin.h").write_text('#define DEKU_PYTHON_ID L"'+runtime_id+'"\n',encoding="ascii")
     resource = output / "brand.rc"
-    resource.write_text('101 ICON "' + icon.as_posix() + '"\n' + '''
+    version=pins["launcher"]["version"]
+    numeric=",".join(version.split("-")[0].split(".")+["0"])
+    resource.write_text(('101 ICON "' + icon.as_posix() + '"\n' + '''
 1 VERSIONINFO
 FILEVERSION 0,1,0,0
 PRODUCTVERSION 0,1,0,0
@@ -57,7 +59,7 @@ BEGIN
   VALUE "Translation", 0x409, 1200
  END
 END
-''', encoding="utf-8")
+''').replace("0,1,0,0",numeric).replace("0.1.0-dev",version), encoding="utf-8")
     obj = output / "brand.o"
     environment = os.environ.copy()
     environment["PATH"] = str(args.toolchain.resolve()) + os.pathsep + environment.get("PATH", "")

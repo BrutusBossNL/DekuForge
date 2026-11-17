@@ -1,158 +1,115 @@
 <p align="center">
-  <img src="assets/branding/logo.png" alt="DekuForge" width="680">
+  <img src="assets/branding/logo.png" alt="DekuForge" width="600">
 </p>
 
 # DekuForge
 
 **Reforging a legend.**
 
-ROMs, game assets, keys, generated game source and compiled game binaries must
-never be shared in this repository, its issues, pull requests or releases.
-Issues and pull requests for the project itself are welcome; see `CONTRIBUTING.md`.
+> [!IMPORTANT]
+> DekuForge includes no ROMs, game assets, encryption keys or compiled game.
+> You must provide a legally obtained copy dumped from your own console. We do
+> not provide game downloads or instructions for obtaining game files.
+>
+> The launcher builds the game locally from your files. The resulting game,
+> extracted data, generated code, shaders and pipeline caches are for your own
+> use. Never upload or share them through releases, commits, issues or pull requests.
 
-An open-source launcher and local game-build project, with a forest-green and
-gold interface inspired by its leaf-and-forge logo. Original project code is MIT licensed. Reused engine components
-retain their accompanying notices.
+## About and credits
 
-## Start
+DekuForge uses the stable **NX2navi 0.10.1** source as its reference and engine
+foundation. Thank you to the NX2navi authors, upstream engine and tooling authors,
+and everyone who contributed code, research, tests, fixes, documentation or feedback.
+Their work made this project possible. Reused components retain their original
+notices; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-Start the Windows launcher with `DekuForge.exe`. The native executable has
-the project's embedded icon and starts without a console window. The desktop
-window sets its own application identity rather than inheriting the caller's.
-Select an existing game installation to play without changing saves or settings.
-On first start the native launcher downloads and verifies its pinned runtime;
-subsequent starts reuse it. Build tools are prepared separately when needed.
-See [distribution and component versions](docs/DISTRIBUTION.md). No ROMs, game
-assets, generated shaders or compiled game binaries are included in the launcher
-package. Development from source can also use `python run_launcher.py`.
-No CMD start script is provided.
+DekuForge develops independently of NX2navi, with its own launcher, interface,
+extensions and release channel. Project code is open to contributions under its
+applicable licenses. Issues and pull requests are welcome: **we aim to review or
+respond within 48 hours**, although this is a volunteer target, not a guarantee.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Game builder
+## Project status
 
-The game backend uses the pinned stable 0.10.1 engine. Its local play test passed,
-and the owner confirmed the baseline plays correctly. The separate DekuForge
-0.11.0 candidate adds our forest-green in-game UI, performance display and Cheat
-Manager; functional cheat checks are still in progress. The baseline remains
-available. See [stable-engine migration](docs/STABLE_ENGINE_MIGRATION.md).
+**Private Windows preview, undergoing installation and update acceptance testing.**
+The stable reference-based game has passed local play tests. The DekuForge 0.11.0
+candidate adds the custom in-game interface and Cheat Manager. The launcher and
+engine have independent versions; the launcher is currently 0.2.0-preview.1.
+The repository stays private until the Windows setup, update and rollback paths
+are stable. No public installer release is available yet.
 
-The launcher keeps Home, Updates, Saves, Build game and Settings inside one window.
-Home uses three artwork cards: Play (active game version), Update (latest release
-in the selected channel), and (Re)build (game dump path). Pointer hover and keyboard
-focus highlight the card; Tab navigates and Enter or Space activates it. Startup
-first shows a very dark green gradient, brighter at its center; the unfinished
-layout remains hidden until that cover has been painted. Artwork is revealed and
-then fades to 46%. The navigation has a subtle green gradient behind its logo and
-text. A logo starts horizontally centered with
-32 pixels of top padding at 135% of its navigation size, shrinks without fading,
-and moves into the navigation as it slides in. The three cards then rise in sequence.
-Controls, dropdown lists and the Windows 11 native title bar use the forest and
-gold palette; navigation buttons highlight on hover and keyboard focus.
-Settings offers English, Nederlands,
-Deutsch, Español and Français; changes apply immediately. The launcher can hide
-while the game runs and restore the same window after it closes. New preferences
-default to the system UI language, with English as the unsupported-language fallback.
+## Features
 
-Updates checks public repository releases on request or at startup, with Stable
-and Preview channels. It displays the launcher version separately from the latest
-release. A version selector lists eligible releases, including older versions.
-Downloading/installing a selected release is not implemented yet; its button and
-automatic-update setting remain disabled. Existing local builds can be switched
-without rebuilding. Build cache is currently always retained.
+- Native Windows game builds from your own supported **game 1.1.1 NUP** archive.
+- A standalone `DekuForge-Setup.exe` with installation-folder selection; no manual
+  Python, compiler or command-file launcher is needed for installation.
+- A branded launcher with Play, Updates, Saves, a build wizard and build library.
+- System-language default, with English, Dutch, German, Spanish and French UI.
+- Verified, cached build-tool downloads and incremental game rebuilding.
+- Stable/Preview release selection, manual update/downgrade, optional automatic
+  updates, launcher health checks and recovery copies for failed app updates.
+- Separate game rebuilds: keep the working game and its profile until the new
+  build completes; retain the previous build for switching back.
+- Save import/export with destination backups, including compatible NX2navi
+  profiles. Import copies files; it never moves or deletes the original saves.
+- The stable engine's in-game graphics, resolution, upscaling, audio and control
+  settings, with a DekuForge interface and performance display.
+- Built-in Cheat Manager, including Equipment and World groups: bomb arrows,
+  spin-attack options, heart refill and individually selectable map markers.
+  Individual cheat scenarios in the new candidate are still being verified.
 
-Build game also opens the installed-build library. Successful builds are recorded
-locally, and the native linking tool records experimental builds with their game
-version. Select a build and choose Set active to change what Play starts. Deleting
-an owned build requires confirmation and a separate choice to retain saves. If
-retained, its complete `profile` is copied to `local/retained-saves` before removal.
-An unsuccessful backup prevents removal. Externally selected installations cannot
-be deleted here. Switching builds does not migrate or modify their individual saves.
+## How to install - Windows
 
-Saves offers ZIP export and folder/ZIP import for an explicitly selected existing
-user save folder containing `slot_00/progress.sav`. Select the user folder, not
-the game installation. Import preserves slots absent from the source and retains
-the previous destination beside it as a dated backup. Close the game before an
-import. The source stays untouched. In-game compatibility and automatic account
-migration remain unverified; a successful copy is not proof that the game can load it.
+When a tested release is available in [Releases](../../releases):
 
-Choose **Build game** for the three-step wizard: game archive, installation
-folder, then building with a live log, measured elapsed time and stage estimates
-when there is enough progress to calculate them. Unknown work stays indeterminate.
-Your current installation and saves are protected from being selected as output.
-The independent engine reads NUP archives, including files with another extension
-that contain the NUP format. Nintendo 64 ROMs need a different engine.
+1. Download **`DekuForge-Setup.exe`**. This is the only file you need to download
+   manually; it contains the launcher, not a game.
+2. Run it, choose where to install DekuForge and select **Install DekuForge**.
+   Setup downloads and verifies its runtime and, by default, prepares build tools.
+   You can defer tool downloads until your first build.
+3. Open **DekuForge** from the Start Menu or run `DekuForge.exe` in that folder.
+4. Choose **(Re)build**, select your own supported NUP and a game destination,
+   then build. The wizard shows the log and measured stage progress.
+5. Choose **Play** when the build has completed. Use **Updates** to choose a
+   release/channel; a changed engine is rebuilt locally from your own archive.
 
-- The command-line archive check validates the index, checksum, paths and directory structure.
-- Command-line extraction streams and verifies files into a fresh build folder.
-- The command-line preparation stage selects executable modules from base/update
-  packages, verifies their content and writes NSO metadata and a module layout.
-- The launcher now uses the complete pinned stable 0.10.1 build pipeline, including
-  native linking and shader preparation. The DekuForge UI and save/build management
-  remain in place. The first isolated migration build completed and its world
-  screenshots now show complete terrain, foliage and sky. The ordinary-start 60-second route test measured
-  54.44 FPS on the local RTX 2080 at 1080p with DLSS Quality. The launcher Play
-  action was also tested through world load and normal close. Broader parity
-  remains under test.
-- Historical 0.3.10-based CPU and renderer experiments remain available for diagnosis.
-  They are not substituted for the selected stable backend.
+Windows x64 and a compatible Vulkan GPU/driver are required. Allow substantial
+free space for your dump, tool cache and game build; updates retain a separate
+working build until the replacement succeeds. See [building.md](docs/building.md).
+Linux, iOS and VR are not supported releases yet.
 
-The stable source revision and every selected source file are pinned by content.
-The source is obtained from a local checkout when available, otherwise from the
-exact upstream commit archive. Its accompanying terms and notices are retained.
-The local shader translator is built from that stable source, rather than the
-experimental compute-to-GLSL mesh wrapper. See
-[the migration record](docs/STABLE_ENGINE_MIGRATION.md) for prerequisites and limits.
-Existing installations can still be started from Home; no user game is
-automatically closed for testing.
+## Known issues
 
-Module normalization decodes segments and checks declared hashes. Full extraction
-keeps package trees separate; RomFS update composition still needs validation.
+- Full first-time Windows installation and automatic-update acceptance are still
+  being tested. Local package checks do not replace a clean-machine game test.
+- Game validation currently covers limited hardware and scenes; FPS and driver
+  compatibility need broader testing. A local 20-second candidate test averaged
+  51.9 FPS on an RTX 2080; this is not a general performance guarantee.
+- Several Cheat Manager scenarios still need independent in-game verification.
+- Save compatibility is checked by game version/layout; a save made by a newer
+  game is not guaranteed to load after downgrading. Keep your save backups.
+- Private release downloads require authorized GitHub access during development;
+  public releases will not require a GitHub account.
 
-## Command line
+## Roadmap
 
-```text
-python run_builder.py --doctor
-python run_builder.py --nup "D:/Games/own.nup" --check
-python run_builder.py --nup "D:/Games/own.nup" --extract
-python run_builder.py --nup "D:/Games/own.nup" --prepare
-python run_builder.py --nup "D:/Games/own.nup"
-```
+See the separate [roadmap.md](roadmap.md) for Windows release gates, Linux, iOS
+and exploratory VR support. **Linux and iOS build/testing contributors are
+especially welcome.** Planned platforms are not advertised as working builds.
 
-The final command requests an independent game build and currently reports the
-unfinished integration. `--compat --backend PATH` explicitly selects an external
-compatibility builder. Install engine dependencies from `requirements-engine.txt`
-in your development environment. Python 3.14+ supports compressed NUP members;
-the launcher alone supports Python 3.11+ with Tk.
+## Building from source
 
-`--generate build/prepared-ID --modules sdk --limit 3 --jobs 1` exercises the
-included C generator on a prepared input. Unsupported instruction reports fail
-the stage. Omit `--limit` for full generation; this still does not link a game.
+[docs/building.md](docs/building.md) describes DekuForge's pinned tools, source
+bootstrap, game builder and launcher/setup packaging. The upstream
+[build guide](https://github.com/tangerineturtle1/NX2navi/blob/main/docs/building.md)
+and [BuildKit guide](https://github.com/tangerineturtle1/NX2navi/blob/main/docs/README-BuildKit.md)
+provide background; their current main branch can differ from our pinned 0.10.1
+base. Upstream supports native Linux builds, but DekuForge's Linux game build is
+not yet validated; our released launcher/setup target Windows first.
 
-## Local files and development
-
-Preferences and logs stay in ignored `local/`. Extracted game files, normalized
-modules, plans and generated C stay in ignored `build/` or `generated/`. No game
-files, keys, saves or built game executables are included. Full extraction needs
-the expanded archive size plus 2 GiB free space. Independent preparation leaves
-the selected installation untouched. Run GPU preparation outside play sessions.
-
-Run `python -m unittest discover -s tests`. See `AGENTS.md` for engineering rules,
-`docs/MIGRATION.md` for implementation status, and `THIRD_PARTY_NOTICES.md` for
-technical source attribution. The repository remains private; no public installer
-or release is available. Contributions, issues and pull requests are welcome.
-
-The native launcher can be built with `python tools/build_launcher.py --toolchain
-PATH_TO_COMPILER_BIN` (Clang and windres). This packs the application emblem into a
-multi-size Windows icon and embeds product metadata. Packaging needs Pillow from
-`requirements-dev.txt`. `python tools/check_launcher.py` verifies the native
-bootstrap and exercises 25 views across five languages in one window.
-
-Delivery order: Windows parity, Linux parity, custom cheats/fixes, public release,
-then iOS. See `docs/ROADMAP.md` for measurable acceptance gates. The repository
-stays private until the first three priorities pass. Desktop source tests do not
-establish Linux game compatibility or iOS support.
-
-The Windows host runtime can be compiled separately with
-`python run_builder.py --runtime build/prepared-ID --toolchain PATH_TO_UCRT64_BIN`.
-This creates a development library and diagnostic report in `build/windows-runtime`;
-it does not create a playable executable. Constructor assertions are derived from
-the verified local module metadata instead of another game's version constants.
+Game-generated outputs remain in ignored `build/` and `generated/` directories;
+local preferences, verified downloads and logs remain under ignored `local/`.
+Runtime dependencies are also ignored. The staged runtime's compiled shader
+headers stay under `build/engine-0.10.1`, never in the source repository.
+Run **`python tools/check_content.py`** before committing, plus the checks in
+[CONTRIBUTING.md](CONTRIBUTING.md). Share source and tooling, never built games.

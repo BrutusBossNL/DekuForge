@@ -1,14 +1,18 @@
-"""Read public release metadata; never download or execute release assets."""
+"""List eligible releases and their authenticated API asset identities."""
 import json
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+from .update_service import github_token
 
 REPOSITORY = "BrutusBossNL/DekuForge"
 
 
 def list_releases(preview=False):
-    request = Request(f"https://api.github.com/repos/{REPOSITORY}/releases?per_page=100",
-                      headers={"Accept": "application/vnd.github+json", "User-Agent": "DekuForge"})
+    headers={"Accept": "application/vnd.github+json", "User-Agent": "DekuForge"}
+    token=github_token()
+    if token:
+        headers["Authorization"]="Bearer " + token
+    request = Request(f"https://api.github.com/repos/{REPOSITORY}/releases?per_page=100", headers=headers)
     try:
         with urlopen(request, timeout=15) as response:
             raw = response.read(2_000_001)
@@ -23,7 +27,10 @@ def list_releases(preview=False):
         raise ValueError("Unexpected release response")
     candidates = [r for r in releases if not r.get("draft") and (preview or not r.get("prerelease"))]
     candidates.sort(key=lambda r: r.get("published_at") or "", reverse=True)
-    return [{"version": str(r["tag_name"]), "date": str(r.get("published_at", ""))} for r in candidates]
+    return [{"version": str(r["tag_name"]), "date": str(r.get("published_at", "")),
+             "preview": bool(r.get("prerelease")), "assets": r.get("assets", []),
+             "installable": any(a.get("name")=="DekuForge-release.json" for a in r.get("assets", []))}
+            for r in candidates]
 
 
 def check_release(preview=False):

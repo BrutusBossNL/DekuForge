@@ -38,9 +38,10 @@ development measurements are recorded in `WINDOWS_BUILD.md`; the old experimenta
 
 Implemented locally: background public-release checks, Stable/Preview selection,
 startup check preference, system-language default, existing-user-folder save
-import/export and retained destination backups. Not yet delivered: automatic
-update installation, validated rollback, account migration and in-game save
-compatibility. Automatic update and cache cleanup controls remain disabled.
+import/export and retained destination backups. The preview now implements application update installation, opt-in automatic
+updates, recovery journals and separate engine rebuilding. Full clean-machine
+acceptance, account migration and broader in-game save compatibility remain
+pending. Automatic cache cleanup remains disabled.
 
 The Windows delivery also requires an Updates action that checks releases from
 the DekuForge repository. Show the installed launcher version, source revision,

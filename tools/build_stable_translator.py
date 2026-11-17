@@ -8,6 +8,8 @@ import subprocess
 import sys
 
 ROOT=Path(__file__).resolve().parents[1]
+sys.path.insert(0,str(ROOT))
+from dekuforge.source_patch import apply_patch
 
 
 def main():
@@ -27,7 +29,18 @@ def main():
     # All preparation/deletion in the reference driver stays under this owned root.
     if not driver.BUILD.resolve().is_relative_to(source.resolve()):
         raise ValueError("Invalid translator build directory")
-    tree=driver.prepare_sources()
+    # The installer owns the toolchain; no system Git is required to apply source patches.
+    tree=driver.BUILD/"ryujinx"
+    if tree.exists():
+        if tree.resolve()!=tree or not tree.is_relative_to(source):
+            raise ValueError("Unsafe translator source directory")
+        shutil.rmtree(tree)
+    shutil.copytree(driver.VENDOR,tree)
+    patches=sorted((driver.XLATE/"patches").glob("*.patch"))
+    if len(patches)!=40:
+        raise ValueError("The pinned translator patch count changed")
+    for patch in patches:
+        apply_patch(tree,patch.read_bytes().decode("utf-8"),newline_override="\r\n" if os.name=="nt" else None)
     work=driver.BUILD/"xlate";work.mkdir(parents=True,exist_ok=True)
     for name in ("Program.cs","AmpereLowering.cs","MeshSpirv.cs","nx2navi_xlate.csproj"):
         shutil.copy2(driver.XLATE/name,work/name)

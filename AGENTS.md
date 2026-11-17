@@ -85,6 +85,7 @@ compare the resulting state with the ARM64 oracle.
 The owner now prioritizes the stable Windows baseline, DekuForge in-game UI and
 Cheat Manager before Linux parity, public distribution and iOS. Follow
 `docs/ROADMAP.md`. The owner
-has authorized publication only at priority 4, after the preceding gates pass;
-keep the repository private until then. Keep source-test results separate from
+now requires Windows setup, update, rollback and local game-rebuild acceptance
+before changing repository visibility. Keep the repository private throughout
+preview development. Keep source-test results separate from
 in-game platform validation. Do not upload game inputs or derived game code to CI.

@@ -69,9 +69,8 @@ def compose(source):
         if not target.resolve().is_relative_to(source.resolve()):
             raise ValueError("Unsafe extension path")
         target.unlink(missing_ok=True)
-    for check in (["--check"],[]):
-        subprocess.run(["git","apply",*check,"--whitespace=nowarn","--directory",source.relative_to(ROOT).as_posix(),
-                        str(LAYER/"cheat_manager.patch")],cwd=ROOT,check=True,capture_output=True)
+    from .source_patch import apply_patch
+    apply_patch(source,patch)
     for name in ("menu_skin.cpp","menu_skin.h"):
         shutil.copy2(LAYER/name,source/"runtime/ui"/name)
     from PIL import Image

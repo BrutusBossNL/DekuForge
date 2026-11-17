@@ -35,19 +35,26 @@ def stage_stable():
         raise ValueError("Stable engine workspace is not owned")
     output.mkdir(parents=True, exist_ok=True)
     marker.write_text(REVISION, encoding="utf-8")
-    if REFERENCE.is_dir():
+    cache=ROOT / "local/build-tools" / ("engine-source-"+REVISION+".zip")
+    cache_id=cache.with_suffix(".sha256")
+    cached=cache.is_file() and cache_id.is_file() and cache.stat().st_size<=384*1024**2
+    if cached:
+        archive=cache.read_bytes()
+        cached=hashlib.sha256(archive).hexdigest()==cache_id.read_text(encoding="ascii").strip()
+    if cached:
+        pass
+    elif REFERENCE.is_dir():
         archive = subprocess.check_output(["git", "-c", "safe.directory=" + REFERENCE.as_posix(),
             "-C", str(REFERENCE), "archive", "--format=zip", REVISION])
-        prefix = ""
     else:
         url = "https://api.github.com/repos/tangerineturtle1/NX2navi/zipball/" + REVISION
         with urlopen(url, timeout=90) as response:
             archive = response.read(384 * 1024 * 1024 + 1)
         if len(archive) > 384 * 1024 * 1024:
             raise ValueError("Stable source archive exceeds its size limit")
-        with zipfile.ZipFile(io.BytesIO(archive)) as package:
-            prefix = package.namelist()[0].split("/",1)[0] + "/"
     expected = source_manifest()
+    with zipfile.ZipFile(io.BytesIO(archive)) as package:
+        prefix="" if set(package.namelist()) & expected.keys() else package.namelist()[0].split("/",1)[0]+"/"
     hashes = {}
     with zipfile.ZipFile(io.BytesIO(archive)) as source:
         for item in source.infolist():
@@ -80,6 +87,10 @@ def stage_stable():
                 target.write_bytes(data)
     if hashes != expected:
         raise ValueError("Incomplete stable engine source archive")
+    if not cached:
+        cache.parent.mkdir(parents=True,exist_ok=True)
+        temporary=cache.with_suffix(".zip.part");temporary.write_bytes(archive);temporary.replace(cache)
+        cache_id.write_text(hashlib.sha256(archive).hexdigest()+"\n",encoding="ascii")
     icon = ROOT / "assets/branding/launcher.ico"
     if icon.is_file():
         (output / "runtime/nx2navi.ico").write_bytes(icon.read_bytes())

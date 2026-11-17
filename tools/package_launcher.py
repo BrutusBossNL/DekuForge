@@ -10,23 +10,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.check_source import forbidden
 
-DIRECTORIES = {"dekuforge", "tools", "launcher", "engine_overrides", "docs"}
-SOURCE_SUFFIXES = {".py", ".ps1", ".json", ".c", ".cpp", ".h", ".patch", ".md", ".txt"}
-ROOT_FILES = {"run_launcher.py", "run_builder.py", "backend_entry.py", "engine_entry.py",
-              "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md", "CONTRIBUTING.md"}
-ARTWORK = {"logo.png", "icon.png", "launcher.ico", "background.png",
-           "home-actions.png", "home-play.png", "home-update.png", "home-build.png"}
+from dekuforge.update_package import SOURCE_DIRS as DIRECTORIES, ROOT_FILES, allowed, validate_package
 
 
 def included(path):
-    """Unknown additions fail closed instead of following the developer directory."""
-    path = Path(path)
-    if path.as_posix() in ROOT_FILES:
-        return True
-    if path.parts[:2] == ("assets", "branding") and len(path.parts) == 3:
-        return path.name in ARTWORK
-    return (len(path.parts) > 1 and path.parts[0] in DIRECTORIES
-            and "__pycache__" not in path.parts and path.suffix in SOURCE_SUFFIXES)
+    name=Path(path).as_posix()
+    return name != "DekuForge.exe" and allowed(name) and "__pycache__" not in Path(path).parts
 
 
 def package(root=ROOT):
@@ -60,6 +49,7 @@ def package(root=ROOT):
     with zipfile.ZipFile(temporary, "w", zipfile.ZIP_DEFLATED) as archive:
         for name, data in files.items():
             archive.writestr(name, data)
+    validate_package(temporary)
     temporary.replace(output)
     print(f"Launcher package: {output} ({output.stat().st_size / 1048576:.2f} MiB, {len(files)} files)")
     return output

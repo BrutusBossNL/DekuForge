@@ -10,6 +10,20 @@ from dekuforge import stable_engine
 
 
 class StableEngineTests(unittest.TestCase):
+    def test_verified_source_archive_is_cached_and_restores_pristine_inputs(self):
+        archive=io.BytesIO()
+        with zipfile.ZipFile(archive,"w") as z:z.writestr("upstream/VERSION","0.10.1")
+        expected={"VERSION":hashlib.sha256(b"0.10.1").hexdigest()}
+        with tempfile.TemporaryDirectory() as folder:
+            with patch.object(stable_engine,"ROOT",Path(folder).resolve()), patch.object(stable_engine,"REFERENCE") as reference, patch.object(stable_engine,"source_manifest",return_value=expected), patch.object(stable_engine,"urlopen") as network:
+                reference.is_dir.return_value=False
+                network.return_value.__enter__.return_value.read.return_value=archive.getvalue()
+                source=stable_engine.stage_stable()
+                (source/"VERSION").write_text("temporary layer version",encoding="utf-8")
+                stable_engine.stage_stable()
+                self.assertEqual(network.call_count,1)
+                self.assertEqual((source/"VERSION").read_text(),"0.10.1")
+
     def test_snapshot_retains_terms_and_source_identity_and_omits_game_outputs(self):
         archive = io.BytesIO()
         with zipfile.ZipFile(archive,"w") as z:

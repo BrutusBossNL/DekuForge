@@ -18,6 +18,8 @@ from .i18n import LANGUAGES, MESSAGES, translate
 from .native import prepare_archive
 from .preferences import DEFAULTS, resolve_language
 from .releases import list_releases
+from .update_service import prepare_release, start_worker, newer_version
+from .game_updates import run_rebuild, game_running
 from .build_library import BuildLibrary
 from .home_cards import ActionCard, animate_intro
 from .saves import export_save, import_save, save_files
@@ -50,6 +52,8 @@ class Launcher:
         self.intro_job = None
         self.card_job = None
         self.release_busy = False
+        self.update_busy = False
+        self.update_job = None
         self.save_busy = False
         self.save_status = ""
         self.save_folder = settings.get("save_folder", "")
@@ -98,6 +102,8 @@ class Launcher:
         root.bind("<Destroy>", self.on_destroy, add="+")
         if settings["check_updates"] and "--self-test" not in sys.argv:
             root.after(2500, self.check_updates)
+        if "--self-test" not in sys.argv:
+            root.after(3000, self.resume_game_update)
 
     def t(self, key, **values):
         return translate(self.language, key, **values)
@@ -206,7 +212,7 @@ class Launcher:
                    self.t("release_found", version=release),
                    self.source or self.t("no_dump"))
         actions = (("play", self.t("playing") if running else self.t("play"), self.play,
-                    selected and not running and not self.build_busy and not self.save_busy),
+                    selected and not running and not self.update_busy and not self.build_busy and not self.save_busy),
                    ("update", self.t("action_update"), lambda: self.navigate("updates"), True),
                    ("build", self.t("action_build"), self.open_wizard, True))
         self.home_cards = []
@@ -277,7 +283,7 @@ class Launcher:
         options = self.card(self.content, padding=12)
         for key, enabled, command, available in (
                 ("check_updates", self.preferences["check_updates"], self.toggle_updates, True),
-                ("auto_update", False, lambda: None, False),
+                ("auto_update", self.preferences["auto_update"], self.toggle_auto_update, True),
                 ("hide", self.hide_playing, self.toggle_hide, True),
                 ("keep_cache", True, lambda: None, False)):
             row = BackgroundCanvas(options, surface=self.backdrop, opacity=0.15)
@@ -300,6 +306,11 @@ class Launcher:
         self.language_choice = code
         self.language = resolve_language(code)
         self.render_navigation()
+        self.render()
+
+    def toggle_auto_update(self):
+        self.preferences["auto_update"] = not self.preferences["auto_update"]
+        self.persist({"auto_update": self.preferences["auto_update"]})
         self.render()
 
     def toggle_hide(self):
@@ -335,9 +346,73 @@ class Launcher:
                               style="Forge.TCombobox")
         choice.pack(fill="x")
         choice.bind("<<ComboboxSelected>>", lambda e: setattr(self, "selected_release", value.get()))
-        self.button(card, self.t("install_release"), lambda: None, state="disabled", pady=5).pack(anchor="w", pady=(10, 0))
+        self.button(card, self.t("install_release"), self.install_selected_release,
+                    state="normal" if any(r.get("installable") for r in self.releases) and not self.management_busy() else "disabled", pady=5).pack(anchor="w", pady=(10, 0))
         self.label(self.content, self.t("update_pending"), color=MUTED, wraplength=620).pack(anchor="w")
+        if (ROOT / "local/pending-game-update.json").is_file():
+            self.button(self.content, self.t("rebuild_update"), lambda: self.resume_game_update(manual=True), pady=5).pack(anchor="w")
         self.button(self.content, self.t("local_versions"), self.open_library).pack(anchor="w", pady=12)
+
+    def install_selected_release(self, automatic=False):
+        if self.management_busy():
+            return
+        release = next((r for r in self.releases if r["version"] == self.selected_release), self.releases[0] if self.releases else None)
+        if not release or not release.get("installable"):
+            self.release_status = self.t("release_incompatible")
+            self.render()
+            return
+        if not automatic and not messagebox.askyesno("DekuForge", self.t("update_confirm", version=release["version"]), parent=self.root):
+            return
+        self.update_busy = True
+        self.release_status = self.t("update_downloading")
+        self.render()
+        def work():
+            try:
+                job = prepare_release(release, lambda done,total: self.events.put(("update_progress", (done,total))))
+                self.events.put(("update_ready", job))
+            except Exception as error:
+                self.events.put(("update_error", str(error)))
+        threading.Thread(target=work, daemon=True).start()
+
+    def resume_game_update(self, manual=False):
+        pending = ROOT / "local/pending-game-update.json"
+        if not pending.is_file() or self.management_busy():
+            return
+        state = json.loads(pending.read_text(encoding="utf-8"))
+        if not state.get("requires_rebuild") or state.get("status") == "complete" or state.get("status") == "failed" and not manual:
+            return
+        if not Path(self.source).is_file() or game_running():
+            self.release_status = self.t("update_rebuild_wait")
+            if self.page == "updates": self.render()
+            return
+        self.build_busy = True
+        self.progress = Progress(); self.progress.begin()
+        self.log_lines = []; self.error = ""; self.result = None
+        folder=ROOT/"local/logs";folder.mkdir(parents=True,exist_ok=True)
+        self.log_path=folder/("update-build-"+datetime.now().strftime("%Y%m%d-%H%M%S")+".log")
+        self.step = 2; self.page = "build"; self.library_view = False
+        self.render_navigation(); self.render()
+        def work():
+            try:
+                with self.log_path.open("w",encoding="utf-8") as log:
+                    def notify(kind,value):
+                        log.write(f"[{kind}] {value}\n");log.flush()
+                        self.events.put((kind,value))
+                    result = run_rebuild(notify)
+                self.events.put(("update_build_complete", str(result)))
+            except Exception as error:
+                self.events.put(("failure", str(error)))
+            finally:
+                self.events.put(("done", None))
+        threading.Thread(target=work, daemon=True).start()
+
+    def automatic_update_allowed(self, release):
+        result=ROOT/"local/update-result.json"
+        try:
+            previous=json.loads(result.read_text(encoding="utf-8"))
+            return previous.get("success") is not False or previous.get("release")!=release["version"]
+        except (OSError,ValueError):
+            return True
 
     def check_updates(self):
         if self.release_busy:
@@ -474,7 +549,7 @@ class Launcher:
         return self.library_entries[selection[0]] if selection else None
 
     def management_busy(self):
-        return self.build_busy or self.save_busy or self.progress.active or (self.process is not None and self.process.poll() is None)
+        return self.update_busy or self.build_busy or self.save_busy or self.progress.active or (self.process is not None and self.process.poll() is None)
 
     def select_library_entry(self, _event=None):
         entry = self.selected_build()
@@ -616,7 +691,7 @@ class Launcher:
         self.render()
 
     def play(self):
-        if self.build_busy or self.save_busy or (self.process is not None and self.process.poll() is None):
+        if self.update_busy or self.build_busy or self.save_busy or (self.process is not None and self.process.poll() is None):
             return
         try:
             self.process = launch(self.executable)
@@ -707,6 +782,31 @@ class Launcher:
                 kind, value = self.events.get_nowait()
             except Empty:
                 break
+            if kind == "update_progress":
+                self.release_status = self.t("update_download_progress", percent=int(value[0]*100/value[1]))
+                changed = self.page == "updates" or changed
+                continue
+            if kind == "update_error":
+                self.update_busy = False
+                self.release_status = self.t("update_error", error=value)
+                changed = True
+                continue
+            if kind == "update_ready":
+                try:
+                    start_worker(value)
+                    self.cancel_intro()
+                    self.root.destroy()
+                    return
+                except Exception as error:
+                    self.update_busy = False
+                    self.release_status = str(error)
+                    changed = True
+                continue
+            if kind == "update_build_complete":
+                self.result = value; self.executable = value
+                self.activity = self.t("update_game_ready")
+                changed = True
+                continue
             if kind in ("release", "release_error"):
                 self.release_busy = False
                 channel, result = value
@@ -716,6 +816,9 @@ class Launcher:
                 self.checked_channel = channel
                 if kind == "release":
                     self.releases = result
+                    self.selected_release = result[0]["version"] if result else ""
+                    if result and result[0].get("installable") and self.preferences["auto_update"] and newer_version(result[0]["version"], __version__) and self.automatic_update_allowed(result[0]) and not self.management_busy():
+                        self.install_selected_release(automatic=True)
                     self.release_status = self.t("release_found", version=result[0]["version"]) if result else self.t("release_none")
                 else:
                     self.release_status = str(result)
@@ -752,6 +855,7 @@ class Launcher:
                 self.error = value
             elif kind == "done":
                 self.progress.finish()
+                self.build_busy = False
                 changed = True
         if len(self.log_lines) > 1600:
             self.log_lines = self.log_lines[-900:]
@@ -797,7 +901,7 @@ class Launcher:
             self.show_error(error)
 
     def close(self):
-        if self.progress.active or self.save_busy or self.build_busy:
+        if self.update_busy or self.progress.active or self.save_busy or self.build_busy:
             messagebox.showinfo("DekuForge", self.t("active_build"), parent=self.root)
             return
         self.cancel_intro()
