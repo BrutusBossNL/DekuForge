@@ -1085,6 +1085,8 @@ def main():
     apply_identity()
     root = tk.Tk(className="DekuForge")
     root.withdraw()  # Never map the unfinished layout or empty artwork cards.
+    mapped = []
+    root.bind("<Map>", lambda event: mapped.append(True) if event.widget is root else None, add="+")
     root._launcher = Launcher(root)
     root._callback_errors=0
     def callback_error(kind,value,traceback):
@@ -1100,7 +1102,7 @@ def main():
             root.after(0,lambda:app.navigate("report"))
     root.report_callback_exception=callback_error
     if "--self-test" in sys.argv:
-        root.deiconify()
+        # Setup/updater health checks construct every view without showing a window.
         def self_test():
             application = root._launcher
             checked = []
@@ -1127,7 +1129,8 @@ def main():
                 report = {"screens": checked, "report_screens":checked_reports, "logo_loaded": root._brand_icon.width() > 0,
                           "native_icon_verified": getattr(root, "_native_icon_verified", os.name != "nt"),
                           "top_level_windows": 1 + sum(isinstance(child, tk.Toplevel) for child in root.winfo_children()),
-                          "success": True}
+                          "window_was_mapped": bool(mapped),
+                          "success": not mapped}
             except Exception as error:
                 report = {"screens": checked, "success": False, "error": str(error)}
             folder = ROOT / "local"

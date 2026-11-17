@@ -91,6 +91,8 @@ isolated in-game validation and measurements from repeatable scenes.
 
 `python run_launcher.py --self-test` renders 40 core views and five report forms across the five languages
 without starting a game or changing preferences. `tools/check_launcher.py` checks
+that this health check never maps a visible window: setup/update checks must not
+flash pages or language changes in front of the user. It also checks
 the native executable, embedded icon and the same one-window flow. Compile
 emitted LDAPR test fragments with `tools/check_ldapr.py --compiler PATH` and
 compare the resulting state with the ARM64 oracle.

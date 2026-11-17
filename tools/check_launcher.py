@@ -29,6 +29,7 @@ def main():
         if report.exists() and report.stat().st_mtime_ns > previous:
             result = json.loads(report.read_text(encoding="utf-8"))
             assert result["success"], result
+            assert result["window_was_mapped"] is False, "Health check showed a launcher window"
             assert result["logo_loaded"] and result["top_level_windows"] == 1
             assert result["native_icon_verified"], "Native Windows frame has no brand icons"
             assert len(result["screens"]) == 40

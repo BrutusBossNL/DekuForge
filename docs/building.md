@@ -79,8 +79,11 @@ python tools/check_content.py
 git diff --check
 ```
 
-A native self-test checks the icon, 40 core UI views and five report forms, not gameplay. Validate game
-changes with normal startup and repeatable scenes; special screenshot mode changes
+A native self-test checks the icon, 40 core UI views and five report forms, not gameplay.
+The self-test keeps its window withdrawn, including during setup/update health
+checks; `window_was_mapped` must be false in its report. Normal startup is tested
+separately and should show only the user's chosen language.
+Validate game changes with normal startup and repeatable scenes; special screenshot mode changes
 pipeline scheduling. Keep game screenshots and measurement captures local.
 
 Game-generated files stay in ignored `build/`, `generated/` or the selected owned

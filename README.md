@@ -81,6 +81,8 @@ When a tested release is available in [Releases](../../releases):
 2. Run it, choose where to install DekuForge and select **Install DekuForge**.
    Setup downloads and verifies its runtime and, by default, prepares build tools.
    You can defer tool downloads until your first build.
+   Setup checks launcher health invisibly, then opens the normal launcher once;
+   it does not display the page/language test sequence.
 3. Open **DekuForge** from the Start Menu or run `DekuForge.exe` in that folder.
 4. Choose **(Re)build**, select your own supported NUP and a game destination,
    then build. The wizard shows the log and measured stage progress.

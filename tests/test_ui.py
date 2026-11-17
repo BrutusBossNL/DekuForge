@@ -1,4 +1,7 @@
 import os
+import json
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import time
@@ -13,6 +16,28 @@ from dekuforge.ui import Launcher
 
 @unittest.skipUnless(os.name == "nt", "Windows desktop integration")
 class LauncherWorkflowTests(unittest.TestCase):
+    def test_setup_health_check_visits_all_languages_without_showing_a_window(self):
+        source = Path(__file__).resolve().parents[1]
+        script = """import sys
+from pathlib import Path
+sys.path.insert(0, sys.argv[1])
+from run_launcher import prepare_tk
+prepare_tk()
+from dekuforge import ui
+ui.ROOT = Path(sys.argv[2])
+ui.load_settings = lambda: {'language':'en', 'check_updates':False}
+sys.argv = ['run_launcher.py', '--self-test']
+ui.main()
+"""
+        result = subprocess.run([sys.executable, "-c", script, str(source), str(self.folder)],
+            capture_output=True, text=True, timeout=30, creationflags=subprocess.CREATE_NO_WINDOW)
+        self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
+        proof = json.loads((self.folder/"local/launcher-selftest.json").read_text())
+        self.assertTrue(proof["success"])
+        self.assertFalse(proof["window_was_mapped"])
+        self.assertEqual(len(proof["screens"]), 40)
+        self.assertEqual(len(proof["report_screens"]), 5)
+
     def setUp(self):
         prepare_tk()
         self.temporary = tempfile.TemporaryDirectory()

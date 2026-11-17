@@ -101,6 +101,9 @@ Windows VM or a complete fresh-machine game build.
 
 The preview now includes application installation/update transactions, durable
 recovery journals, pre-update backups and a post-install launcher health check.
+The health check renders its views with the root window withdrawn, records
+whether it was ever mapped, and fails if it becomes visible. Setup and updates
+therefore show no page/language tour before the normal launcher starts.
 Stable/Preview filtering and manual release selection also support downgrades.
 Automatic updates are opt-in and install only a newer semantic launcher version.
 The native setup was tested from an empty destination: it downloaded its own
