@@ -74,7 +74,8 @@ class IndependentContractTests(unittest.TestCase):
         words += [0xd65f0000 | rn<<5 for rn in (0,1,30)]
         header = emit_c([words[0]]).split('int deku_block',1)[0]
         functions = [emit_c([word]).split('int deku_block',1)[1] for word in words]
-        text = header+'\n'.join('int deku_'+str(i)+body for i,body in enumerate(functions))
+        export = '__declspec(dllexport) ' if os.name == 'nt' else ''
+        text = header+'\n'.join(export+'int deku_'+str(i)+body for i,body in enumerate(functions))
         class State(ctypes.Structure):
             _fields_ = [('x',ctypes.c_uint64*31),('sp',ctypes.c_uint64),('pc',ctypes.c_uint64),('nzcv',ctypes.c_uint64)]
         cpu = Uc(UC_ARCH_ARM64, UC_MODE_ARM)
