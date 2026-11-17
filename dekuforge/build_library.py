@@ -26,6 +26,14 @@ class BuildLibrary:
         temp.write_text(json.dumps(entries, indent=2), encoding="utf-8")
         temp.replace(self.path)
 
+    def prune_missing(self):
+        entries=self.entries()
+        # Forget only owned directories that are gone. Never delete an external or offline installation.
+        retained=[entry for entry in entries if not (entry.get("owned") and
+                  Path(Path(entry["executable"]).anchor).exists() and not Path(entry["executable"]).parent.exists())]
+        if retained!=entries:self.write(retained)
+        return retained
+
     def register(self, executable, dump="", version="", owned=False):
         exe = Path(executable).absolute()
         if not exe.is_file():
@@ -54,6 +62,7 @@ class BuildLibrary:
         return entry
 
     def discover(self, selected="", dump=""):
+        self.prune_missing()
         build = self.project / "build"
         if build.is_dir():
             for folder in build.iterdir():
@@ -104,6 +113,12 @@ class BuildLibrary:
         return entry, folder
 
     def delete(self, identity, keep_saves=True):
+        entry=next((e for e in self.entries() if e["id"]==identity),None)
+        if entry is None:return None
+        if entry.get("owned") and not Path(entry["executable"]).parent.exists():
+            self.check_root(Path(entry["executable"]).parent)
+            self.write([e for e in self.entries() if e["id"]!=identity])
+            return None
         entry, folder = self.deletion_target(identity)
         backup = None
         profile = folder / "profile"

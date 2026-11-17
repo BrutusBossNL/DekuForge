@@ -1,7 +1,9 @@
 {
   "schema": 1,
   "launcher": {
-    "version": "0.2.0-preview.1"
+    "version": "0.2.0-preview.1",
+    "bug_reports": true,
+    "uninstaller": true
   },
   "engine": {
     "version": "0.11.0",

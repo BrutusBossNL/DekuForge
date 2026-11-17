@@ -20,7 +20,7 @@ def fixture_package(path, text="new", extra=None):
     exe=bytearray(512);exe[:2]=b"MZ";struct.pack_into("<I",exe,60,128)
     exe[128:132]=b"PE\0\0";struct.pack_into("<H",exe,128+24+68,2)
     exe[300:318]="DekuForge".encode("utf-16le")
-    files={"DekuForge.exe":bytes(exe),"run_launcher.py":text.encode(),
+    files={"DekuForge.exe":bytes(exe),"DekuForge-Uninstall.exe":bytes(exe),"run_launcher.py":text.encode(),
            "dekuforge/components.json":json.dumps(COMPONENTS).encode(),
            "tools/bootstrap_runtime.ps1":b"# synthetic bootstrap",
            "dekuforge/runtime_layer.py":b"# same engine"}

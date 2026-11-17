@@ -169,7 +169,124 @@ for _language, _messages in _UPDATE_MESSAGES.items():
     MESSAGES[_language].update(_messages)
 
 
+_REPORT_MESSAGES = {'en': {'report': 'Report a problem',
+        'report_help': 'Review hardware, versions and log excerpts before sending. No game files or saves '
+                       'are included.',
+        'report_title': 'Short title',
+        'report_details': 'What happened? Include steps to reproduce.',
+        'report_expected': 'What did you expect?',
+        'report_logs': 'Include recent text logs (personal paths and tokens filtered)',
+        'report_preview': 'Report preview',
+        'report_direct': 'Send to GitHub',
+        'report_browser': 'Open browser',
+        'report_export': 'Save report',
+        'report_auth': 'Browser submission uses your GitHub account and a shorter log excerpt. Direct '
+                       'sending uses an existing GitHub CLI sign-in or GH_TOKEN. DekuForge does not store '
+                       'your token.',
+        'report_sent': 'Report submitted: {url}',
+        'report_send_error': 'Could not confirm submission: {error}. Check GitHub before retrying to avoid '
+                             'duplicates.',
+        'report_required': 'Enter a title and describe what happened.',
+        'report_signin': 'Sign in with GitHub CLI or use the browser button.',
+        'report_crash': 'The game exited unexpectedly (code {code}). You can review and report it below.',
+        'report_previous': 'A previous crash or launcher error is available for review.',
+        'report_unknown': 'Unknown'},
+ 'nl': {'report': 'Probleem melden',
+        'report_help': 'Controleer hardware, versies en logregels voor verzending. Spelbestanden en saves '
+                       'worden niet meegestuurd.',
+        'report_title': 'Korte titel',
+        'report_details': 'Wat gebeurde er? Vermeld stappen om het te herhalen.',
+        'report_expected': 'Wat verwachtte je?',
+        'report_logs': 'Recente tekstlogs toevoegen (paden en tokens gefilterd)',
+        'report_preview': 'Voorbeeld van melding',
+        'report_direct': 'Naar GitHub sturen',
+        'report_browser': 'Browser openen',
+        'report_export': 'Melding opslaan',
+        'report_auth': 'Via de browser gebruik je je GitHub-account en een korter logfragment. Direct '
+                       'versturen gebruikt een bestaande GitHub CLI-aanmelding of GH_TOKEN. DekuForge '
+                       'bewaart je token niet.',
+        'report_sent': 'Melding verstuurd: {url}',
+        'report_send_error': 'Verzending niet bevestigd: {error}. Controleer GitHub voor je opnieuw '
+                             'verstuurt.',
+        'report_required': 'Vul een titel in en beschrijf wat er gebeurde.',
+        'report_signin': 'Meld je aan met GitHub CLI of gebruik de browserknop.',
+        'report_crash': 'De game is onverwacht gestopt (code {code}). Controleer de melding hieronder.',
+        'report_previous': 'Een eerdere crash of launcherfout is beschikbaar om te melden.',
+        'report_unknown': 'Onbekend'},
+ 'de': {'report': 'Problem melden',
+        'report_help': 'Hardware, Versionen und Logauszuege vor dem Senden pruefen. Keine Spieldateien oder '
+                       'Spielstaende werden beigefuegt.',
+        'report_title': 'Kurzer Titel',
+        'report_details': 'Was ist passiert? Schritte zur Wiederholung angeben.',
+        'report_expected': 'Was wurde erwartet?',
+        'report_logs': 'Aktuelle Textlogs beifuegen (Pfade und Tokens gefiltert)',
+        'report_preview': 'Meldung pruefen',
+        'report_direct': 'An GitHub senden',
+        'report_browser': 'Browser oeffnen',
+        'report_export': 'Meldung speichern',
+        'report_auth': 'Im Browser wird Ihr GitHub-Konto mit kurzem Logauszug verwendet. Direktes Senden '
+                       'nutzt eine bestehende GitHub-CLI-Anmeldung oder GH_TOKEN. DekuForge speichert kein '
+                       'Token.',
+        'report_sent': 'Meldung gesendet: {url}',
+        'report_send_error': 'Senden nicht bestaetigt: {error}. Vor einem weiteren Versuch GitHub auf '
+                             'Duplikate pruefen.',
+        'report_required': 'Titel und Problembeschreibung eingeben.',
+        'report_signin': 'Mit GitHub CLI anmelden oder den Browser verwenden.',
+        'report_crash': 'Spiel unerwartet beendet (Code {code}). Meldung unten pruefen.',
+        'report_previous': 'Ein frueherer Absturz oder Launcherfehler kann gemeldet werden.',
+        'report_unknown': 'Unbekannt'},
+ 'es': {'report': 'Informar problema',
+        'report_help': 'Revisa hardware, versiones y extractos antes de enviar. No se incluyen archivos del '
+                       'juego ni partidas.',
+        'report_title': 'Titulo breve',
+        'report_details': 'Que ocurrio? Incluye los pasos para reproducirlo.',
+        'report_expected': 'Que esperabas?',
+        'report_logs': 'Incluir registros recientes (rutas y tokens filtrados)',
+        'report_preview': 'Vista previa',
+        'report_direct': 'Enviar a GitHub',
+        'report_browser': 'Abrir navegador',
+        'report_export': 'Guardar informe',
+        'report_auth': 'El navegador usa tu cuenta de GitHub y un extracto mas corto. El envio directo usa '
+                       'GitHub CLI o GH_TOKEN existentes. DekuForge no guarda tu token.',
+        'report_sent': 'Informe enviado: {url}',
+        'report_send_error': 'No se confirmo el envio: {error}. Comprueba GitHub antes de reintentar para '
+                             'evitar duplicados.',
+        'report_required': 'Introduce un titulo y describe el problema.',
+        'report_signin': 'Inicia sesion con GitHub CLI o utiliza el navegador.',
+        'report_crash': 'El juego termino inesperadamente (codigo {code}). Revisa el informe.',
+        'report_previous': 'Hay un fallo anterior del juego o del lanzador para revisar.',
+        'report_unknown': 'Desconocido'},
+ 'fr': {'report': 'Signaler un probleme',
+        'report_help': 'Verifiez materiel, versions et extraits avant envoi. Aucun fichier de jeu ni '
+                       'sauvegarde ne sera joint.',
+        'report_title': 'Titre court',
+        'report_details': 'Que se passe-t-il ? Indiquez les etapes de reproduction.',
+        'report_expected': 'Quel resultat attendiez-vous ?',
+        'report_logs': 'Inclure les journaux recents (chemins et jetons filtres)',
+        'report_preview': 'Apercu du rapport',
+        'report_direct': 'Envoyer a GitHub',
+        'report_browser': 'Ouvrir navigateur',
+        'report_export': 'Enregistrer',
+        'report_auth': 'Le navigateur utilise votre compte GitHub et un extrait plus court. Envoi direct '
+                       'avec une connexion GitHub CLI ou GH_TOKEN existante. DekuForge ne conserve pas votre '
+                       'jeton.',
+        'report_sent': 'Rapport envoye : {url}',
+        'report_send_error': 'Envoi non confirme : {error}. Verifiez GitHub avant de reessayer pour eviter '
+                             'un doublon.',
+        'report_required': 'Saisissez un titre et decrivez le probleme.',
+        'report_signin': 'Connectez GitHub CLI ou utilisez le navigateur.',
+        'report_crash': 'Le jeu a quitte de facon inattendue (code {code}). Verifiez le rapport.',
+        'report_previous': 'Un ancien plantage ou une erreur du lanceur peut etre examine.',
+        'report_unknown': 'Inconnu'}}
+for _language,_messages in _REPORT_MESSAGES.items():
+    MESSAGES[_language].update(_messages)
+
+
+for _language,_text in {"en":"Uninstall DekuForge","nl":"DekuForge verwijderen","de":"DekuForge deinstallieren","es":"Desinstalar DekuForge","fr":"Desinstaller DekuForge"}.items():
+    MESSAGES[_language]["uninstall"]=_text
+
+
 def translate(language, key, **values):
     selected = language if language in MESSAGES else "en"
-    text = FILE_LABELS[selected][key] if key in FILE_LABELS[selected] else MESSAGES[selected][key]
+    text = FILE_LABELS[selected][key] if key in FILE_LABELS[selected] else MESSAGES[selected].get(key,MESSAGES["en"].get(key,key.replace("_"," ").title()))
     return text.format(**values)

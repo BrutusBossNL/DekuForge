@@ -78,3 +78,29 @@ tokens are never saved in launcher settings and are stripped on asset redirects.
 Draft releases are not offered by the normal release selector. Public installers
 will not need a GitHub account. Keep the repository private until setup/update,
 failed-update recovery and local game-rebuild acceptance are complete.
+
+## Reporting and uninstallation
+
+The preview has a user-reviewed issue form with hardware/version information and
+bounded, filtered text logs. It offers a prefilled GitHub browser page or direct
+submission using the user's existing GitHub CLI/token. It does not include an
+embedded maintainer token or submit automatically. Nonzero game exit codes and
+recorded launcher errors can offer a report; this is not a full crash-dump service
+and does not detect every possible failure. Redaction is best effort: review the
+preview before sending. Direct API submission is covered by mocked tests, not
+an automatically posted live test issue.
+
+Installed copies include a native uninstaller and Windows Installed apps entry.
+Managed directories require ownership markers; external installations are not
+removed. Save retention is selected by default and verifies a separate backup
+before removal. Original configured ROM/NUP paths and recognized game archives
+are excluded from deletion and save backup. Synthetic PowerShell integration
+checks exercise keep/remove/refusal cases. The native setup/uninstall flow is
+also checked in an isolated directory on the development machine; this is not a
+clean Windows VM or a test of every possible user installation.
+
+A real authenticated private-draft update downloaded and installed the package in
+an isolated folder, passed UI checks and preserved settings and a synthetic save.
+The subsequent full separate game rebuild did not finish. Its large acceptance
+folder was removed at the owner's request; do not report it as a successful
+end-to-end fresh install, game rebuild or rollback play test.

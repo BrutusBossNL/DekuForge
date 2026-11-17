@@ -12,6 +12,8 @@ from tkinter import filedialog, messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 
 from . import __version__
+from . import reports
+import webbrowser
 from .core import ROOT, launch, load_settings, save_installation, update_settings
 from .engine import build_independent
 from .i18n import LANGUAGES, MESSAGES, translate
@@ -52,6 +54,15 @@ class Launcher:
         self.intro_job = None
         self.card_job = None
         self.release_busy = False
+        self.report_busy = False
+        self.report_load_failed = False
+        self.report_context = None
+        self.report_authenticated = False
+        self.report_status = ""
+        self.report_incident = None
+        self.report_draft = {"title":"", "details":"", "expected":"", "include_logs":True}
+        self.report_submitted_url = ""
+        self.report_preview = None
         self.update_busy = False
         self.update_job = None
         self.save_busy = False
@@ -81,8 +92,10 @@ class Launcher:
         self.sidebar = NavigationCanvas(root, width=240)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
         self.sidebar.grid_propagate(False)
+        self.sidebar.pack_propagate(False)
         self.backdrop = BackgroundCanvas(root)
         self.backdrop.grid(row=0, column=0, columnspan=2, sticky="nsew")
+        self.backdrop.grid_propagate(False)
         self.backdrop.grid_rowconfigure(0, weight=1)
         self.backdrop.grid_columnconfigure(0, weight=1)
         self.content = BackgroundCanvas(self.backdrop, surface=self.backdrop)
@@ -104,14 +117,15 @@ class Launcher:
             root.after(2500, self.check_updates)
         if "--self-test" not in sys.argv:
             root.after(3000, self.resume_game_update)
+            root.after(1000, self.check_previous_incident)
 
     def t(self, key, **values):
         return translate(self.language, key, **values)
 
     def label(self, parent, text, size=11, color=TEXT, **options):
-        widget = (ArtworkLabel(parent, text, size, color, **options) if isinstance(parent, BackgroundCanvas)
-                  else tk.Label(parent, text=text, bg=parent.cget("bg"), fg=color,
-                                font=("Segoe UI", size), justify="left", anchor="w", **options))
+        # Text always has a solid backing, including help/status outside cards.
+        widget = tk.Label(parent, text=text, bg=PANEL, fg=color,
+                          font=("Segoe UI", size), justify="left", anchor="w", **options)
         if "wraplength" in options:
             maximum = options["wraplength"]
             def wrap(event):
@@ -149,7 +163,7 @@ class Launcher:
         else:
             self.label(self.sidebar, "DekuForge", 22, GOLD).pack(padx=20, pady=30)
         self.label(self.sidebar, self.t("tagline"), 10, MUTED).pack(padx=22, pady=(0, 32))
-        for name in ("home", "updates", "saves", "build", "settings"):
+        for name in ("home", "updates", "saves", "build", "settings", "report"):
             selected = self.page == name
             self.button(self.sidebar, self.t(name), lambda value=name: self.navigate(value),
                         primary=selected, anchor="w").pack(fill="x", padx=16, pady=5)
@@ -172,6 +186,9 @@ class Launcher:
             child.destroy()
         self.content.grid_configure(padx=(252, 12) if self.page == "home" else (274, 34),
                                     pady=12 if self.page == "home" else 28)
+        self.content._opacity = .46 if self.page == "home" else .15
+        self.content.configure(highlightbackground=BORDER,
+                               highlightthickness=0 if self.page == "home" else 1)
         if self.page == "home":
             self.render_home()
         elif self.page == "settings":
@@ -180,6 +197,8 @@ class Launcher:
             self.render_updates()
         elif self.page == "saves":
             self.render_saves()
+        elif self.page == "report":
+            self.render_report()
         else:
             if self.library_view:
                 self.render_library()
@@ -189,7 +208,7 @@ class Launcher:
 
     def build_entries(self):
         try:
-            return self.library.entries()
+            return self.library.prune_missing()
         except (ValueError, OSError) as error:
             self.library_status = str(error)
             return []
@@ -298,6 +317,14 @@ class Launcher:
         self.label(options, self.t("update_pending"), 9, MUTED, wraplength=620).pack(anchor="w", pady=(8, 0))
         self.label(options, self.t("cache_help"), 9, MUTED, wraplength=620).pack(anchor="w")
         self.button(self.content, self.t("open_log"), lambda: self.open_folder(ROOT / "local" / "logs")).pack(anchor="w", pady=8)
+        installed=(ROOT/"local/installation.json").is_file() and (ROOT/"DekuForge-Uninstall.exe").is_file()
+        self.button(self.content,self.t("uninstall"),self.uninstall,pady=6,state="normal" if installed and not self.management_busy() else "disabled").pack(anchor="w",pady=4)
+
+    def uninstall(self):
+        if self.management_busy() or self.report_busy:return
+        import subprocess
+        subprocess.Popen([str(ROOT/"DekuForge-Uninstall.exe")],cwd=ROOT,creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0))
+        self.close()
 
     def set_language(self, code):
         if code not in LANGUAGES and code != "system":
@@ -429,6 +456,115 @@ class Launcher:
         if self.page == "updates":
             self.render()
 
+    def check_previous_incident(self):
+        incident=reports.previous_incident(ROOT)
+        seen=ROOT/"local/report-seen.json"
+        try:previous=json.loads(seen.read_text(encoding="utf-8"))
+        except (OSError,ValueError):previous=None
+        if incident and incident!=previous:
+            self.report_incident=incident
+            self.report_status=self.t("report_previous")
+            self.navigate("report")
+
+    def prepare_report(self):
+        if self.report_busy or self.report_load_failed or self.report_context is not None:
+            return
+        if "--self-test" in sys.argv:
+            self.report_context={"metadata":{"launcher":__version__},"logs":[]}
+            return
+        self.report_busy=True
+        def work():
+            try:
+                context=reports.collect(ROOT,self.executable,self.report_incident)
+                from .update_service import github_token
+                self.events.put(("report_ready",(context,bool(github_token()))))
+            except Exception as error:self.events.put(("report_error",str(error)))
+        threading.Thread(target=work,daemon=True).start()
+
+    def render_report(self):
+        self.prepare_report()
+        self.label(self.content,self.report_status or self.t("report_help"),10,MUTED,wraplength=640).pack(anchor="w",pady=(0,8))
+        card=self.card(self.content,padding=12)
+        system=(self.report_context or {}).get("metadata",{}).get("system",{})
+        if system:
+            unknown=self.t("report_unknown")
+            gpus=", ".join(gpu["model"]+" / "+gpu.get("driver",unknown) for gpu in system.get("gpus",[])) or unknown
+            summary="OS: "+system.get("os",unknown)+"\nCPU: "+system.get("cpu",unknown)+" | RAM: "+str(system.get("ram_gib",unknown))+" GiB\nGPU: "+gpus
+            self.label(card,summary,9,MUTED,wraplength=620).pack(anchor="w",pady=(0,8))
+        self.label(card,self.t("report_title"),10).pack(anchor="w")
+        title=tk.StringVar(value=self.report_draft["title"])
+        entry=tk.Entry(card,textvariable=title,bg=PANEL,fg=TEXT,insertbackground=GOLD,relief="flat",font=("Segoe UI",11))
+        entry.pack(fill="x",pady=(3,6))
+        def title_changed(*_):
+            self.report_draft["title"]=title.get();self.report_submitted_url="";self.refresh_report_preview()
+        title.trace_add("write",title_changed)
+        for key,label,height in (("details","report_details",3),("expected","report_expected",1)):
+            self.label(card,self.t(label),10).pack(anchor="w")
+            widget=ScrolledText(card,height=height,wrap="word",font=("Segoe UI",10),bg=PANEL,fg=TEXT,
+                insertbackground=GOLD,relief="flat",borderwidth=0)
+            widget.insert("1.0",self.report_draft[key]);widget.pack(fill="x",pady=(3,6))
+            def changed(_event=None,field=key,control=widget):
+                try:self.report_draft[field]=control.get("1.0","end-1c")
+                except tk.TclError:return
+                self.report_submitted_url="";self.refresh_report_preview()
+            widget.bind("<KeyRelease>",changed);widget.bind("<FocusOut>",changed)
+        include=tk.BooleanVar(value=self.report_draft["include_logs"])
+        def toggle():self.report_draft["include_logs"]=include.get();self.report_submitted_url="";self.refresh_report_preview()
+        tk.Checkbutton(card,text=self.t("report_logs"),variable=include,command=toggle,bg=PANEL,fg=TEXT,
+            activebackground=PANEL,activeforeground=GOLD,selectcolor=BG,relief="flat").pack(anchor="w")
+        self.label(card,self.t("report_preview"),10).pack(anchor="w",pady=(6,3))
+        self.report_preview=ScrolledText(card,height=7,wrap="word",font=("Consolas",9),bg=BG,fg=TEXT,relief="flat")
+        self.report_preview.pack(fill="x")
+        self.refresh_report_preview()
+        buttons=BackgroundCanvas(self.content,surface=self.backdrop)
+        buttons.pack(fill="x")
+        ready=self.report_context is not None and not self.report_busy
+        self.button(buttons,self.t("report_direct"),self.submit_report,primary=True,pady=6,
+            state="normal" if ready and self.report_authenticated and not self.report_submitted_url else "disabled").pack(side="left",padx=(0,6))
+        self.button(buttons,self.t("report_browser"),self.open_report_browser,pady=6,state="normal" if ready else "disabled").pack(side="left",padx=(0,6))
+        self.button(buttons,self.t("report_export"),self.export_report,pady=6,state="normal" if ready else "disabled").pack(side="left")
+        self.label(self.content,self.t("report_auth"),9,MUTED,wraplength=640).pack(anchor="w",pady=(8,0))
+        if self.report_load_failed:
+            self.button(self.content,self.t("check_now"),self.retry_report,pady=5).pack(anchor="w")
+        if self.report_incident:
+            from .update_package import atomic_json
+            atomic_json(ROOT/"local/report-seen.json",self.report_incident)
+
+    def retry_report(self):
+        self.report_load_failed=False;self.report_context=None;self.report_status="";self.render()
+
+    def refresh_report_preview(self):
+        if self.report_preview is None or not self.report_preview.winfo_exists():return
+        draft=dict(self.report_draft)
+        draft["title"]=draft["title"] or self.t("report_title")
+        draft["details"]=draft["details"] or self.t("report_details")
+        context=self.report_context or {"metadata":{},"logs":[]}
+        text=reports.body(draft,context)
+        self.report_preview.configure(state="normal");self.report_preview.delete("1.0","end")
+        self.report_preview.insert("1.0",text);self.report_preview.configure(state="disabled")
+
+    def open_report_browser(self):
+        try:webbrowser.open(reports.browser_url(self.report_draft,self.report_context))
+        except (ValueError,OSError) as error:self.show_error(error)
+
+    def export_report(self):
+        try:text=reports.body(self.report_draft,self.report_context)
+        except ValueError as error:self.show_error(error);return
+        filename=filedialog.asksaveasfilename(parent=self.root,initialfile="DekuForge-bug-report.txt",defaultextension=".txt",filetypes=[("Text","*.txt")])
+        if filename:Path(filename).write_text(text,encoding="utf-8")
+
+    def submit_report(self):
+        if self.report_busy:return
+        try:reports.body(self.report_draft,self.report_context)
+        except ValueError as error:self.show_error(error);return
+        self.report_busy=True
+        draft=dict(self.report_draft);context=self.report_context
+        self.report_status=self.t("working");self.render()
+        def work():
+            try:self.events.put(("report_sent",reports.submit(draft,context)))
+            except Exception as error:self.events.put(("report_error",str(error)))
+        threading.Thread(target=work,daemon=True).start()
+
     def render_saves(self):
         self.label(self.content, self.t("save_help"), color=MUTED, wraplength=620).pack(anchor="w", pady=(0, 18))
         card = self.card(self.content)
@@ -549,7 +685,7 @@ class Launcher:
         return self.library_entries[selection[0]] if selection else None
 
     def management_busy(self):
-        return self.update_busy or self.build_busy or self.save_busy or self.progress.active or (self.process is not None and self.process.poll() is None)
+        return self.report_busy or self.update_busy or self.build_busy or self.save_busy or self.progress.active or (self.process is not None and self.process.poll() is None)
 
     def select_library_entry(self, _event=None):
         entry = self.selected_build()
@@ -695,6 +831,7 @@ class Launcher:
             return
         try:
             self.process = launch(self.executable)
+            reports.record_run(ROOT,self.process,self.executable)
             self.activity = self.t("playing")
             self.render()
             if self.hide_playing:
@@ -782,6 +919,24 @@ class Launcher:
                 kind, value = self.events.get_nowait()
             except Empty:
                 break
+            if kind == "report_ready":
+                self.report_context,self.report_authenticated = value
+                self.report_busy = False
+                self.report_status = ""
+                changed = self.page == "report" or changed
+                continue
+            if kind == "report_error":
+                self.report_busy = False
+                self.report_load_failed = self.report_context is None
+                self.report_status = self.t("report_send_error",error=value)
+                changed = self.page == "report" or changed
+                continue
+            if kind == "report_sent":
+                self.report_busy = False
+                self.report_submitted_url = value
+                self.report_status = self.t("report_sent",url=value)
+                changed = self.page == "report" or changed
+                continue
             if kind == "update_progress":
                 self.release_status = self.t("update_download_progress", percent=int(value[0]*100/value[1]))
                 changed = self.page == "updates" or changed
@@ -865,7 +1020,16 @@ class Launcher:
                 self.log_widget.delete("1.0", "end")
                 self.log_widget.configure(state="disabled")
         if self.process is not None and self.process.poll() is not None:
-            self.activity = self.t("game_ended", code=self.process.returncode)
+            code=self.process.returncode
+            self.activity = self.t("game_ended", code=code)
+            incident=reports.record_exit(ROOT,code)
+            if incident:
+                self.report_incident=incident
+                self.report_context=None
+                self.report_draft["title"]="Game exited unexpectedly (code "+str(code)+")"
+                self.report_status=self.t("report_crash",code=code)
+                self.page="report"
+                self.render_navigation()
             self.process = None
             self.root.deiconify()
             changed = True
@@ -901,7 +1065,7 @@ class Launcher:
             self.show_error(error)
 
     def close(self):
-        if self.update_busy or self.progress.active or self.save_busy or self.build_busy:
+        if self.report_busy or self.update_busy or self.progress.active or self.save_busy or self.build_busy:
             messagebox.showinfo("DekuForge", self.t("active_build"), parent=self.root)
             return
         self.cancel_intro()
@@ -915,11 +1079,25 @@ def main():
     root = tk.Tk(className="DekuForge")
     root.withdraw()  # Never map the unfinished layout or empty artwork cards.
     root._launcher = Launcher(root)
+    root._callback_errors=0
+    def callback_error(kind,value,traceback):
+        import traceback as trace
+        path=ROOT/"local/launcher-crash.log";path.parent.mkdir(parents=True,exist_ok=True)
+        path.write_text("".join(trace.format_exception(kind,value,traceback)),encoding="utf-8")
+        root._callback_errors+=1
+        if root._callback_errors==1:
+            app=root._launcher
+            app.report_context=None
+            app.report_incident={"kind":"launcher_callback","time":datetime.now(timezone.utc).isoformat()}
+            app.report_status=app.t("report_previous")
+            root.after(0,lambda:app.navigate("report"))
+    root.report_callback_exception=callback_error
     if "--self-test" in sys.argv:
         root.deiconify()
         def self_test():
             application = root._launcher
             checked = []
+            checked_reports = []
             try:
                 for language in LANGUAGES:
                     application.language = language
@@ -937,7 +1115,9 @@ def main():
                     root.update_idletasks()
                     checked.append(f"{language}/build/library")
                     application.library_view = False
-                report = {"screens": checked, "logo_loaded": root._brand_icon.width() > 0,
+                    application.navigate("report");root.update_idletasks()
+                    checked_reports.append(f"{language}/report")
+                report = {"screens": checked, "report_screens":checked_reports, "logo_loaded": root._brand_icon.width() > 0,
                           "native_icon_verified": getattr(root, "_native_icon_verified", os.name != "nt"),
                           "top_level_windows": 1 + sum(isinstance(child, tk.Toplevel) for child in root.winfo_children()),
                           "success": True}
@@ -951,4 +1131,14 @@ def main():
     else:
         animate_intro(root._launcher)
         root.deiconify()
+        if "--startup-smoke" in sys.argv:
+            root.after(2000,lambda:root._launcher.navigate("report"))
+            def finish_smoke():
+                app=root._launcher
+                report={"success":root._callback_errors==0 and app.report_context is not None,"page":app.page,"callback_errors":root._callback_errors,
+                        "report_loaded":app.report_context is not None}
+                from .update_package import atomic_json
+                atomic_json(ROOT/"local/launcher-startup-smoke.json",report)
+                root.destroy()
+            root.after(6000,finish_smoke)
     root.mainloop()

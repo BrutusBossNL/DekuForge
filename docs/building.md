@@ -65,7 +65,7 @@ python tools/check_content.py
 git diff --check
 ```
 
-A native self-test checks the icon and 40 UI views, not gameplay. Validate game
+A native self-test checks the icon, 40 core UI views and five report forms, not gameplay. Validate game
 changes with normal startup and repeatable scenes; special screenshot mode changes
 pipeline scheduling. Keep game screenshots and measurement captures local.
 

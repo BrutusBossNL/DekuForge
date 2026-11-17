@@ -21,7 +21,14 @@ def main():
     args=parser.parse_args()
     if args.tag != "v"+COMPONENTS["launcher"]["version"]:
         raise ValueError("Release tag must match the launcher component version")
-    archive=package();out=ROOT/"build/setup";out.mkdir(parents=True,exist_ok=True)
+    out=ROOT/"build/setup";out.mkdir(parents=True,exist_ok=True)
+    env=os.environ.copy();env["PATH"]=str(args.toolchain.resolve())+os.pathsep+env.get("PATH","")
+    uninstall_resource=out/"uninstall.rc"
+    uninstall_resource.write_text('101 ICON "'+(ROOT/"assets/branding/launcher.ico").as_posix()+'"\n103 RCDATA "'+(ROOT/"installer/uninstall.ps1").as_posix()+'"\n',encoding="utf-8")
+    subprocess.run([str(args.toolchain/"windres.exe"),str(uninstall_resource),"-o",str(out/"uninstall.o")],env=env,check=True)
+    subprocess.run([str(args.toolchain/"clang.exe"),"-O2","-Wall","-Wextra","-Werror","-municode","-mwindows",
+        str(ROOT/"installer/uninstall.c"),str(out/"uninstall.o"),"-o",str(ROOT/"DekuForge-Uninstall.exe")],env=env,check=True)
+    archive=package()
     script=(ROOT/"installer/install.ps1").read_text(encoding="utf-8")
     digest=hashlib.sha256(archive.read_bytes()).hexdigest()
     script=script.replace("$ProgressPreference = 'SilentlyContinue'","$ProgressPreference = 'SilentlyContinue'\n"

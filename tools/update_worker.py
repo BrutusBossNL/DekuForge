@@ -39,6 +39,8 @@ def main():
         proof = json.loads(report.read_text(encoding="utf-8"))
         if report.stat().st_mtime_ns == before or not proof["success"] or len(proof["screens"]) != 40:
             raise RuntimeError("Updated launcher failed its health check")
+        if result["components"]["launcher"].get("bug_reports") and len(proof.get("report_screens",[]))!=5:
+            raise RuntimeError("Updated launcher failed its report-form checks")
         atomic_json(root / "local/pending-game-update.json", {**result, "release": job["release"], "status": "pending"})
         atomic_json(root / "local/update-result.json", {"success": True, "release": job["release"], **result})
     except Exception as error:

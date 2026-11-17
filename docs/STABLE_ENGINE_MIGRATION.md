@@ -1,5 +1,10 @@
 # Stable 0.10.1 engine migration
 
+This document records dated migration measurements. Installation selections,
+local capture paths and retained fallback builds below describe those runs,
+not a guarantee that those files still exist after cleanup. Current delivery
+status is in [DISTRIBUTION.md](DISTRIBUTION.md) and the [README](../README.md).
+
 The owner selected the complete stable 0.10.1 engine as the new game backend.
 Pinned revision: `5ae55db41c7d11c4e997d2676019939a936e560b` (tag `v0.10.1`).
 The old 0.3.10 import and its experimental extensions are retained for provenance
@@ -40,8 +45,8 @@ wrapper is applied. `tools/build_stable_translator.py` reproduces this build.
 
 Visible application titles and executable names are adapted in the owned
 workspace, and the project icon is supplied. The DekuForge launcher, settings,
-build library and save management remain the project's own UI. Further game-menu
-and cheat-manager integration follows verified core rendering.
+build library and save management remain the project's own UI. The separate 0.11.0 layer described below now supplies the own game-menu skin
+and Cheat Manager; individual cheat scenarios still need acceptance.
 
 ## Local migration run (2026-11-17)
 
@@ -87,8 +92,8 @@ prebuilt 500 recorded pipelines (zero failures or remaining jobs) before play,
 measured 47.36 average FPS and a 20.63 FPS one-percent low over 951 gameplay
 intervals, and logged zero incomplete frames shown at the available checkpoint.
 This exposed the missing release-only list: the verified 0.10.1 release supplies
-9,814 pipeline records and 7,447 associated shader variants. The complete
-release preparation is now being tested before activation. `--capture` enables bounded frame recording and settings-page captures.
+9,814 pipeline records and 7,447 associated shader variants. The completed
+release preparation and activation are recorded in the later section below. `--capture` enables bounded frame recording and settings-page captures.
 
 The launcher build route is the same `build_independent` route exercised by
 `run_builder.py`. Successful builds receive version metadata and enter the build
@@ -146,12 +151,13 @@ area in the game.
 The actual `Launcher.play()` action was then invoked with the selected executable
 and no command-line arguments. The game reached the world and closed through its
 window close handler with exit code 0. The launcher hid while playing and returned
-to the same single window afterwards (52.06 seconds total). The active installation
-now points to `build/stable-windows-game/DekuForgeGame.exe`; the previous preference
+to the same single window afterwards (52.06 seconds total). At that point the active installation
+was set to `build/stable-windows-game/DekuForgeGame.exe`; the previous preference
 file was backed up. The original reference installation and save files were not
 modified. The test game and test launcher are closed.
 
-Evidence remains local: `dekuforge-validation.json`, `test-stable-world.png`,
+Recorded evidence was local; some bulky captures were subsequently removed
+during owner-authorized cleanup. Referenced original paths included: `dekuforge-validation.json`, `test-stable-world.png`,
 `validation-frames/final-largest-differences.jpg`, `test-launcher-play.log` and
 `local/launcher-play-smoke.json`. None of these game-derived artifacts enter Git.
 `run_builder.py --doctor` reports the completed build and separately scoped local
@@ -181,8 +187,8 @@ full network download and final installer still need independent acceptance.
   movie decoding already logs 1920x1080 AV1 at approximately 60 presented FPS.
 - Validate native-tool downloads and first-time setup in a clean Windows environment;
   owned local tool provisioning has passed the pinned-package and compile/run checks.
-- Bring over custom cheats and related game-menu extensions after the desktop
-  baseline gates, without replacing the validated stable renderer.
+- Validate the composed custom cheats and game-menu extensions individually,
+  without replacing the validated stable renderer.
 - Validate a complete first-time wizard build on a clean installation.
 
 ## DekuForge 0.11.0 candidate and independent launcher bootstrap
@@ -196,8 +202,9 @@ The settings header, boot skin and both performance displays use DekuForge brand
 A normal-start 20-second world capture completed with exit 0 and averaged 51.37 FPS.
 The captured world and Cheats tab were visually checked: complete terrain, rocks,
 grass, clouds, Link and controller prompts. This short result includes capture
-and UI-test overhead and is not a new multi-scene parity claim. The baseline build
-remains the selected fallback until candidate acceptance.
+and UI-test overhead and is not a new multi-scene parity claim. The candidate was subsequently selected locally. The original migration baseline
+was removed through build management; it is not a retained fallback today. The
+separate original NX2navi installation remains outside DekuForge management.
 
 An incremental rebuild using DekuForge's own versioned Python runtime took 26.1
 seconds: two files compiled, 722 retained, and unchanged shader/pipeline products
@@ -206,4 +213,5 @@ launcher, buildkit, input-game and local build identities are recorded in metada
 
 See [DISTRIBUTION.md](DISTRIBUTION.md) for the launcher-only package and successful
 empty-folder runtime-download test. Full fresh-machine game-building acceptance
-and automatic release installation remain separate work.
+remains incomplete. Application release installation is implemented and locally
+tested; see the separate setup/update acceptance limits in DISTRIBUTION.md.

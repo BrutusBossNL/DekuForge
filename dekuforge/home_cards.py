@@ -3,7 +3,7 @@ from io import BytesIO
 from pathlib import Path
 import tkinter as tk
 
-from .theme import BG, BORDER, GOLD, MUTED, PANEL, TEXT, BackgroundCanvas, green_gradient
+from .theme import BG, BORDER, GOLD, MUTED, PANEL, TEXT, BackgroundCanvas, green_gradient, rgb_photo
 
 
 class StartupCanvas(BackgroundCanvas):
@@ -82,9 +82,7 @@ class ActionCard(tk.Canvas):
                                       centering=(0.5, 0.35))
                 self.images = {"size": size}
                 for name, brightness in (("idle", .83 if self.enabled else .48), ("active", 1.08 if self.enabled else .65)):
-                    payload = BytesIO()
-                    ImageEnhance.Brightness(fitted).enhance(brightness).save(payload, format="PNG")
-                    self.images[name] = tk.PhotoImage(master=self, data=payload.getvalue(), format="png")
+                    self.images[name] = rgb_photo(self, ImageEnhance.Brightness(fitted).enhance(brightness))
             self.image = self.images["active" if active else "idle"]
             self.create_image(3, 3, image=self.image, anchor="nw", tags="content")
         self.create_text(width / 2 + 3, art_height + 18, text=self.title,
@@ -118,8 +116,9 @@ def animate_intro(app):
     logo_frames = []
     if mark is not None and LOGO.is_file():
         width, height = mark.image.width(), mark.image.height()
-        target = (mark.winfo_rootx() - root.winfo_rootx() + mark.winfo_width() / 2,
-                  mark.winfo_rooty() - root.winfo_rooty() + mark.winfo_height() / 2)
+        # The root is intentionally withdrawn here. Absolute screen coordinates
+        # are not valid until mapping; the navigation has a fixed 240px column.
+        target = (120, 32 + height / 2)
         with Image.open(LOGO) as source:
             for step in range(13):
                 scale = 1 + .35 * (1 - step / 12)**3

@@ -27,6 +27,11 @@ def package(root=ROOT):
             or b"D\0e\0k\0u\0F\0o\0r\0g\0e\0" not in launcher):
         raise ValueError("Expected the small native DekuForge GUI bootstrap")
     files = {"DekuForge.exe": launcher}
+    uninstaller=root/"DekuForge-Uninstall.exe"
+    if uninstaller.is_file():
+        from dekuforge.update_package import validate_launcher
+        content=uninstaller.read_bytes();validate_launcher(content)
+        files[uninstaller.name]=content
     candidates = [root / name for name in ROOT_FILES]
     for name in DIRECTORIES | {"assets/branding"}:
         candidates.extend((root / name).rglob("*"))

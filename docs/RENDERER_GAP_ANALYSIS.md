@@ -6,7 +6,9 @@
 
 # Windows renderer gap analysis
 
-Status: 2026-11-17. Windows rendering acceptance failed. Do not publish a playable release.
+Historical status: experimental Windows rendering acceptance failed. That engine
+was retired; this finding does not describe the replacement stable backend.
+The investigation paths below may refer to captures removed during cleanup.
 
 ## Decision
 

@@ -1,6 +1,7 @@
 """Shared leaf-green and forged-gold desktop styling."""
 
 import math
+from functools import lru_cache
 import os
 import struct
 import tkinter as tk
@@ -21,6 +22,7 @@ ICON = ROOT / "assets" / "branding" / "launcher.ico"
 BACKGROUND = ROOT / "assets" / "branding" / "background.png"
 
 
+@lru_cache(maxsize=2)
 def green_gradient(menu=False):
     """Small procedural texture, smoothly scaled to the client area."""
     from PIL import Image
@@ -34,6 +36,13 @@ def green_gradient(menu=False):
             pixels.append(tuple(round(a+(b-a)*glow) for a, b in zip(base, light)))
     image.putdata(pixels)
     return image
+
+
+def rgb_photo(master, image):
+    """Transfer pixels directly; PNG compression on every UI frame blocks Tk."""
+    image = image.convert("RGB")
+    header = f"P6\n{image.width} {image.height}\n255\n".encode("ascii")
+    return tk.PhotoImage(master=master, data=header + image.tobytes(), format="PPM")
 
 
 def style_controls(window):
@@ -118,6 +127,7 @@ class BackgroundCanvas(tk.Canvas):
         self._fitted = None
         self._image = None
         self._resize_job = None
+        self._draw_key = None
         self._item = self.create_image(0, 0, anchor="nw")
         if surface is None and BACKGROUND.is_file():
             try:
@@ -151,13 +161,17 @@ class BackgroundCanvas(tk.Canvas):
         if self._resize_job is not None:
             self.after_cancel(self._resize_job)
         self._resize_job = None
-        from io import BytesIO
+        owner = self._surface or self
+        key = (self.winfo_width(), self.winfo_height(), owner.winfo_width(), owner.winfo_height(),
+               self.winfo_rootx()-owner.winfo_rootx(), self.winfo_rooty()-owner.winfo_rooty(),
+               self._opacity, getattr(self, "reveal", None), id(owner._art))
+        if key == self._draw_key:
+            return
         subdued = self._region()
         if subdued is None:
             return
-        payload = BytesIO()
-        subdued.save(payload, format="PNG")
-        self._image = tk.PhotoImage(master=self, data=payload.getvalue(), format="png")
+        self._image = rgb_photo(self, subdued)
+        self._draw_key = key
         self.itemconfigure(self._item, image=self._image)
         self.tag_lower(self._item)
         for child in self.winfo_children():
@@ -247,13 +261,21 @@ def icon_image(master, width=64, height=64):
 def _png_image(master, path, width, height):
     if not path.is_file():
         return None
+    cache = getattr(master, "_brand_images", None)
+    if cache is None:
+        master._brand_images = cache = {}
+    key = (str(path), path.stat().st_mtime_ns, width, height)
+    if key in cache:
+        return cache[key]
     payload = path.read_bytes()
     original = tk.PhotoImage(master=master, data=payload, format="png")
     expected = struct.unpack_from(">II", payload, 16)
     if (original.width(), original.height()) != expected:
         raise RuntimeError("Brand image decoder returned unexpected dimensions")
     factor = max(1, math.ceil(max(original.width() / width, original.height() / height)))
-    return original.subsample(factor, factor) if factor > 1 else original
+    result = original.subsample(factor, factor) if factor > 1 else original
+    cache[key] = result
+    return result
 
 
 def apply_window(window):

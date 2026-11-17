@@ -90,7 +90,8 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE previous, PWSTR args, int show
         if (regular_file(candidate)) wcscpy(python, candidate);
     }
     if (swprintf(script, 32768, L"%ls\\run_launcher.py", root) < 0 || !regular_file(script)) return 1;
-    const wchar_t *option = !wcscmp(args, L"--self-test") ? L" --self-test" : L"";
+    const wchar_t *option = !wcscmp(args, L"--self-test") ? L" --self-test" :
+                           !wcscmp(args,L"--startup-smoke") ? L" --startup-smoke" : L"";
     if (swprintf(command, 32768, L"\"%ls\" \"%ls\"%ls", python, script, option) < 0) return 1;
     STARTUPINFOW startup = {0}; startup.cb = sizeof(startup);
     PROCESS_INFORMATION process = {0};

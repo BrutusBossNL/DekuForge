@@ -1,4 +1,10 @@
-# Implementation status
+# Historical implementation status
+
+> Archived snapshot of the retired experimental engine, before the switch to
+> stable 0.10.1. The table below is not the current product status. See
+> [STABLE_ENGINE_MIGRATION.md](STABLE_ENGINE_MIGRATION.md),
+> [DISTRIBUTION.md](DISTRIBUTION.md) and the [README](../README.md) for the active
+> build path, tested results and remaining release gates.
 
 | Area | Status |
 | --- | --- |

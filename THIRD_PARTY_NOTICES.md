@@ -1,5 +1,61 @@
 # Provenance and reuse
 
+## Active Windows backend and scope of the root license
+
+The default builder stages NX2navi **0.10.1**, revision
+`5ae55db41c7d11c4e997d2676019939a936e560b`, into ignored
+`build/engine-0.10.1`. Source: https://github.com/tangerineturtle1/NX2navi .
+`dekuforge/stable_engine_source.json` pins the original file hashes;
+`dekuforge/stable_engine.py` verifies and stages them. This is reused upstream
+builder/runtime code, not an independently rewritten engine. The launcher uses
+its own provisioned Python and tools; an installed NX2navi application is not
+required. See [docs/STABLE_ENGINE_MIGRATION.md](docs/STABLE_ENGINE_MIGRATION.md).
+
+The staged source retains `LICENSE`, `LICENSE-ADDITIONS`, component notices and
+copyright headers. **The root MIT license covers original DekuForge code only.**
+Upstream `LICENSE-ADDITIONS` explicitly grants no license for its covered later
+changes. Downloading or locally staging source does not grant redistribution
+rights. Do not describe the entire composed engine as MIT or fully open source.
+Any public distribution must resolve the applicable rights and component terms;
+keeping this preview private does not change those terms.
+
+`dekuforge/runtime_layer.py` composes the DekuForge UI and scoped custom Cheat
+Manager changes, recorded from fork revision
+`8cb3f1c6c168fd36ff2dc08ecdd606508af10f9a`, over that backend. The original
+contributions' scoped grant is retained in
+`engine_overrides/dekuforge_0110/LICENSE-CUSTOM-ADDITIONS`; it does not relicense
+surrounding upstream implementation. The complete patch and its provenance must
+be considered together.
+
+The verified official application archive supplies release-only pipeline
+metadata, controller art, tool locks and credits for local preparation. It is
+not included in the launcher package. Its Input Prompts Pack terms refer to
+redistribution in NX2navi releases; those terms must not be assumed to grant
+equivalent rights to a new project. No game-derived outputs are distributed.
+
+## Downloaded tools and runtime dependencies
+
+`dekuforge/components.json`, the native toolchain lock and shader-tool manifests
+record the downloaded component identities. The managed Python runtime includes
+third-party Python packages and Tcl/Tk; native tools include LLVM/Clang, SDL and
+Vulkan tooling, with .NET used for the Ryujinx-based shader translator. Retain
+their accompanying licenses and notices in downloaded installations. The full
+upstream component inventory is in the staged `THIRD_PARTY_NOTICES.md`; do not
+replace it with this overview or infer a common license for all dependencies.
+
+The active build can download NVIDIA DLSS 310.9.1 under the NVIDIA RTX SDKs
+License, pinned by upstream `tools/dlss_pin.py`, with its notice copied beside the
+local game. It is not MIT licensed and is not bundled in our small launcher ZIP.
+Optional SDK features remain subject to their own terms and hardware support.
+Upstream feature availability does not establish that every option has been
+tested in DekuForge.
+
+## Historical experimental components
+
+The sections below record the retired `engine/` import and its experimental
+overrides. They remain in the repository for provenance and development, but
+are not the default game-build route.
+
 ## NVN2 shader support
 
 `engine_overrides/shader/ampere.patch` and `mesh-*.patch` adapt the permitted Ampere decoder and
@@ -30,8 +86,9 @@ replace gem5's C++ bitfield types with explicit portable-C nibble extraction;
 they do not import gem5's platform simulator. Source:
 https://github.com/gem5/gem5/blob/9d368896ce119c17e1289dcbb18f33624724b843/src/arch/arm/qarma.cc .
 
-The DekuForge launcher and archive/build orchestration are newly written Python.
-No game-derived outputs or third-party binaries are bundled.
+The DekuForge launcher and original archive orchestration are project code.
+The active game build also calls the reused stable upstream builder described
+above. No game-derived output is part of the launcher package.
 
 ## AV1 decoding dependency
 
@@ -54,25 +111,19 @@ retained in `engine/LICENSE`; detailed component notices and authors remain in
 `engine/THIRD_PARTY_NOTICES.md` and file headers. `engine/SOURCE.json` records each
 imported file's SHA-256. `tools/import_engine.py` reproduces this source-only export.
 
-The baseline is not validated for game 1.1.1. Internal engine names and formats
-remain unchanged during integration. No proprietary upscaler binaries are bundled
-or downloaded by DekuForge. Module normalization uses separately installed `lz4`
+This historical baseline did not pass game 1.1.1 rendering acceptance. Internal
+engine names and formats remain unchanged in that import. The active route's
+upscaler downloads are described above. Module normalization uses `lz4`
 (BSD) and `zbic` (GPLv2); generation uses NumPy (BSD). Their licenses accompany
 their separate installation; the Python packages are not bundled here.
 
-NX2navi is the reference for the requested feature inventory and an optional,
-separately installed external application. Its base MIT license does not cover
-all subsequent changes. Its LICENSE-ADDITIONS and individual dependency licenses
-must be reviewed before any reuse. A private repository does not alter those terms.
+Reused material must retain its notices and record source, revision, scope and
+license. Historical files in `engine/` keep their original notices unchanged.
 
-Original BrutusBossNL contributions in the existing fork have a scoped MIT grant
-in LICENSE-CUSTOM-ADDITIONS. Mixed files must be reviewed at change level before
-porting; the grant does not extend to the surrounding upstream implementation.
-Reused material must retain its notices and have an entry here with source,
-revision, scope and license. Custom contributions from mixed upstream files have
-not yet been ported; the engine import above is the historical MIT base only.
+## Optional external compatibility adapter
 
-The NUP build adapter calls the documented command-line interface of an existing
+Only the explicitly selected compatibility route (`run_builder.py --compat`)
+uses the NUP adapter to call the command-line interface of an existing
 NX2navi installation: `tools/make_game.py --nup --check`, or `--nup --out --msys
 --jobs --events`. It starts that installation's Python with its own dependencies.
 The backend stays external and its license remains unchanged. The adapter is not

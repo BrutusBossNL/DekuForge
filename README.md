@@ -26,8 +26,9 @@ We have no intention of undermining Nintendo or causing it harm.
 DekuForge uses the stable **NX2navi 0.10.1** source as its reference and engine
 foundation. Thank you to the NX2navi authors, upstream engine and tooling authors,
 and everyone who contributed code, research, tests, fixes, documentation or feedback.
-Their work made this project possible. Reused components retain their original
-notices; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Their work made this project possible. Original DekuForge code is MIT licensed;
+this does not relicense the upstream engine or restricted components. Reused
+components retain their original notices; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 DekuForge develops independently of NX2navi, with its own launcher, interface,
 extensions and release channel. Project code is open to contributions under its
@@ -42,7 +43,8 @@ The stable reference-based game has passed local play tests. The DekuForge 0.11.
 candidate adds the custom in-game interface and Cheat Manager. The launcher and
 engine have independent versions; the launcher is currently 0.2.0-preview.1.
 The repository stays private until the Windows setup, update and rollback paths
-are stable. No public installer release is available yet.
+are stable and component distribution terms are resolved. No public installer
+release is available yet.
 
 ## Features
 
@@ -56,6 +58,11 @@ are stable. No public installer release is available yet.
   updates, launcher health checks and recovery copies for failed app updates.
 - Separate game rebuilds: keep the working game and its profile until the new
   build completes; retain the previous build for switching back.
+- User-reviewed bug reports with CPU/GPU/driver, RAM, OS, versions and filtered
+  log excerpts. Use a prefilled GitHub browser form, or send directly with an
+  existing GitHub CLI sign-in/token. No automatic issue submission or game-file upload.
+- An uninstaller for managed builds/tools, with verified save backup and explicit
+  protection for original game archives, even inside the installation folder.
 - Save import/export with destination backups, including compatible NX2navi
   profiles. Import copies files; it never moves or deletes the original saves.
 - The stable engine's in-game graphics, resolution, upscaling, audio and control
@@ -84,7 +91,25 @@ free space for your dump, tool cache and game build; updates retain a separate
 working build until the replacement succeeds. See [building.md](docs/building.md).
 Linux, iOS and VR are not supported releases yet.
 
+## Uninstalling - Windows
+
+Open **Settings > Apps > Installed apps > DekuForge > Uninstall**, or run
+`DekuForge-Uninstall.exe` in your DekuForge installation folder. Close the game,
+launcher and any active build first.
+
+**Keep my saves** is selected by default. Choose a new backup folder outside the
+installation; the uninstaller copies and verifies your saves before removing
+anything. Clear the checkbox only if you also want the managed save profiles removed.
+
+Uninstall removes this installation's launcher, managed builds, downloaded tools
+and caches. It does not remove external installations such as NX2navi. **Your
+original ROM/NUP is never deleted, moved or modified**, including when stored
+inside a DekuForge folder. Such a folder can remain solely to hold that archive.
+
 ## Known issues
+
+Found another issue? Use **Report a problem** in the launcher, or review the
+report offered after a detected crash. Check the diagnostics before submitting.
 
 - Full first-time Windows installation and automatic-update acceptance are still
   being tested. Local package checks do not replace a clean-machine game test.

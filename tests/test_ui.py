@@ -80,13 +80,26 @@ class LauncherWorkflowTests(unittest.TestCase):
                 yield from buttons(child)
         for language in LANGUAGES:
             self.app.set_language(language)
-            for page in ("settings", "updates", "saves", "home"):
+            self.app.report_context={"metadata":{"system":{"os":"Windows 11 build test","cpu":"Intel Test CPU with 16 logical processors","ram_gib":32,"gpus":[{"model":"NVIDIA Test GPU","driver":"123.45"}]}},"logs":[]}
+            for page in ("settings", "updates", "saves", "home", "report"):
                 self.app.navigate(page)
                 self.root.update_idletasks()
                 for button in buttons(self.app.content):
                     self.assertLessEqual(button.winfo_rooty() + button.winfo_height(),
                                          self.root.winfo_rooty() + self.root.winfo_height(),
                                          (language, page, button.cget("text")))
+
+    def test_crashed_game_opens_report_without_submitting_anything(self):
+        process=Mock(pid=123);process.poll.return_value=None
+        with patch("dekuforge.ui.launch",return_value=process),patch("dekuforge.ui.reports.submit") as submit:
+            self.app.play()
+            self.app.report_context={"metadata":{},"logs":[]}
+            process.poll.return_value=3221225477;process.returncode=3221225477
+            self.app.tick()
+            self.assertEqual(self.app.page,"report")
+            self.assertEqual(self.app.report_incident["exit_code"],3221225477)
+            self.assertIsNone(self.app.process)
+            submit.assert_not_called()
 
     def test_rendered_logo_contains_project_gold_and_preserves_wide_shape(self):
         images = [child.image for child in self.app.sidebar.winfo_children() if hasattr(child, "image")]
@@ -119,6 +132,21 @@ class LauncherWorkflowTests(unittest.TestCase):
             start.assert_not_called()
         self.app.home_cards[2].activate()
         self.assertEqual(self.app.page, "build")
+
+    def test_navigation_keeps_background_viewport_and_readable_text(self):
+        from dekuforge.theme import PANEL
+        self.root.deiconify()
+        self.root.update()
+        expected = (self.app.backdrop.winfo_width(), self.app.backdrop.winfo_height())
+        self.assertEqual(expected, (self.root.winfo_width(), self.root.winfo_height()))
+        for page in ("settings", "saves", "build", "updates", "home"):
+            self.app.navigate(page)
+            self.root.update_idletasks()
+            self.assertEqual((self.app.backdrop.winfo_width(), self.app.backdrop.winfo_height()), expected)
+            text = self.app.label(self.app.content, "Readable status")
+            self.assertIsInstance(text, tk.Label)
+            self.assertEqual(text.cget("background"), PANEL)
+            text.destroy()
 
     def test_intro_cancel_restores_layout_and_home_cards(self):
         from dekuforge.home_cards import animate_intro

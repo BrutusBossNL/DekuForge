@@ -8,6 +8,21 @@ from dekuforge.build_library import BuildLibrary
 
 
 class BuildLibraryTests(unittest.TestCase):
+    def test_already_removed_owned_build_is_unregistered_without_marker_access(self):
+        entry=self.library.register(self.exe,owned=True)
+        import shutil
+        shutil.rmtree(self.folder)
+        self.assertIsNone(self.library.delete(entry["id"]))
+        self.assertEqual(self.library.entries(),[])
+
+    def test_refresh_prunes_removed_owned_builds_and_keeps_external_records(self):
+        owned=self.library.register(self.exe,owned=True)
+        import shutil
+        shutil.rmtree(self.folder)
+        external={**owned,"id":"external","owned":False}
+        self.library.write([owned,external])
+        self.assertEqual(self.library.prune_missing(),[external])
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)

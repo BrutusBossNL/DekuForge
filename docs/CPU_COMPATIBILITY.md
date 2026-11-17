@@ -1,5 +1,11 @@
 # Instruction compatibility
 
+> Historical validation of the experimental `engine/` extensions. These results
+> do not describe the active stable 0.10.1 generator or establish its compatibility.
+> The current build route is documented in [building.md](building.md). The
+> synthetic checks remain useful development tools; their local game-generation
+> counts below are recorded observations, not shipped game content.
+
 The immutable engine baseline is composed with original extensions in an owned,
 ignored engine workspace. Both the parent generator and its child workers import
 the same extension. The source import and hash inventory remain unchanged.

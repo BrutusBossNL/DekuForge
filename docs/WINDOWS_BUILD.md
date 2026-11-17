@@ -1,4 +1,11 @@
-# Windows game-build progress
+# Historical experimental Windows build progress
+
+> Archived investigation of the retired 0.3.10-based experimental engine. The
+> failures, commands and measurements below describe that path, not the active
+> stable 0.10.1 backend. Some local captures were subsequently deleted to reclaim
+> disk space. For current results, use
+> [STABLE_ENGINE_MIGRATION.md](STABLE_ENGINE_MIGRATION.md) and
+> [building.md](building.md).
 
 The launcher is usable. An experimental independent Windows game executable is
 linked locally, but world loading and readable rendering are not yet verified.

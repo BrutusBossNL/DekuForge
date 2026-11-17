@@ -31,6 +31,13 @@ Do not repost a rejected attachment or quote its contents into a new report.
 
 Include DekuForge launcher and engine versions, local build ID, game version,
 Windows version, CPU/GPU and driver, reproduction steps and relevant **text** logs.
+The launcher's **Report a problem** page collects these details and bounded text
+log excerpts for review. It filters common personal paths and token patterns;
+check the preview yourself before sending. Browser reports use a shorter excerpt;
+export the full text report when more detail is needed. Direct submission uses
+an existing GitHub CLI/token, while browser submission uses your GitHub account.
+Nothing is submitted without your action.
+
 Remove personal paths, account details and tokens. Describe the save state rather
 than uploading saves. For performance, include settings, scene, frame times and
 repeatable measurements; distinguish source-test results from actual play tests.
@@ -65,6 +72,7 @@ running game or overwrite their working installation to run an experiment.
 ## Review and release
 
 Maintainers review contributions before merging. The project stays private until
-Windows installation/update acceptance passes. Publishing a setup must include
+Windows installation/update acceptance passes and component distribution terms
+are resolved. Publishing a setup must include
 only the launcher and tooling, with appropriate notices. Every player builds
 locally from their own input. Do not publish generated game artifacts to CI.

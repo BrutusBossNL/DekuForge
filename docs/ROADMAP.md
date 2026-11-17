@@ -8,8 +8,10 @@ the source revision, engine revision, game build ID, hardware and driver.
 
 ## 1. Windows parity
 
-The current blocker analysis and the evidence required before further renderer
-changes are recorded in [RENDERER_GAP_ANALYSIS.md](RENDERER_GAP_ANALYSIS.md).
+The retired renderer investigation is archived in
+[RENDERER_GAP_ANALYSIS.md](RENDERER_GAP_ANALYSIS.md). Current stable-engine evidence
+and delivery limits are in [STABLE_ENGINE_MIGRATION.md](STABLE_ENGINE_MIGRATION.md)
+and [DISTRIBUTION.md](DISTRIBUTION.md).
 
 The user entry point is `DekuForge.exe`, with the project's embedded icon and no
 console or CMD script. A final distribution includes the launcher dependencies;
@@ -23,8 +25,8 @@ screenshots now show the missing terrain, foliage and sky correctly. The ordinar
 world test measured 54.44 FPS on this machine, with complete captured surfaces
 and a successful launcher Play/hide/return check. See
 [STABLE_ENGINE_MIGRATION.md](STABLE_ENGINE_MIGRATION.md) for the exact evidence,
-test-mode distinction and remaining acceptance checks. Fresh-machine toolchain
-provisioning is still required for a distributable installer.
+test-mode distinction and remaining acceptance checks. An empty-folder setup/tool download passed locally; full fresh-machine game
+build acceptance remains pending.
 
 Acceptance requires install, launch, title, save/load, controller mapping, audio,
 rendering and a repeatable play session. Compare Kokiri Forest, Market Square,
@@ -68,8 +70,8 @@ the native game acceptance gate.
 
 ## 3. Custom features
 
-Port the owned cheat manager, fixes and extensions after both desktop baselines
-pass: Equipment (bomb arrows with black aura, spin reach/charge), World markers,
+The Windows candidate already composes the owned Cheat Manager. Validate its
+features individually before claiming parity, then carry them to Linux: Equipment (bomb arrows with black aura, spin reach/charge), World markers,
 health refill/max-heart handling, controller fixes and measured memory fixes.
 Preserve per-age filtering, night icons, collected-state checks and independent
 category toggles. Validate fixes individually and repeat affected baseline tests.
@@ -97,7 +99,7 @@ workspace; do not claim iOS support from a desktop test.
 
 ## Maintenance
 
-Prepare a daily repository report and source tests, targeting 09:17
+The checked-in maintenance workflow requests a daily report and source tests at 09:17
 Europe/Amsterdam. A workflow is active only after it reaches the default branch
 and a run is observed. Reports are not automatic fixes or automatic PR merges.
 Review new regressions, build failures and pull requests; reproduce defects,

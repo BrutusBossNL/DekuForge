@@ -27,11 +27,12 @@ def allowed(name):
             or any(x.split(".")[0].rstrip(" ").upper() in {"CON", "PRN", "AUX", "NUL", *[f"COM{i}" for i in range(10)],
                     *[f"LPT{i}" for i in range(10)]} for x in p.parts)):
         return False
-    if name == "DekuForge.exe" or name in ROOT_FILES:
+    if name in {"DekuForge.exe","DekuForge-Uninstall.exe"} or name in ROOT_FILES:
         return True
     if p.parts[:2] == ("assets", "branding") and len(p.parts) == 3:
         return p.name in ARTWORK
-    return len(p.parts) > 1 and p.parts[0] in SOURCE_DIRS and p.suffix in SOURCE_SUFFIXES
+    return len(p.parts) > 1 and p.parts[0] in SOURCE_DIRS and (
+        p.suffix in SOURCE_SUFFIXES or p.name in {"LICENSE-MNG", "LICENSE-NXNATIVE", "LICENSE-CUSTOM-ADDITIONS"})
 
 
 def checked_path(root, name):
@@ -94,13 +95,15 @@ def validate_package(archive):
         if set(hashes) != set(names) - {"launcher-package.json"}:
             raise ValueError("Package inventory does not cover every member")
         required = {"DekuForge.exe", "run_launcher.py", "dekuforge/components.json", "tools/bootstrap_runtime.ps1"}
+        if inventory["components"]["launcher"].get("uninstaller"):
+            required.add("DekuForge-Uninstall.exe")
         if not required <= hashes.keys():
             raise ValueError("Application package is incomplete")
         for name, digest in hashes.items():
             data = source.read(name)
             if hashlib.sha256(data).hexdigest() != digest:
                 raise ValueError("Package member checksum mismatch: " + name)
-            if name == "DekuForge.exe":
+            if name in {"DekuForge.exe","DekuForge-Uninstall.exe"}:
                 validate_launcher(data)
             elif (data.startswith((b"NSO0", b"NUP\1", b"PFS0", b"DFROMFS1", b"\x7fELF", b"MZ"))
                   or re.search(rb"(?m)^\s*(?://|/\*|\*)\s*(?:DEKUFORGE|NX2NAVI)_RECOMP_GENERATED_FROM_GAME_CODE\b",data[:8192])):

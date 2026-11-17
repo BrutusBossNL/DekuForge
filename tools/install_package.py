@@ -41,7 +41,8 @@ def main():
             subprocess.run([str(python),str(root/"tools/prepare_installation.py")],cwd=root,check=True)
         report=root/"local/launcher-selftest.json"
         subprocess.run([str(python),str(root/"run_launcher.py"),"--self-test"],cwd=root,check=True,timeout=90)
-        if not json.loads(report.read_text(encoding="utf-8"))["success"]:
+        proof=json.loads(report.read_text(encoding="utf-8"))
+        if not proof["success"] or result["components"]["launcher"].get("bug_reports") and len(proof.get("report_screens",[]))!=5:
             raise RuntimeError("Installed launcher failed its health check")
         atomic_json(root/"local/setup-result.json",{"success":True,"components":result["components"],"tools_prepared":not args.skip_tools})
         if has_game and result["requires_rebuild"]:

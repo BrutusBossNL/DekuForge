@@ -62,7 +62,20 @@ The project's original source is open source under the root MIT license.
 - Generated code is changed through its generator, not edited by hand.
 - Do not stop the user's game or start GPU-heavy preparation during play.
 
-## Verification
+## Documentation accuracy
+
+Every behavior, dependency, packaging or support-status change must update all
+affected Markdown documentation in the same change. Review README, roadmap,
+contribution instructions, build/distribution guides and third-party notices;
+do not leave obsolete architecture or promises behind. Distinguish planned,
+implemented and actually validated behavior. Scope measurements to their tested
+revision, hardware and scenario; never turn a local smoke test into a platform
+support claim. Mark retired investigation documents as historical and link to
+the current status. Preserve imported license texts and attribution rather than
+rewriting them to fit the project's branding. Verify documentation commands
+against the current CLI and record remaining acceptance gaps honestly.
+
+## Verification commands
 
 Run `python -m unittest discover -s tests` and `git diff --check` before committing.
 Run `python tools/check_source.py` after staging. Preserve the pinned engine bytes;
@@ -76,7 +89,7 @@ Changes to future instruction lifting need differential tests against an
 independent ARM64 implementation. Changes to runtime memory or rendering need
 isolated in-game validation and measurements from repeatable scenes.
 
-`python run_launcher.py --self-test` renders 40 views across the five languages
+`python run_launcher.py --self-test` renders 40 core views and five report forms across the five languages
 without starting a game or changing preferences. `tools/check_launcher.py` checks
 the native executable, embedded icon and the same one-window flow. Compile
 emitted LDAPR test fragments with `tools/check_ldapr.py --compiler PATH` and

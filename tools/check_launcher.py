@@ -22,8 +22,9 @@ def main():
     assert extract(str(executable), -1, None, None, 0) == 1, "Missing embedded brand icon"
     report = ROOT / "local" / "launcher-selftest.json"
     previous = report.stat().st_mtime_ns if report.exists() else 0
-    subprocess.run([str(executable), "--self-test"], cwd=ROOT, check=True, timeout=10)
-    deadline = time.monotonic() + 20
+    # First launch includes the pinned runtime download; an empty Windows runner has no cache.
+    subprocess.run([str(executable), "--self-test"], cwd=ROOT, check=True, timeout=600)
+    deadline = time.monotonic() + 90
     while time.monotonic() < deadline:
         if report.exists() and report.stat().st_mtime_ns > previous:
             result = json.loads(report.read_text(encoding="utf-8"))
@@ -31,7 +32,8 @@ def main():
             assert result["logo_loaded"] and result["top_level_windows"] == 1
             assert result["native_icon_verified"], "Native Windows frame has no brand icons"
             assert len(result["screens"]) == 40
-            print("Native GUI launcher: embedded icon verified; 40 screens, 5 languages, 1 window")
+            assert len(result.get("report_screens",[])) == 5
+            print("Native GUI launcher: icon verified; 40 core views and 5 report forms, 5 languages, 1 window")
             return
         time.sleep(0.1)
     raise RuntimeError("Native launcher self-test did not produce a fresh report")

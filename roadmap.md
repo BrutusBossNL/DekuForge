@@ -1,7 +1,8 @@
 # DekuForge roadmap
 
 This roadmap records planned work, not promises of support or delivery dates.
-The repository remains private until the Windows release gates pass.
+The repository remains private until Windows release gates and component
+distribution requirements are satisfied.
 
 ## Windows - current priority
 
