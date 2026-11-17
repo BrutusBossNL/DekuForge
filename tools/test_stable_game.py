@@ -20,7 +20,10 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--capture",action="store_true",help="Record bounded consecutive frames and in-game settings pages")
     parser.add_argument("--deterministic-shot",action="store_true",help="Use synchronous pipelines for a deterministic final screenshot")
+    parser.add_argument("--seconds",type=int,default=20,help="World-time duration, from 10 to 180 seconds")
     args=parser.parse_args()
+    if not 10 <= args.seconds <= 180:
+        parser.error("--seconds must be between 10 and 180")
     folder=ROOT/"build/stable-windows-game"
     if folder.resolve()!=folder or not (folder/".dekuforge-stable-build").is_file():
         raise ValueError("Use only the owned stable migration build")
@@ -42,7 +45,7 @@ def main():
             NX2NAVI_MENU_TEST="1200:20",NX2NAVI_MENU_TEST_DIR=str(folder))
     shot=folder/"test-stable-world.png"
     shot.unlink(missing_ok=True)
-    command=[str(exe),"--seconds","20"]
+    command=[str(exe),"--seconds",str(args.seconds)]
     captures=folder/"normal-start-captures"
     if args.deterministic_shot:
         command += ["--shot",str(shot)]
@@ -80,7 +83,7 @@ def main():
     gpu=re.search(r"vk caps: (.+), vendor .+ driver (.+), api (.+)",text)
     with exe.open("rb") as binary:
         executable_hash=hashlib.file_digest(binary,"sha256").hexdigest()
-    record={"normal_start":not args.deterministic_shot,"engine_revision":REVISION,
+    record={"requested_world_seconds":args.seconds,"normal_start":not args.deterministic_shot,"engine_revision":REVISION,
         "runtime_sha256":executable_hash,
         "world_started":world is not None,"world_frame_stats":fps,
         "gpu":gpu[1] if gpu else None,"driver":gpu[2] if gpu else None,"engine":"0.10.1","exit_code":code,"timed_out":timed_out,"fatal_error":fatal,

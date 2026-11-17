@@ -17,8 +17,9 @@ Deliver a local build from the owner's NUP input using the pinned stable 0.10.1
 source backend and independently provisioned tools. The launcher wizard is now
 connected to the complete extraction, CPU generation, native linking and shader
 preparation pipeline. Its first full isolated build completed; the initial world
-screenshots now show the missing terrain, foliage and sky correctly. Warm moving
-world tests measured approximately 36 FPS on this machine. See
+screenshots now show the missing terrain, foliage and sky correctly. The ordinary-start 60-second
+world test measured 54.44 FPS on this machine, with complete captured surfaces
+and a successful launcher Play/hide/return check. See
 [STABLE_ENGINE_MIGRATION.md](STABLE_ENGINE_MIGRATION.md) for the exact evidence,
 test-mode distinction and remaining acceptance checks. Fresh-machine toolchain
 provisioning is still required for a distributable installer.

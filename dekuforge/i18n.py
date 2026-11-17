@@ -95,6 +95,17 @@ for _language, _help in _STABLE_BUILD_HELP.items():
 
 
 
+_PIPELINE_PHASE_LABELS = {
+    "en": "Preparing graphics pipelines",
+    "nl": "Grafische pipelines voorbereiden",
+    "de": "Grafik-Pipelines vorbereiten",
+    "es": "Preparando pipelines gr\u00e1ficos",
+    "fr": "Pr\u00e9paration des pipelines graphiques",
+}
+for _language, _label in _PIPELINE_PHASE_LABELS.items():
+    MESSAGES[_language]["pipelines"] = _label
+
+
 def translate(language, key, **values):
     selected = language if language in MESSAGES else "en"
     text = FILE_LABELS[selected][key] if key in FILE_LABELS[selected] else MESSAGES[selected][key]

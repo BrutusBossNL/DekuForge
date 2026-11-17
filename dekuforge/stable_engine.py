@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 import zipfile
 from urllib.request import urlopen
 from .core import ROOT
@@ -215,6 +216,29 @@ def release_preparation_changed(output):
     return True
 
 
+def carry_active_configuration(output, active):
+    """Carry preferences from the same engine revision into a fresh owned build."""
+    target = output / "nx2navi.ini"
+    if target.exists() or not active:
+        return False
+    folder = Path(active).parent
+    try:
+        info = json.loads((folder / "dekuforge-build-info.json").read_text(encoding="utf-8"))
+        if info.get("engine_revision") != REVISION or not Path(active).is_file():
+            return False
+        source = folder / "nx2navi.ini"
+        if source.stat().st_size > 256 * 1024:
+            return False
+        data = source.read_bytes()
+    except (OSError, ValueError, AttributeError):
+        return False
+    with tempfile.NamedTemporaryFile(dir=output, prefix="settings-", suffix=".tmp", delete=False) as stream:
+        temporary = Path(stream.name)
+        stream.write(data)
+    temporary.replace(target)
+    return True
+
+
 def build_stable(filename, notify, destination):
     output = Path(destination).absolute()
     if output.resolve() != output:
@@ -225,6 +249,9 @@ def build_stable(filename, notify, destination):
     output.mkdir(parents=True, exist_ok=True)
     marker.touch()
     (output / ".dekuforge-owned").write_text("DekuForge stable build\n",encoding="utf-8")
+    from .core import load_installation
+    if carry_active_configuration(output, load_installation()):
+        notify("log", "Carried graphics and controller preferences from the matching active engine\n")
     notify("phase", {"phase":"checking"})
     notify("log", "Preparing stable 0.10.1 source " + REVISION + "\n")
     source = stage_stable()
@@ -247,11 +274,20 @@ def build_stable(filename, notify, destination):
     command = [sys.executable, str(source / "tools/make_game.py"), *build_input_arguments(filename,output),
         "--out", str(output), "--msys", str(toolchain), "--jobs", "6", "--events"]
     notify("log", "Building pinned stable engine 0.10.1: " + REVISION + "\n")
+    pipeline_progress = False
     with subprocess.Popen(command, cwd=source, env=env, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace",
             creationflags=getattr(subprocess,"CREATE_NO_WINDOW",0)) as process:
         for line in process.stdout:
             notify("log", line)
+            if line.startswith("prepare-pipelines: progress "):
+                fields = line.split()
+                try:
+                    done, total = int(fields[2]), int(fields[3])
+                    pipeline_progress = True
+                    notify("progress", {"phase":"pipelines", "done":done, "total":total})
+                except (ValueError, IndexError):
+                    pass
             if line.startswith("@@"):
                 try:
                     event = json.loads(line[2:])
@@ -260,6 +296,11 @@ def build_stable(filename, notify, destination):
                               "prompts":"prompts", "scan":"checking"}
                     phase = phases.get(event.get("step"), "checking")
                     if event.get("ev") == "progress":
+                        detail = event.get("detail", "")
+                        if pipeline_progress and event.get("step") == "shaders":
+                            if detail.startswith("Translated"):
+                                continue
+                            pipeline_progress = False
                         fraction=event.get("fraction")
                         if isinstance(fraction,(int,float)) and 0<=fraction<=1:
                             notify("progress", {"phase":phase,"done":fraction,"total":1})

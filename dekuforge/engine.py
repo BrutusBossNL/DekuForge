@@ -17,17 +17,38 @@ from .modules import normalize_prepared
 
 def engine_report(root=ROOT):
     engine = root / "build/engine-0.10.1"
+    revision = "5ae55db41c7d11c4e997d2676019939a936e560b"
+    active = load_installation(root / "local/settings.json")
+    available = False
+    local_test = None
+    if active and Path(active).is_file():
+        try:
+            folder = Path(active).parent
+            info = json.loads((folder / "dekuforge-build-info.json").read_text(encoding="utf-8"))
+            available = info.get("engine_revision") == revision
+            record = json.loads((folder / "dekuforge-validation.json").read_text(encoding="utf-8"))
+            with Path(active).open("rb") as binary:
+                matches = hashlib.file_digest(binary, "sha256").hexdigest() == record.get("runtime_sha256")
+            if available and matches and record.get("exit_code") == 0 and record.get("visually_verified"):
+                local_test = {"passed":True, "scope":record.get("visual_review", {}).get("scope"),
+                              "world_frame_stats":record.get("world_frame_stats")}
+        except (OSError, ValueError, AttributeError):
+            pass
+    own_tools = {"clang":root / "local/build-tools/native/msys64/ucrt64/bin/clang.exe",
+                 "ninja":root / "local/build-tools/ninja-1.13.2/ninja.exe",
+                 "dotnet":root / "local/build-tools/dotnet-10.0.404/dotnet.exe"}
     components = {"arm64_lifter": "recomp/lifter.py", "code_generator": "recomp/gen.py",
                   "host_runtime": "runtime/boot.c", "vulkan_renderer": "runtime/vk_device.c",
                   "shader_translator": "tools/xlate/Program.cs", "native_linker_driver": "tools/make_game.py"}
-    return {"engine_version": "0.10.1", "engine_revision": "5ae55db41c7d11c4e997d2676019939a936e560b",
+    return {"engine_version": "0.10.1", "engine_revision": revision,
             "source_components": {name: (engine / relative).is_file() for name, relative in components.items()},
             "python_dependencies": {name: importlib.util.find_spec(name) is not None
                                     for name in ("numpy", "lz4", "zbic")},
-            "tools": {name: shutil.which(name) is not None for name in ("clang", "ninja", "dotnet")},
+            "tools": {name: path.is_file() or shutil.which(name) is not None for name, path in own_tools.items()},
             "interpreter": f"{sys.version_info.major}.{sys.version_info.minor}",
             "game_1_1_1_port_validated": False,
-            "playable_build_available": False}
+            "playable_build_available": available,
+            "local_world_test": local_test}
 
 
 def verify_engine_sources(root=ROOT):

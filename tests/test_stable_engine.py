@@ -100,3 +100,18 @@ class StableEngineTests(unittest.TestCase):
             self.assertEqual(updated["steps"],{"exefs":"kept","romfs":"kept","compile":"kept"})
             (output/".dekuforge-release-data").write_text(stable_engine.RELEASE_SHA256,encoding="ascii")
             self.assertFalse(stable_engine.release_preparation_changed(output))
+
+    def test_new_build_carries_only_matching_preferences_and_preserves_existing_destination(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder).resolve();old=root/"active";new=root/"new"
+            old.mkdir();new.mkdir();exe=old/"game.exe";exe.touch()
+            info=old/"dekuforge-build-info.json"
+            info.write_text(json.dumps({"engine_revision":"other"}),encoding="utf-8")
+            (old/"nx2navi.ini").write_text("dlss=quality\n",encoding="utf-8")
+            self.assertFalse(stable_engine.carry_active_configuration(new,str(exe)))
+            info.write_text(json.dumps({"engine_revision":stable_engine.REVISION}),encoding="utf-8")
+            self.assertTrue(stable_engine.carry_active_configuration(new,str(exe)))
+            self.assertEqual((new/"nx2navi.ini").read_text(),"dlss=quality\n")
+            (old/"nx2navi.ini").write_text("dlss=performance\n",encoding="utf-8")
+            self.assertFalse(stable_engine.carry_active_configuration(new,str(exe)))
+            self.assertEqual((new/"nx2navi.ini").read_text(),"dlss=quality\n")

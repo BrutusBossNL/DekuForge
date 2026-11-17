@@ -87,8 +87,10 @@ that contain the NUP format. Nintendo 64 ROMs need a different engine.
 - The launcher now uses the complete pinned stable 0.10.1 build pipeline, including
   native linking and shader preparation. The DekuForge UI and save/build management
   remain in place. The first isolated migration build completed and its world
-  screenshots now show complete terrain, foliage and sky. Warm play tests measured
-  approximately 36 FPS on the local RTX 2080; broader parity remains under test.
+  screenshots now show complete terrain, foliage and sky. The ordinary-start 60-second route test measured
+  54.44 FPS on the local RTX 2080 at 1080p with DLSS Quality. The launcher Play
+  action was also tested through world load and normal close. Broader parity
+  remains under test.
 - Historical 0.3.10-based CPU and renderer experiments remain available for diagnosis.
   They are not substituted for the selected stable backend.
 

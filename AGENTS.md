@@ -7,6 +7,10 @@ The project's original source is open source under the root MIT license.
 
 - The active game backend is stable 0.10.1, pinned in `dekuforge/stable_engine.py`.
 - `tools/build_stable_translator.py` builds its unmodified shader translation logic.
+- Include the separately verified 0.10.1 release pipeline data and controller art;
+  the Git source checkout alone lacks these inputs and produced incomplete first-play frames.
+- Test ordinary startup: `--shot` disables asynchronous pipeline work and cannot
+  establish ordinary Play behavior. Preserve measured graphics preferences.
 - Follow `docs/STABLE_ENGINE_MIGRATION.md`; the old `engine/` import is diagnostic history.
 
 - `dekuforge/core.py`: installation selection and local preferences.

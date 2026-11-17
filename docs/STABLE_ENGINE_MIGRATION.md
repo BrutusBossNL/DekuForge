@@ -106,6 +106,57 @@ Older experimental render PNG sets and their reproducible shader cache were
 removed to provide build space. The latest raw-depth capture, test logs, input
 dump, original game and save profiles were retained.
 
+## Completed release test and activation
+
+The complete release-data preparation finished successfully in 24.8 minutes,
+reusing the extracted game and native compilation. It translated 49,208 variants,
+built the applicable release pipelines and completed 42,239 driver-library builds
+with zero failures. All seven sets of controller/keyboard prompts were generated.
+The release archive identity is recorded beside the completed build.
+
+For the first-start check, this installation's own `pipeline-keys.bin` and
+`pipeline-cache-play.bin` were renamed to retained backups. The ordinary startup
+therefore used the release seed, not our previously learned route. It read 9,814
+records, built 6,384 pipelines, recognized 3,429 duplicates and dropped one record
+whose shader this game version does not contain. It left zero builds in the
+background and reported zero failures; prewarming took 3.163 seconds.
+
+The local performance profile retains the reference's `lib_warm=0`, also sets
+`lib_prebuild=0`, and uses `prewarm_full=1`: known graphics pipelines finish before
+play, while unused compute/library compilations do not compete with drawing. The
+ordinary-start trace had shown a four-thread library warm resuming during play;
+turning that extra background work off changes configuration, not the renderer.
+A new build carries the active build's graphics/controller preferences only when
+its engine revision matches, and never overwrites an existing destination config.
+
+The ordinary 60-second world run completed with exit code 0. All 3,276 presentation
+intervals from world start were present: 60.180 seconds, 54.44 average FPS, 22.56 FPS
+one-percent low, 17.730 ms median and 103.741 ms maximum. Periodic full-window
+screenshots and two frame-recording dumps were enabled, so this includes capture
+overhead. The final runtime frame-time window reported 55.9 FPS and a 48.8 FPS
+one-percent low; that narrower interval is not substituted for the complete run.
+
+Both 90-frame recordings reported zero skipped pipeline draws and zero skipped
+shader draws. Their game-clock/wall-clock ratios were 0.9998 and 1.0011. The
+assistant inspected the final screenshot and the twelve largest adjacent-image
+changes: terrain, rocks, foliage, cloud detail and Link remain complete, with
+PlayStation R1/R2 prompts visible. This validates the captured route, not every
+area in the game.
+
+The actual `Launcher.play()` action was then invoked with the selected executable
+and no command-line arguments. The game reached the world and closed through its
+window close handler with exit code 0. The launcher hid while playing and returned
+to the same single window afterwards (52.06 seconds total). The active installation
+now points to `build/stable-windows-game/DekuForgeGame.exe`; the previous preference
+file was backed up. The original reference installation and save files were not
+modified. The test game and test launcher are closed.
+
+Evidence remains local: `dekuforge-validation.json`, `test-stable-world.png`,
+`validation-frames/final-largest-differences.jpg`, `test-launcher-play.log` and
+`local/launcher-play-smoke.json`. None of these game-derived artifacts enter Git.
+`run_builder.py --doctor` reports the completed build and separately scoped local
+world test; full platform parity remains a separate gate.
+
 ## Native tool provisioning
 
 The stable release toolchain lock pins 31 native packages (170 MB compressed).
@@ -126,10 +177,8 @@ full network download and final installer still need independent acceptance.
 
 ## Remaining delivery work
 
-- Complete ordinary startup/prewarm and launcher Play validation of the final binary.
 - Test additional scenes, save/write/load, controllers and audio interactively;
   movie decoding already logs 1920x1080 AV1 at approximately 60 presented FPS.
-- Activate only the tested installation; retain the previous entry for rollback.
 - Validate native-tool downloads and first-time setup in a clean Windows environment;
   owned local tool provisioning has passed the pinned-package and compile/run checks.
 - Bring over custom cheats and related game-menu extensions after the desktop
