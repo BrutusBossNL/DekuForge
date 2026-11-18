@@ -109,6 +109,8 @@ def main():
     args = parser.parse_args()
     if sys.platform != 'win32' or not 1 <= args.jobs <= 32:
         parser.error('Windows development tools require 1–32 jobs')
+    from dekuforge.open_python_build import provision
+    provision()
     source = owned(args.source, ROOT/'build') if args.source else stage(provider='hookshot')
     verify_tree(source, manifest('hookshot'))
     work = owned(args.work, ROOT/'build')

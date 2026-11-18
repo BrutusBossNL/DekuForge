@@ -250,3 +250,36 @@ self-test passed with its embedded icon, five languages and one unmapped window.
 Commit `55b89d4` passed both Windows and Linux source CI; a Linux test-root length
 assumption found in the preceding run was corrected. These are source/UI results,
 not substitutes for gameplay acceptance. Main remains at `2ec49ef` unchanged.
+
+## 2026-11-18: complete first-world frames with startup loading
+
+The subsequent ordinary windowed `RX_VK_LOAD=start` run of the complete NUP
+product prepared 18,206 programs, 25,457 graphics and 1,107 compute pipelines
+before the title (445.9 seconds). The first loaded-world screenshot showed
+complete terrain, Link, HUD, vegetation and sky. Twelve consecutive settled
+Death Mountain captures and the first-frame/settled contact sheet were inspected;
+those samples showed no holes or flashes. This does not establish a whole-game
+or long-session temporal guarantee.
+
+A 59.833-second loaded-world interval produced 2,835 native frames: **47.382 fps**
+average, 47.35 median reported fps, at 1920x1080 native with frame generation off.
+It includes screenshot overhead, three scripted movements and a camera change.
+The process exited normally and original profile hashes stayed unchanged. The
+repeated preparation wait is a real limitation. Main's earlier 54.44 fps run used
+DLSS Quality at a lower internal resolution; these figures cannot establish
+matched performance parity.
+
+A separate headless UI-only diagnostic captured the branded green/gold settings
+menu and three moving AV1 intro frames. It disabled precompile only for UI
+inspection, so its world/FPS output is not gameplay or startup acceptance. A
+same-byte asset-mod probe was opened through the launcher's merged snapshot;
+the runtime identified the selected file, the base hash stayed unchanged, and
+the temporary mod/settings were restored afterward.
+
+The launcher uses its own official Python-build-standalone 20261110 / CPython
+3.14.10 with Tk, pinned Pillow 12.0.0 and hash-enforced NumPy/lz4/fontTools build
+wheels. Cold bootstrap and cached reuse passed; native `DekuForge.exe` self-test
+passed on that interpreter. The full source suite passed **226 tests with two
+environment skips** using the owned Python, LLVM-MinGW and development ARM64
+oracles. Main remains unchanged. Full launcher-rebuild acceptance is tracked
+separately from the successful direct NUP build and gameplay measurement.

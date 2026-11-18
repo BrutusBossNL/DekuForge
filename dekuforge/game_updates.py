@@ -8,6 +8,12 @@ import csv
 from .core import ROOT, load_settings, save_installation
 from .stable_engine import build_stable
 from .update_package import atomic_json
+from . import COMPONENTS
+
+
+def check_backend():
+    if COMPONENTS['engine'].get('backend') == 'independent':
+        raise RuntimeError('Main-channel engine rebuilds are disabled on the independent branch')
 
 
 def game_running():
@@ -20,6 +26,7 @@ def game_running():
 
 
 def rebuild_pending(notify, root=ROOT):
+    check_backend()
     pending=root/"local/pending-game-update.json"
     state=json.loads(pending.read_text(encoding="utf-8"))
     settings=load_settings(root/"local/settings.json")
@@ -89,6 +96,7 @@ def rebuild_pending(notify, root=ROOT):
 
 
 def run_rebuild(notify, root=ROOT):
+    check_backend()
     try:
         return rebuild_pending(notify,root)
     except Exception:

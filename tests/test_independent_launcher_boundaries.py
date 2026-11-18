@@ -1,5 +1,7 @@
 """Main's owned UI must never reactivate its excluded build/update backend."""
 import unittest
+import tempfile
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -10,6 +12,21 @@ from dekuforge.ui import Launcher
 
 
 class IndependentLauncherBoundaries(unittest.TestCase):
+    def test_direct_legacy_update_api_cannot_bypass_ui_guard_or_rewrite_pending_state(self):
+        from dekuforge.game_updates import run_rebuild, rebuild_pending
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder).resolve()
+            pending=root/'local/pending-game-update.json'
+            pending.parent.mkdir()
+            pending.write_bytes(b'{"status":"pending"}')
+            with patch('dekuforge.game_updates.build_stable') as excluded:
+                for entry in (run_rebuild,rebuild_pending):
+                    with self.assertRaisesRegex(RuntimeError,'disabled on the independent branch'):
+                        entry(Mock(),root)
+                excluded.assert_not_called()
+            self.assertEqual(pending.read_bytes(),b'{"status":"pending"}')
+            self.assertFalse((root/'local/build.lock').exists())
+
     def fake(self):
         return SimpleNamespace(page='home', t=lambda key: key, render=Mock())
 

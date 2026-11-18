@@ -19,7 +19,7 @@ investigations; it records reusable work, failed approaches and measurement scop
 | Historical `engine/` | Immutable earlier MIT import | Reference only; not selected as the new backend |
 | Stable 0.10.1 backend/patches | Inherited reference integration | Excluded from independent build route; scoped grants do not clear surrounding code |
 | Shader/Vulkan/guest services | Not implemented in this backend | Audit reusable upstream components or implement independently |
-| Portable Python/Tk/compiler packaging | Not implemented for this branch | No download from an NX2navi release; developer interpreter is external |
+| Python/Tk/compiler provisioning | Official hash-pinned Python/Tk/Pillow and generic compiler bootstrap, experimental Windows only | No NX2navi runtime download; installer acceptance is still open |
 
 For every future reused component, record the original source, exact revision,
 file/function scope, license/grant, retained notices and validation. Published
@@ -196,7 +196,8 @@ The complete experimental NUP pipeline now has an original orchestration layer,
 owned output/work folders, pinned generic-tool provisioning and explicit local
 launcher opt-in. Save discovery understands its `user/save` layout. Asset mods
 are composed in launcher priority order without altering base assets; code mods
-and the Cheat Manager are not yet connected. Automatic installer/Python bootstrap
-and main performance parity remain acceptance gaps.
+and the Cheat Manager are not yet connected. The official Python/Tk/Pillow
+bootstrap and owned build-wheel provisioning now work separately from main.
+Independent installer acceptance and main performance parity remain open.
 See [OPEN_ENGINE_EVALUATION.md](OPEN_ENGINE_EVALUATION.md) for those commands and
 the evidence index for measured scope. Main remains unchanged.

@@ -51,6 +51,8 @@ def build(filename, notify, destination, *, config=None, romfs=None, exefs=None,
             raise ValueError('Source, work and installed output must be separate')
     record = manifest('hookshot')
     verify_tree(source, record)
+    from .open_python_build import provision
+    provision(lambda line: notify('log', line+'\n'))
     if not (compiler/'bin/clang.exe').is_file() or not (deps/'dav1d/1.5.4/lib/libdav1d.a').is_file():
         raise ValueError('Explicit compiler and source-built AV1 dependency are required')
     if filename is not None:

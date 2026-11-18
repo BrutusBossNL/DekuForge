@@ -36,7 +36,7 @@ and parity with main are not established.**
   and runs moving Death Mountain and Kokiri scenes with DekuForge UI adaptations.
   See the [engine plan](docs/INDEPENDENT_ENGINE.md) and
   [scoped measurements](docs/INDEPENDENT_EVIDENCE.md). Full gameplay acceptance
-  and standalone launcher provisioning remain outstanding. The
+  and standalone installer acceptance remain outstanding. The
   [experimental Windows build guide](docs/OPEN_ENGINE_EVALUATION.md) covers
   pinned generic tools, source compilation and explicit launcher opt-in.
 - No automatic fallback to the old experimental 0.3.10 or stable 0.10.1 renderer.
@@ -44,13 +44,22 @@ and parity with main are not established.**
   are disabled. The experimental provisioner downloads verified generic tools;
   the selected GPL engine and AV1 decoder are compiled from source.
 
-Use a development Python 3.14+ with Tk and the dependencies in the requirements
-files. Run `python run_launcher.py` for the development UI and
-`python run_builder.py --doctor` for the independent status. `--prepare` remains
-an explicit local module-preparation operation; it does not produce a game.
-An explicitly configured development interpreter can also launch this UI through
-the locally compiled `DekuForge.exe`; see the experimental build guide. This is
-separate from a packaged end-user installation.
+The independent Windows bootstrap provisions official generic Python 3.14.10/Tk
+and hash-pinned Pillow in this checkout. The locally compiled `DekuForge.exe`
+uses that runtime without depending on main's interpreter. Follow the experimental
+build guide; an independent end-user installer is not published. A development
+Python is also supported for source commands. `run_builder.py --doctor` reports
+independent capabilities; `--prepare` prepares modules only and is not a game.
+
+## Known experimental limits
+
+Startup loading now shows complete first-world and consecutive Death Mountain
+captures. The measured native-1080p test averaged 47.4 fps, including screenshot
+work. This is not a matched main benchmark. On the tested RTX 2080 driver,
+preparing known pipelines at each start still took about 7.5 minutes and used
+substantial memory; reducing that wait is unresolved. The full custom Cheat
+Manager, independent app updates, end-user setup, long-session/controller/audio
+acceptance and Linux/iOS gameplay remain open.
 
 ## Reuse and contributions
 

@@ -145,6 +145,14 @@ a port of its builder implementation and does not grant rights to the backend.
 
 ## Independent branch experiment
 
+The independent Windows launcher bootstrap uses official Astral
+python-build-standalone release 20261110 / CPython 3.14.10 (PSF license and bundled
+component terms) and Pillow 12.0.0 (MIT-CMU). URLs, sizes and SHA-256 identities are
+pinned in `components.json`; installed license files remain with those packages.
+No Python runtime from an NX2navi release is used. NumPy 2.5.4 (BSD-3-Clause),
+lz4 4.4.5 (BSD/LZ4 component terms) and fontTools 4.68.0 (MIT) are build-only
+dependencies with hash-pinned Windows wheels in `requirements-open-engine.txt`.
+
 The optional source-only candidate stager (`dekuforge/open_engine.py`) fetches
 [Ocarina Recomp](https://github.com/sostenesfreitas/ocarina-recomp) at
 `406b3ae0321eff8dd083a607a8186aa56b52b873`, checked by

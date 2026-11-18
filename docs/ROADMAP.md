@@ -3,7 +3,7 @@
 > **Independent branch status:** the stable-backend milestones below describe
 > main and remain reference evidence. This branch now runs a separately licensed
 > source-built experimental game with DekuForge UI adaptations, but has not
-> completed launcher provisioning or parity acceptance. Current work and measured
+> completed end-user installer or parity acceptance. Current work and measured
 > results are in [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md) and
 > [INDEPENDENT_EVIDENCE.md](INDEPENDENT_EVIDENCE.md). Do not use main's results as
 > acceptance of this different engine.
@@ -11,7 +11,8 @@
 The independent Windows developer route now composes the complete source-built
 NUP pipeline, pinned generic tools and source-built AV1 movies, with explicit
 launcher opt-in. Current work covers ordinary-play cache readiness, gameplay
-measurements and asset-mod/save integration. A portable Python/setup, the full
+measurements and asset-mod/save integration. Official standalone Python/Tk/Pillow
+now boots the launcher locally. Independent setup acceptance, the full
 Cheat Manager, matched performance and long-session acceptance remain open; see
 [OPEN_ENGINE_EVALUATION.md](OPEN_ENGINE_EVALUATION.md).
 

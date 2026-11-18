@@ -10,6 +10,10 @@ This branch is `independent`, not the stable main build. The default backend is
 `dekuforge/independent_engine.py`; vendor runtime/source downloads, main-channel
 application updates and installer packaging are disabled until independent
 replacements exist. Never fall back to the old 0.3.10 or stable 0.10.1 engine.
+The independent Windows launcher now has an official hash-pinned standalone
+Python/Tk/Pillow bootstrap. Generic build wheels may be provisioned into that
+owned interpreter only; never modify external Python automatically. This does
+not enable main's runtime downloads or independent installer publication.
 Use the stable main game as a behavioral/performance reference only. Reuse only
 code with a recorded open-source or redistribution grant; comply with its terms.
 Rewriting, renaming or restructuring restricted code is not provenance clearance.

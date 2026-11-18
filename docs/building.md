@@ -1,8 +1,9 @@
 # Building DekuForge from source
 
 > Independent branch: these inherited Windows setup instructions describe main.
-> Vendor provisioning/packaging is disabled here. Use an external development
-> Python 3.14+ with Tk and the requirements files, then run
+> Main's engine provisioning/packaging is disabled here. The independent guide
+> provisions official standalone Python/Tk/Pillow and generic tools, or use a
+> chosen development Python 3.14+. Then run
 > `python run_builder.py --doctor` and the source tests. See
 > [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md) for the current independent route.
 
@@ -10,7 +11,7 @@ For the complete opt-in Windows NUP experiment, use
 [OPEN_ENGINE_EVALUATION.md](OPEN_ENGINE_EVALUATION.md). Its generic tool
 provisioner, source compiler and independent launcher adapter are separate from
 the inherited setup commands below. Do not run main's bootstrap to supply its
-runtime to this branch. A development Python remains required.
+runtime to this branch. This branch now has its own generic interpreter bootstrap.
 
 The independent development route also provides read-only module analysis:
 `python tools/analyze_independent.py --exefs PATH --out local/analysis.json`.

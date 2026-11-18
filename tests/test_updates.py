@@ -5,6 +5,7 @@ import shutil
 import struct
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 from urllib.request import Request
 import zipfile
@@ -34,6 +35,30 @@ def fixture_package(path, text="new", extra=None):
 
 
 class UpdateTests(unittest.TestCase):
+    def test_low_disk_keeps_active_game_and_save_without_starting_reference_builder(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder).resolve()
+            active=root/'working/game.exe'
+            active.parent.mkdir()
+            active.write_bytes(b'working')
+            profile=active.parent/'profile'
+            profile.mkdir()
+            (profile/'progress.sav').write_bytes(b'keep')
+            source=root/'own.nup'
+            source.write_bytes(b'synthetic')
+            atomic_json(root/'local/settings.json',{'executable':str(active),'nup':str(source)})
+            atomic_json(root/'local/pending-game-update.json',{'components':COMPONENTS,'requires_rebuild':True,'status':'pending'})
+            with (patch('dekuforge.game_updates.COMPONENTS',{'engine':{'backend':'stable-reference'}}),
+                  patch('dekuforge.game_updates.game_running',return_value=False),
+                  patch('dekuforge.game_updates.shutil.disk_usage',return_value=SimpleNamespace(free=0)),
+                  patch('dekuforge.game_updates.build_stable') as builder):
+                with self.assertRaisesRegex(ValueError,'Insufficient space'):
+                    run_rebuild(lambda *args:None,root)
+                builder.assert_not_called()
+            self.assertEqual(active.read_bytes(),b'working')
+            self.assertEqual((profile/'progress.sav').read_bytes(),b'keep')
+            self.assertFalse((root/'local/build.lock').exists())
+
     def test_pinned_text_patches_need_no_git_and_check_every_context_before_writing(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder).resolve();(root/"first.c").write_text("before\n",encoding="utf-8")
@@ -52,7 +77,10 @@ class UpdateTests(unittest.TestCase):
             source=root/"own.nup";source.write_bytes(b"synthetic")
             atomic_json(root/"local/settings.json",{"executable":str(active),"nup":str(source)})
             atomic_json(root/"local/pending-game-update.json",{"components":COMPONENTS,"requires_rebuild":True,"status":"pending"})
-            with patch("dekuforge.game_updates.game_running",return_value=False), patch("dekuforge.game_updates.build_stable",side_effect=RuntimeError("compile failed")):
+            with (patch("dekuforge.game_updates.COMPONENTS",{'engine':{'backend':'stable-reference'}}),
+                  patch("dekuforge.game_updates.shutil.disk_usage",return_value=SimpleNamespace(free=16*1024**3)),
+                  patch("dekuforge.game_updates.game_running",return_value=False),
+                  patch("dekuforge.game_updates.build_stable",side_effect=RuntimeError("compile failed"))):
                 with self.assertRaises(RuntimeError):run_rebuild(lambda *args:None,root)
             self.assertEqual(json.loads((root/"local/settings.json").read_text())["executable"],str(active))
             self.assertEqual((profile/"progress.sav").read_bytes(),b"original save")
@@ -68,7 +96,10 @@ class UpdateTests(unittest.TestCase):
             def build(source,notify,destination):
                 self.assertEqual(json.loads((root/"local/settings.json").read_text())["executable"],str(active))
                 exe=destination/"DekuForgeGame.exe";exe.write_bytes(b"new build");return exe
-            with patch("dekuforge.game_updates.game_running",return_value=False), patch("dekuforge.game_updates.build_stable",side_effect=build):
+            with (patch("dekuforge.game_updates.COMPONENTS",{'engine':{'backend':'stable-reference'}}),
+                  patch("dekuforge.game_updates.shutil.disk_usage",return_value=SimpleNamespace(free=16*1024**3)),
+                  patch("dekuforge.game_updates.game_running",return_value=False),
+                  patch("dekuforge.game_updates.build_stable",side_effect=build)):
                 result=run_rebuild(lambda *args:None,root)
             self.assertNotEqual(result.parent,active.parent)
             self.assertEqual((result.parent/"profile/progress.sav").read_bytes(),b"save")

@@ -27,7 +27,13 @@ class DistributionTests(unittest.TestCase):
         self.assertEqual(__version__, COMPONENTS["launcher"]["version"])
         self.assertEqual(COMPONENTS["engine"]["backend"], "independent")
         self.assertNotIn("base_version", COMPONENTS["engine"])
-        self.assertIsNone(COMPONENTS["python"]["url"])
+        runtime = COMPONENTS['python']
+        self.assertEqual(runtime['source'], 'astral-python-build-standalone')
+        self.assertTrue(runtime['url'].startswith('https://github.com/astral-sh/python-build-standalone/releases/download/'))
+        self.assertRegex(runtime['sha256'], r'^[0-9a-f]{64}$')
+        self.assertGreater(runtime['size'], 0)
+        self.assertTrue(runtime['pillow']['url'].startswith('https://files.pythonhosted.org/'))
+        self.assertRegex(runtime['pillow']['sha256'], r'^[0-9a-f]{64}$')
         self.assertNotEqual(COMPONENTS["launcher"]["version"], COMPONENTS["engine"]["version"])
         self.assertIn("version", COMPONENTS["buildkit"])
 

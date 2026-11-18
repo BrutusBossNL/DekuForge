@@ -1,7 +1,10 @@
 param([Parameter(Mandatory=$true)][string]$Root)
 $ErrorActionPreference = 'Stop'
 $branchComponents=Get-Content -Raw -LiteralPath (Join-Path $Root 'dekuforge\components.json') | ConvertFrom-Json
-if ($branchComponents.engine.backend -eq 'independent') { throw 'Independent branch runtime is not packaged. Use a development Python with Tk/Pillow; no NX2navi runtime will be downloaded.' }
+if ($branchComponents.engine.backend -eq 'independent') {
+    & (Join-Path $Root 'tools/bootstrap_open_runtime.ps1') -Root $Root
+    exit $LASTEXITCODE
+}
 function File-Sha256([string]$Path) {
     $algorithm=[Security.Cryptography.SHA256]::Create()
     $stream=[IO.File]::OpenRead($Path)

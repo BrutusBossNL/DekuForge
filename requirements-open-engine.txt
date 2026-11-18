@@ -1,0 +1,4 @@
+# Windows CPython 3.14 build dependencies; verified PyPI wheels only.
+numpy==2.5.4 --hash=sha256:2ca144f15135b6212a5c47b1e2aeca6e412f102f95a2d5d88d8aec77eb255de3
+lz4==4.4.5 --hash=sha256:92159782a4502858a21e0079d77cdcaade23e8a5d252ddf46b0652604300d7be
+fonttools==4.68.0 --hash=sha256:1782f2cf952eb262c4126b1f57b5f0e027e71bf2b632350a033dec526f448428

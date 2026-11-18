@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "launcher": {
-    "version": "0.3.0-independent.7",
+    "version": "0.3.0-independent.8",
     "stage": "development",
     "bug_reports": true,
     "uninstaller": true,
@@ -14,16 +14,22 @@
     "playable": false
   },
   "buildkit": {
-    "version": "0.3.0-independent.8"
+    "version": "0.3.0-independent.9"
   },
   "python": {
-    "version": "3.14+",
-    "id": "development-interpreter",
-    "source": "external development Python with Tk and Pillow",
-    "status": "not-packaged",
-    "url": null,
-    "sha256": null,
-    "size": 0
+    "version": "3.14.10",
+    "id": "3.14.10-32b6cf90-pil8dc232e3",
+    "source": "astral-python-build-standalone",
+    "status": "experimental-bootstrap",
+    "url": "https://github.com/astral-sh/python-build-standalone/releases/download/20261110/cpython-3.14.10%2B20261110-x86_64-pc-windows-msvc-install_only_stripped.tar.gz",
+    "sha256": "32b6cf90a03e2bc15fda8d2ab7ff78c4870f138887d612932650ce764efaab8f",
+    "size": 23680756,
+    "pillow": {
+      "version": "12.0.0",
+      "url": "https://files.pythonhosted.org/packages/2b/24/b350c31543fb0107ab2599464d7e28e6f856027aadda995022e695313d94/pillow-12.0.0-cp314-cp314-win_amd64.whl",
+      "sha256": "8dc232e39d409036af549c86f24aed8273a40ffa459981146829a324e0848b4b",
+      "size": 7142916
+    }
   },
   "dotnet": {
     "version": "10.0.404"

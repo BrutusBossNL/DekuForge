@@ -18,7 +18,7 @@ this worktree's `build/`, separate from generated output. The provider's
 the user's original files.
 
 Python requirements are those in the pinned provider's `requirements.txt`.
-Development currently uses Python 3.14.9, Capstone 5.0.9 and a pinned official
+Development now uses its own Python 3.14.10, Capstone 5.0.9 and a pinned official
 LLVM-MinGW 20261104 compiler. Codec/header libraries and control DLLs retain
 their individual FFmpeg, Vulkan, SPIR-V, VMA and SDL terms. These dependencies
 are not yet provisioned by an independent installer.
@@ -31,26 +31,29 @@ hot-function profile, shader cache or game installation.
 
 ### Complete experimental Windows NUP build
 
-Use a development Python 3.14+ with the repository's development requirements.
-This is an opt-in developer route; it does not install Python or ship a setup.
-From the independent checkout:
+This opt-in Windows developer route provisions its own generic Python/Tk and
+tools. An independent end-user installer is not published. From PowerShell:
 
 ```powershell
-python -B tools/provision_open_tools.py --work build/open-engine-work --jobs 4 --configure-launcher
-python -B tools/build_open_game.py --nup "C:\path\to\your-own.nup" --out build/windows-independent
-python run_launcher.py
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/bootstrap_runtime.ps1 -Root $PWD
+$forgePython = (Get-Content local/python-path.txt -Raw).Trim()
+& $forgePython -B tools/provision_open_tools.py --work build/open-engine-work --jobs 4 --configure-launcher
+& $forgePython -B tools/build_launcher.py --toolchain local/build-tools/hookshot-llvm-20261104/bin
+.\DekuForge.exe
 ```
 
-For a native development entry point, compile `tools/build_launcher.py
---toolchain local/build-tools/hookshot-llvm-20261104/bin` with Python. Put the
-absolute path of your chosen development `python.exe` in the UTF-8 file
-`local/python-path.txt`. Then `DekuForge.exe` opens the same launcher without a
-console. This explicit development override is accepted only for the
-`development-interpreter` component; it neither downloads main's interpreter nor
-completes independent runtime packaging. The selected interpreter needs Tk and
-Pillow and must remain installed.
+Alternatively build explicitly with `& $forgePython -B tools/build_open_game.py
+--nup "C:\path\to\your-own.nup" --out build/windows-independent`.
 
-The first command verifies the pinned GPL source and downloads hash-pinned
+The bootstrap verifies official Python-build-standalone 20261110 / CPython 3.14.10
+and Pillow 12.0.0, preserves their notices, and imports Tk/Pillow before committing
+the runtime marker. Bounded tar/ZIP validation rejects links, traversal and
+aliases. It does not download an NX2navi runtime. The tool provisioner installs
+hash-pinned NumPy/lz4/fontTools wheels into this owned Python only. External
+development Python is checked and never changed automatically; install
+`requirements-open-engine.txt` explicitly if needed.
+
+The tool provisioner verifies the pinned GPL source and downloads hash-pinned
 LLVM-MinGW, codec/header and SDL packages. It extracts only generic dependencies,
 then compiles dav1d from source. The engine and instruction lifter are compiled
 from verified source; no NX2navi install, downloaded compiled engine or shared
@@ -78,7 +81,12 @@ mode. On the measured NVIDIA driver, cache-only loading at program creation
 still missed thousands of prepared pipelines and left incomplete initial world
 frames; start mode keeps known programs/pipelines ready before the title. This
 uses more memory and still needs startup/performance acceptance. It changes the
-loading policy, not shader translation or rendering formulas.
+loading policy, not shader translation or rendering formulas. The measured
+ordinary start prepared known pipelines in 445.9 seconds. Its first world frame
+and twelve consecutive settled captures were complete; a 59.833-second
+instrumented interval averaged 47.382 fps. The recurring startup wait remains
+unresolved. See the evidence ledger for scope; do not advertise a quick start or
+performance parity with main.
 `--no-prepare-shaders` is diagnostic only and skips that readiness check too.
 
 The launcher retains its original async Play, save import/export, build inventory,
@@ -90,6 +98,8 @@ limit is checked before starting; excessively long mod paths report an error.
 Crash reports include bounded text logs and graphics settings, never binary
 shader/pipeline caches. Deleting an owned build can preserve its `user` profile,
 as well as the legacy `profile` layout; the original game archive is protected.
+Both the launcher and direct legacy update API reject main-engine rebuilds on
+this branch before changing a pending update or calling the excluded backend.
 
 ### Individual investigation stages
 
