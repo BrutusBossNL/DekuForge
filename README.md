@@ -22,8 +22,14 @@ original implementation and explicitly approved, redistributable components.
   scalar/register-offset and paired memory operations with a bounded native
   correctness runner, checked against an
   independent ARM64 oracle. It is not a complete CPU backend.
-- A guest-memory prototype loads verified NSO segments and relative relocations.
+- A guest-memory prototype loads verified NSO segments and bounded MOD0/ELF
+  symbol and RELA/RELR pointer relocations; synthetic cross-module calls execute.
   Read-only module analysis reuses extracted inputs without rebuilding them.
+- Main's original mod manager, release list/notes and update outcome reporting
+  are retained. Independent updates and legacy code-mod builds remain disabled.
+- A pinned, separately licensed GPL runtime is being evaluated locally. Its
+  source-only stager verifies the complete archive and 900 Git blobs; see the
+  [engine plan](docs/INDEPENDENT_ENGINE.md). It is not gameplay-approved yet.
 - No automatic fallback to the old experimental 0.3.10 or stable 0.10.1 renderer.
 - Vendor runtime/tool downloads, main-channel app updates and installer packaging
   are disabled until independent replacements are ready.

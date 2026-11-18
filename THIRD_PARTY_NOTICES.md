@@ -8,7 +8,7 @@
 
 The independent integer/control-flow/scalar, register-offset and paired-memory
 generator, bounded native
-runner, guest-memory/relative-relocation model and read-only analyzer are original
+runner, guest-memory/MOD0/ELF pointer-linking model and read-only analyzer are original
 DekuForge code under the root MIT license. Arm ISA/ABI documents supply encoding
 and behavior facts, not imported runtime code. Unicorn is a separately licensed
 development oracle, not the game's CPU backend. Reuse and measurement scope are
@@ -142,3 +142,15 @@ NX2navi installation: `tools/make_game.py --nup --check`, or `--nup --out --msys
 --jobs --events`. It starts that installation's Python with its own dependencies.
 The backend stays external and its license remains unchanged. The adapter is not
 a port of its builder implementation and does not grant rights to the backend.
+
+## Independent branch experiment
+
+The optional source-only candidate stager (`dekuforge/open_engine.py`) fetches
+[Ocarina Recomp](https://github.com/sostenesfreitas/ocarina-recomp) at
+`406b3ae0321eff8dd083a607a8186aa56b52b873`, checked by
+`dekuforge/open_engine_source.json`. Its composed runtime is GPL-3.0-or-later,
+with scoped MIT and other component terms retained in its `LICENSE`,
+`LICENSE-MIT` and `THIRD_PARTY_NOTICES.md`. Those source files and their notices
+remain together in the local staged tree. This is not original MIT DekuForge
+runtime code. The candidate is not a published or gameplay-approved backend;
+see `docs/INDEPENDENT_ENGINE.md` for scope and acceptance requirements.

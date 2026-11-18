@@ -1,0 +1,3614 @@
+{
+  "repository": "sostenesfreitas/ocarina-recomp",
+  "revision": "406b3ae0321eff8dd083a607a8186aa56b52b873",
+  "archive_sha256": "d36e0ae3c447cad5e5b6e9829d8265c690d031e2d4bc81ef8c20eebaed2b50f5",
+  "files_verified": 900,
+  "normalization": "Git archive eol=crlf files restored to their verified Git blob LF form",
+  "game_files_downloaded": false,
+  "schema": 1,
+  "url": "https://codeload.github.com/sostenesfreitas/ocarina-recomp/zip/406b3ae0321eff8dd083a607a8186aa56b52b873",
+  "license": "GPL-3.0-or-later with separately retained component licenses",
+  "production_approved": false,
+  "files": {
+    ".gitattributes": {
+      "sha1": "e6204710307229452b1008cfbf9bfa613eedf00b",
+      "size": 107
+    },
+    ".githooks/pre-commit": {
+      "sha1": "224fbcbb15a34cb267adfc7d518209bb789b03e2",
+      "size": 115
+    },
+    ".github/ISSUE_TEMPLATE/1-crash.yml": {
+      "sha1": "40517a2939d5fe9042b6a0fda52eb19f11a6c869",
+      "size": 2412
+    },
+    ".github/ISSUE_TEMPLATE/2-graphics.yml": {
+      "sha1": "1c7bec58250f49c79e1c26ca147c0b6946026254",
+      "size": 1689
+    },
+    ".github/ISSUE_TEMPLATE/3-bug.yml": {
+      "sha1": "0dcd66238cb4914eaf80b83e6523def3ff00d632",
+      "size": 1640
+    },
+    ".github/ISSUE_TEMPLATE/4-feature.yml": {
+      "sha1": "71851fd0cd4eb88b354915d69735bc95863d81cb",
+      "size": 816
+    },
+    ".github/ISSUE_TEMPLATE/config.yml": {
+      "sha1": "330880a4fde56db4a80ded5f66cecfeba3899caa",
+      "size": 422
+    },
+    ".github/pull_request_template.md": {
+      "sha1": "0975bacdce2262324672a7dd9dcee56656084075",
+      "size": 864
+    },
+    ".github/workflows/content-guard.yml": {
+      "sha1": "11c1130f40cf017803374ba74c1001622c4188b6",
+      "size": 313
+    },
+    ".gitignore": {
+      "sha1": "d4359ba6bcf1176f2a188c1796dfe0f07a3ce7a4",
+      "size": 1457
+    },
+    "AGENTS.md": {
+      "sha1": "991e21b86a88b743f6104cbbd29027194dbce0fe",
+      "size": 635
+    },
+    "CLAUDE.md": {
+      "sha1": "43c994c2d3617f947bcb5adf1933e21dabe46bb5",
+      "size": 11
+    },
+    "CODE_OF_CONDUCT.md": {
+      "sha1": "42871fde9f74f080e539f6d104c3a91664f4d4aa",
+      "size": 5593
+    },
+    "CONTRIBUTING.en.md": {
+      "sha1": "8b5b5b1a65281119b0d3a131b78ec8309dbba42d",
+      "size": 7616
+    },
+    "CONTRIBUTING.md": {
+      "sha1": "76128a60d62f4d6926196ca018b5ef8e0715fdc2",
+      "size": 7884
+    },
+    "LICENSE": {
+      "sha1": "f288702d2fa16d3cdf0035b15a9fcbc552cd88e7",
+      "size": 35149
+    },
+    "LICENSE-MIT": {
+      "sha1": "afa9602fcd92942f898b98117e8bdaa171908f96",
+      "size": 1075
+    },
+    "README.en.md": {
+      "sha1": "98075d9da1e33dab3f7a137452bd08c19e93605f",
+      "size": 10264
+    },
+    "README.md": {
+      "sha1": "c9f92d662fb02aa3b002b45175a9d47ab855802c",
+      "size": 10649
+    },
+    "THIRD_PARTY_NOTICES.md": {
+      "sha1": "c6c1ef02c1887a469200ce3710a89341926b6213",
+      "size": 31145
+    },
+    "VERSION": {
+      "sha1": "42045acae20fc8d80f15174966be202f7d898d19",
+      "size": 6
+    },
+    "compilar.ps1": {
+      "sha1": "29e483be79b98324879586d6e12d417a8a4ff2fd",
+      "size": 9421
+    },
+    "compilar.sh": {
+      "sha1": "28b66a3bb22c9bddc9a350cb6ce6d41635a3608b",
+      "size": 10722
+    },
+    "config.example.toml": {
+      "sha1": "bd34eba86c337378938484166d22e62facd95bee",
+      "size": 843
+    },
+    "docs/architecture.md": {
+      "sha1": "12f75987adabc962a6151fd417e1f9c89e055a87",
+      "size": 14944
+    },
+    "docs/build-by-hand.md": {
+      "sha1": "a66bf7c9ae6b90e7762aaf9ae4fb9c176f9b948a",
+      "size": 6120
+    },
+    "docs/building.md": {
+      "sha1": "d2f6d819fb1148b0fc011ed37966659527d6e6be",
+      "size": 14013
+    },
+    "docs/compilar-manual.md": {
+      "sha1": "0a595cc96914fb987535812c607668407c23abb9",
+      "size": 6336
+    },
+    "docs/controls.md": {
+      "sha1": "baa541190de513abb7aab98101ebc596d0282132",
+      "size": 14760
+    },
+    "docs/maxwell.md": {
+      "sha1": "dc71a04159f44705c88be7f0d2f26e3d585d1eaf",
+      "size": 44344
+    },
+    "docs/nvn2-command-modes.md": {
+      "sha1": "8764788b5e467c2999d1c868da5f7a3bde81f887",
+      "size": 2384
+    },
+    "docs/test-environment-rx5500xt.md": {
+      "sha1": "01f9cf7e359b2e97785c1bf38bcb67dd43b461eb",
+      "size": 3994
+    },
+    "docs/upscaling.md": {
+      "sha1": "396cb2e09205fe1e88500b19e6e2255a838f2a25",
+      "size": 2914
+    },
+    "instalador/Instalar-Ocarina.ps1": {
+      "sha1": "da146996ad71adf3ebd75eb85ef3b3648c877688",
+      "size": 40962
+    },
+    "instalador/build_exe.sh": {
+      "sha1": "3abbca72c122fd21d9071ff1ac167bc2f130df5f",
+      "size": 261
+    },
+    "instalador/launcher.c": {
+      "sha1": "f4dfa21c9d7ca841089c1d2eb230bf5f574605bd",
+      "size": 1720
+    },
+    "jogar/hookshot-copiar-save.bat": {
+      "sha1": "50fbf210a325e9fa528a6402d82d5d3d290b7c39",
+      "size": 620
+    },
+    "jogar/hookshot-preparar-jogo.bat": {
+      "sha1": "4ef7d9a09a010d3f09baa833348fc1a4e4ef17d6",
+      "size": 614
+    },
+    "jogar/importar-save.ps1": {
+      "sha1": "948b62d30581a51b40ae40703ec9480907c39c2a",
+      "size": 6573
+    },
+    "jogar/jogar-ocarina.ps1": {
+      "sha1": "3ce3c4ae66438aaad0323423209f73c93c389494",
+      "size": 2296
+    },
+    "jogar/jogar-ocarina.sh": {
+      "sha1": "639b935d6e1580cabb4e075752a87f82e8cbf382",
+      "size": 3665
+    },
+    "jogar/jogar-perfil-gpu.ps1": {
+      "sha1": "1745bdfad837e891cd94b700e1a3ed1e646160d2",
+      "size": 691
+    },
+    "jogar/medir-partida.ps1": {
+      "sha1": "3507fb97793e913176474e9a87925428d78a87ce",
+      "size": 5708
+    },
+    "jogar/preparar-shaders.ps1": {
+      "sha1": "fc57b3debe8452c75e67bdb661a0c73083440a29",
+      "size": 8821
+    },
+    "jogar/totk.ini": {
+      "sha1": "b66794f44a1dbbab291dc3a69c2a8292a5860f65",
+      "size": 76
+    },
+    "recomp/flags.py": {
+      "sha1": "61188f9d6f2e96babc5e61bbdb2f7a83c26d2c0a",
+      "size": 6631
+    },
+    "recomp/gen.py": {
+      "sha1": "1eaa00f2d3be8a599be30325e40b6c1c242b40f6",
+      "size": 35581
+    },
+    "recomp/jumptables.py": {
+      "sha1": "96b373cb378194dad59c9363739ed98139367e64",
+      "size": 50680
+    },
+    "recomp/layout.py": {
+      "sha1": "971d6004728356d5fb1f6f1f4734189b39dc8738",
+      "size": 2419
+    },
+    "recomp/lifter.py": {
+      "sha1": "f66d25e87d4d28ad64fe7269fe706fb51f427c7a",
+      "size": 35485
+    },
+    "recomp/module.py": {
+      "sha1": "c3e4f355da9e16be653de8ae9b43eb135332b518",
+      "size": 3968
+    },
+    "recomp/nso.py": {
+      "sha1": "03beab282f2e90c4d0ee12764f3b91b1973902ac",
+      "size": 5939
+    },
+    "recomp/patches-v111.txt": {
+      "sha1": "905a11b65cd0c7d7d55c52eeacd7da967bdb0535",
+      "size": 50688
+    },
+    "recomp/patches-v121.txt": {
+      "sha1": "7dbb63edf59b7a35c6ea115535f4defa6eff8d01",
+      "size": 51035
+    },
+    "recomp/patches-v143.txt": {
+      "sha1": "c1a839fe790ed16cca46673406e137859ec0e8fb",
+      "size": 53890
+    },
+    "recomp/patches.py": {
+      "sha1": "ecc12e7e8adb8f6f2a47c1bed89876154fa6a79e",
+      "size": 7442
+    },
+    "recomp/regs.py": {
+      "sha1": "c583faa8275ee6be285eb4ebf49825879f81f2e5",
+      "size": 5804
+    },
+    "recomp/simd_c.py": {
+      "sha1": "b2469984b9115c831b4f830c347fafc643ebc4b8",
+      "size": 52369
+    },
+    "runtime/astc_decode_spv.h": {
+      "sha1": "95850f3773c890ff1456307b55a9479b37c062fa",
+      "size": 170693
+    },
+    "runtime/astc_probe.c": {
+      "sha1": "20bee2a2f26f7d3395a2eeb196aea400f72032bb",
+      "size": 23263
+    },
+    "runtime/audio_effects.c": {
+      "sha1": "2e030a4a39bd8d49a415c4aaaa0f5b2e6899923e",
+      "size": 12217
+    },
+    "runtime/audio_effects.h": {
+      "sha1": "aa6a3328ce2eab4f94eaac1aa569716e3a982075",
+      "size": 2275
+    },
+    "runtime/audio_mixer.c": {
+      "sha1": "f77baae6d02bc0610014a1fd6f48b86eddc33e5b",
+      "size": 54336
+    },
+    "runtime/audio_reverb.c": {
+      "sha1": "aef08cfde03a74089848294b0171c70144c2d119",
+      "size": 6724
+    },
+    "runtime/audio_reverb.h": {
+      "sha1": "28c4466319d022fbdd566a1d407084792a2cf0d5",
+      "size": 998
+    },
+    "runtime/audren.c": {
+      "sha1": "a5b15aac0d0b7b951f38e972d7d3e78709421644",
+      "size": 23320
+    },
+    "runtime/audren.h": {
+      "sha1": "85a0b0dfea8b1d6332e6467548b271932dbcb245",
+      "size": 8664
+    },
+    "runtime/bc3_encode_spv.h": {
+      "sha1": "eeda077487457c8d2b003c9a8f8704102e128f23",
+      "size": 24927
+    },
+    "runtime/boot.c": {
+      "sha1": "b09f9a3d9d5e5a458da8ed4c498701b41a620c65",
+      "size": 20980
+    },
+    "runtime/cfg.c": {
+      "sha1": "62411e3d053d5cf53ee2ea96eeb706200861b16f",
+      "size": 33184
+    },
+    "runtime/cfg.h": {
+      "sha1": "5f94bc7a015d49ad70cdf0341aab1aeee449f010",
+      "size": 4490
+    },
+    "runtime/cfg_probe.c": {
+      "sha1": "2818be3dbf0926133dc697d9114aab3d877fdb12",
+      "size": 23356
+    },
+    "runtime/color_grade_spv.h": {
+      "sha1": "3f45a24ef1c2b77b90bb59e52561946e4229eaaf",
+      "size": 6753
+    },
+    "runtime/cpu.h": {
+      "sha1": "38a0ea9f4619a7d6b368abaf62f73188fd5e5c95",
+      "size": 22045
+    },
+    "runtime/dispatch.c": {
+      "sha1": "80dad4488667b1fa81a031a4457e9347b0875231",
+      "size": 9855
+    },
+    "runtime/dispatch.h": {
+      "sha1": "a46e66e3e5c3fd7c81a642c15d69c76aae7a4546",
+      "size": 2800
+    },
+    "runtime/dpi_probe_win.c": {
+      "sha1": "a2ddcf6624400312509c122afe0fc8158c8314a8",
+      "size": 1793
+    },
+    "runtime/fg_camflow_spv.h": {
+      "sha1": "ea7c815d623e24cf540b5675cd0488ca4dfbced2",
+      "size": 15639
+    },
+    "runtime/fg_copy_spv.h": {
+      "sha1": "6771c50b6d82d1fe056dc09c9abe1e8512acac96",
+      "size": 4285
+    },
+    "runtime/fg_depth_spv.h": {
+      "sha1": "47ed8ac6906bbec149c9585caa83a61e9f9f2e13",
+      "size": 3535
+    },
+    "runtime/fg_flow_spv.h": {
+      "sha1": "7a6b348279dcb48925468b342e5a64fc5f785e20",
+      "size": 10897
+    },
+    "runtime/fg_luma_spv.h": {
+      "sha1": "2c3e269f0d2bd2d0ea745d1148edd0cc41b1fcbc",
+      "size": 5985
+    },
+    "runtime/fg_median_spv.h": {
+      "sha1": "920dd6057191956440f01f5f4a7ca7f8f90834de",
+      "size": 9489
+    },
+    "runtime/fg_synth_spv.h": {
+      "sha1": "127fcb37b49e9e4dccd849fefa90490222ec8ebf",
+      "size": 13011
+    },
+    "runtime/flight.c": {
+      "sha1": "d32918e48539a05224c0666dfff955a2420b9f73",
+      "size": 17335
+    },
+    "runtime/flight.h": {
+      "sha1": "5125f7b64416d991cb4191f5b70c93bc471c4283",
+      "size": 1411
+    },
+    "runtime/frame_rate.c": {
+      "sha1": "9bf101a27206c5d4caca5097b96bc3808effe2b6",
+      "size": 14310
+    },
+    "runtime/fs.h": {
+      "sha1": "a780e1e13e6a0e50a23480e5879e8a2f6761afcd",
+      "size": 3336
+    },
+    "runtime/fs_host.c": {
+      "sha1": "87803d4ca85dd3c442755e5a894b668e4d3b1f51",
+      "size": 84777
+    },
+    "runtime/fsr_easu_spv.h": {
+      "sha1": "ef415872553146479f6d5fee96df580d255cae8c",
+      "size": 182823
+    },
+    "runtime/fsr_rcas_spv.h": {
+      "sha1": "3f27e778bb357e4cf9e1c4d9256c5b9925eaf01f",
+      "size": 42035
+    },
+    "runtime/gfx.h": {
+      "sha1": "6c3141b3e501d36710ef00c394e47bf9819953f2",
+      "size": 13767
+    },
+    "runtime/gfx_abi_probe.c": {
+      "sha1": "24ff66327074d1b15e1568084561a45abe36f1d3",
+      "size": 7986
+    },
+    "runtime/gfx_geometry_probe.c": {
+      "sha1": "cdf749f2770bcf485cf5ac8455b45cce81dec6a0",
+      "size": 9236
+    },
+    "runtime/gfx_null.c": {
+      "sha1": "958d1894fb736001230d5017625a03bf6f7777d2",
+      "size": 7315
+    },
+    "runtime/gfx_present.c": {
+      "sha1": "15fd9995414dd62b80255eb3b67421ea056b2f53",
+      "size": 43795
+    },
+    "runtime/gfx_shader.c": {
+      "sha1": "dac68bdb0d2aa3ec168073930b9fc2fec6b11ca1",
+      "size": 143766
+    },
+    "runtime/gfx_shader_probe.c": {
+      "sha1": "753353ed3a7d54c3a272a171a83b0c9a3bb3c87f",
+      "size": 11021
+    },
+    "runtime/gfx_window_probe.c": {
+      "sha1": "0757171b178ccc54b6fe815a5ca2bcd7282fdf3b",
+      "size": 10895
+    },
+    "runtime/gfx_window_sdl.c": {
+      "sha1": "b1978c6155eba19e3811f0b25912c71b3eb2d9f9",
+      "size": 12272
+    },
+    "runtime/gfx_window_win.c": {
+      "sha1": "b1f3f306b0dd9a8e8ec05747cf48f19d4da049e2",
+      "size": 17943
+    },
+    "runtime/gfx_wsys.h": {
+      "sha1": "90fdeef16c3ea6c32dde9a43ef277f1f1b3c879a",
+      "size": 1807
+    },
+    "runtime/host.h": {
+      "sha1": "6dc7ee23c25625a22527a3f8ac54cea6efd6fc57",
+      "size": 28203
+    },
+    "runtime/hostfn.c": {
+      "sha1": "e57a7d4146259ddcb58b04c5bce0690b66c72220",
+      "size": 9355
+    },
+    "runtime/input.c": {
+      "sha1": "8639173920dc1bbc1d4d8f19bb91d98477ed6081",
+      "size": 32506
+    },
+    "runtime/input.h": {
+      "sha1": "8fe24377097660f5ce7c265e0b871959eff3ac96",
+      "size": 5984
+    },
+    "runtime/input_map.c": {
+      "sha1": "49220eacba540579a7965fde5e69384c80d9e0b9",
+      "size": 17257
+    },
+    "runtime/input_map.h": {
+      "sha1": "6e66b4ab4b25cfaccafefccc092ab036e7ee51d1",
+      "size": 8087
+    },
+    "runtime/input_sdl.c": {
+      "sha1": "8ee747adf81ac258d0fb7dc5ea44fdc394f434c8",
+      "size": 8996
+    },
+    "runtime/input_sdl.h": {
+      "sha1": "bfbb44b83c54623cad2fa1220547e0cae980763c",
+      "size": 958
+    },
+    "runtime/input_win.c": {
+      "sha1": "064f01698c8ce02732b9162533a3539fcb3094dd",
+      "size": 8771
+    },
+    "runtime/input_win.h": {
+      "sha1": "85c3711fbdf2b52f1fd029377090e0a02ee8bf15",
+      "size": 569
+    },
+    "runtime/input_wsys.h": {
+      "sha1": "4f2fbb964347b7807ba2b4454fea288872fcbdb2",
+      "size": 1081
+    },
+    "runtime/ipc.c": {
+      "sha1": "21f811c4ea6ee92be5c5f4ca3b45e7bdce5c4919",
+      "size": 43745
+    },
+    "runtime/ipc.h": {
+      "sha1": "83e07965215781c4b30d917451bc1c9d91cd8b80",
+      "size": 3052
+    },
+    "runtime/kernel.c": {
+      "sha1": "cd55b791a71347525e82880b67c40ccd7cd060a3",
+      "size": 91395
+    },
+    "runtime/kernel.h": {
+      "sha1": "d719b30118e5dc29c35c99ada6f7725a5a8c47ca",
+      "size": 2022
+    },
+    "runtime/kernel_probe.c": {
+      "sha1": "df9e84d258a4b2a4a727042e02d656aeb4dbdf46",
+      "size": 31090
+    },
+    "runtime/loader.c": {
+      "sha1": "8e7aecd7ac23355e515022bac668197df6e36edd",
+      "size": 33983
+    },
+    "runtime/main.c": {
+      "sha1": "51ebe8a9199ce3469a40529a845b698c22590e70",
+      "size": 30711
+    },
+    "runtime/memory.c": {
+      "sha1": "27ac13d2775a12b745cd3e5f0135b73a43761ced",
+      "size": 30004
+    },
+    "runtime/motion_fusion.c": {
+      "sha1": "7bbf3be67c1805a4203714c3d12464b4339a2e20",
+      "size": 6747
+    },
+    "runtime/movie.h": {
+      "sha1": "96745e9c49fc15c303e7822d5c3452de896ea3d4",
+      "size": 2584
+    },
+    "runtime/movie_probe.c": {
+      "sha1": "7580b739eefb62b59ba9ee20a232270990e94c95",
+      "size": 24494
+    },
+    "runtime/nvn.h": {
+      "sha1": "b80a8d244c087b848a07c67c2291b0bfccff18c9",
+      "size": 88884
+    },
+    "runtime/nvn2_c0.h": {
+      "sha1": "84a9f514254bb44a0f46430c5d472cded8aa7769",
+      "size": 2773
+    },
+    "runtime/nvn2_lower.cpp": {
+      "sha1": "4f4cfdc75baaaf5cade3db8702d1b414c74a4318",
+      "size": 14359
+    },
+    "runtime/nvn_api.h": {
+      "sha1": "20285bc6248a670d6f9d3f96ba49fd0cc29f0dc9",
+      "size": 10165
+    },
+    "runtime/nvn_api_cmd.c": {
+      "sha1": "3b316cbe95d3e99eeb401fb2663a83e235298e55",
+      "size": 62010
+    },
+    "runtime/nvn_api_core.c": {
+      "sha1": "d440d198039c282dc0bcc7483fe0624c9353e768",
+      "size": 36178
+    },
+    "runtime/nvn_api_nvn2.c": {
+      "sha1": "575ba7e01e357a90c9eed3b341b005bd08a919b8",
+      "size": 9433
+    },
+    "runtime/nvn_api_obj.c": {
+      "sha1": "d688fd56425a77b3f8ec2f010ef08895cd4e310e",
+      "size": 37940
+    },
+    "runtime/nvn_ext.c": {
+      "sha1": "6a89ba8add0349c0acbb1f36bad1fe8a4787a74c",
+      "size": 24199
+    },
+    "runtime/nvn_geometry_control.h": {
+      "sha1": "f220916cbe318c38004196ac01fcc7eb43e27317",
+      "size": 6259
+    },
+    "runtime/nvn_hmap.h": {
+      "sha1": "73bf78599b7084bf26243352652be130b91fc5bf",
+      "size": 4015
+    },
+    "runtime/nvn_indirect_reset.h": {
+      "sha1": "44fca583f9d6c057d3367a69bce2fc0aae1723cb",
+      "size": 2909
+    },
+    "runtime/nvn_mode_trace.c": {
+      "sha1": "525473d908d9ec7bda227b2a8e7586ccdd70aba0",
+      "size": 4669
+    },
+    "runtime/nvn_mode_trace.h": {
+      "sha1": "3776af060fe854fecfc5ecdcea3918c71d13b687",
+      "size": 973
+    },
+    "runtime/nvn_obj.h": {
+      "sha1": "95118d2c4b5a019013e845318eddc28516796af0",
+      "size": 15113
+    },
+    "runtime/nvn_pool_index.h": {
+      "sha1": "eaf8d3312fa4dc439743b2e3d367ed41ef2d7879",
+      "size": 4998
+    },
+    "runtime/nvn_probe.c": {
+      "sha1": "88df7289f0c841b529bd99fb145a15e2a6132db2",
+      "size": 50595
+    },
+    "runtime/nvn_procs.c": {
+      "sha1": "8c4a10cbf08e898e951ccbc1669f3221ccc62f98",
+      "size": 3825
+    },
+    "runtime/nvn_procs.inc": {
+      "sha1": "dd0acf4ceeaab67131fcf5769ab24858afbbb772",
+      "size": 21914
+    },
+    "runtime/nvn_procs_nvn2.inc": {
+      "sha1": "fe6f8f9de84b78ded2b96b6b102b68cba3b0097a",
+      "size": 8322
+    },
+    "runtime/nvn_tex.c": {
+      "sha1": "f26c329a305300fb6ad7eac95b37cb6c19a6c98d",
+      "size": 10283
+    },
+    "runtime/nvn_tex.h": {
+      "sha1": "4a9fcd151dda1d4ed810bb7acc6b7d1b8d56c5ce",
+      "size": 1393
+    },
+    "runtime/nvn_tex_probe.c": {
+      "sha1": "c9658e10f74ade13b5e830677866e0dd7d38b308",
+      "size": 4785
+    },
+    "runtime/oot_fsr2_prep_spv.h": {
+      "sha1": "1ef22d686d022551816c8dc92ef533d10751cf5a",
+      "size": 11133
+    },
+    "runtime/oot_motion.c": {
+      "sha1": "a004e6d292bb25b300d3337c52bcd37f8a92f592",
+      "size": 10791
+    },
+    "runtime/oot_scene_easu_spv.h": {
+      "sha1": "d85d3db163bdd2f2d8169c86691ccf2c2386c58e",
+      "size": 183535
+    },
+    "runtime/oot_scene_spv.h": {
+      "sha1": "fd02b43c58b2ea2a543da830d572a9db8f1336fc",
+      "size": 4013
+    },
+    "runtime/oot_taa_spv.h": {
+      "sha1": "046bd494e58fca45191a8dc7f7011bfd0910413d",
+      "size": 14621
+    },
+    "runtime/ov.h": {
+      "sha1": "c546ac87ea2f5b9b91f6dc314e9bb68818ca4d6a",
+      "size": 822
+    },
+    "runtime/ov_codec.c": {
+      "sha1": "5459456b981df7320c2736e9acc8df11ef83fcde",
+      "size": 34838
+    },
+    "runtime/ov_gfx.c": {
+      "sha1": "cbd8546ff1a503b648fe6aeedd68e2bbdc490b2b",
+      "size": 7705
+    },
+    "runtime/ov_input.c": {
+      "sha1": "ea0ecaebd40c02969414fdf5c6409aa3e46777ba",
+      "size": 29377
+    },
+    "runtime/ov_media.c": {
+      "sha1": "6e0bd03ebd348b41b05f50b3ac25bf131cf3a60c",
+      "size": 7748
+    },
+    "runtime/ov_movie.c": {
+      "sha1": "acf5258605fcccf939006ddeca0aa3f81801a698",
+      "size": 36052
+    },
+    "runtime/ov_probe.c": {
+      "sha1": "9a08a3e5f0c96e60c9786fa418cf1b6509dc14e7",
+      "size": 58890
+    },
+    "runtime/ov_system.c": {
+      "sha1": "939645253401da69c73e7ead49eb8eae500bf08d",
+      "size": 52890
+    },
+    "runtime/ov_zstd.c": {
+      "sha1": "0446f307cb1e47ab361bca9332ca4237c47fafe4",
+      "size": 12838
+    },
+    "runtime/patches.c": {
+      "sha1": "a54f9c36527c4bdeee80a8b319138b1830eeeaa1",
+      "size": 3099
+    },
+    "runtime/perf.c": {
+      "sha1": "827e2c1a54b5bf2bd33139ea456f0c9f98e6f96b",
+      "size": 16412
+    },
+    "runtime/perfmon.c": {
+      "sha1": "3a5e2f2823f122066caec08b0818737bd7ac589f",
+      "size": 16421
+    },
+    "runtime/perfmon.h": {
+      "sha1": "c5ea1d3a5f077399063456f3ac360514d24c2f8d",
+      "size": 2773
+    },
+    "runtime/platform/common.c": {
+      "sha1": "66eec4262da539453c500a715e24a3fe18b4bdcc",
+      "size": 2679
+    },
+    "runtime/platform/fp_x86.h": {
+      "sha1": "dd48c28e6f9e044eabac3f3d3ccafd7ae7ea1a20",
+      "size": 580
+    },
+    "runtime/platform/linux.c": {
+      "sha1": "5605a030cd3c7625f340383924ca12309c9378f4",
+      "size": 62326
+    },
+    "runtime/platform/platform.h": {
+      "sha1": "786eda74f6fff348ca5e611a5d7e7b970680312d",
+      "size": 28560
+    },
+    "runtime/platform/win32.c": {
+      "sha1": "dc47c24827a4c2e1d123e40c0f5be0e6ea05f58c",
+      "size": 62334
+    },
+    "runtime/prof.h": {
+      "sha1": "6a3a4056b8bd368412669596d0ad31e8f0bbf0bf",
+      "size": 785
+    },
+    "runtime/prof_win.c": {
+      "sha1": "24fd5c9d8ac6fd318f4b170be606d51c031f34aa",
+      "size": 18899
+    },
+    "runtime/rdoc.c": {
+      "sha1": "725ee2effcdc3559f83a6a4a6dea46bf43faf9de",
+      "size": 4178
+    },
+    "runtime/resolution.c": {
+      "sha1": "1d8e235520e8152333d056435bdb96fc9bbdab1e",
+      "size": 13522
+    },
+    "runtime/romfs.c": {
+      "sha1": "b30e20e1c5457cd107e4a7f9838286723db27312",
+      "size": 31170
+    },
+    "runtime/romfs_path.h": {
+      "sha1": "7d9c48c3a515d3b699e730d0f600282e9386d25b",
+      "size": 2022
+    },
+    "runtime/sha256.c": {
+      "sha1": "f0e794af2cf5ee242be2afdc8e94e55d048b18a8",
+      "size": 6123
+    },
+    "runtime/sha256.h": {
+      "sha1": "dcc41ca8a580e10928511639480eeea0298932ca",
+      "size": 548
+    },
+    "runtime/shaders/astc_decode.comp": {
+      "sha1": "a6c965487e5c3f71b4dbc3b0fe38c2f9f09ffcaf",
+      "size": 18247
+    },
+    "runtime/shaders/bc3_encode.comp": {
+      "sha1": "eca6843e8927313fd88a792ccdc1f7dc00436b6b",
+      "size": 4183
+    },
+    "runtime/shaders/color_grade.comp": {
+      "sha1": "580c517cb49ed1598a5a9bbde6a6cbbc90cc9f7d",
+      "size": 1130
+    },
+    "runtime/shaders/ffx/LICENSE.txt": {
+      "sha1": "324cba594d11f918191907676a99deed2fea51d0",
+      "size": 1094
+    },
+    "runtime/shaders/ffx/ffx_a.h": {
+      "sha1": "d04bff55cbe5f0c77af7a39d6a3452f2744dc6f4",
+      "size": 181915
+    },
+    "runtime/shaders/ffx/ffx_fsr1.h": {
+      "sha1": "4e0b3d548553e61eedd384021409f24e3eb74de3",
+      "size": 60310
+    },
+    "runtime/shaders/fg_camflow.comp": {
+      "sha1": "f5cd439478279fa376ff7aad63a4aa5e50c17a55",
+      "size": 2733
+    },
+    "runtime/shaders/fg_copy.comp": {
+      "sha1": "02bf1fd053248d7196350e9fb87ae82ba35cf2f2",
+      "size": 799
+    },
+    "runtime/shaders/fg_depth.comp": {
+      "sha1": "cadf13d802c8b0293148b00f14d21f9ac8f3882b",
+      "size": 526
+    },
+    "runtime/shaders/fg_flow.comp": {
+      "sha1": "bd1f933ed6e4a395ac3ea51ba22e8906784ce438",
+      "size": 1505
+    },
+    "runtime/shaders/fg_luma.comp": {
+      "sha1": "efe3de7d28addee675f3aa159d841995eb6a2c63",
+      "size": 752
+    },
+    "runtime/shaders/fg_median.comp": {
+      "sha1": "aa418000a83f28bfd05d64eb7ee6cf5ad16ee58d",
+      "size": 1000
+    },
+    "runtime/shaders/fg_synth.comp": {
+      "sha1": "e6cc24a31058c249184dedbf6e7bec7a91f424f2",
+      "size": 2443
+    },
+    "runtime/shaders/fsr_easu.comp": {
+      "sha1": "33cf9d8690515617a6c08e98d82262fa724ce017",
+      "size": 1780
+    },
+    "runtime/shaders/fsr_rcas.comp": {
+      "sha1": "c75cec4986c10bffd60c986d5d16c8ab4e899da3",
+      "size": 1264
+    },
+    "runtime/shaders/oot_fsr2_prep.comp": {
+      "sha1": "17e53f805d12401dfdbdff441ed364624f32e5f1",
+      "size": 2008
+    },
+    "runtime/shaders/oot_scene.comp": {
+      "sha1": "53fab4e2c5942689a71aea5cd9c96e8065c4f0bd",
+      "size": 530
+    },
+    "runtime/shaders/oot_scene_easu.comp": {
+      "sha1": "a1ad068a5910a98a27710bf1df5ace78ccb7bb28",
+      "size": 1956
+    },
+    "runtime/shaders/oot_taa.comp": {
+      "sha1": "9008b44902222461fc1895ff05b56644835dd0e1",
+      "size": 3242
+    },
+    "runtime/shaders/stencil_clear_frag.spvasm": {
+      "sha1": "4d668009272b9be962e20b83e7a59f99ab75c36a",
+      "size": 342
+    },
+    "runtime/shaders/stencil_clear_vert.spvasm": {
+      "sha1": "205b17ce0f26829e05aef47f317c619f0701927b",
+      "size": 1149
+    },
+    "runtime/simd.h": {
+      "sha1": "535cb10675e1f0e5700192e45def59d7afe3ec01",
+      "size": 43381
+    },
+    "runtime/simd_fp.h": {
+      "sha1": "7020c25458ca403b9cfabd80ffd94fc7a4181a1c",
+      "size": 15715
+    },
+    "runtime/stencil_clear_frag_spv.h": {
+      "sha1": "d62d6dd55dcacdd5327603ebfb1bbc6af2d5d908",
+      "size": 669
+    },
+    "runtime/stencil_clear_vert_spv.h": {
+      "sha1": "902dc9d29fe07a1d3d34ea40d54b62b8dd5e5b03",
+      "size": 2057
+    },
+    "runtime/svc.c": {
+      "sha1": "acd8a67c088c38d9919e1a3bc0aa44b09d0f7ca1",
+      "size": 9367
+    },
+    "runtime/swkbd.c": {
+      "sha1": "7d25b53ff17c1f1852c3426b8fdbab93cad7a5c9",
+      "size": 10775
+    },
+    "runtime/swkbd.h": {
+      "sha1": "7f45504b56bf50dec08e20d016dfdb970dbc9157",
+      "size": 1566
+    },
+    "runtime/swkbd_sdl.c": {
+      "sha1": "becace2a972c4b00fa92c253d58256583cd57232",
+      "size": 1015
+    },
+    "runtime/swkbd_win.c": {
+      "sha1": "c5b0e4d33e41a04cbb494c1a44ebbd9a20b46fc7",
+      "size": 8350
+    },
+    "runtime/sysinfo.c": {
+      "sha1": "adb9abcf8cb2aa347d7b8c5fb331928e66d35c1f",
+      "size": 3671
+    },
+    "runtime/sysinfo.h": {
+      "sha1": "c180a6fbb4efeb3151ede510f2fb53c69be7f0fb",
+      "size": 907
+    },
+    "runtime/tex.h": {
+      "sha1": "f7268da35b6f9ea10a9b1e863d3310b3be968409",
+      "size": 5895
+    },
+    "runtime/tex_astc.c": {
+      "sha1": "0ce87e816358f74b51a6b5e1354800d45351e5f2",
+      "size": 22493
+    },
+    "runtime/tex_astc_mt.c": {
+      "sha1": "ddcb5102f9e775d39c731c1fa1305554013de605",
+      "size": 5873
+    },
+    "runtime/tex_bc3.c": {
+      "sha1": "c5a24225ed099233204945ed0d20d71caff3b348",
+      "size": 4257
+    },
+    "runtime/tex_deswizzle.c": {
+      "sha1": "0707bf229ad365593c54aaa33620d1e0997ea5a8",
+      "size": 7970
+    },
+    "runtime/tex_probe.c": {
+      "sha1": "7d21ad7f7f2584c5d0fc6366b741d40817447d16",
+      "size": 33732
+    },
+    "runtime/third_party/eglantine/README.md": {
+      "sha1": "b3f8f19ac9c700c573b58ba2bdf2a5b60e4b174f",
+      "size": 854
+    },
+    "runtime/third_party/eglantine/UPSTREAM_COMMIT": {
+      "sha1": "16ac540c35cf2e58e5b322cbd20eb0220492f2bb",
+      "size": 41
+    },
+    "runtime/third_party/eglantine/common/common_types.h": {
+      "sha1": "26f3afb1d1cd0676cdd2442d7ff6147a52d9a3aa",
+      "size": 393
+    },
+    "runtime/third_party/eglantine/shader_recompiler/frontend/ampere/geometry_exit.h": {
+      "sha1": "c3c21afbdf1b2c5be153891687c7295b288b1e37",
+      "size": 9888
+    },
+    "runtime/third_party/eglantine/shader_recompiler/frontend/ampere/instruction.h": {
+      "sha1": "2a91d88ba9c217a529e0bfb12dbb14afff4f6d52",
+      "size": 600
+    },
+    "runtime/third_party/eglantine/shader_recompiler/frontend/ampere/lower_to_maxwell.h": {
+      "sha1": "eaf3b74416ae5f1704a7b7d9195d9e6ca97f2704",
+      "size": 261998
+    },
+    "runtime/third_party/eglantine/shader_recompiler/frontend/ampere/program_address_map.h": {
+      "sha1": "bee32a821ccf6dd7b0249aa2989c682ebc742654",
+      "size": 1299
+    },
+    "runtime/third_party/eglantine/shader_recompiler/frontend/ampere/program_capture.h": {
+      "sha1": "d63579faa1600be3437219569195c4502e433db3",
+      "size": 4164
+    },
+    "runtime/third_party/eglantine/shader_recompiler/frontend/ampere/program_override.h": {
+      "sha1": "0943028b0c9994c47fb37bc7a4f409a73a0d6497",
+      "size": 4418
+    },
+    "runtime/third_party/eglantine/shader_recompiler/frontend/ampere/register_pressure.h": {
+      "sha1": "236dd8e1b1b17752c8690cb4322e3074d7800ec4",
+      "size": 8852
+    },
+    "runtime/third_party/eglantine/shader_recompiler/frontend/ampere/trap_guards.h": {
+      "sha1": "5507f81f0577be91ab9b4ab62253e0d508009fb4",
+      "size": 6290
+    },
+    "runtime/third_party/fsr2/LICENSE.txt": {
+      "sha1": "c066ae106362bfad8baccf883df61914602f5724",
+      "size": 1165
+    },
+    "runtime/third_party/fsr2/VERSION": {
+      "sha1": "db651d2cae08b6f6d6fcf136a59d0191b791bc23",
+      "size": 72
+    },
+    "runtime/third_party/fsr2/ffx_assert.cpp": {
+      "sha1": "8a70ad501a129deff48f336b64b87d13279fadf4",
+      "size": 2713
+    },
+    "runtime/third_party/fsr2/ffx_assert.h": {
+      "sha1": "ae32d2a73345194507824e991fe849e85053da04",
+      "size": 5013
+    },
+    "runtime/third_party/fsr2/ffx_error.h": {
+      "sha1": "7ba7d9c4ea4738eb53401c3ac07f36f3bdc07462",
+      "size": 4094
+    },
+    "runtime/third_party/fsr2/ffx_fsr2.cpp": {
+      "sha1": "051018e43786bd229118cfc69085acc2b9b55f79",
+      "size": 75738
+    },
+    "runtime/third_party/fsr2/ffx_fsr2.h": {
+      "sha1": "2a1c74abb1b358435524f0bb9dc62adcee91c665",
+      "size": 26898
+    },
+    "runtime/third_party/fsr2/ffx_fsr2_interface.h": {
+      "sha1": "b6be9760a719391e62d209571869d15b4744ca92",
+      "size": 19314
+    },
+    "runtime/third_party/fsr2/ffx_fsr2_maximum_bias.h": {
+      "sha1": "5fdbd0cdcd008a5cad45f8c5b655ab3abbf98b8f",
+      "size": 3260
+    },
+    "runtime/third_party/fsr2/ffx_fsr2_private.h": {
+      "sha1": "6b5fbc51177c7cc806c3d29fa81670347927310f",
+      "size": 3880
+    },
+    "runtime/third_party/fsr2/ffx_types.h": {
+      "sha1": "74edd192c48878bcfdeea4f8237cb84245513cfb",
+      "size": 20255
+    },
+    "runtime/third_party/fsr2/ffx_util.h": {
+      "sha1": "ca4324ea832ed1131fbf8edc6589b5c08487b4b5",
+      "size": 3224
+    },
+    "runtime/third_party/fsr2/fsr2_shaders_gen.h": {
+      "sha1": "7a665bbad35ade51cb283445a8dce4f9e81970d5",
+      "size": 351618
+    },
+    "runtime/third_party/fsr2/shaders/ffx_common_types.h": {
+      "sha1": "ddd17862b61a3dd8561817e7207bfd0afe49d904",
+      "size": 13110
+    },
+    "runtime/third_party/fsr2/shaders/ffx_core.h": {
+      "sha1": "4e687d6e3d6b187d4c97de788d673078f004096a",
+      "size": 1942
+    },
+    "runtime/third_party/fsr2/shaders/ffx_core_cpu.h": {
+      "sha1": "3bf0295bfc62075423ceddd3ad9b18784bf7194d",
+      "size": 15221
+    },
+    "runtime/third_party/fsr2/shaders/ffx_core_glsl.h": {
+      "sha1": "6ec58f3c625c4415fee44b353f54aa3add780e94",
+      "size": 53140
+    },
+    "runtime/third_party/fsr2/shaders/ffx_core_gpu_common.h": {
+      "sha1": "ae07642f0df31ab4f950c1e6920404de423aedef",
+      "size": 88008
+    },
+    "runtime/third_party/fsr2/shaders/ffx_core_gpu_common_half.h": {
+      "sha1": "c46ccb36575dfcc17c206ce3186b5261361de3b8",
+      "size": 97548
+    },
+    "runtime/third_party/fsr2/shaders/ffx_core_hlsl.h": {
+      "sha1": "ad4ff6552d1612ca1fb29bb30e55557869fbf9dc",
+      "size": 50064
+    },
+    "runtime/third_party/fsr2/shaders/ffx_core_portability.h": {
+      "sha1": "45be05973a84a79ac03c0e3a3ad15af24950a63b",
+      "size": 1713
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr1.h": {
+      "sha1": "1ac23cf3de3d6493b9345166faea9dca90d87980",
+      "size": 66353
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_accumulate.h": {
+      "sha1": "7bd5892cb90f26e2c408ed6742d58f2ab725f6de",
+      "size": 13093
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_accumulate_pass.glsl": {
+      "sha1": "6006fd024ef10962e1ebe601ca7b8016c0b01824",
+      "size": 4005
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_autogen_reactive_pass.glsl": {
+      "sha1": "7ae41cf0c1ade8a964c13a0941cde3cc5dcc6ae4",
+      "size": 4173
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_callbacks_glsl.h": {
+      "sha1": "10da13fb815b00355077a0986e9a493396773f3d",
+      "size": 22274
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_callbacks_hlsl.h": {
+      "sha1": "fd722b307e2fe57ca4c949d75f0e70db4e1c27b5",
+      "size": 36550
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_common.h": {
+      "sha1": "0c72aa84943e50b6806cddd6bf5c56c7d4922fe0",
+      "size": 18791
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_compute_luminance_pyramid.h": {
+      "sha1": "c63f1820e08dce54f9da230e46538bd39c6560a8",
+      "size": 6020
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_compute_luminance_pyramid_pass.glsl": {
+      "sha1": "3c99b9819ab150f0236c7af81a55be0f5213598c",
+      "size": 4171
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_depth_clip.h": {
+      "sha1": "fa4c975a23fddcabba65eb93820a05e48882ea31",
+      "size": 11398
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_depth_clip_pass.glsl": {
+      "sha1": "c7e30937a19d3ba1618fd5c645cc5abcef03e232",
+      "size": 3074
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_lock.h": {
+      "sha1": "8347fa86bcdf81d1c4cb4e70e66bf31519bc0b5d",
+      "size": 3708
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_lock_pass.glsl": {
+      "sha1": "f7cad59c209d298ec08240d58c592848ec356070",
+      "size": 2520
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_postprocess_lock_status.h": {
+      "sha1": "cee9e148ba1658af39af008cb511125378b4b679",
+      "size": 4693
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_rcas.h": {
+      "sha1": "d9006cd8ee00eaba65a35938c9bc76c0861ccf26",
+      "size": 2347
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_rcas_pass.glsl": {
+      "sha1": "20807a32e90ca7b40449c8aff1b27e24f1b4d7d9",
+      "size": 2888
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_reconstruct_dilated_velocity_and_previous_depth.h": {
+      "sha1": "e9ccc4bc8c28b2b1180fc76c72fd1380bf6aa179",
+      "size": 5497
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_reconstruct_previous_depth_pass.glsl": {
+      "sha1": "20e17eef8c5e9320d8fe60197e9e88cdace7bf86",
+      "size": 3003
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_reproject.h": {
+      "sha1": "f7f396129e14d715c66f7e26aa6a7871ff0613b1",
+      "size": 5369
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_resources.h": {
+      "sha1": "535dbc383c7be29cbfb0332757a1422091e15ef9",
+      "size": 7884
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_sample.h": {
+      "sha1": "f94f40aa793c0825e67df759cad4bcbfa5d2deca",
+      "size": 27132
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_tcr_autogen.h": {
+      "sha1": "101b75d25e4d0765f1b93a8b44a913c33a254b57",
+      "size": 10742
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_tcr_autogen_pass.glsl": {
+      "sha1": "bebca910991339114968a7d76a42735b2f91040b",
+      "size": 4980
+    },
+    "runtime/third_party/fsr2/shaders/ffx_fsr2_upsample.h": {
+      "sha1": "abdb8888a9a4022b422b28c579265a3e9def1a73",
+      "size": 9177
+    },
+    "runtime/third_party/fsr2/shaders/ffx_spd.h": {
+      "sha1": "5ce24ec87cc3204b7d5e315774a892ba6fdd13b9",
+      "size": 37953
+    },
+    "runtime/third_party/fsr2/vk/ffx_fsr2_vk.cpp": {
+      "sha1": "ec5aa8b276fe24a500e6b308878e9e21d800621d",
+      "size": 90135
+    },
+    "runtime/third_party/fsr2/vk/ffx_fsr2_vk.h": {
+      "sha1": "3ed87d569863cf80373f6323e917c5f0ca5c9188",
+      "size": 7061
+    },
+    "runtime/third_party/fsr2/vk/shaders/ffx_fsr2_shaders_vk.h": {
+      "sha1": "8035657725d709e33357f848a8f2c40080408db7",
+      "size": 3532
+    },
+    "runtime/third_party/imgui/LICENSE.txt": {
+      "sha1": "00ae473abe62bf1c53b333613bd9e05aa72e2ca0",
+      "size": 1083
+    },
+    "runtime/third_party/imgui/backends/imgui_impl_vulkan.cpp": {
+      "sha1": "f9d0fc6a6fbac6f9ebecabee1bb7a184f6dbb085",
+      "size": 90707
+    },
+    "runtime/third_party/imgui/backends/imgui_impl_vulkan.h": {
+      "sha1": "c3f40e138ae96569d6600b2b64baabda2bde5f57",
+      "size": 13284
+    },
+    "runtime/third_party/imgui/imconfig.h": {
+      "sha1": "a1e29e849bc8c6125a0c567fa6cb528a293025cb",
+      "size": 11579
+    },
+    "runtime/third_party/imgui/imgui.cpp": {
+      "sha1": "8ec001178734e137aa67dd3133c596c458be7df3",
+      "size": 881860
+    },
+    "runtime/third_party/imgui/imgui.h": {
+      "sha1": "4ca9c83724dcac2bc61741ed924fd1152add0ed7",
+      "size": 377981
+    },
+    "runtime/third_party/imgui/imgui_draw.cpp": {
+      "sha1": "aa0a7feec1bd8236ea6e22bbf1c53851ed84f800",
+      "size": 258760
+    },
+    "runtime/third_party/imgui/imgui_internal.h": {
+      "sha1": "6cb9be406c32ea282393ba39fa4d74a1ce246ae2",
+      "size": 272832
+    },
+    "runtime/third_party/imgui/imgui_tables.cpp": {
+      "sha1": "e67a8364978a9ff6caef5cada73e4913bc84ce17",
+      "size": 247576
+    },
+    "runtime/third_party/imgui/imgui_widgets.cpp": {
+      "sha1": "fc358534eaa85915b3b31223a0e527a38507b45d",
+      "size": 517769
+    },
+    "runtime/third_party/imgui/imstb_rectpack.h": {
+      "sha1": "f6917e7a6e56a03dcee169bf4e08c32611b761c9",
+      "size": 20344
+    },
+    "runtime/third_party/imgui/imstb_textedit.h": {
+      "sha1": "b7a761c85381993be0f4cd78539f277c06eb407e",
+      "size": 57128
+    },
+    "runtime/third_party/imgui/imstb_truetype.h": {
+      "sha1": "976f09cb92780b0d0db6fdfa3b2714df2567b320",
+      "size": 199485
+    },
+    "runtime/totk.ico": {
+      "sha1": "610eec95bf395ccf540f986c205abc766037a403",
+      "size": 124342
+    },
+    "runtime/totk.manifest": {
+      "sha1": "a0da154b980f06798d972a0823608d956b0615b8",
+      "size": 1569
+    },
+    "runtime/totk.rc": {
+      "sha1": "5739d292780155b9889b9892ffe0435daece6c18",
+      "size": 333
+    },
+    "runtime/ui/binds_page.cpp": {
+      "sha1": "04fe9d512f8625c5765e46738c949fb560455aba",
+      "size": 11014
+    },
+    "runtime/ui/binds_page.h": {
+      "sha1": "732a1a328d1c584ec844d89348d9e882451f99d5",
+      "size": 565
+    },
+    "runtime/ui/fonts/LICENSE-Roboto.txt": {
+      "sha1": "d705fac49b9de197fae0e45c4b4fe23ec81b1446",
+      "size": 10278
+    },
+    "runtime/ui/fonts/Roboto-Medium.ttf": {
+      "sha1": "39c63d7461796094c0b8889ee8fe2706d344a99a",
+      "size": 162588
+    },
+    "runtime/ui/menu.cpp": {
+      "sha1": "c309827946110374e57b083c009764e67b8716ba",
+      "size": 68654
+    },
+    "runtime/ui/menu.h": {
+      "sha1": "7f28f0ca36048edfde90b5932c04b4a1ce9d166f",
+      "size": 4630
+    },
+    "runtime/ui/menu_sdl.cpp": {
+      "sha1": "e1deeaccbee76093b6dda1a3785ceb75892f0212",
+      "size": 3692
+    },
+    "runtime/ui/menu_win.cpp": {
+      "sha1": "4d556a3d9adb8756ed88b13324709d6d6959fe6a",
+      "size": 3483
+    },
+    "runtime/ui/option_rows.cpp": {
+      "sha1": "04199d01ee39879516a55c6c2c06f1bffcb78064",
+      "size": 20507
+    },
+    "runtime/ui/option_rows.h": {
+      "sha1": "6e03faf864a46c106c2a7dfe454156928d580bd2",
+      "size": 4372
+    },
+    "runtime/ui_text.c": {
+      "sha1": "9517b36751f02450f8ba957894af1b65479f4f3d",
+      "size": 61720
+    },
+    "runtime/ui_text.h": {
+      "sha1": "ae6f695a652316ac7fb10d46ead66f0b1cf85332",
+      "size": 12462
+    },
+    "runtime/utf16.h": {
+      "sha1": "67965d85c659c708bf8a6b851095d2d8a652e53c",
+      "size": 2358
+    },
+    "runtime/vk.h": {
+      "sha1": "e28ecdbc62058fcb9b834c8bc740b2605d4c464e",
+      "size": 51360
+    },
+    "runtime/vk_astc.c": {
+      "sha1": "29126ed0b83876b4619cd5ef52f0ba1c0bfe9fb2",
+      "size": 36244
+    },
+    "runtime/vk_backend.c": {
+      "sha1": "09f2d2043ec2fdb3a1014bfe98ab87b34e945b4c",
+      "size": 32018
+    },
+    "runtime/vk_caps.c": {
+      "sha1": "97f91e15a892cdc786087df604434d0a2bf1ed11",
+      "size": 10368
+    },
+    "runtime/vk_clear.c": {
+      "sha1": "7dc8fddb6abc5feda9ead5ba8925ce19cff37f45",
+      "size": 7678
+    },
+    "runtime/vk_clear_probe.c": {
+      "sha1": "b1a7ad428ab56faa67c416446e975e46eaefc166",
+      "size": 7270
+    },
+    "runtime/vk_color.c": {
+      "sha1": "db29611d355ce7d9cd225e34579e51ed93daad28",
+      "size": 11305
+    },
+    "runtime/vk_copy_probe.c": {
+      "sha1": "de88e509994226daf6ac41ff91fb547b013682cd",
+      "size": 25379
+    },
+    "runtime/vk_crumbs.c": {
+      "sha1": "74a391a20d9ec0f44a7ec5c7135da46bccac6042",
+      "size": 3382
+    },
+    "runtime/vk_device.c": {
+      "sha1": "2c5ef190877805f0b0e65bc7617373d8aeabcaf2",
+      "size": 32769
+    },
+    "runtime/vk_dump.c": {
+      "sha1": "1d43c98ef40e7de1e021f6c5e9c8405e94278263",
+      "size": 48183
+    },
+    "runtime/vk_exec.c": {
+      "sha1": "04683d2f9c8fe00a0bf91314974674afc360fa25",
+      "size": 57906
+    },
+    "runtime/vk_exec.h": {
+      "sha1": "7cf43be45e271852df19a4d4bfb68fd66e2d6842",
+      "size": 14729
+    },
+    "runtime/vk_exec_draw.c": {
+      "sha1": "db46f52251ad6bcfca0697fd199853f894b3507d",
+      "size": 269412
+    },
+    "runtime/vk_exec_probe.c": {
+      "sha1": "9db7d41529b1dc3fb82dd3537781d746b359a089",
+      "size": 49175
+    },
+    "runtime/vk_exec_xfer.c": {
+      "sha1": "f179fc335a7344b24c12f32ed489f78b1555cba3",
+      "size": 40247
+    },
+    "runtime/vk_formats.c": {
+      "sha1": "7d799fd83ed83985c2238e124ae5ef4625b1a28d",
+      "size": 10967
+    },
+    "runtime/vk_framegen.c": {
+      "sha1": "ab971f5f198dd316fa55e0fea88ad1e4263e68f3",
+      "size": 21899
+    },
+    "runtime/vk_fsr.c": {
+      "sha1": "b71cbe4293a54c013ee67a54576e8ba1b66f92d4",
+      "size": 13285
+    },
+    "runtime/vk_fsr2.cpp": {
+      "sha1": "2f1a71039405b98e00f971df07fe902a561d8ddf",
+      "size": 6750
+    },
+    "runtime/vk_geometry_probe.c": {
+      "sha1": "0ad66f219233ad176d8f9c24e78504d84489dc2a",
+      "size": 25605
+    },
+    "runtime/vk_headroom.c": {
+      "sha1": "679ce6d00c459937e212ad2ba00d1521ef515eeb",
+      "size": 6612
+    },
+    "runtime/vk_memory.c": {
+      "sha1": "a55b4320d76d9467e29b35ad9af95a8c6f793438",
+      "size": 131431
+    },
+    "runtime/vk_pipeline.c": {
+      "sha1": "95f75e691d514310cb718d4dd106c2974cbc8d28",
+      "size": 315367
+    },
+    "runtime/vk_pool_probe.c": {
+      "sha1": "c73041ab67ee453528bf2a06b5e48639c4a9080e",
+      "size": 14997
+    },
+    "runtime/vk_rec.c": {
+      "sha1": "9e25a8fc88493841790ab8a424820c0c5cf380c0",
+      "size": 36082
+    },
+    "runtime/vk_rec.h": {
+      "sha1": "b9e3cdfbd8320165f61d508012318a41cbb83df2",
+      "size": 13782
+    },
+    "runtime/vk_reset_probe.c": {
+      "sha1": "dc74009394bdfcb6add60cb10aefdf36c0bfefd9",
+      "size": 13590
+    },
+    "runtime/vk_sync.c": {
+      "sha1": "29f9c32f37040588668010fc765e0281a6baaf95",
+      "size": 30125
+    },
+    "runtime/vk_texture.c": {
+      "sha1": "42040c1a32cf16765996d8d52e6a75e82f6b15bf",
+      "size": 100961
+    },
+    "runtime/vk_usnap.c": {
+      "sha1": "0f8742465fdea6697713bc367ca549d953433f31",
+      "size": 13300
+    },
+    "runtime/vk_vma.cpp": {
+      "sha1": "c6ddf890b2e0258d904c610ab04aa60537b90368",
+      "size": 384
+    },
+    "tests/alpha_test_spirv_test.py": {
+      "sha1": "59aa1d1de0147c5aef1fb2cc630077a9892e90b1",
+      "size": 7040
+    },
+    "tests/ampere_lichii_ports.cpp": {
+      "sha1": "fc790a2df18f4d1b34d4d2269056294942be25a7",
+      "size": 5392
+    },
+    "tests/ampere_lichii_ports_test.py": {
+      "sha1": "9d8dd0947cbe5f3e4409f8bd9388824da55ea5e3",
+      "size": 1186
+    },
+    "tests/audio_splitter_order.c": {
+      "sha1": "1012db99273081eaadcf1f428dd4fdb9bcff456c",
+      "size": 10880
+    },
+    "tests/audio_splitter_order_test.py": {
+      "sha1": "10b469fd53998e75c11734c4fa03c4f7c9d7707d",
+      "size": 5061
+    },
+    "tests/build_xlate_options_test.py": {
+      "sha1": "5d3f8d458edc102e44de063b81e20e9c1b2fd966",
+      "size": 4769
+    },
+    "tests/c0_layout_test.py": {
+      "sha1": "a34d17b90eda4ff63dc05dffac9c4408fbce31b2",
+      "size": 4310
+    },
+    "tests/check_content_test.py": {
+      "sha1": "021bbb93e4d1640f3f447909727581d471f9aebd",
+      "size": 6059
+    },
+    "tests/depth_register_test.py": {
+      "sha1": "67f70042749a887680e115463f060bbe358bce16",
+      "size": 4011
+    },
+    "tests/descriptor_empty_set.c": {
+      "sha1": "f27d9fa5f1e131eac12b24e31e089bdb6fac864d",
+      "size": 12873
+    },
+    "tests/descriptor_empty_set_test.py": {
+      "sha1": "ce47c2b3d5d2e5b9f8b34f797f73916a9a2dad5f",
+      "size": 4686
+    },
+    "tests/descriptor_pool_cache_test.py": {
+      "sha1": "0da5943260d533980f571f29aad3cbbf38d34ed1",
+      "size": 13867
+    },
+    "tests/descriptor_pool_registry_test.py": {
+      "sha1": "b34b3975774d42ae910c6641bcd73ed5c7faff0f",
+      "size": 20181
+    },
+    "tests/diff/atomic.py": {
+      "sha1": "27ee419ee18ac2a5af55d0c89856a13b2388fc1c",
+      "size": 9334
+    },
+    "tests/diff/common.py": {
+      "sha1": "648e280cff78defa8b68ab4921cb9d6f9f004d3a",
+      "size": 12175
+    },
+    "tests/diff/func.py": {
+      "sha1": "25a5d0bc952553a54dd44827aabf3e0702e901c7",
+      "size": 18908
+    },
+    "tests/diff/harness.c": {
+      "sha1": "00be191b0a5badca3e0676c48a70dac1eca19a73",
+      "size": 6026
+    },
+    "tests/diff/lift.py": {
+      "sha1": "779dd66417e05d13beb0e01c55df82c8351d8b35",
+      "size": 10089
+    },
+    "tests/diff/simd.py": {
+      "sha1": "556c54bdb221b094923cb305ebf5179ff2952e1b",
+      "size": 9666
+    },
+    "tests/excl_mt.py": {
+      "sha1": "22b424fc6ba14ea8c2c500aa48b637986271783e",
+      "size": 5341
+    },
+    "tests/f2i_byte_test.py": {
+      "sha1": "7ecf5687aab76871be70f572fee0db04e24baa7a",
+      "size": 10805
+    },
+    "tests/flags_check.c": {
+      "sha1": "9563925aa4711f69c3ee257c06bd7a7c3ac86d3a",
+      "size": 6077
+    },
+    "tests/flags_check.py": {
+      "sha1": "9447ff74f4decd104109123c7ad11abc22370ce5",
+      "size": 1085
+    },
+    "tests/float_minmax_gpu.c": {
+      "sha1": "a0205a904eb89f939aa3eb0901a1d409688cfa9f",
+      "size": 17343
+    },
+    "tests/float_minmax_gpu_test.py": {
+      "sha1": "5b28a48570012c899fbe76286eb849bbf2123832",
+      "size": 16002
+    },
+    "tests/float_minmax_test.py": {
+      "sha1": "bfc954a01fe7c0b7e9d39a4361da725e0537e76c",
+      "size": 15981
+    },
+    "tests/geometry_body_footprint_test.py": {
+      "sha1": "fd5ef2f047f252c7eee56cb31cb1b38c9b581a54",
+      "size": 15337
+    },
+    "tests/geometry_context_log_test.py": {
+      "sha1": "3657e49449c1c5a9001805b42f845285f776c2e2",
+      "size": 14281
+    },
+    "tests/geometry_feature_flags_test.py": {
+      "sha1": "caa6ecfd78d069f1755ed1eded709bc64c974e2e",
+      "size": 10092
+    },
+    "tests/geometry_native_control_cache_test.py": {
+      "sha1": "bc4a9a5c3f954ccb01312bc36ff91f65ae08394d",
+      "size": 11565
+    },
+    "tests/geometry_ordering_probe_test.py": {
+      "sha1": "4f1748e650ee6ff15002267b418e9bbba8fe76b2",
+      "size": 16325
+    },
+    "tests/geometry_passthrough_body_test.py": {
+      "sha1": "85e61db397571dc6196d3c9e084aa4912e2389c4",
+      "size": 20223
+    },
+    "tests/geometry_passthrough_cache_test.py": {
+      "sha1": "b0f43e7b793cedb54ee389f13214b6320cd983cb",
+      "size": 18773
+    },
+    "tests/geometry_passthrough_fixture.py": {
+      "sha1": "04135f8f41ae6f906005952da2de5a55cc2aa2ce",
+      "size": 1004
+    },
+    "tests/geometry_passthrough_test.py": {
+      "sha1": "ff9e5736f40d1a673969cd502c40bf91547db73b",
+      "size": 15921
+    },
+    "tests/geometry_pipeline.c": {
+      "sha1": "26c15695439ac8bcad5d79c02146d5120287b849",
+      "size": 24566
+    },
+    "tests/geometry_pipeline_test.py": {
+      "sha1": "38fd9065da2665130c488a635e6e24d78572c8b2",
+      "size": 20479
+    },
+    "tests/geometry_program_control_test.py": {
+      "sha1": "897f438e8e43fe23a777e6d660d03827b11e71f8",
+      "size": 17378
+    },
+    "tests/geometry_replay_test.py": {
+      "sha1": "5044d0b593a90a70d605c6b0870e764aa12fddd4",
+      "size": 21975
+    },
+    "tests/geometry_shader_cache.c": {
+      "sha1": "d50ba76e2b3614691aa9e84d7fcd2c1c42fe1217",
+      "size": 17265
+    },
+    "tests/geometry_shader_cache_test.py": {
+      "sha1": "c63ba986c9bacd12b01a0732cd77371d91453a1c",
+      "size": 40178
+    },
+    "tests/geometry_shader_fixture.py": {
+      "sha1": "1dd29b6e86c9aad23af83adc6d85dfdaa4784962",
+      "size": 5101
+    },
+    "tests/geometry_subgroup.c": {
+      "sha1": "60fce3002192bd7df205e386e7c7fc3ca1c7c981",
+      "size": 4546
+    },
+    "tests/geometry_subgroup_test.py": {
+      "sha1": "b7440dda65094d094f4b8eb79e9cbbb00d2fd45f",
+      "size": 11763
+    },
+    "tests/geometry_viewport_fixture.py": {
+      "sha1": "2fcf850f39b18631e874b4cb0d69b40ceff74dad",
+      "size": 12547
+    },
+    "tests/geometry_viewport_state_test.py": {
+      "sha1": "323c70a1b96309f7bc25b5c187656d7f5db9de36",
+      "size": 9104
+    },
+    "tests/hookshot_tool_test.py": {
+      "sha1": "7ba50b228e987da0085f40ae76ac4cd3eb620fe5",
+      "size": 37447
+    },
+    "tests/indirect_reset.c": {
+      "sha1": "02581a295179bd307baaeb81a6b638d45bb447be",
+      "size": 10602
+    },
+    "tests/indirect_reset_test.py": {
+      "sha1": "69eff37a07b0eac14340b1015c4325196171053f",
+      "size": 1482
+    },
+    "tests/jumptables_check.py": {
+      "sha1": "5c71aac14ba9b81b1160164c283e685a14602294",
+      "size": 35021
+    },
+    "tests/native_exit_capture.cpp": {
+      "sha1": "87ff3c015e9f2fb9dd9cce6d34571e4bb48d8b22",
+      "size": 4444
+    },
+    "tests/native_exit_capture_test.py": {
+      "sha1": "2784910806c73a4da13dbb1b579f80bc285fb1cf",
+      "size": 2423
+    },
+    "tests/nup_extract_check.py": {
+      "sha1": "18b6dfac231489ac53d4661aa0aff091ab0baee6",
+      "size": 15953
+    },
+    "tests/nvn2_compute_c0.c": {
+      "sha1": "ab48cc312cc7d717bf471556178cdaafce7afabc",
+      "size": 5175
+    },
+    "tests/nvn2_compute_c0_test.py": {
+      "sha1": "683f747e9a19e32d9dcdc6eea2f07b0d61ec5b45",
+      "size": 2453
+    },
+    "tests/nvn2_indirect_c0_test.py": {
+      "sha1": "9f631c0fc661303139f7a22a205eee3f727af13c",
+      "size": 7708
+    },
+    "tests/nvn2_shader_control_test.py": {
+      "sha1": "521e8c62a37c95b289d0b11f8573aedd0c6fee57",
+      "size": 16276
+    },
+    "tests/nvn_mode_trace.c": {
+      "sha1": "b227d88f041f8031f5a6af3a763ede3b8eacdc4e",
+      "size": 14435
+    },
+    "tests/nvn_mode_trace_test.py": {
+      "sha1": "50bb9de9d2ea419b77761473c1e3dbad4edd32f6",
+      "size": 3115
+    },
+    "tests/nvn_push_constants.c": {
+      "sha1": "00a6d1b896e8165d88facbb6b5ac945a59d1924b",
+      "size": 8310
+    },
+    "tests/nvn_push_constants_test.py": {
+      "sha1": "76d921a164d9069f5020444894ad40b3fd97d01c",
+      "size": 1257
+    },
+    "tests/nvn_submit_ticks.c": {
+      "sha1": "42fa72eef61ee2fdb76557eb43d04d44d6a0e6ca",
+      "size": 8217
+    },
+    "tests/nvn_submit_ticks_test.py": {
+      "sha1": "7d5ebed2168567c5883994b36454d917cb9b8727",
+      "size": 5418
+    },
+    "tests/nvn_wait_sync.c": {
+      "sha1": "49a5fc8e29b93cc0e54768384e05ebb6819be397",
+      "size": 13979
+    },
+    "tests/nvn_wait_sync_test.py": {
+      "sha1": "5e10febef286a0aaedaf3f442f6998883fa685e3",
+      "size": 2244
+    },
+    "tests/pack_shader_cache_test.py": {
+      "sha1": "53356ef7cebad7ddc0f1a0b5fb2656ae458757b4",
+      "size": 4674
+    },
+    "tests/shader_failure_capture.c": {
+      "sha1": "4531355b06eade90abdac98d6a8d513e9864245c",
+      "size": 7276
+    },
+    "tests/shader_failure_replay_test.py": {
+      "sha1": "91f3b411f88a137b71f3741f3af903bc196361f9",
+      "size": 16254
+    },
+    "tests/spin_waits_test.py": {
+      "sha1": "29c5642359e6d39e9e0088e1fa04fc2a0ebdbde0",
+      "size": 4167
+    },
+    "tests/spirv_interface_test.py": {
+      "sha1": "96de23db34fa1a7702d7ee3a81ad86e133ddb76d",
+      "size": 26366
+    },
+    "tests/stencil_clear_test.c": {
+      "sha1": "f49ecd1f42e7146c95f2f96793c9d81b1417f875",
+      "size": 5418
+    },
+    "tests/stencil_clear_test.py": {
+      "sha1": "879dd0ad3eb01071912456fc94d336253332f802",
+      "size": 2135
+    },
+    "tests/storage_candidates_fixture.py": {
+      "sha1": "41f7d6813875eb1e0cebcc28729ca57e599de3c4",
+      "size": 7173
+    },
+    "tests/storage_candidates_gpu.c": {
+      "sha1": "6c86e06191c5f2a36f35b05417f93171083988ff",
+      "size": 19555
+    },
+    "tests/storage_candidates_gpu_test.py": {
+      "sha1": "277da24a21dfea744e24a5bc98800183e1501c96",
+      "size": 21193
+    },
+    "tests/storage_candidates_resource_probe.cs": {
+      "sha1": "f7d265411a62bea27d0eee1cb65e1fa703d074d8",
+      "size": 7566
+    },
+    "tests/storage_candidates_runtime_test.py": {
+      "sha1": "fda9a8687bc3fae262cf79ce4cf5be12cbbae234",
+      "size": 15625
+    },
+    "tests/vk_geometry_passthrough_probe_test.py": {
+      "sha1": "f2389cf29ce579c2fe7dfb4f3f1b6c2f11c6665e",
+      "size": 14617
+    },
+    "tests/vk_geometry_probe_test.py": {
+      "sha1": "09b9a65b074f1107463522a1d2799139ecac417f",
+      "size": 11444
+    },
+    "tests/vk_memory_inspect_test.py": {
+      "sha1": "18d2edd83fcb5407a98ce5cc813c94ab2823ea9c",
+      "size": 12634
+    },
+    "tests/vk_pool_probe_test.py": {
+      "sha1": "159fd610635848c45331f11373b04241328a97e6",
+      "size": 7948
+    },
+    "tests/vk_prefix_read.c": {
+      "sha1": "663c77bca3790caed27eb8af9930258b96de7549",
+      "size": 15906
+    },
+    "tests/vk_prefix_read_test.py": {
+      "sha1": "4c723b9963a197d5deff8f08f5c96745ab0e2341",
+      "size": 4422
+    },
+    "tests/vk_resource_frontier.c": {
+      "sha1": "799f4e0f6e95985b419b8de3946dca37cefb9561",
+      "size": 18110
+    },
+    "tests/vk_resource_frontier_test.py": {
+      "sha1": "8738a05f2eff54c8a22f76c1bc3586bd5882b80c",
+      "size": 6737
+    },
+    "tests/worktree_test.py": {
+      "sha1": "e4c06ef77880c0dc56ec2395af0060e76ae129d6",
+      "size": 5524
+    },
+    "tests/xlate_geometry_test.py": {
+      "sha1": "8099d0cfa6811eef9bf057d7879a8998f70f3988",
+      "size": 20832
+    },
+    "tests/xlate_storage_candidates_test.py": {
+      "sha1": "3ecf1e81519e35c7e870a48e9bb96524f684f6f7",
+      "size": 24548
+    },
+    "tools/ab_summary.py": {
+      "sha1": "12f7b8198aa8afdb7543ffd34606bea1e58063d7",
+      "size": 1897
+    },
+    "tools/build_fsr2_shaders.py": {
+      "sha1": "888a33c18e3e242446e0778d0be03c8853f936d9",
+      "size": 5687
+    },
+    "tools/build_game.py": {
+      "sha1": "cabe2dcef2bd4ab5b41865da5cf18e4d9d00ddc6",
+      "size": 48486
+    },
+    "tools/build_hactool.py": {
+      "sha1": "a39fa1ae279415b61fd5575865182882402a777f",
+      "size": 4750
+    },
+    "tools/build_shaders.py": {
+      "sha1": "4e6a5a076c2b71763017ee3b377f70ebe51cb861",
+      "size": 3626
+    },
+    "tools/build_xlate.py": {
+      "sha1": "c5307c7e29d74167e3396eeaf024cc69c595f178",
+      "size": 10154
+    },
+    "tools/check_content.py": {
+      "sha1": "2fd36e60edeb9efef8dbe4a72177ec9c98d74839",
+      "size": 3777
+    },
+    "tools/check_platform.py": {
+      "sha1": "8b9ac245fa83d2087add08a98773b1f5b83305dc",
+      "size": 5218
+    },
+    "tools/crit_path.py": {
+      "sha1": "1f89ae306bbbaf3558734c1a4b72a7e5b8529888",
+      "size": 4785
+    },
+    "tools/data/expected-oot111.json": {
+      "sha1": "e629c70c49466220377212ca034693152e1db13e",
+      "size": 571
+    },
+    "tools/data/expected-v1.0.0.json": {
+      "sha1": "20284152a1155bbd8fb33e9abce511ce68d2ee65",
+      "size": 1797
+    },
+    "tools/data/expected-v1.1.1.json": {
+      "sha1": "5f706acf2bf3836142edcdb0cfa03e3b02571cea",
+      "size": 1579
+    },
+    "tools/data/expected-v1.1.2.json": {
+      "sha1": "988193740cefd6600bbee19829b7e9ec0da2a047",
+      "size": 1634
+    },
+    "tools/data/expected-v1.2.1.json": {
+      "sha1": "1d56fef219467f1b1012e07e1fd9419a0897618f",
+      "size": 1650
+    },
+    "tools/data/expected-v1.4.3.json": {
+      "sha1": "813bd7968b67fb69f279daee532ee97c4182596b",
+      "size": 1651
+    },
+    "tools/dkb_expected.py": {
+      "sha1": "2e64633345b1f5a345078d6208f66adc673a633c",
+      "size": 1750
+    },
+    "tools/dkb_lower_test.cpp": {
+      "sha1": "bd4a39a6b142188a6ead1364534a83b9d73edeb8",
+      "size": 4339
+    },
+    "tools/dkb_nvn2_ctlstats.py": {
+      "sha1": "6095e9898718f0b16857061c955c03caba139bdb",
+      "size": 1259
+    },
+    "tools/dkb_nvn2_sphstats.py": {
+      "sha1": "376d48da94deaee6f2ce4d749549756f2fdc5cb7",
+      "size": 804
+    },
+    "tools/dkb_sm86_ops.py": {
+      "sha1": "d1de3a9a9dac0d7b3f70e1ceff827deed350b33a",
+      "size": 2124
+    },
+    "tools/extract.py": {
+      "sha1": "839cb35c8b8a21b3847ac11ecd05e2afe282d2fa",
+      "size": 17699
+    },
+    "tools/extract_fonts.py": {
+      "sha1": "77ccf9199c179203ed39f0175fad288abefd4aa0",
+      "size": 2623
+    },
+    "tools/extract_nup.py": {
+      "sha1": "10ca2d894f0265137ddd2db3a0c01e3b231d72cd",
+      "size": 16906
+    },
+    "tools/fetch_refs.sh": {
+      "sha1": "52ac2ae2805cb43adb581dc21a5cd3e7229a5c50",
+      "size": 2369
+    },
+    "tools/flight_view.py": {
+      "sha1": "652356301177561f1f59ae350339ec8c903bbd83",
+      "size": 6832
+    },
+    "tools/gen_nvn_procs.py": {
+      "sha1": "0a074a9cba3f026eb62a1539f7d7d988ec25be87",
+      "size": 2408
+    },
+    "tools/geometry_body_footprint.py": {
+      "sha1": "e10293ae101ba75de93a079e89c213a019a53873",
+      "size": 10638
+    },
+    "tools/hactool/mbedtls-asm-clobbers.patch": {
+      "sha1": "d0f01ed73a25e3fdae448cb683d02bff629b4816",
+      "size": 1063
+    },
+    "tools/hactool/portable.patch": {
+      "sha1": "517f9bda506c8d2244ee0e63a6909f375670fead",
+      "size": 2334
+    },
+    "tools/hactool/unicode.patch": {
+      "sha1": "eda188f6e5377d153ab805ace555f856af39fcd7",
+      "size": 2491
+    },
+    "tools/hostmem.py": {
+      "sha1": "7916d937e72c7c5a324669337f055e690c250ed4",
+      "size": 2589
+    },
+    "tools/input/load_save.txt": {
+      "sha1": "e6d2844539f2071729d8cb4d6e074ddfba2f716b",
+      "size": 78
+    },
+    "tools/make_romfs_patches.py": {
+      "sha1": "9de0c8acc80e64aea84b5bca11e8e7ae19c65a12",
+      "size": 23094
+    },
+    "tools/oot/hookshot.py": {
+      "sha1": "924ed93293b35fba7089889f8e66dad644d37271",
+      "size": 24975
+    },
+    "tools/oot/make_setup.py": {
+      "sha1": "0c01d083d992609601e94927fff0666d90d30ad2",
+      "size": 13558
+    },
+    "tools/oot/merge_records.py": {
+      "sha1": "95fd768c619be60757cd335f281d800ae141d5ea",
+      "size": 3557
+    },
+    "tools/oot/patch_generated.py": {
+      "sha1": "a978fb999517cf135bb0ecb9d8b5eeaf7ac477bd",
+      "size": 4987
+    },
+    "tools/oot/shader_extract.py": {
+      "sha1": "8ee5aa3159517f43484b7e7160f32a04bd3d6285",
+      "size": 9678
+    },
+    "tools/oot/unzbic.c": {
+      "sha1": "0d5cceb899dc130dcb876c877c75388fb9ae7ef6",
+      "size": 1776
+    },
+    "tools/pack_romfs.py": {
+      "sha1": "d536d1e804a8c4a7269f1a1f32ee84a68da2eeb0",
+      "size": 3021
+    },
+    "tools/pack_shader_cache.py": {
+      "sha1": "f41e2c3fcc8ac667d994bd9794a98d2b5b783450",
+      "size": 6014
+    },
+    "tools/perf_summary.py": {
+      "sha1": "68725a7e3ef560cf92980502313b64ea43ae7ba8",
+      "size": 6486
+    },
+    "tools/prepare_shaders.py": {
+      "sha1": "f26aa30dc38724dfab1daa67c5b5c208cf335f8b",
+      "size": 10988
+    },
+    "tools/prof_report.py": {
+      "sha1": "9c5ad45d598c2a3e1567e381169c15f389b10511",
+      "size": 6380
+    },
+    "tools/replay_shader_failure.py": {
+      "sha1": "3526ced205498a529b5c127b4d69cc4ba53beadc",
+      "size": 3671
+    },
+    "tools/requirements-build.txt": {
+      "sha1": "b23e18406fbc6af95ef2794b02c23f38fab5bf43",
+      "size": 148
+    },
+    "tools/requirements-py314.txt": {
+      "sha1": "2bf9147b12f0df94f041494fdf6c94761c055e8b",
+      "size": 562
+    },
+    "tools/requirements.txt": {
+      "sha1": "dbcc250984157a02337f473de13649c95588e7d6",
+      "size": 801
+    },
+    "tools/romfs_index.py": {
+      "sha1": "b61272126a6b4a176a7e6bcbb916bea914ac9453",
+      "size": 4948
+    },
+    "tools/run_game.py": {
+      "sha1": "f0062b4850c0029a611c8f5da6a96e2aed349e6a",
+      "size": 8435
+    },
+    "tools/shader_census.py": {
+      "sha1": "7f1e1790bac5f5605a0fbd22f42c64b7e497a08c",
+      "size": 17969
+    },
+    "tools/shader_list.py": {
+      "sha1": "493f0d00b961765a50481c40079b3ec431271a4f",
+      "size": 1844
+    },
+    "tools/spin_waits.py": {
+      "sha1": "7f581fde94a65b47b5cd6fc120668915d1ab75ce",
+      "size": 21546
+    },
+    "tools/ultrawide_layout.py": {
+      "sha1": "6c2fff1a30d70d3f4dc48b0f9afa6efc8b1eb86c",
+      "size": 19397
+    },
+    "tools/vendor/macnativegames/LICENSE": {
+      "sha1": "a94417a3cd27398e5188438eaf7fa6aceef49f7e",
+      "size": 1084
+    },
+    "tools/vendor/macnativegames/README.md": {
+      "sha1": "dd88cb381e85e5381758ba2948e577ac90dd8ff7",
+      "size": 736
+    },
+    "tools/vendor/macnativegames/extract_exefs.py": {
+      "sha1": "c929dfbf3c2ee1df1252bf551b7685eacc93393a",
+      "size": 12194
+    },
+    "tools/vendor/macnativegames/extract_romfs.py": {
+      "sha1": "0b057bed05b64da63c9c639217613597fd719704",
+      "size": 5986
+    },
+    "tools/vendor/macnativegames/extract_shared_fonts.py": {
+      "sha1": "69dbaeacf5321c5ad0c2f0299d389bc271eab43a",
+      "size": 10008
+    },
+    "tools/vendor/macnativegames/extract_update_romfs.py": {
+      "sha1": "a45b9f73f7d0906f71a1f765d1f289e5a8036f28",
+      "size": 7734
+    },
+    "tools/vendor/ryujinx/.gitignore": {
+      "sha1": "cd42ee34e873b4ddf17cdeeed2e6c0d4e094c62b",
+      "size": 10
+    },
+    "tools/vendor/ryujinx/Directory.Build.props": {
+      "sha1": "b80d1a8870effc093f7ba9d614d76879b90892a6",
+      "size": 218
+    },
+    "tools/vendor/ryujinx/Directory.Packages.props": {
+      "sha1": "6bf619dd3071b14e4a0b0c7e5b20f58e5d4a15ea",
+      "size": 5592
+    },
+    "tools/vendor/ryujinx/LICENSE.txt": {
+      "sha1": "818ddd76058d49f42eed9c0ecb580777c7f87d7e",
+      "size": 1081
+    },
+    "tools/vendor/ryujinx/README.md": {
+      "sha1": "4bc9d2a19490b9e9bdbaf382cc85cde9bf2b579b",
+      "size": 618
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/AsyncWorkQueue.cs": {
+      "sha1": "e3f91c8916af29c1580f4a847549d40a51cf45be",
+      "size": 2679
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Collections/BitMap.cs": {
+      "sha1": "2c92113005a419b7e6b6a8aba66c1fbea414362b",
+      "size": 6252
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Collections/IntervalTree.cs": {
+      "sha1": "cc2062d4856c8e693cf193001c9475d48741f75c",
+      "size": 17700
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Collections/IntrusiveRedBlackTree.cs": {
+      "sha1": "55bfe00195543dc2b3d57731aa835a6d5e232dc1",
+      "size": 10885
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Collections/IntrusiveRedBlackTreeImpl.cs": {
+      "sha1": "58bcc4fe55722913c375ee22abfd75d56b4e6b5d",
+      "size": 12477
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Collections/IntrusiveRedBlackTreeNode.cs": {
+      "sha1": "57e0b27c8192fc57a2b625e4b69cdbe32befb3f5",
+      "size": 388
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Collections/TreeDictionary.cs": {
+      "sha1": "ef818167df04c9241ee20adfbf902e7981690d0c",
+      "size": 20299
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/AntiAliasing.cs": {
+      "sha1": "1510c23eee7a6cd8ca8854d988f606cf48109531",
+      "size": 292
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/AppDataManager.cs": {
+      "sha1": "cb26be2d5426cfe3331fcf8071d6ca08068bc72a",
+      "size": 14016
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/AspectRatioExtensions.cs": {
+      "sha1": "23ecd5870bdf23b489b7345a6db89a29bb5a3b29",
+      "size": 2126
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/BackendThreading.cs": {
+      "sha1": "198c2eed1164f1f39bc616d073a33f20022f782e",
+      "size": 237
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/DirtyHack.cs": {
+      "sha1": "ae3416a279e67b6944295f8799c03324bbc08770",
+      "size": 2053
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/DownloadableContentContainer.cs": {
+      "sha1": "6f12e9767587d49c45a0f3495cb1bcf406f31469",
+      "size": 388
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/DownloadableContentJsonSerializerContext.cs": {
+      "sha1": "cc89cb128bb7e4fbb9e8e507cf7aa6188b81eb34",
+      "size": 341
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/DownloadableContentNca.cs": {
+      "sha1": "60d4a9bd6d2d83e23f8babc6a05509a111568db3",
+      "size": 380
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/GraphicsBackend.cs": {
+      "sha1": "ca6298eb583675b40826c37c26791b86082ad8df",
+      "size": 228
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/GraphicsDebugLevel.cs": {
+      "sha1": "707715bbb40d9640d77bfe7ea5eac9d94fd84f0b",
+      "size": 263
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/AssignedInputDevice.cs": {
+      "sha1": "ee7add6a4d0bd140a86900d3e37796259b32816b",
+      "size": 243
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/AssignedInputDeviceType.cs": {
+      "sha1": "aff9971ef38ab43d630a3905d5f6b7d4dc4b7b8a",
+      "size": 254
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Controller/GamepadInputId.cs": {
+      "sha1": "2d4c23ea7b4e0b1e478c9f3d7a009ea99ad5cf69",
+      "size": 1042
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Controller/GenericControllerInputConfig.cs": {
+      "sha1": "c99da6f4a74e876607b856bc8e62bb7284538ba2",
+      "size": 2523
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Controller/JoyconConfigControllerStick.cs": {
+      "sha1": "70af4071df75effd802d36b378c8f86c6c2bda95",
+      "size": 432
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Controller/LedConfigController.cs": {
+      "sha1": "5edeff0ac5385196d9cde2d9f04eeb619c4416ff",
+      "size": 710
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Controller/Motion/CemuHookMotionConfigController.cs": {
+      "sha1": "1c31fff7b18390bbb90be02529bc62e399ba2135",
+      "size": 836
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Controller/Motion/JsonMotionConfigControllerConverter.cs": {
+      "sha1": "40f067aea3491d978c84ce6120231e94c19dc935",
+      "size": 3589
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Controller/Motion/MotionConfigController.cs": {
+      "sha1": "7905ef062f6db60ee6df84056048ea40cae13432",
+      "size": 656
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Controller/Motion/MotionConfigJsonSerializerContext.cs": {
+      "sha1": "784e0cb1183fdfea8615406b2628e8ff53ce8e19",
+      "size": 436
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Controller/Motion/MotionInputBackendType.cs": {
+      "sha1": "fa23e00d3c2184da0c47b0d7d9b8e79c90f8384c",
+      "size": 297
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Controller/Motion/StandardMotionConfigController.cs": {
+      "sha1": "7f1ac40a2120a1d30360a7b9ef940f7919431b69",
+      "size": 142
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Controller/RumbleConfigController.cs": {
+      "sha1": "f190996c1aa0c008945b74905f51119465b3190f",
+      "size": 644
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Controller/StandardControllerInputConfig.cs": {
+      "sha1": "cfd9755bfa0c05907545c6bcb4771a30361253ef",
+      "size": 170
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Controller/StickInputId.cs": {
+      "sha1": "6e9920eddb5462620091ef5bc854d08474019038",
+      "size": 282
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/ControllerType.cs": {
+      "sha1": "904c6d13de6c7aa7e4215c221f695de262804e08",
+      "size": 605
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/GenericInputConfigurationCommon.cs": {
+      "sha1": "c70594df47ce583a10fdbbd47ef2dfdf728765f3",
+      "size": 483
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/InputBackendType.cs": {
+      "sha1": "c3336dc6468fd36d46b4ab1ef649cd619ae5a005",
+      "size": 298
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/InputConfig.cs": {
+      "sha1": "874961c70d9adbd2360ebd62cbc8aec8fa5cd198",
+      "size": 1587
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/InputConfigJsonSerializerContext.cs": {
+      "sha1": "bd8be2491ab4d1f74342faf19944353336ba7e79",
+      "size": 502
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/JsonInputConfigConverter.cs": {
+      "sha1": "eadaab492e2d3fe3ac53dfd66558a2ca3a53bc36",
+      "size": 3576
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Key.cs": {
+      "sha1": "cf0f4c0763310fbaf4d7dee913defc6a5aadf298",
+      "size": 2130
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Keyboard/GenericKeyboardInputConfig.cs": {
+      "sha1": "ecddd31e32ef1f1eab34a2af40a0ac8f428698f6",
+      "size": 528
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Keyboard/JoyconConfigKeyboardStick.cs": {
+      "sha1": "36292a8b76084d2a98d7d81060cd0cb46b373dd6",
+      "size": 361
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/Keyboard/StandardKeyboardInputConfig.cs": {
+      "sha1": "548b0762c3144d2a8932dd5341e7bd299c208c01",
+      "size": 147
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/KeyboardHotkeys.cs": {
+      "sha1": "efdb422e7709c6e7812e2a7fd98c0ce0567f0a3d",
+      "size": 704
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/LeftJoyconCommonConfig.cs": {
+      "sha1": "1404535555ea6f2b4ae1066939e341c27b4b4d6f",
+      "size": 523
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/PhysicalKey.cs": {
+      "sha1": "c9cc1b8cd5f0a1e44d0bd3d180c7775f72b6b4c9",
+      "size": 2146
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/PlayerIndex.cs": {
+      "sha1": "4675486ef8e5b6b7b376bf3c39352619169f7675",
+      "size": 559
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/PlayerInputAssignment.cs": {
+      "sha1": "aacd8400c2a8813a4ff065a68dcfc6fab2622799",
+      "size": 314
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/PlayerInputAssignmentHelper.cs": {
+      "sha1": "5bfa26a454af3d6f9b711e98e77c6e9a770f299f",
+      "size": 5750
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Hid/RightJoyconCommonConfig.cs": {
+      "sha1": "1fb99104f1b06f84e640ad8382c2d3c5b1365e84",
+      "size": 520
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/HideCursorMode.cs": {
+      "sha1": "f4480268f2da11e4584ad31e08f7d00d420e3ad8",
+      "size": 133
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/MemoryManagerMode.cs": {
+      "sha1": "83d1e8ae24724adf4e795e6137a2b3dcb6d4aab3",
+      "size": 280
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Mod.cs": {
+      "sha1": "052c7c8d12dd72aef0fe57da1365e40bbe3a6d99",
+      "size": 200
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/ModMetadata.cs": {
+      "sha1": "6bc9482ad9637f5868f460574d0d818255be8a32",
+      "size": 237
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/ModMetadataJsonSerializerContext.cs": {
+      "sha1": "8c1e242ad87dfb6515805d856b78efb70d288121",
+      "size": 276
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/Multiplayer/MultiplayerMode.cs": {
+      "sha1": "be0e1518c8c6bbe9fc3e5254c874cb974ad398c2",
+      "size": 150
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/ScalingFilter.cs": {
+      "sha1": "9040b1be04790190904848a32c3fa2210d86c185",
+      "size": 254
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/TitleUpdateMetadata.cs": {
+      "sha1": "a1b14f6f7583b25ce63719835d4fbd721af96d8d",
+      "size": 221
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/TitleUpdateMetadataJsonSerializerContext.cs": {
+      "sha1": "a4b6efff4f9442a273547a3e5b83e1fb797d5969",
+      "size": 292
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Configuration/VSyncMode.cs": {
+      "sha1": "21505bf2a48cd42f561b344478d1d0562caf8632",
+      "size": 576
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Extensions/BinaryReaderExtensions.cs": {
+      "sha1": "dece2384cc37e6832c6bca3e26f014cef5ae881a",
+      "size": 376
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Extensions/BinaryWriterExtensions.cs": {
+      "sha1": "9c3e72329f4a5ae96e249214725c4319c74b9b1b",
+      "size": 753
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Extensions/SequenceReaderExtensions.cs": {
+      "sha1": "c4b33ab0dc26f2ebd624f6dfea7c2c2eee910689",
+      "size": 8502
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Extensions/StreamExtensions.cs": {
+      "sha1": "59ff44edc0398f9908dd4ebf070ad170ba7d8176",
+      "size": 5093
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/GraphicsDriver/DriverUtilities.cs": {
+      "sha1": "a9163f348545605cbef0a9d428e1354b6ae72478",
+      "size": 1270
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/GraphicsDriver/NVAPI/Nvapi.cs": {
+      "sha1": "985e5e6d3a9ea662173cf8c4bec1b9d26bdd4e08",
+      "size": 236
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/GraphicsDriver/NVAPI/NvapiUnicodeString.cs": {
+      "sha1": "5b0992dce8d553f9872630e9ea68475b09053c4f",
+      "size": 1023
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/GraphicsDriver/NVAPI/NvdrsApplicationV4.cs": {
+      "sha1": "39820bfef20d8243b6f9cc05b6c43d3ae8daae28",
+      "size": 507
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/GraphicsDriver/NVAPI/NvdrsProfile.cs": {
+      "sha1": "f9fe4ed4149176d633f7ee462363190c8e7902ca",
+      "size": 385
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/GraphicsDriver/NVAPI/NvdrsSetting.cs": {
+      "sha1": "a36781bafc66b943578024ecdf7f779fb9603eda",
+      "size": 1304
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/GraphicsDriver/NVThreadedOptimization.cs": {
+      "sha1": "8d969bd6af021a7bac72c068a74d76bad272e204",
+      "size": 6846
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Hash128.cs": {
+      "sha1": "e95a15caae311c415678d589fc85835024240656",
+      "size": 25826
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Helpers/ConsoleHelper.cs": {
+      "sha1": "75954110cd2586ec7d8561b729a21790df73b21d",
+      "size": 1942
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Helpers/FileAssociationHelper.cs": {
+      "sha1": "d57a209c273a6a4c3c277d6cbd8d035d38e31cc1",
+      "size": 7033
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Helpers/LinuxHelper.cs": {
+      "sha1": "e342b2151b9a1cdb19d451a25df7347241de0636",
+      "size": 1854
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Helpers/ObjectiveC.cs": {
+      "sha1": "4c2481f6ed55fb3b513736d3cd4f12729d7bc5c2",
+      "size": 5243
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Helpers/OpenHelper.cs": {
+      "sha1": "402e6bcc175495ab5580043acecb0758c4c92069",
+      "size": 4346
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Helpers/Patterns.cs": {
+      "sha1": "5de3b7d95653fbfc25f86518810e09ff6ef0e9da",
+      "size": 4646
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Helpers/RefEvent.cs": {
+      "sha1": "5487135cedd0a4c0c7131639744a17581c3bf39b",
+      "size": 1365
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Helpers/RunningPlatform.cs": {
+      "sha1": "8bc7f65aaac417fc6aeee94e5708411e724da9e6",
+      "size": 1581
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Logging/Formatters/DefaultLogFormatter.cs": {
+      "sha1": "b1cffcb56d2bd95ad80b41e4745bab090ed48184",
+      "size": 1360
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Logging/Formatters/DynamicObjectFormatter.cs": {
+      "sha1": "a7b4da40f4659a436ab4f23e3459918813dccf77",
+      "size": 2175
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Logging/Formatters/ILogFormatter.cs": {
+      "sha1": "3a2261a6b8061982b061df0018674f17dd9f3cd6",
+      "size": 130
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Logging/LogClass.cs": {
+      "sha1": "0e02cfcc2c64f2584f99a01b4605ba5e2b812d9e",
+      "size": 1536
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Logging/LogEventArgs.cs": {
+      "sha1": "264f8f3a2e0977e9b8c768e484524f250d431db8",
+      "size": 586
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Logging/LogLevel.cs": {
+      "sha1": "e8778191a52a4c2937395a7bb26a3d743569c971",
+      "size": 332
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Logging/Logger.cs": {
+      "sha1": "6bfa9b1aac4940a80aa79ec44da13439b43647f7",
+      "size": 9864
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Logging/Targets/AsyncLogTargetWrapper.cs": {
+      "sha1": "63cc63fec5eb0c3854af78b97514118f22d3fdc2",
+      "size": 3534
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Logging/Targets/ConsoleLogTarget.cs": {
+      "sha1": "391cc5131f9c82219476853b5e724f5c0b3a97c5",
+      "size": 1250
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Logging/Targets/FileLogTarget.cs": {
+      "sha1": "181bd489acaeb0e097fd7384ca0fccd168751d2a",
+      "size": 3536
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Logging/Targets/ILogTarget.cs": {
+      "sha1": "2d7aca4fedd15879c24a9f35d2b198d584a13743",
+      "size": 200
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Logging/XCIFileTrimmerLog.cs": {
+      "sha1": "fb11432b023a4a4d178197550d12bf0be0cbf56b",
+      "size": 1001
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Memory/ArrayPtr.cs": {
+      "sha1": "a54bdb3f66dfab77252f5454f1cc35bd9fa10e5a",
+      "size": 4166
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Memory/Box.cs": {
+      "sha1": "e7dd76a65a9b54a857db1310e84442226be92120",
+      "size": 185
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Memory/IArray.cs": {
+      "sha1": "3c77b039bf3a133aa4c99ab94d4f61df38b29212",
+      "size": 709
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Memory/MemoryOwner.cs": {
+      "sha1": "f99553dc83268b701f2dfff6da599d54f6b12ef5",
+      "size": 8471
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Memory/MemoryStreamManager.cs": {
+      "sha1": "88f5956e9a313015b33c1ef17044f07fb3efca84",
+      "size": 5562
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Memory/PartialUnmaps/NativeReaderWriterLock.cs": {
+      "sha1": "17106ae5f6cf7b09bcb2c8f075fc83334b2da248",
+      "size": 2594
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Memory/PartialUnmaps/PartialUnmapHelpers.cs": {
+      "sha1": "0daa7c4642e0b19d5060bb7645c78a74b161137c",
+      "size": 738
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Memory/PartialUnmaps/PartialUnmapState.cs": {
+      "sha1": "60fdd7af6434d89a8f4d93d6c23f156824c3ee8b",
+      "size": 6012
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Memory/PartialUnmaps/ThreadLocalMap.cs": {
+      "sha1": "24573e0f5d7f9a45fbe15623ec86c38df47b46f7",
+      "size": 3229
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Memory/Ptr.cs": {
+      "sha1": "3a8c1e1b6d9039a7089eefe85f510dc57a0596c3",
+      "size": 1965
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Memory/SpanOwner.cs": {
+      "sha1": "acb20bcad62a8980cff5bc550f9a48c3a272d21e",
+      "size": 4596
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Memory/SpanReader.cs": {
+      "sha1": "946439e31f2475f5cb9994956f059723ebe648b0",
+      "size": 1717
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Memory/SpanWriter.cs": {
+      "sha1": "5866652dcc7eb89a0002381296e78a4e8148d413",
+      "size": 1144
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Memory/StructArrayHelpers.cs": {
+      "sha1": "fcb2229a70e6c233fc4af43f5da83532e414945b",
+      "size": 23101
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Memory/StructByteArrayHelpers.cs": {
+      "sha1": "79b7d681a4a54c809359995f0a903fafc53f0a48",
+      "size": 2749
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/PerformanceCounter.cs": {
+      "sha1": "8c40fd7f4296943af595e87ac45c7aa09a6d5c91",
+      "size": 2270
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Pools/ObjectPool.cs": {
+      "sha1": "de8534332c399026aef247a7afde2d20bf7289b9",
+      "size": 728
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Pools/SharedPools.cs": {
+      "sha1": "342eab4ddaab4bcd0d6dd29f7d286d8dc6a918d1",
+      "size": 409
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Pools/ThreadStaticArray.cs": {
+      "sha1": "a2b9811c51178e8813cf6d6e8755af39576fcc90",
+      "size": 287
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/PreciseSleep/IPreciseSleepEvent.cs": {
+      "sha1": "26b5ab685ed72fc328043b485ebbde5487be440b",
+      "size": 1426
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/PreciseSleep/Nanosleep.cs": {
+      "sha1": "67f067ae2c434c1404f1201e7e0a0e5cdf351c52",
+      "size": 6045
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/PreciseSleep/NanosleepEvent.cs": {
+      "sha1": "962bc2a5167ad087b5696f46eb58662505c205c3",
+      "size": 2291
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/PreciseSleep/NanosleepPool.cs": {
+      "sha1": "3569dd968b85d1bdd8ebd8bf66babbb096d1c009",
+      "size": 7494
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/PreciseSleep/PreciseSleepHelper.cs": {
+      "sha1": "3c30a7f60a703de20bceef670d442d744d115ee4",
+      "size": 3966
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/PreciseSleep/SleepEvent.cs": {
+      "sha1": "f0769d1e4c326b02f2f8fd7090944551445b69a5",
+      "size": 1146
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/PreciseSleep/WindowsGranularTimer.cs": {
+      "sha1": "143c9c8d34daf6a3e23b7c054d0ebeec9aa46c67",
+      "size": 7387
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/PreciseSleep/WindowsSleepEvent.cs": {
+      "sha1": "87c10d18edd8dabc88a1fec130d45d8fc565de3f",
+      "size": 3031
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/ReactiveObject.cs": {
+      "sha1": "0e807eb7a1321ccb2681ad00b074c86adfe4342f",
+      "size": 2512
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/ReleaseInformation.cs": {
+      "sha1": "54525278b5c2114984afa8b1af9724d3af3582f7",
+      "size": 1584
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Ryujinx.Common.csproj": {
+      "sha1": "60a75a7b21bc96fc154f24fef7821da1f4e47801",
+      "size": 627
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/RyujinxException.cs": {
+      "sha1": "590072a5d10921dba7e9cb268d1b548551c0e0d5",
+      "size": 178
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/SharedConstants.cs": {
+      "sha1": "2c79c34783a5d6144234941356e7272ff6badcaf",
+      "size": 794
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/SystemInterop/DisplaySleep.cs": {
+      "sha1": "4dff5410eded1f4861f5c3045b90d1d6026182f7",
+      "size": 989
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/SystemInterop/ForceDpiAware.cs": {
+      "sha1": "a89dcd1adadd71aab8fe9d14cf34c58577f32086",
+      "size": 3656
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/SystemInterop/GdiPlusHelper.cs": {
+      "sha1": "c00598c9831d042a4f87d3285c0d1add7c68637a",
+      "size": 2354
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/SystemInterop/StdErrAdapter.cs": {
+      "sha1": "4936cd8748659ef2c94fd9191c4292f1d4a54637",
+      "size": 3115
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/SystemInterop/WindowsMultimediaTimerResolution.cs": {
+      "sha1": "0fbce37e28fe4321d0d0ba6feabce1fdc022e9b0",
+      "size": 3680
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/TitleIDs.cs": {
+      "sha1": "fe4ce9b6729e5cc6d9831613558d017e0de37ce2",
+      "size": 13113
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/UI/UserError.cs": {
+      "sha1": "cdcc42eac5993fcff267fdf7169cfb6bbde27e02",
+      "size": 922
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/BitUtils.cs": {
+      "sha1": "c99a8635de77f13ac0e220695f6c5e4fa3a6daf0",
+      "size": 3080
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/BitfieldExtensions.cs": {
+      "sha1": "8e9b696eeb0857fa537741357b095c16f5e99d37",
+      "size": 1917
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/Buffers.cs": {
+      "sha1": "b66f6025e1604f616584c7cfae37f0b6998d84f9",
+      "size": 2007
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/CommonJsonContext.cs": {
+      "sha1": "6c59ccae4455fc8709c3614ced52e0157f3806b5",
+      "size": 372
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/EmbeddedResources.cs": {
+      "sha1": "35cfa0a696e08aa240257316a2d6083f5f5bd299",
+      "size": 4602
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/FileSystemUtils.cs": {
+      "sha1": "6ec92044e9adf4abae5f585179b02f25cf5cf682",
+      "size": 1981
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/HexUtils.cs": {
+      "sha1": "cf975e44a284b7ca8f4de79457ac2bc19a85ac41",
+      "size": 2946
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/JsonHelper.cs": {
+      "sha1": "2493f3ec4e381f75e3f699db359918b21413eed8",
+      "size": 3166
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/MessagePackObjectFormatter.cs": {
+      "sha1": "fa04ee347c79671decb6f334898a9b9e54db5996",
+      "size": 7969
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/NetworkHelpers.cs": {
+      "sha1": "53d1e4f339ce6ce6ad5279d1f86b33749970e46c",
+      "size": 3213
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/OsUtils.cs": {
+      "sha1": "79fe8b722e7055501a5b2aa3ad3f265a0e258090",
+      "size": 1631
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/Rainbow.cs": {
+      "sha1": "93129bf10c0ae0fc8661627450ccfc7c81862bfb",
+      "size": 3989
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/SpanHelpers.cs": {
+      "sha1": "8c8e00a455be1371b42e23d55d2aab514c4391a7",
+      "size": 2424
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/StreamUtils.cs": {
+      "sha1": "e5246dfe74f70e6c4d44bdfd0ca47a5f620894da",
+      "size": 2871
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/UInt128Utils.cs": {
+      "sha1": "23afaa3a1ad3e06ebd7dc2c8ed9cf2f108cf13c3",
+      "size": 616
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Common/Utilities/XCIFileTrimmer.cs": {
+      "sha1": "90738798ac083e686366ea364043aca84447a171",
+      "size": 16915
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/AlphaTestOp.cs": {
+      "sha1": "13958ea486b3fe95e479b8f54b0e072f6fe07dfa",
+      "size": 222
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/AttributeType.cs": {
+      "sha1": "5244532877f1773873a9f72746b93c736f5184fc",
+      "size": 1512
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/BufferDescriptor.cs": {
+      "sha1": "11d4e3c1165e760733241497057af5af908c8dc6",
+      "size": 1036
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/BufferUsageFlags.cs": {
+      "sha1": "10b9848319bcdf00989b62722f1f7750acb9db43",
+      "size": 343
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/CodeGenParameters.cs": {
+      "sha1": "f692c428b8afdf28d33c121bfd16dca866b948af",
+      "size": 1015
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/CodeGenContext.cs": {
+      "sha1": "cd9c712806d6ae8146b382f45fdb014b537e8615",
+      "size": 2564
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/Declarations.cs": {
+      "sha1": "a7b82e742b37d343a407fa1e47a0f677885d1faf",
+      "size": 28333
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/DefaultNames.cs": {
+      "sha1": "54bf9aeb23a524b8091fced1fc91f26856719c3e",
+      "size": 443
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/GlslGenerator.cs": {
+      "sha1": "469c4f0a2c0ff79dbc9aa40fdb36b558abb07314",
+      "size": 6700
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/HelperFunctions/HelperFunctionNames.cs": {
+      "sha1": "0b80ac2b6b288e03a60e62ac974aeedcb54c4149",
+      "size": 310
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/HelperFunctions/MultiplyHighS32.glsl": {
+      "sha1": "caad6f5696c7a43cda6ddafc82d784828ec5a38a",
+      "size": 120
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/HelperFunctions/MultiplyHighU32.glsl": {
+      "sha1": "617a925f6b3a2a1b7202d064e4a423263102a313",
+      "size": 125
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/HelperFunctions/SwizzleAdd.glsl": {
+      "sha1": "057cb6cac978bd444e90186b1a5031fabe83b149",
+      "size": 259
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/Instructions/InstGen.cs": {
+      "sha1": "939b57aa7b9b13398b7bbe861b17f4c7ffc036a2",
+      "size": 7855
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/Instructions/InstGenBallot.cs": {
+      "sha1": "000d7f7970af6563a360e208ce1e715c12686b02",
+      "size": 922
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/Instructions/InstGenCall.cs": {
+      "sha1": "9d4ea534895b0adbe001a0e27cb4594d3f5a9d88",
+      "size": 947
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/Instructions/InstGenFSI.cs": {
+      "sha1": "1697aa47e778a5d98cf824896c3956c154a98338",
+      "size": 805
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/Instructions/InstGenHelper.cs": {
+      "sha1": "4b28f3878d42fb6dc6a78d75325790d558cc891c",
+      "size": 13744
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/Instructions/InstGenMemory.cs": {
+      "sha1": "881ca0d47d3c8804a2d08503a5a2a47f7ac14a24",
+      "size": 25737
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/Instructions/InstGenPacking.cs": {
+      "sha1": "4469785d2a2a97f7b3ef6a50bec4fad1ed62b98c",
+      "size": 2047
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/Instructions/InstGenShuffle.cs": {
+      "sha1": "b72b94d90ae18f5765704d5c0a55cfbcf60e2178",
+      "size": 830
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/Instructions/InstGenVector.cs": {
+      "sha1": "a300c7750cedb2bca2ffef79a62260e023ecee65",
+      "size": 1115
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/Instructions/InstInfo.cs": {
+      "sha1": "a784e2bb31df8eef43cbe4a16555486965366b41",
+      "size": 404
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/Instructions/InstType.cs": {
+      "sha1": "217c6ae73349eb2499adde0104f40a8bc8154900",
+      "size": 785
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/Instructions/IoMap.cs": {
+      "sha1": "8c45c0b6762aae454b5449d11588646c56b696e9",
+      "size": 8163
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/NumberFormatter.cs": {
+      "sha1": "b32e28e04d086f8f8bc8c6c2c63104beccf7da42",
+      "size": 2984
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/OperandManager.cs": {
+      "sha1": "6c20cb0c8b9e578f415b82fa2e92828eef670990",
+      "size": 8326
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Glsl/TypeConversion.cs": {
+      "sha1": "3d7d0d0c1474c5f99a2ed3d68a3d3f0e63c3c2f6",
+      "size": 3280
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/CodeGenContext.cs": {
+      "sha1": "3f80c2ae0145e19d143dec39ac7755d6066298a5",
+      "size": 13145
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/Declarations.cs": {
+      "sha1": "e1571fc78306d6eb2c35246a34de3fcc7e64b268",
+      "size": 31351
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/EnumConversion.cs": {
+      "sha1": "d444588e84121e83ff4d493abb61984c8680a22b",
+      "size": 817
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/ImageDeclaration.cs": {
+      "sha1": "1e0aee7347412e81d8f62b460e510e0a72501fe6",
+      "size": 594
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/Instructions.cs": {
+      "sha1": "79383ec4d9e9913ae55fb9fcf5dbd12870853bc9",
+      "size": 96447
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/IoMap.cs": {
+      "sha1": "1fd8a731a4452b48112babd57c1f6c697c42c781",
+      "size": 6187
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/OperationResult.cs": {
+      "sha1": "5be634c74d9574faca962dcf05ddaed19cc7880f",
+      "size": 477
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/SamplerDeclaration.cs": {
+      "sha1": "9e0ecd7947e485fd69bc6779fe26ad6cc7d0c259",
+      "size": 820
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/SpirvDelegates.cs": {
+      "sha1": "3716d76d9a37858550d6c51195fbee5f77f39df1",
+      "size": 9522
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/CodeGen/Spirv/SpirvGenerator.cs": {
+      "sha1": "e1561446b9a737cc32d76e5d822307fcffc5fd49",
+      "size": 19002
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Constants.cs": {
+      "sha1": "6317369f0d017aa5582527255790ffaee5af561f",
+      "size": 457
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Decoders/Block.cs": {
+      "sha1": "9264d15b9881e3096af7fbd175427f917a453dad",
+      "size": 4500
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Decoders/DecodedFunction.cs": {
+      "sha1": "ce702b2aba329f33fe32e5838d50335bb0870727",
+      "size": 1189
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Decoders/DecodedProgram.cs": {
+      "sha1": "be5d0a81b83474004dc506afe217f1ecac1953f7",
+      "size": 2417
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Decoders/Decoder.cs": {
+      "sha1": "45250a46313c25f9d3051da48e68e2b7424cc666",
+      "size": 34300
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Decoders/FunctionType.cs": {
+      "sha1": "6ea6a82aee9f5a1a579f6a0e2970537e8b553ae9",
+      "size": 165
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Decoders/InstDecoders.cs": {
+      "sha1": "8bf5671acf925f16c1de43d1c8fbbbb8a6d9569d",
+      "size": 224327
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Decoders/InstName.cs": {
+      "sha1": "04ad9391f876db3bbc3dd5b4ab6949f5483bdd83",
+      "size": 2734
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Decoders/InstOp.cs": {
+      "sha1": "045257dc6527e8c18d61d80b8b03691b5eb697da",
+      "size": 762
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Decoders/InstProps.cs": {
+      "sha1": "14cdcd06003ed20fcfb1522362819550516aa09d",
+      "size": 558
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Decoders/InstTable.cs": {
+      "sha1": "35367b8df870ba0708df2cf2f7791f6819329c76",
+      "size": 53755
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Decoders/Register.cs": {
+      "sha1": "2e6d61996919b42d8b06a5347e98b504f942ebb7",
+      "size": 926
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Decoders/RegisterConsts.cs": {
+      "sha1": "416fba966e1b747c017e20d039cf3c134fb8d153",
+      "size": 405
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Decoders/RegisterType.cs": {
+      "sha1": "c870464ffd6207811fd43395823e64939552a4f4",
+      "size": 127
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/GpuGraphicsState.cs": {
+      "sha1": "38684002c2e3e63fdf5dc4284683a16504d051dd",
+      "size": 7676
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IGpuAccessor.cs": {
+      "sha1": "77953df05bcaad04a46651226bd1ac81099f0ec1",
+      "size": 18150
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/ILogger.cs": {
+      "sha1": "c43067f50e60ed7a396d2519e737890a1482b5b2",
+      "size": 403
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/InputTopology.cs": {
+      "sha1": "074386b5df0303bcd6d46c91b08f4ee21825f8e4",
+      "size": 1454
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/AttributeMap.cs": {
+      "sha1": "b89502e168de1cfe487d02720b46aa8045210fe9",
+      "size": 16526
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmit.cs": {
+      "sha1": "d77621db6760b050c8572ec5c2d02746283ac81c",
+      "size": 11430
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitAluHelper.cs": {
+      "sha1": "4370560d7771653ebfa390bd96c73bff25861d0f",
+      "size": 6490
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitAttribute.cs": {
+      "sha1": "2b6647cd2989dc8e69280147b96bf0f69047713a",
+      "size": 18368
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitBarrier.cs": {
+      "sha1": "8061aec2804b43670d79c178e578625309cb5d27",
+      "size": 1211
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitBitfield.cs": {
+      "sha1": "97b08aefdcbdca98eab20b7c3b2a933dd483e541",
+      "size": 6213
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitConditionCode.cs": {
+      "sha1": "b5580a37ab498ff3698a77e30eca4b280eb1d5e5",
+      "size": 3925
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitConversion.cs": {
+      "sha1": "4b917c1eb38145a65ced000d60a02f57d9370a61",
+      "size": 14364
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitFloatArithmetic.cs": {
+      "sha1": "7d974a37072c988cbcb4ad02479b444b44e6db87",
+      "size": 20109
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitFloatComparison.cs": {
+      "sha1": "e70afd74cbae836d944795937ef143ba87726a92",
+      "size": 18935
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitFloatMinMax.cs": {
+      "sha1": "4a3337bca8794f8ec2cab3dbe65a90ceeb4fe12a",
+      "size": 4118
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitFlowControl.cs": {
+      "sha1": "e86328868a93c06cf62308ceeddbe69a2008c0c0",
+      "size": 10733
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitHelper.cs": {
+      "sha1": "d3623ff6f273318e6fbc31179641e81d848aab23",
+      "size": 7715
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitIntegerArithmetic.cs": {
+      "sha1": "2f3988119965a5a026e4f2eb0f341a89a9cd06f4",
+      "size": 23598
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitIntegerComparison.cs": {
+      "sha1": "c97e53bfe38f2055fa829f61c102f44f2a7f651d",
+      "size": 12298
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitIntegerLogical.cs": {
+      "sha1": "2e2d951d2aa716dfb9f93acb81a3364d1cacb9e0",
+      "size": 5727
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitIntegerMinMax.cs": {
+      "sha1": "f34efc6f355df1092aa31929cbca451b22437a67",
+      "size": 2394
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitMemory.cs": {
+      "sha1": "154ed24fc758d4fb2b8d2be49d0c4a51321765b1",
+      "size": 21079
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitMove.cs": {
+      "sha1": "4c71272743ae4c86c1159ed27b76d8e79179ba5b",
+      "size": 10988
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitMultifunction.cs": {
+      "sha1": "5c079378e4da5ab1dd1880ab91ab35a058218a9f",
+      "size": 3230
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitNop.cs": {
+      "sha1": "28ee927d8419e96c9fe5c0b026997d427d546bc9",
+      "size": 324
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitPredicate.cs": {
+      "sha1": "1d8651254f780fa6b4e77a9017393e6536c9fdd3",
+      "size": 4477
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitShift.cs": {
+      "sha1": "9c7899940a8ce1508d8e48471d33f0c2242d9c1b",
+      "size": 8172
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitSurface.cs": {
+      "sha1": "2f86f044d14decb5de03ce7597c5e50616e034a1",
+      "size": 24850
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitTexture.cs": {
+      "sha1": "fa0b87317d1375e0719c0435285683238749821a",
+      "size": 42584
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitVideoArithmetic.cs": {
+      "sha1": "a0e9fb38415abf547cdb15fd2b0e52f502a29ae0",
+      "size": 4296
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitVideoMinMax.cs": {
+      "sha1": "d52c972bcbee000ce23942e1f6671c6051b9b428",
+      "size": 6566
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitWarp.cs": {
+      "sha1": "73eea5c34d25c4f63339fbfc7bd82e49c2ece42e",
+      "size": 5576
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/InstEmitter.cs": {
+      "sha1": "e1cef26d8a9edee4002b259eac0a55ece729df74",
+      "size": 150
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Instructions/Lop3Expression.cs": {
+      "sha1": "6846ea8d6a83a82531eaf56f64f744d2fcd4e5af",
+      "size": 6162
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IntermediateRepresentation/BasicBlock.cs": {
+      "sha1": "d3eae31088ea0dd839fb17f5c336aa8623a1bf10",
+      "size": 2251
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IntermediateRepresentation/CommentNode.cs": {
+      "sha1": "1d33a9b02e5531490c1fba2a583edb7369d4e96e",
+      "size": 279
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IntermediateRepresentation/Function.cs": {
+      "sha1": "a5f3e0a8c4a8e7e246ee05364f583030656de653",
+      "size": 650
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IntermediateRepresentation/INode.cs": {
+      "sha1": "d5eae00b79ec13cb1571a22dc1fa2d6227ee9de2",
+      "size": 327
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IntermediateRepresentation/Instruction.cs": {
+      "sha1": "f63a8c4beb54af55e5c3f83e81e3fde3ec975513",
+      "size": 4858
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IntermediateRepresentation/IoVariable.cs": {
+      "sha1": "21e208636e1217b1cf73001057708c2cdc6b23bb",
+      "size": 1040
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IntermediateRepresentation/IrConsts.cs": {
+      "sha1": "cc9d6cc20e2f928a762c55dc1dc8cf807b96eb5a",
+      "size": 175
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IntermediateRepresentation/Operand.cs": {
+      "sha1": "19e65951a505be2d457b78c9c50f7ef658b14e4a",
+      "size": 1899
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IntermediateRepresentation/OperandHelper.cs": {
+      "sha1": "f883135520f19ccc72d0f7adec7dd0b91ba0bc9a",
+      "size": 1502
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IntermediateRepresentation/OperandType.cs": {
+      "sha1": "7dbd9d25d47f6e846d77a70678d6a81f0952d3ec",
+      "size": 233
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IntermediateRepresentation/Operation.cs": {
+      "sha1": "dc2f56e7eb40e857e8fb8ba6fb6e83288a0641cf",
+      "size": 8092
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IntermediateRepresentation/PhiNode.cs": {
+      "sha1": "a32b2e9eea5a0ed93b9a5cb09d9e78cdce26df9f",
+      "size": 2415
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IntermediateRepresentation/StorageKind.cs": {
+      "sha1": "2b39e85ea04ce34456d8d41d3b279fc4a0029a0c",
+      "size": 1640
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IntermediateRepresentation/TextureFlags.cs": {
+      "sha1": "3b0e38542d26ccde756d6e74f4141d91d4c063fe",
+      "size": 689
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/IntermediateRepresentation/TextureOperation.cs": {
+      "sha1": "7eee8f2e9c40e84d9a9da2cbdd68cbd5a4e4b1f0",
+      "size": 2018
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/OutputTopology.cs": {
+      "sha1": "a517fe861693946d307a338cddc945aa38bb601a",
+      "size": 560
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/ResourceReservationCounts.cs": {
+      "sha1": "c0bae8eab755966ec067228d3091951b3c3bade5",
+      "size": 862
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Ryujinx.Graphics.Shader.csproj": {
+      "sha1": "cfb188dafa1fc52e3947e5de1a13feabf09204fc",
+      "size": 616
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/SamplerType.cs": {
+      "sha1": "88449ef66786286fbe5851e5ae3e0adff74fe117",
+      "size": 5404
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/SetBindingPair.cs": {
+      "sha1": "1e8a4f9c61363f3388ce9afffd5afca66511d22a",
+      "size": 115
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/ShaderProgram.cs": {
+      "sha1": "9e62491bfc4b0ff70234dbec416aaf293e5bcdd8",
+      "size": 938
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/ShaderProgramInfo.cs": {
+      "sha1": "22823ac38e5a7d28666a6de14135774f76f8fea4",
+      "size": 2205
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/ShaderStage.cs": {
+      "sha1": "cbfd1aa0c5a9909c3fbf52f7ca713def481436e4",
+      "size": 1014
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/AstAssignment.cs": {
+      "sha1": "efda774c63902bbe37ff76cb9d01180d2bcb10bb",
+      "size": 722
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/AstBlock.cs": {
+      "sha1": "97c0f005ec096f8f7b39d21bfaf9df23e3416f9d",
+      "size": 2811
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/AstBlockType.cs": {
+      "sha1": "a7dcc72a104eb9f7b32fc9217eb14952e3157b7b",
+      "size": 173
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/AstBlockVisitor.cs": {
+      "sha1": "16efeff727f5d41663cccd5ddfcaf866659687ef",
+      "size": 1856
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/AstComment.cs": {
+      "sha1": "1c82e646f964ed456921528c6f6d2af7cf23056d",
+      "size": 227
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/AstHelper.cs": {
+      "sha1": "06d13c90b8a54d764cf4cab0f73110d1ccfcc0e9",
+      "size": 2100
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/AstNode.cs": {
+      "sha1": "0b8246171f6038087953112f08b8827122dc1e8f",
+      "size": 234
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/AstOperand.cs": {
+      "sha1": "28aad589fa16c54d539ae5c588f36cd1b462a14b",
+      "size": 873
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/AstOperation.cs": {
+      "sha1": "46555a85a45832bc228dc4734f73914490afb959",
+      "size": 2574
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/AstOptimizer.cs": {
+      "sha1": "3f2e4991f3b87482e8000c0679701b2c439b6aa9",
+      "size": 4917
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/AstTextureOperation.cs": {
+      "sha1": "867cae85364d78739961da1ed1f1ebcd17ce76b0",
+      "size": 1415
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/BufferDefinition.cs": {
+      "sha1": "e2759480464193803745fd834f1204ab6cad6559",
+      "size": 553
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/BufferLayout.cs": {
+      "sha1": "1c25ed34d9a59378460b0369ed105b8811ef8a06",
+      "size": 117
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/GotoElimination.cs": {
+      "sha1": "e2e52586a7bcaf33722a852655fcd827b5ab7f56",
+      "size": 14175
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/GotoStatement.cs": {
+      "sha1": "4607a16c1275da47196134869c88c232a2e2690b",
+      "size": 592
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/HelperFunctionsMask.cs": {
+      "sha1": "2a3d65e75e94f80effad87e5c6ff1f97b65f1b0d",
+      "size": 240
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/IAstNode.cs": {
+      "sha1": "248d8d69f35d52d58ec9d9dbfa62df03a2b8c1f3",
+      "size": 214
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/InstructionInfo.cs": {
+      "sha1": "b2ddf6ab7a8f9cdfbdc8270a5e8b48504a160ae2",
+      "size": 15177
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/IoDefinition.cs": {
+      "sha1": "0a0681fa42f6d66dcd02c8e7d10adafcd07b4b16",
+      "size": 1367
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/MemoryDefinition.cs": {
+      "sha1": "3ea69fde11a9ba0992a5a8b3e050860dc664daa1",
+      "size": 459
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/OperandInfo.cs": {
+      "sha1": "638a5298fe619ca54cf8935af4df5e5de948a96b",
+      "size": 927
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/PhiFunctions.cs": {
+      "sha1": "90f1f2f6d84aaf8f415ba09f59d1a5969802a767",
+      "size": 1481
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/ShaderProperties.cs": {
+      "sha1": "f0f22c056309583f94c0797156bc36f726f88a4d",
+      "size": 4267
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/StructureType.cs": {
+      "sha1": "fdf824f5793160606c88a766deca1be1316d8b4d",
+      "size": 644
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/StructuredFunction.cs": {
+      "sha1": "79fba17cd9d1c1f19e2b07012cc8c0bf45188282",
+      "size": 1116
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/StructuredProgram.cs": {
+      "sha1": "63bd820dc212b7e10671ee7a599c6e485c2f37f9",
+      "size": 16987
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/StructuredProgramContext.cs": {
+      "sha1": "60bdacc02a6f30f6e75e5b44d691e53021dd3ad8",
+      "size": 11892
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/StructuredProgramInfo.cs": {
+      "sha1": "ded2f2a892a61172104e625d7e5d0a329f385598",
+      "size": 494
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/StructuredIr/TextureDefinition.cs": {
+      "sha1": "1021dff0e8d16b652d8e46d879e54cd40cfc43ec",
+      "size": 1315
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/SupportBuffer.cs": {
+      "sha1": "fb624d624477fde468b11ece36bc1305f7f7bf11",
+      "size": 4093
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/TessPatchType.cs": {
+      "sha1": "6c4fc1a30bc5df8bfab35d23c6fe0469977a7dbe",
+      "size": 477
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/TessSpacing.cs": {
+      "sha1": "8d42ccbf12437afd6f3ea411dc612d61f127b6e6",
+      "size": 560
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/TextureDescriptor.cs": {
+      "sha1": "1e387407d82800e86fb6c4784bd8ce3b553d83d9",
+      "size": 1162
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/TextureFormat.cs": {
+      "sha1": "619598c7fa59a7e537548964c0675f030347a729",
+      "size": 4899
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/TextureHandle.cs": {
+      "sha1": "d2132172dd35867f7ff2203aa6b076cb8d336f24",
+      "size": 5028
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/TextureUsageFlags.cs": {
+      "sha1": "306435fd6de4a23ddb65e5f2add90dc60d99db4d",
+      "size": 442
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/AggregateType.cs": {
+      "sha1": "85d58bb0a584871d8894a221301095cdfb094de6",
+      "size": 1432
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/AttributeConsts.cs": {
+      "sha1": "c4bd2cbfa8c7c0d0fb2d5dcdc9f9de8255e7ce87",
+      "size": 1598
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/AttributeUsage.cs": {
+      "sha1": "5504ef4ed64c968ebbb1865123c5a70e6db6f8a0",
+      "size": 5895
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/ControlFlowGraph.cs": {
+      "sha1": "1df45a47863ca348a57636f80345d9858b9fdd1f",
+      "size": 5073
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Dominance.cs": {
+      "sha1": "cd651ce089cd904bacb5964a4b635d85a67a8871",
+      "size": 3022
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/EmitterContext.cs": {
+      "sha1": "62dd9e2e76f7572ab46f761beb1c218b9299b036",
+      "size": 29184
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/EmitterContextInsts.cs": {
+      "sha1": "3d19586dbf2ad2e0aaf24d264ac2f2aa27c2e288",
+      "size": 39151
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/FeatureFlags.cs": {
+      "sha1": "82a54db8353dda14f017306d4911b8ddc4ec9d00",
+      "size": 772
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/FunctionMatch.cs": {
+      "sha1": "b396de06bc8e2d5d35f638ee7465bad0a3b34984",
+      "size": 31091
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/HelperFunctionManager.cs": {
+      "sha1": "ec181bb09ee5465d97eb45cf1ce3bd3a6b21d40b",
+      "size": 20002
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/HelperFunctionName.cs": {
+      "sha1": "09b17729d49878b65707c27139cbf40e731fba73",
+      "size": 399
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/HostCapabilities.cs": {
+      "sha1": "bfd85c158148fdc2cbca3573074160a01ca0036b",
+      "size": 1865
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/IoUsage.cs": {
+      "sha1": "8ce2da4a031259b7e9ed5c04e0bccc2936398822",
+      "size": 1098
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Optimizations/BindlessElimination.cs": {
+      "sha1": "c40568a6117f5820823da55ec9d61e55ea5a3532",
+      "size": 20113
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Optimizations/BindlessToArray.cs": {
+      "sha1": "1e0b3b645ab6691e71d6f23dea7add81f407bf84",
+      "size": 9638
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Optimizations/BranchElimination.cs": {
+      "sha1": "ab988f70eb7e711d94921d350808ccbd28ddc469",
+      "size": 1756
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Optimizations/ConstantFolding.cs": {
+      "sha1": "345e83c82f9a384b4977416372abbec869a6c1d8",
+      "size": 12307
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Optimizations/DoubleToFloat.cs": {
+      "sha1": "208ca3935fc82637f4ad069d8d4cc90386759e78",
+      "size": 2455
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Optimizations/GlobalToStorage.cs": {
+      "sha1": "55628c88b786e0e8c54919b8112dec45c1807915",
+      "size": 43892
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Optimizations/Optimizer.cs": {
+      "sha1": "022532af80fac8bd618c9310658402cf806eac64",
+      "size": 15463
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Optimizations/Simplification.cs": {
+      "sha1": "282c136e1d2d9bf72e57885e453eddf315675189",
+      "size": 7418
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Optimizations/Utils.cs": {
+      "sha1": "449886e11ae307fc60d06c7a961577248e1f0893",
+      "size": 6976
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Optimizations/XmadOptimizer.cs": {
+      "sha1": "91073164d1ca64a7faf417183e7f619db46d3b9f",
+      "size": 10165
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/RegisterUsage.cs": {
+      "sha1": "c6bbb49681b2c876516c9661a3bc098394f4a8a1",
+      "size": 17166
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/ResourceManager.cs": {
+      "sha1": "2fc15344e2cb3706477f82432dc504db522610f7",
+      "size": 22654
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/ResourceReservations.cs": {
+      "sha1": "c89c4d0b66689afadbdded51782240c29fd3311e",
+      "size": 7854
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/ShaderDefinitions.cs": {
+      "sha1": "c11e658128f76f9424fa34d861b9c13ddec478e9",
+      "size": 13093
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/ShaderHeader.cs": {
+      "sha1": "0fcdff691e41160aa9d027504be27c0c01164f57",
+      "size": 4516
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Ssa.cs": {
+      "sha1": "89aaa3b44c66e48de16d20b3cef80036bd972703",
+      "size": 11591
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/TargetApi.cs": {
+      "sha1": "5196009373b9606884149e61297d98c6d1dbcf87",
+      "size": 120
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/TargetLanguage.cs": {
+      "sha1": "863c7447bd751ef4c80d78ef4639c64c5290dd31",
+      "size": 135
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/TransformContext.cs": {
+      "sha1": "1e87585f1802205221bfb4d516b5eb3a7bbd0065",
+      "size": 1349
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/TransformFeedbackOutput.cs": {
+      "sha1": "7d5c7462234ab16529b3da349ba80f722366880a",
+      "size": 459
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Transforms/DrawParametersReplace.cs": {
+      "sha1": "9e73013dbc69a7da993131d08af60346e2de3bd9",
+      "size": 3536
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Transforms/ForcePreciseEnable.cs": {
+      "sha1": "6b7e1410f881843a24247d27f3d917df2e57ef8b",
+      "size": 1555
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Transforms/GeometryToCompute.cs": {
+      "sha1": "573acc942d8e1c2a2eabee8a8cd277517848cc92",
+      "size": 17078
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Transforms/ITransformPass.cs": {
+      "sha1": "0a109d1d2b9df90fb5177fc7f80d6cb59a3fb40a",
+      "size": 447
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Transforms/SharedAtomicSignedCas.cs": {
+      "sha1": "c556e8149d2af5a2caf67dc475e1fa0832abe672",
+      "size": 2046
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Transforms/SharedStoreSmallIntCas.cs": {
+      "sha1": "2852a61ad0718b718f159a8e9490cb4d412c23fb",
+      "size": 1959
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Transforms/ShufflePass.cs": {
+      "sha1": "9cb361e6ca2410bb705e96e24ad2d754515b7e64",
+      "size": 2068
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Transforms/TexturePass.cs": {
+      "sha1": "2ec00ce2d81b51d437b79f913d532ce20c0cd5e1",
+      "size": 27598
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Transforms/TransformPasses.cs": {
+      "sha1": "7ff3b8bf134de3ae283733ee6395730168e2e65c",
+      "size": 1499
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Transforms/VectorComponentSelect.cs": {
+      "sha1": "e55f4355dfba4cf19ca3915ceb12ba257b92908e",
+      "size": 3309
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Transforms/VertexToCompute.cs": {
+      "sha1": "2f85a33d18959262276dd1db00d58f8460366f06",
+      "size": 16708
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/TranslationFlags.cs": {
+      "sha1": "df1e76a1fe5602ac5b2175985e9f575d31e4d4c1",
+      "size": 221
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/TranslationOptions.cs": {
+      "sha1": "d9829ac4fc01535248d21a906aceb84209f25a9b",
+      "size": 491
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/Translator.cs": {
+      "sha1": "2a111063273ce7178df55c04df153bfdcc5853d0",
+      "size": 15052
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/Translation/TranslatorContext.cs": {
+      "sha1": "c7c5629474ecc60a7275747bbffa227704ee5c73",
+      "size": 28240
+    },
+    "tools/vendor/ryujinx/src/Ryujinx.Graphics.Shader/VertexInfoBuffer.cs": {
+      "sha1": "000d372dc3a33c6fa00817e8eefec7ab7db19208",
+      "size": 2277
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/Autogenerated/CoreGrammar.cs": {
+      "sha1": "086e783fb988449b9157fe8b9cb142d25db562b9",
+      "size": 186971
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/Autogenerated/GlslStd450Grammar.cs": {
+      "sha1": "394935f5af5b5b25d9c6df1467beaed69bb8e438",
+      "size": 17122
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/Autogenerated/OpenClGrammar.cs": {
+      "sha1": "50d54870803b5271c160cda914145c4f3c570147",
+      "size": 33182
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/ConstantKey.cs": {
+      "sha1": "5359c24d6e94e81c91060be9b9ca56282259db20",
+      "size": 866
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/DeterministicHashCode.cs": {
+      "sha1": "ee7ad1de025d8e7cf69032ab69d874fbf7e4ab6b",
+      "size": 3221
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/DeterministicStringKey.cs": {
+      "sha1": "7ed14c33c3f0f89270cacaab4a1d649cca95ba81",
+      "size": 660
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/GeneratorPool.cs": {
+      "sha1": "3c16586c958d411c692472051573b583b24e905c",
+      "size": 1293
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/IOperand.cs": {
+      "sha1": "8809b606d79a972f53851fc31f85612e2b02e6eb",
+      "size": 243
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/Instruction.cs": {
+      "sha1": "49c9c2d90f3378e7fc01b90217d7782e979e9c04",
+      "size": 6836
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/InstructionOperands.cs": {
+      "sha1": "38c2b1f2ccb465d6d1193c229b00d4f72bf40e05",
+      "size": 2278
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/LICENSE": {
+      "sha1": "31aa79387f27e730e33d871925e152e35e428031",
+      "size": 1023
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/LiteralInteger.cs": {
+      "sha1": "013ca3b9455fcaf7a3ce935f3904c1ed85f325d2",
+      "size": 3362
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/LiteralString.cs": {
+      "sha1": "ed20d0e8f5e78445e58212bb067b0426d785e236",
+      "size": 1436
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/Module.cs": {
+      "sha1": "b2cbb254d2d95dcb117d0811ae12dfd9f132df2b",
+      "size": 12290
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/OperandType.cs": {
+      "sha1": "ddbdc89db9b397b8e49f3e5bd2235f7d350eec5d",
+      "size": 138
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/Spv.Generator.csproj": {
+      "sha1": "3642709d89afb1e79c32b7c966572ee21ef1f0ba",
+      "size": 161
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/TypeDeclarationKey.cs": {
+      "sha1": "aaaf4fd31bd0aca822760d4b4ae304a551bf0ead",
+      "size": 902
+    },
+    "tools/vendor/ryujinx/src/Spv.Generator/spirv.cs": {
+      "sha1": "7844c97080125bd4492a25b21358e0fc85de5c8c",
+      "size": 59875
+    },
+    "tools/worktree.py": {
+      "sha1": "e6a3c683776f9f93a97f9f00f03371e2b5b43941",
+      "size": 6141
+    },
+    "tools/xlate/LICENSE": {
+      "sha1": "e98c7620fff706c032c62d120eef265c4d9ee408",
+      "size": 1065
+    },
+    "tools/xlate/Program.cs": {
+      "sha1": "ab62c557b878c172b1d418b7ca6477639d9f8a21",
+      "size": 30955
+    },
+    "tools/xlate/patches/0001-keep-call-arguments-in-variables.patch": {
+      "sha1": "c0225c1bcc6ea9d25e7e708b8797ca2ecbcaf92e",
+      "size": 937
+    },
+    "tools/xlate/patches/0002-keep-live-call-sources-when-removing-dead-node.patch": {
+      "sha1": "09e2758d454ae2fd04d33a8205bfc06efafeebd5",
+      "size": 1217
+    },
+    "tools/xlate/patches/0003-keep-side-effect-assignments-in-the-ast-optimizer.patch": {
+      "sha1": "84aa09ce51f225ff85903c9d62cfaf3fb0a844e3",
+      "size": 2906
+    },
+    "tools/xlate/patches/0004-no-else-if-flattening.patch": {
+      "sha1": "d0a7585d137724d7941c6fa5572e55ec79c470c3",
+      "size": 1469
+    },
+    "tools/xlate/patches/0005-declare-storage-image-write-without-format.patch": {
+      "sha1": "79ae1422ac0b461e7b783f6a00b8bfe3cdb4da3a",
+      "size": 2236
+    },
+    "tools/xlate/patches/0006-initialise-unlinked-vertex-outputs.patch": {
+      "sha1": "42ae972c478edde8571f96f76e0d66423fe4302c",
+      "size": 2173
+    },
+    "tools/xlate/patches/0007-position-always-invariant.patch": {
+      "sha1": "a9b658fcac22b51103fe81e8f01396f1ae724a46",
+      "size": 1329
+    },
+    "tools/xlate/patches/0008-point-size-from-support-buffer.patch": {
+      "sha1": "7d78919928ceeeceb4364bbadb6db49c76d93b5f",
+      "size": 1914
+    },
+    "tools/xlate/patches/0009-round-d16-array-compare-reference.patch": {
+      "sha1": "ec4e1edc06b82bc10dab122b6854b1fbd01e9753",
+      "size": 1422
+    },
+    "tools/xlate/patches/0010-ldc-constant-address-as-constant-buffer-operand.patch": {
+      "sha1": "eb922b8fc595fa31abb78cd6988c7f6fd96fbff1",
+      "size": 1537
+    },
+    "tools/xlate/patches/0011-global-to-storage-keep-walking-after-a-deleted-store.patch": {
+      "sha1": "cbb1068de2d0555beb589506e156faec6291365d",
+      "size": 1292
+    },
+    "tools/xlate/patches/0012-thirty-two-storage-buffers-per-stage.patch": {
+      "sha1": "0d461e6503a717f728aa41313daa1407d2851781",
+      "size": 742
+    },
+    "tools/xlate/patches/0013-clamp-shared-and-local-memory-indices.patch": {
+      "sha1": "c9957d0a1df111d427056240b7e5e35cf7ec3044",
+      "size": 2581
+    },
+    "tools/xlate/patches/0014-numeric-float-minmax-and-saturation.patch": {
+      "sha1": "61101502f888427795f9b2c45452eca0fa561177",
+      "size": 6244
+    },
+    "tools/xlate/patches/0015-guarded-runtime-storage-candidates.patch": {
+      "sha1": "65b820853b5567af246d7b6681986c9cdddda812",
+      "size": 22898
+    },
+    "tools/xlate/patches/0016-explicit-portable-geometry-passthrough.patch": {
+      "sha1": "e8d615b591c4638b18e7aee8c5af4400af03587a",
+      "size": 3469
+    },
+    "tools/xlate/patches/0017-native-geometry-passthrough-viewport-mask.patch": {
+      "sha1": "b1647a3464ac219df9e4468fbe487c84cbe34b0f",
+      "size": 6520
+    },
+    "tools/xlate/patches/0018-f2i-byte-destination.patch": {
+      "sha1": "c87929ede70f2ddde63201d3000c4ae3bfab48aa",
+      "size": 2453
+    },
+    "tools/xlate/patches/0019-switch2-mesh-stage.patch": {
+      "sha1": "0149316193a2a3a959ff391f8160e7c9f235e6f7",
+      "size": 33597
+    },
+    "tools/xlate/patches/0020-sixty-four-storage-buffers.patch": {
+      "sha1": "c4e08b6d62db742dd26fab35c28eb097204d2c17",
+      "size": 886
+    },
+    "tools/xlate/patches/0021-bindless-from-storage.patch": {
+      "sha1": "682afcbd076ea4aa2fb5e1f2fca6a0b5256d1683",
+      "size": 3421
+    },
+    "tools/xlate/patches/0022-small-global-loads.patch": {
+      "sha1": "28201cdba7d397ad77d62946c024efff6ee18463",
+      "size": 1439
+    },
+    "tools/xlate/patches/0023-describe-unresolved-global.patch": {
+      "sha1": "30596776c9ff9d381396c3c528975ebd73353ab2",
+      "size": 1750
+    },
+    "tools/xlate/patches/0024-table-field-pointers.patch": {
+      "sha1": "178aa64f86d14b3182d69cb278e3a99544f78afd",
+      "size": 4137
+    },
+    "tools/xlate/patches/0025-graphics-guarded-candidates.patch": {
+      "sha1": "2e81685162bb561d40c34f761a8b06f2b796ac7c",
+      "size": 1056
+    },
+    "tools/xlate/patches/0026-dead-code-multi-output.patch": {
+      "sha1": "f9b0d8633cbcc19e1b406760444b5fe0964ef6e8",
+      "size": 789
+    },
+    "tools/xlate/patches/0027-mesh-index-clamp.patch": {
+      "sha1": "6129883a2d9fef9b0f433b294e8e428743945b70",
+      "size": 1048
+    },
+    "tools/xlate/patches/0028-describe-unresolved-handle.patch": {
+      "sha1": "14484f6862ef4e2b133aeab2aebca5f9a16b4c42",
+      "size": 2008
+    },
+    "tools/xlate/patches/0029-bindless-undefined-phi.patch": {
+      "sha1": "0ee3685865b66f1cce48fbfe624a8de126d1b22b",
+      "size": 759
+    },
+    "tools/xlate/patches/0030-red-signed-offset.patch": {
+      "sha1": "007e8f4ae368ee508b3e066f1bb23090fc49b521",
+      "size": 711
+    },
+    "tools/xlate/patches/0031-maxwell-nan-semantics.patch": {
+      "sha1": "ded4b6bcaab3fd61363b1b62624d5d6ff63b250b",
+      "size": 2726
+    },
+    "tools/xlate/patches/0032-ir-trace.patch": {
+      "sha1": "dba3166cfe573af4cbd7b00eb8c73f49ed5980a2",
+      "size": 4058
+    },
+    "tools/xlate/patches/0033-call-returns.patch": {
+      "sha1": "4e35019b9f86952d3185883d8ba22c40f18541e9",
+      "size": 581
+    },
+    "tools/xlate/patches/0034-keep-subgroup-operations-in-place.patch": {
+      "sha1": "97d66ab3ba9b14a30aab8128ddf3f772329ecf33",
+      "size": 960
+    },
+    "tools/xlate/patches/0035-register-banks.patch": {
+      "sha1": "30c53be2b9529176270a04936626ccfa29d0f07c",
+      "size": 9423
+    },
+    "tools/xlate/patches/0036-compact-half-matrix-multiply.patch": {
+      "sha1": "21e541ba9ac82056140aa022d9b8e52f2a2063ac",
+      "size": 10766
+    },
+    "tools/xlate/patches/0037-atomic-reads-in-float-add-loop.patch": {
+      "sha1": "e036b378d4702086d3cceb1a4341b8bf9d01ba10",
+      "size": 1017
+    },
+    "tools/xlate/patches/0038-depth-register-after-whole-targets.patch": {
+      "sha1": "f8128d372b23451fb8a9260b2ec1cbd3161152f0",
+      "size": 1223
+    },
+    "tools/xlate/patches/0039-shadow-gather-per-tap-offsets.patch": {
+      "sha1": "c83e7fa8a05fac73050caf79087a075223a509b0",
+      "size": 625
+    },
+    "tools/xlate/patches/0040-atomic-read-in-storage-cas-loop.patch": {
+      "sha1": "f2aeed32eff669f427cd1b3a03110a2b0e19f047",
+      "size": 772
+    },
+    "tools/xlate/patches/0041-task-first-workgroup.patch": {
+      "sha1": "8eef236ff79cab359eb62a42dd8b388f60385144",
+      "size": 1085
+    },
+    "tools/xlate/patches/0042-zero-local-memory.patch": {
+      "sha1": "b3fb06ee30724bfd7a7dabfd41b3ccbc7fbfb26d",
+      "size": 1868
+    },
+    "tools/xlate/patches/0043-bitfield-past-bit-31.patch": {
+      "sha1": "87bded21a3fd0247bd05256941642552c5edb020",
+      "size": 3248
+    },
+    "tools/xlate/patches/0044-funnel-shift-by-zero.patch": {
+      "sha1": "04d9bd06d493918cf1f0260248386412334be5ee",
+      "size": 1380
+    },
+    "tools/xlate/patches/0045-integer-image-formats.patch": {
+      "sha1": "e02d753e944e180e0816e4a48649fdf6e211b25e",
+      "size": 1147
+    },
+    "tools/xlate/totk_xlate.csproj": {
+      "sha1": "e39ea5b87244f2979422e02cb6d5d35b281a6809",
+      "size": 850
+    },
+    "tools/xlate_smoke.py": {
+      "sha1": "fb860cb1a57998b4438b2381d1ed004963e5e4f9",
+      "size": 3031
+    },
+    "totk.ini.example": {
+      "sha1": "93c467e71c50c5883f31b2eb88ea11a8a315f661",
+      "size": 14401
+    },
+    "verificar.ps1": {
+      "sha1": "ac38b738fe0a84cb27d36d30ec7b67029b3cc963",
+      "size": 5028
+    }
+  }
+}

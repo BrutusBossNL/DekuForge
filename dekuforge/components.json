@@ -14,7 +14,7 @@
     "playable": false
   },
   "buildkit": {
-    "version": "0.3.0-independent.3"
+    "version": "0.3.0-independent.4"
   },
   "python": {
     "version": "3.14+",

@@ -126,6 +126,13 @@ dependency; this build mode is distinct from the upstream NativeAOT identity.
 Existing packed game data is opened read-only; output and profiles stay in this
 worktree. This does not establish standalone installer or gameplay readiness.
 
+`dekuforge/open_engine.py` stages only that exact source archive. Its lock records
+the archive SHA-256 and all 900 canonical Git blob identities and sizes. It
+rejects missing/extra members, traversal, case aliases, links, encrypted members,
+oversized archives and changed source in an existing owned tree. License texts
+and upstream notices remain in the staged source. It downloads no game files,
+compiled game code or caches, and is not selected by the default launcher yet.
+
 ## Implementation sequence for contributors
 
 1. Extend original A64 decoding/IR/emission with complete-state differential tests:
