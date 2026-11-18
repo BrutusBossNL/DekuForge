@@ -2,6 +2,29 @@
 
 Component versions are independent. Published releases are not replaced in place.
 
+## Launcher 0.3.0-preview.3 / buildkit 0.2.4 - installer correction
+
+Fixes [issue #4](https://github.com/BrutusBossNL/DekuForge/issues/4): setup compared
+an unnormalized Windows 8.3 TEMP path with a normalized extraction target and
+rejected valid packages as `Unsafe installer payload`. Both paths now use the
+same canonicalization. Traversal, absolute/stream paths, aliases, links and size
+limits remain enforced, with specific rejection messages. Shorter runtime staging
+names also leave room for nested Python files under long temporary paths.
+
+Packaging now cold-installs the actual EXE through an aliased/dotted TEMP path,
+downloads the real Python runtime and checks the installed launcher's hidden
+health report before artifacts can be uploaded. Game tools are skipped in this
+installer regression test; no game is built. The frozen 0.2.0 updater is tested too.
+This preview also delivers main's version list/release notes and update outcome
+and prefilled failure-report improvements. Engine 0.11.0 is unchanged.
+
+## Launcher 0.2.1 / buildkit 0.2.2 - stable installer hotfix
+
+Applies only the installer path correction, shorter runtime staging and setup
+regression coverage to the 0.2.0 source. Preview-only Mods, Frame Generation
+dependency changes and newer update UI are not promoted to Stable. Game source,
+engine version and saves are unchanged; this hotfix needs no game rebuild.
+
 ## Launcher 0.3.0-preview.2 / buildkit 0.2.3 - updater compatibility
 
 Fixes an application-update rollback from 0.2.0: that release's frozen helper

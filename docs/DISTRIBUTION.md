@@ -13,15 +13,26 @@ pull requests and attached diagnostic files.
 
 ## Component versions
 
-Launcher 0.3.0-preview.2 and buildkit 0.2.3 include mod management, the scrolling
+Launcher 0.3.0-preview.3 and buildkit 0.2.4 include mod management, the scrolling
 fix and complete NVIDIA Frame Generation dependency preparation. The GitHub
-release is a prerelease, excluded from Stable updates; 0.2.0 remains the stable
+release is a prerelease, excluded from Stable updates; 0.2.1 is the stable
 release. Engine 0.11.0 is unchanged. Existing games need the managed game rebuild
 after updating to receive the missing Frame Generation libraries and notices.
 The builder verifies all seven libraries and three notice/license files beside
 the executable before reporting success. See [frame-generation.md](frame-generation.md)
 and [mods.md](mods.md). The invisible health check covers 45 core views and five
 report forms in five languages.
+
+Stable 0.2.1 is a minimal installer hotfix over 0.2.0. Setup normalizes both the
+8.3/dotted TEMP root and member targets before containment checks. Runtime staging
+uses a shorter collision-checked name for .NET Framework's path limits. Unsafe
+archive checks remain active. The installer correction itself does not change
+game-build inputs or require a game rebuild.
+
+`tools/test_setup_installation.py` cold-installs the real setup EXE with an aliased
+and dotted TEMP path, real runtime provisioning, no shortcut/launcher launch and
+the hidden GUI health check. It skips game-tool downloads and does not build a
+game. The packaging workflow requires it alongside frozen-updater acceptance.
 
 `dekuforge/components.json` records independent identities:
 

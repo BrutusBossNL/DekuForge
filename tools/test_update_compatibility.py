@@ -93,7 +93,7 @@ def main():
         for name, data in sentinels.items():
             assert (app/name).read_bytes() == data, name
         result.update(success=True, frozen_updater_used=True, settings_saves_tools_preserved=True,
-                      legacy_views=len(proof['screens']), mod_views=len(proof['mod_screens']))
+                      legacy_views=len(proof['screens']), mod_views=len(proof.get('mod_screens',[])))
     (ROOT/'local/update-compatibility-check.json').write_text(json.dumps(result, indent=2)+'\n', encoding='utf-8')
     print(json.dumps(result))
 

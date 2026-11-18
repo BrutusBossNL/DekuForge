@@ -38,15 +38,18 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Project status
 
-**DekuForge 0.2.0 - first Windows Early Access release.**
+**Windows Early Access: stable 0.2.1; Preview 0.3.0-preview.3.**
 The stable reference-based game has passed local play tests. The DekuForge 0.11.0
 candidate adds the custom in-game interface and Cheat Manager. The launcher and
-engine have independent versions: preview launcher **0.3.0-preview.2**, buildkit **0.2.3**
+engine have independent versions: preview launcher **0.3.0-preview.3**, buildkit **0.2.4**
 and engine **0.11.0**.
-The repository is public and **0.2.0** is the latest published Early Access release.
-Preview **0.3.0-preview.2** adds the original mod manager, the scrolling fix and
+The stable **0.2.1** hotfix retains the 0.2.0 feature set and fixes setup failures
+when Windows supplies a short temporary path. Runtime extraction also uses a
+shorter staging name to avoid legacy Windows path-length failures.
+Preview **0.3.0-preview.3** includes the same installer correction, the original mod manager, the scrolling fix and
 complete NVIDIA Frame Generation dependency preparation. Select the Preview
-update channel to receive it; Stable stays on 0.2.0. Preview 2 also fixes the update rollback from 0.2.0 that affected Preview 1.
+update channel to receive it; Stable stays on the 0.2.x line. The frozen 0.2.0
+updater remains supported. The installer hotfix alone does not require rebuilding a game.
 Update results are shown after restart; failures offer a prefilled issue form.
 Updates lists versions with their GitHub release notes, update/downgrade actions
 and a rebuild action for the installed version.

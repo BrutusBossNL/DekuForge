@@ -5,6 +5,7 @@ import shutil
 import struct
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 from urllib.request import Request
 import zipfile
@@ -76,7 +77,7 @@ class UpdateTests(unittest.TestCase):
             source=root/"own.nup";source.write_bytes(b"synthetic")
             atomic_json(root/"local/settings.json",{"executable":str(active),"nup":str(source)})
             atomic_json(root/"local/pending-game-update.json",{"components":COMPONENTS,"requires_rebuild":True,"status":"pending"})
-            with patch("dekuforge.game_updates.game_running",return_value=False), patch("dekuforge.game_updates.build_stable",side_effect=RuntimeError("compile failed")):
+            with patch("dekuforge.game_updates.shutil.disk_usage",return_value=SimpleNamespace(free=16*1024**3)), patch("dekuforge.game_updates.game_running",return_value=False), patch("dekuforge.game_updates.build_stable",side_effect=RuntimeError("compile failed")):
                 with self.assertRaises(RuntimeError):run_rebuild(lambda *args:None,root)
             self.assertEqual(json.loads((root/"local/settings.json").read_text())["executable"],str(active))
             self.assertEqual((profile/"progress.sav").read_bytes(),b"original save")
@@ -92,7 +93,7 @@ class UpdateTests(unittest.TestCase):
             def build(source,notify,destination):
                 self.assertEqual(json.loads((root/"local/settings.json").read_text())["executable"],str(active))
                 exe=destination/"DekuForgeGame.exe";exe.write_bytes(b"new build");return exe
-            with patch("dekuforge.game_updates.game_running",return_value=False), patch("dekuforge.game_updates.build_stable",side_effect=build):
+            with patch("dekuforge.game_updates.shutil.disk_usage",return_value=SimpleNamespace(free=16*1024**3)), patch("dekuforge.game_updates.game_running",return_value=False), patch("dekuforge.game_updates.build_stable",side_effect=build):
                 result=run_rebuild(lambda *args:None,root)
             self.assertNotEqual(result.parent,active.parent)
             self.assertEqual((result.parent/"profile/progress.sav").read_bytes(),b"save")
@@ -122,7 +123,7 @@ class UpdateTests(unittest.TestCase):
                 result = destination/'DekuForgeGame.exe'
                 result.write_bytes(b'new game')
                 return result
-            with patch('dekuforge.game_updates.game_running', return_value=False), patch('dekuforge.game_updates.build_stable', side_effect=build):
+            with patch('dekuforge.game_updates.shutil.disk_usage',return_value=SimpleNamespace(free=16*1024**3)), patch('dekuforge.game_updates.game_running', return_value=False), patch('dekuforge.game_updates.build_stable', side_effect=build):
                 result = run_rebuild(lambda *_: None, root)
             self.assertNotEqual(result.parent, active.parent)
             self.assertEqual(mod.read_bytes(), b'synthetic mod asset')
