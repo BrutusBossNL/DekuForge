@@ -5,10 +5,16 @@ import unittest
 from unittest.mock import patch
 
 from dekuforge.core import launch
-from dekuforge.open_engine_runtime import MANIFEST, launch_options
+from dekuforge.open_engine_runtime import MANIFEST, game_language, launch_options
 
 
 class IndependentRuntimeTests(unittest.TestCase):
+    def test_game_language_keeps_supported_regions_and_falls_back_to_english(self):
+        for local, expected in [('nl_NL', 'nl'), ('fr_CA', 'fr-CA'), ('es-MX', 'es-419'),
+                                ('zh_HK', 'zh-Hant'), ('ja_JP', 'ja'), ('sv_SE', 'en-US')]:
+            with self.subTest(locale=local):
+                self.assertEqual(game_language(local), expected)
+
     def fixture(self, root):
         game = root / 'build/native'
         game.mkdir(parents=True)

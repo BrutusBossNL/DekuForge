@@ -58,8 +58,17 @@ its final validation step. With that cache and a warm NVIDIA driver cache, two
 starts on the tested RTX 2080 reached the menu in about 30 seconds and averaged
 about 48 fps at native 1080p on Death Mountain Trail. Driver changes and cold
 caches can take longer. See [the test evidence](docs/INDEPENDENT_EVIDENCE.md).
-The full custom Cheat Manager, independent app updates, end-user setup,
-long-session/controller/audio acceptance and Linux/iOS gameplay remain open.
+The Windows game supports SDL gamepads and locally built Switch, Xbox, PS4 and
+PS5 prompts. In **Controls**, use **PlayStation / Xbox** for bottom-button
+confirm (Cross or A), or **Nintendo** for right-button confirm. Hold the left
+stick click (L3) while moving to sprint. The **Cheat Manager** includes sprint
+speed and the engine's player, inventory and travel cheats.
+
+**Gameplay → Game language → System language** follows the system UI language
+on restart, falling back to English. New builds select it by default. Explicit
+game and overlay language choices are kept. The full set of custom cheats,
+independent app updates, end-user setup, broad controller/audio validation and
+Linux/iOS gameplay remain open.
 
 ## Reuse and contributions
 

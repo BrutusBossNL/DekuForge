@@ -319,3 +319,21 @@ seconds on Death Mountain Trail. Both processes exited normally and the
 baseline profile hashes matched. The first world-detection screenshot in
 the repeat test could still fall during the load fade. These figures cover one
 RTX 2080 and its warmed driver, with frame generation off.
+
+## 2026-11-18: controller prompts, sprint and settings
+
+Engine `0.1.0-independent.8` generated the local shader census and all six
+controller/keyboard prompt packs. The final build validation wrote its
+pipeline cache and presented Vulkan frames in 27.99 seconds on the previously
+warmed RTX 2080. A normal launch detected a connected DualSense over SDL,
+selected the PS5 font and textures automatically, and started the game in
+Dutch using the system-language setting.
+
+The Controls preset bound guest A to the physical bottom button. The gameplay
+test enabled Sprint speed at 1.25× through the menu and sent a left-stick click
+with stick movement on Death Mountain Trail. The input and character controller
+logs confirmed L3 engaged sprint and the game applied the 125% multiplier.
+Physical button presses across the other controller families remain untested.
+Separate overlay captures showed the active-tab accent, the Cheat Manager,
+and the frame-time graph on the green and gold performance panel. These
+headless captures are for UI inspection only.

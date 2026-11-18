@@ -14,7 +14,7 @@ launcher opt-in. The build saves its driver pipeline cache before completion.
 Current work covers repeat startup time, gameplay measurements and asset-mod/save
 integration. Official standalone Python/Tk/Pillow
 now boots the launcher locally. Independent setup acceptance, the full
-Cheat Manager, matched performance and long-session acceptance remain open; see
+Cheat Manager feature parity, matched performance and long-session acceptance remain open; see
 [OPEN_ENGINE_EVALUATION.md](OPEN_ENGINE_EVALUATION.md).
 
 The owner has since prioritized DekuForge's in-game UI and Cheat Manager directly

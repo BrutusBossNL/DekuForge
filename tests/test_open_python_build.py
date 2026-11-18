@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from dekuforge.open_python_build import provision
+from dekuforge.open_python_build import PACKAGES, provision
 
 
 class OwnedPythonDependenciesTests(unittest.TestCase):
@@ -23,7 +23,7 @@ class OwnedPythonDependenciesTests(unittest.TestCase):
             own.parent.mkdir(parents=True)
             own.touch()
             (own.parent/'.dekuforge-runtime.json').write_text('{}')
-            calls=iter([PackageNotFoundError('fixture') for _ in range(3)]+['2.5.4','4.4.5','4.68.0'])
+            calls = iter([PackageNotFoundError('fixture') for _ in PACKAGES] + list(PACKAGES.values()))
             def package_version(name):
                 result=next(calls)
                 if isinstance(result,Exception):

@@ -39,6 +39,15 @@ def main():
         return module.main()
     if script.name == 'make_game.py':
         module = importlib.import_module('make_game')
+        module.LANGUAGES = [*module.LANGUAGES, ('system', 'System language')]
+        build_language = module.build_language
+
+        def select_language(args, folder):
+            if not args.language and not module.folder_language(folder):
+                return 'system'
+            return build_language(args, folder)
+
+        module.build_language = select_language
         # Child interpreters also receive branding and the explicit local deps.
         module.PY = [sys.executable, '-B', '-u', str(Path(__file__).resolve())]
         # Never let an upstream convenience routine end another game process.

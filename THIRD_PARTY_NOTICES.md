@@ -173,14 +173,23 @@ engine code, not original MIT DekuForge code. The development evaluation tool
 does not distribute its source, game outputs or compiled runtime in a launcher
 release. See `docs/OPEN_ENGINE_EVALUATION.md` for explicit build boundaries.
 
-`dekuforge/open_engine_branding.py` adapts this GPL provider's UI and adds a
-pipeline cache save during build validation. The adapter is GPL-3.0-or-later
+`dekuforge/open_engine_branding.py` adapts this GPL provider's UI, SDL input,
+game language, sprint controls and build cache save. The adapter is GPL-3.0-or-later
 (SPDX header), excepted from the root MIT grant.
 Generated adapted sources retain the original headers and add an attribution
 line; their original/adapted SHA-256 values are recorded locally. The complete
 GPL text is retained in `licenses/GPL-3.0.txt` and in the verified provider tree.
 This does not relicense the engine, remove its credits or grant rights to game
 content. No compiled game or game-derived shader/cache is distributed.
+
+The local shader census and controller prompt builder also use hash-pinned
+[python-zstandard 0.25.0](https://pypi.org/project/zstandard/0.25.0/) (BSD-3-Clause),
+[astc-encoder-py 0.1.12](https://pypi.org/project/astc-encoder-py/0.1.12/) (MIT,
+with its bundled encoder notices),
+[texture2ddecoder 1.0.6](https://pypi.org/project/texture2ddecoder/1.0.6/) (MIT),
+and [archspec 0.2.7](https://pypi.org/project/archspec/0.2.7/) (Apache-2.0 OR MIT).
+Their wheel metadata and license files remain installed with those tools.
+Controller textures and fonts are generated locally from the player's copy.
 
 The independent Windows movie path builds VideoLAN dav1d 1.5.4 from the official
 source mirror, under BSD-2-Clause. `tools/build_av1_decoder.py` pins archive and

@@ -107,6 +107,13 @@ def build(filename, notify, destination, *, config=None, romfs=None, exefs=None,
         original = output/'hookshot.exe'
         if not original.is_file() or not (output/'image.bin').is_file() or not (output/'romfs').is_dir():
             raise RuntimeError('Provider did not produce a complete local game folder')
+        prompts = output/'prompts'
+        prompt_files = ['External.bfotf', 'Common.bntx', 'rsizetable.zs'] + [
+            f'{face}/textures.bin' for face in ('switch', 'xbox', 'ps4', 'ps5', 'steamdeck')]
+        for name in prompt_files:
+            asset = prompts/name
+            if not asset.is_file() or not asset.stat().st_size:
+                raise RuntimeError(f'Missing controller prompt asset {name}; inspect the build log')
         executable = output/'DekuForgeGame.exe'
         original.replace(executable)
         # The public source pipeline copies controller libraries when available.

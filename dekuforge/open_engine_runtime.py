@@ -4,8 +4,24 @@ import os
 from pathlib import Path
 
 from .core import ROOT
+from .preferences import system_locale
 
 MANIFEST = '.dekuforge-runtime.json'
+
+
+def game_language(locale_name):
+    language, _, region = locale_name.lower().replace('_', '-').partition('-')
+    if language == 'en':
+        return 'en-GB' if region in {'gb', 'ie', 'au', 'nz'} else 'en-US'
+    if language == 'fr':
+        return 'fr-CA' if region == 'ca' else 'fr'
+    if language == 'es':
+        return 'es' if region in {'es', ''} else 'es-419'
+    if language == 'pt':
+        return 'pt-BR'
+    if language == 'zh':
+        return 'zh-Hant' if region.split('-')[0] in {'hant', 'tw', 'hk', 'mo', 'cht'} else 'zh-Hans'
+    return language if language in {'de', 'it', 'nl', 'pl', 'ru', 'ja', 'ko'} else 'en-US'
 
 
 def launch_options(executable, root=ROOT):
@@ -40,6 +56,7 @@ def launch_options(executable, root=ROOT):
     # The measured NVIDIA driver does not answer many cache-only requests after
     # preparation. The provider's documented start mode keeps prepared programs
     # and pipelines ready before the title instead of dropping first-use draws.
-    env.update(RX_BACKEND='vulkan', RX_VK_LOAD='start', HOS_DISCORD='0')
+    env.update(RX_BACKEND='vulkan', RX_VK_LOAD='start', HOS_DISCORD='0',
+               DEKUFORGE_SYSTEM_LANGUAGE=game_language(system_locale()))
     return {'args': [str(executable), str(paths['image']), '--romfs', str(paths['romfs']), '--user', str(paths['user'])],
             'env': env}

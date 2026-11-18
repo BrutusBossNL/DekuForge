@@ -91,6 +91,11 @@ See the [evidence ledger](INDEPENDENT_EVIDENCE.md) for the measured scope.
 
 The launcher retains its original async Play, save import/export, build inventory,
 release list/notes and update-outcome views. Main-channel installs remain blocked.
+Controller prompt generation requires the locked Windows build wheels in
+`requirements-open-engine.txt`. The build checks the generated font and texture
+packs before selecting the new executable. Auto prompts follow input from the
+most recently used SDL controller. Controls keeps separate prompt and layout
+choices so a manually remapped pad can keep its own button icons.
 Asset mods use immutable verified snapshots so the first enabled provider wins,
 matching the launcher order; disabled mods are excluded. No base game file is
 overwritten. Code-patch/cheat mods remain blocked. The provider's Windows path
