@@ -48,7 +48,10 @@ try {
         Move-Item -LiteralPath $partial -Destination $archive -Force
     }
     Add-Type -AssemblyName System.IO.Compression.FileSystem
-    $staging = Assert-LocalPath (Join-Path $localFolder ('python-stage-' + [Guid]::NewGuid().ToString('N')))
+    # Keep room for nested runtime headers below long user/TEMP paths on .NET
+    # Framework. A full GUID here pushed valid package entries over MAX_PATH.
+    $staging = Assert-LocalPath (Join-Path $localFolder ('py-' + [Guid]::NewGuid().ToString('N').Substring(0,8)))
+    if (Test-Path -LiteralPath $staging) { throw 'Runtime staging directory already exists; retry setup' }
     [IO.Directory]::CreateDirectory($staging) | Out-Null
     $zip = [IO.Compression.ZipFile]::OpenRead($archive)
     try {

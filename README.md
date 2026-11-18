@@ -38,10 +38,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Project status
 
-**DekuForge 0.2.0 — first Windows Early Access release, prepared for publication.**
+**DekuForge 0.2.1 — Windows Early Access installer hotfix.**
 The stable reference-based game has passed local play tests. The DekuForge 0.11.0
 candidate adds the custom in-game interface and Cheat Manager. The launcher and
-engine have independent versions: launcher **0.2.0**, buildkit **0.2.1**
+engine have independent versions: launcher **0.2.1**, buildkit **0.2.2**
 and engine **0.11.0**.
 The repository currently remains private: the upstream distribution terms noted
 in [the publication review](docs/PUBLICATION_REVIEW.md) are still unresolved.
@@ -138,6 +138,12 @@ original ROM/NUP is never deleted, moved or modified**, including when stored
 inside a DekuForge folder. Such a folder can remain solely to hold that archive.
 
 ## Known issues
+
+Installer hotfix 0.2.1 fixes valid packages being rejected when Windows supplies
+an 8.3 TEMP path. Runtime extraction also uses a shorter collision-checked stage
+name to stay within legacy Windows path limits. The 0.2.0 feature set and engine
+are retained; no game rebuild is required for this hotfix. Preview features are
+not included. See [release history](docs/CHANGELOG.md).
 
 Found another issue? Use **Report a problem** in the launcher, or review the
 report offered after a detected crash. Check the diagnostics before submitting.

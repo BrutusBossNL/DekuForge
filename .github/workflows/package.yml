@@ -23,6 +23,7 @@ jobs:
       - run: python tools/build_launcher.py --toolchain local/build-tools/native/msys64/ucrt64/bin
       - run: python tools/check_launcher.py
       - run: python tools/build_setup.py --toolchain local/build-tools/native/msys64/ucrt64/bin
+      - run: python tools/test_setup_installation.py
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: DekuForge-Windows-preview

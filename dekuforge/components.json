@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "launcher": {
-    "version": "0.2.0",
+    "version": "0.2.1",
     "stage": "early-access",
     "bug_reports": true,
     "uninstaller": true
@@ -12,7 +12,7 @@
     "base_revision": "5ae55db41c7d11c4e997d2676019939a936e560b"
   },
   "buildkit": {
-    "version": "0.2.1"
+    "version": "0.2.2"
   },
   "python": {
     "version": "3.14.9",

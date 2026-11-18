@@ -2,6 +2,22 @@
 
 Component versions are independent. Published releases are not replaced in place.
 
+## Launcher 0.2.1 / buildkit 0.2.2 - stable installer hotfix
+
+Fixes [issue #4](https://github.com/BrutusBossNL/DekuForge/issues/4). The installer
+now normalizes its extraction root and entry targets consistently when Windows
+supplies an 8.3 or dotted temporary path. Unsafe archive names, traversal, aliases,
+links and oversized payloads remain blocked, with more specific diagnostics.
+Runtime staging has a shorter collision-checked name to leave room for nested
+Python files under .NET Framework's path limits.
+
+Packaging cold-installs the actual EXE with a short/dotted TEMP path, provisions
+the real Python runtime and validates the hidden installed-launcher health
+report. Game-tool downloads are skipped in this installer regression test; no
+game is built. This is a minimal patch over 0.2.0, without Preview Mods, newer
+update UI or Frame Generation dependency changes. Engine 0.11.0 and game inputs
+are unchanged; users do not need to rebuild the game for this installer fix.
+
 ## Launcher 0.2.0 — first Early Access release
 
 Buildkit 0.2.1; engine 0.11.0. This release uses a normal version, without a

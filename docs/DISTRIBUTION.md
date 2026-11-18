@@ -13,6 +13,14 @@ pull requests and attached diagnostic files.
 
 ## Component versions
 
+Stable launcher 0.2.1 / buildkit 0.2.2 corrects the installer path handling over
+0.2.0. Preview-only changes are excluded. Setup canonicalizes both sides of its
+containment check and shortens the runtime staging name without removing archive
+guards. The packaging workflow exercises the actual setup EXE from a short and
+dotted TEMP path through runtime provisioning and the hidden GUI health check.
+That test skips game tools and never builds or distributes a game. Engine
+0.11.0 and game-build inputs are unchanged by this hotfix.
+
 `dekuforge/components.json` records independent identities:
 
 | Component | Purpose |
