@@ -47,6 +47,15 @@ class OpenEngineSourceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'blob mismatch'):
             verified_files(data,record)
 
+    def test_second_provider_retains_exact_gpl_source_identity(self):
+        record=manifest('hookshot')
+        self.assertEqual(record['revision'],'1c7e70bb035a7f45419b23882e73d7eb09b93e16')
+        self.assertEqual(len(record['files']),2188)
+        self.assertFalse(record['production_approved'])
+        self.assertIn('GPL-3.0',record['license'])
+        with self.assertRaisesRegex(ValueError,'Unknown'):
+            manifest('../another-source')
+
     def test_traversal_case_alias_and_incomplete_archive_rejected(self):
         for entries in ({'../outside':b'a'}, {'A':b'a','a':b'b'}):
             data, record=fixture(entries)

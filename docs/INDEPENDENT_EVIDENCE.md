@@ -111,3 +111,46 @@ the excluded runtime and is not imported. No independent installer is produced.
 The separately licensed runtime experiment is documented in
 [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md). Neither its successful source
 generation nor shader-translator build is accepted as working gameplay.
+
+## 2026-11-18: first licensed runtime rejected; direct NVN2 evaluation
+
+The pinned Ocarina Recomp candidate compiled 664 objects and linked a private
+313 MiB game executable. Its runtime self-test passed, including tables for
+297,414 functions. Its source-built managed translator passed six constant-bank
+checks and a synthetic shader service test, including SPIR-V validation and
+recovery after malformed input. These are scoped development results.
+
+A first ordinary-start run used a new account and therefore tested the title
+and intro, not the copied save. After copying the account identity into the
+isolated profile, another ordinary run loaded the existing Death Mountain save
+and executed scripted movement/camera input. Original save hashes were unchanged.
+Captures visibly show black Link/objects in shadow. The runtime still reported
+zero unimplemented calls, validation errors and shader failures: those counters
+cannot establish correct rendering. This candidate fails gameplay acceptance.
+
+Its clock starts at the first present, including menus/loading. The recorded
+startup average must not be presented as gameplay FPS. A separate attempt to
+prepare all 45 encountered large compute variants was bounded to 600 seconds;
+39 finished before the timeout during the 346,306-word variant. Disabling skipped
+compute shaders has not been validated as a fix. Do not repeat this preparation
+or call it completed without a new reason.
+
+Full-size raw PNGs exceeded the image tool's output allowance. Local JPEG
+inspection copies at 1280x720 opened successfully, with original PNGs retained.
+Use compact inspection copies/native crops before concluding that visual tools
+require additional user permissions. Inspect actual presentation/crop behavior
+separately from unused black padding in a raw render-target capture.
+
+The second evaluation pins GPL Hookshot source at
+`1c7e70bb035a7f45419b23882e73d7eb09b93e16`. All 2,188 original source blobs were
+verified before use and rechecked unchanged during compilation. It uses direct
+NVN2 translation rather than the first candidate's Ampere-to-Maxwell route.
+Its lifter reports 294,518 discovered functions and no untranslated recognized
+instructions in 17,646,126 sites, emitting 292 source files. This is a static
+translation report, not execution coverage or gameplay acceptance.
+
+The shader census generated a private 38,809-program / 42,856-stage seed from
+the owner's own game input. No shared shader or pipeline cache was downloaded.
+Generic compiler, header/codec and SDL tools were fetched with pinned hashes;
+the engine/runtime itself is compiled from the audited source. The independent
+build is still under evaluation; main is unchanged.

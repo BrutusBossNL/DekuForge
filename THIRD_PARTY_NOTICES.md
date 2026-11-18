@@ -154,3 +154,13 @@ with scoped MIT and other component terms retained in its `LICENSE`,
 remain together in the local staged tree. This is not original MIT DekuForge
 runtime code. The candidate is not a published or gameplay-approved backend;
 see `docs/INDEPENDENT_ENGINE.md` for scope and acceptance requirements.
+
+The second experimental provider is the GPL-3.0-or-later
+[Hookshot source mirror](https://github.com/Z-TOON/Hookshot) at
+`1c7e70bb035a7f45419b23882e73d7eb09b93e16`. Its archive SHA-256 and 2,188
+canonical Git blob identities are recorded in `dekuforge/hookshot_source.json`.
+Original headers, GPL texts and component notices remain in the staged source,
+including `third_party/a64-kit/NOTICE.TOTKPort.md`. This is separately licensed
+engine code, not original MIT DekuForge code. The development evaluation tool
+does not distribute its source, game outputs or compiled runtime in a launcher
+release. See `docs/OPEN_ENGINE_EVALUATION.md` for explicit build boundaries.

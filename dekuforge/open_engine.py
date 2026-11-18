@@ -18,8 +18,11 @@ MAX_ARCHIVE = 64 * 1024**2
 MAX_SOURCE = 64 * 1024**2
 
 
-def manifest():
-    return json.loads(Path(__file__).with_name('open_engine_source.json').read_text(encoding='utf-8'))
+def manifest(provider='ocarina'):
+    names = {'ocarina':'open_engine_source.json', 'hookshot':'hookshot_source.json'}
+    if provider not in names:
+        raise ValueError('Unknown experimental engine provider')
+    return json.loads(Path(__file__).with_name(names[provider]).read_text(encoding='utf-8'))
 
 
 def _name(name):
@@ -73,10 +76,27 @@ def verified_files(data, record):
     return files
 
 
-def stage(root=ROOT, notify=lambda message: None):
+def verify_tree(target, record):
+    """Check original source blobs without rejecting local compiler outputs."""
+    target = Path(target).absolute()
+    if target.resolve() != target or not target.is_dir():
+        raise ValueError('Engine source directory must be a regular owned directory')
+    for name, item in record['files'].items():
+        path = target.joinpath(*_name(name).parts)
+        if not path.resolve().is_relative_to(target) or path.is_symlink():
+            raise ValueError('Engine source contains a link')
+        if path.stat().st_size != item['size']:
+            raise ValueError('Engine source changed: '+name)
+        content = path.read_bytes()
+        if hashlib.sha1(b'blob '+str(len(content)).encode('ascii')+b'\0'+content).hexdigest() != item['sha1']:
+            raise ValueError('Engine source changed: '+name)
+    return target
+
+
+def stage(root=ROOT, notify=lambda message: None, provider='ocarina'):
     """Populate a new owned source directory; never overwrite a previous tree."""
     root = Path(root).resolve()
-    record = manifest()
+    record = manifest(provider)
     target = root / 'build' / ('open-engine-source-' + record['revision'])
     cache = root / 'local/build-tools' / ('open-engine-' + record['revision'] + '.zip')
     marker = target / '.dekuforge-open-engine-source.json'
@@ -89,16 +109,7 @@ def stage(root=ROOT, notify=lambda message: None):
         identity = json.loads(marker.read_text(encoding='utf-8'))
         if identity != {key: record[key] for key in ('revision', 'archive_sha256')}:
             raise ValueError('Engine source marker mismatch')
-        # Recheck every original blob. Generated outputs may live below the tree.
-        for name, item in record['files'].items():
-            path = target.joinpath(*_name(name).parts)
-            if not path.resolve().is_relative_to(target.resolve()) or path.is_symlink():
-                raise ValueError('Engine source contains a link')
-            content = path.read_bytes()
-            if len(content) != item['size'] or hashlib.sha1(
-                    b'blob '+str(len(content)).encode('ascii')+b'\0'+content).hexdigest() != item['sha1']:
-                raise ValueError('Engine source changed: '+name)
-        return target
+        return verify_tree(target, record)
     cache.parent.mkdir(parents=True, exist_ok=True)
     if not cache.is_file():
         notify('Downloading pinned GPL engine source')

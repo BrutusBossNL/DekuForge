@@ -133,6 +133,22 @@ oversized archives and changed source in an existing owned tree. License texts
 and upstream notices remain in the staged source. It downloads no game files,
 compiled game code or caches, and is not selected by the default launcher yet.
 
+The first isolated candidate compiled and passed its runtime self-test, but
+moving Death Mountain captures exposed black objects in shadow. It is rejected
+for gameplay acceptance. Its first-present clock is not a loaded-world detector;
+startup averages must not be presented as gameplay performance. Full recorded
+compute preparation is a diagnostic, not an accepted renderer fix.
+
+A second source-only evaluation uses the publicly GPL-3.0-or-later
+[Hookshot source mirror](https://github.com/Z-TOON/Hookshot) at
+`1c7e70bb035a7f45419b23882e73d7eb09b93e16`. All 2,188 source blobs were checked
+against the pinned Git tree. Its retained component notices identify the
+Rexcomp/a64-kit CPU path, GPL Eden/suyu shader compiler and separately licensed
+libraries. This route uses direct NVN2 shader translation and reports ambient
+probe/culling fixes relevant to the observed defect. Those reports are reasons
+to test it, not proof of parity. Its source and local outputs remain under
+ignored experiment directories; no candidate is selected automatically.
+
 ## Implementation sequence for contributors
 
 1. Extend original A64 decoding/IR/emission with complete-state differential tests:
