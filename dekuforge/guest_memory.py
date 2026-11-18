@@ -40,6 +40,31 @@ class AddressSpace:
         return tuple({'base': r.base, 'size': len(r.data), 'permissions': r.permissions,
                       'owner': r.owner} for r in self._regions)
 
+    @property
+    def modules(self):
+        return tuple(self._modules.values())
+
+    def relocate_pointers(self, entries):
+        """Commit a validated multi-module pointer plan as one model transaction."""
+        pending, targets = [], set()
+        for index, (base, name, offset, value) in enumerate(entries):
+            if index >= 1000000:
+                raise GuestFault('Too many pointer relocations')
+            module = self._modules.get(base)
+            if module is None or module.name != name:
+                raise GuestFault('Unknown relocation module')
+            if (type(offset) is not int or type(value) is not int or offset < 0 or
+                    offset % 8 or offset + 8 > module.mapped_size or not 0 <= value < 1 << 64):
+                raise GuestFault('Invalid pointer relocation')
+            address = base + offset
+            spans = self._spans(address, 8, 'w')
+            if address in targets or any(r.owner != name for r, *_ in spans):
+                raise GuestFault('Duplicate relocation or wrong module owner')
+            targets.add(address)
+            pending.append((address, struct.pack('<Q', value)))
+        for address, data in pending:
+            self.write(address, data)
+
     def _range(self, address, size):
         if (type(address) is not int or type(size) is not int or size < 0 or
                 address < 0 or address >= ADDRESS_LIMIT or size > ADDRESS_LIMIT - address):

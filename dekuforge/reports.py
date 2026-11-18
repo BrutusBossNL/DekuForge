@@ -114,7 +114,9 @@ def collect(root, executable="", incident=None):
     for path in (local/"launcher-crash.log",local/"runtime-bootstrap.log"):
         if path.is_file():paths.append(path)
     if (local/"logs").is_dir():paths.extend((local/"logs").glob("*.log"))
-    candidates=sorted(set(paths),key=lambda p:p.stat().st_mtime,reverse=True)
+    from .update_status import log_paths
+    update_logs = log_paths(root, incident or {})
+    candidates=update_logs + sorted(set(paths)-set(update_logs),key=lambda p:p.stat().st_mtime,reverse=True)
     logs=[];remaining=24000
     for path in candidates[:3]:
         if path.is_symlink() or path.suffix!=".log":continue

@@ -27,9 +27,12 @@ from .saves import export_save, import_save, discover_saves, game_save_profiles
 from .theme import BG, BORDER, GOLD, LEAF, MUTED, PANEL, TEXT, ArtworkLabel, BackgroundCanvas, apply_identity, apply_window, logo_image
 from .workflow import BuildRequest, Progress, duration, validate_destination, validate_source
 from .theme import button_feedback, NavigationCanvas, NavigationLogo, PagePanel, ScrolledText
+from .mod_ui import ModsUI
+from .mods import ModLibrary
+from .release_ui import ReleaseListUI
 
 
-class Launcher:
+class Launcher(ModsUI, ReleaseListUI):
     def __init__(self, root):
         self.root = root
         root.title("DekuForge")
@@ -64,7 +67,17 @@ class Launcher:
         self.report_preview = None
         self.update_busy = False
         self.update_job = None
+        self.update_release = ''
+        from .update_status import pending_result
+        self.update_notice = pending_result(ROOT)
         self.save_busy = False
+        self.mods_busy = False
+        self.mods_entries = []
+        self.mods_loaded_for = None
+        self.mod_selected = ''
+        self.mods_status = ''
+        self.mods_log = []
+        self.mods_log_widget = None
         self.save_status = ""
         self.save_folder = settings.get("save_folder", "")
         self.save_sources = []
@@ -118,9 +131,10 @@ class Launcher:
         self.render()
         self.tick_job = root.after(100, self.tick)
         root.bind("<Destroy>", self.on_destroy, add="+")
-        if settings["check_updates"] and COMPONENTS['launcher'].get('updates', True) and "--self-test" not in sys.argv:
+        if settings["check_updates"] and COMPONENTS["launcher"].get("updates", True) and "--self-test" not in sys.argv:
             root.after(2500, self.check_updates)
         if "--self-test" not in sys.argv:
+            root.after(2500, self.show_update_result)
             root.after(3000, self.resume_game_update)
             root.after(1000, self.check_previous_incident)
 
@@ -167,11 +181,11 @@ class Launcher:
         else:
             self.label(self.sidebar, "DekuForge", 22, GOLD).pack(padx=20, pady=30)
         self.label(self.sidebar, self.t("tagline"), 10, MUTED).pack(padx=22, pady=(0, 32))
-        for name in ("home", "updates", "saves", "build", "settings", "report"):
+        for name in ("home", "updates", "saves", "mods", "build", "settings", "report"):
             selected = self.page == name
             self.button(self.sidebar, self.t(name), lambda value=name: self.navigate(value),
                         primary=selected, anchor="w").pack(fill="x", padx=16, pady=5)
-        stage = "early_access" if COMPONENTS["launcher"].get("stage") == "early-access" else "development"
+        stage = {"early-access": "early_access", "preview": "preview_release"}.get(COMPONENTS["launcher"].get("stage"), "development")
         self.label(self.sidebar, f"{self.t(stage)}\n{__version__}", 9, MUTED).pack(side="bottom", padx=22, pady=24)
 
     def navigate(self, page):
@@ -187,6 +201,7 @@ class Launcher:
         if self.progressbar is not None:
             self.progressbar.stop()
         self.log_widget = self.progressbar = self.time_label = self.phase_label = None
+        self.mods_log_widget = None
         for child in self.page_host.winfo_children():
             child.destroy()
         self.page_host.grid_configure(padx=(252, 12) if self.page == "home" else (264, 24),
@@ -209,6 +224,8 @@ class Launcher:
             self.render_saves()
         elif self.page == "report":
             self.render_report()
+        elif self.page == "mods":
+            self.render_mods()
         else:
             if self.library_view:
                 self.render_library()
@@ -240,8 +257,8 @@ class Launcher:
         details = ((version if version == self.t("custom_game") else self.t("game_version", version=version)) if selected else self.t("no_install"),
                    self.t("release_found", version=release),
                    self.source or self.t("no_dump"))
-        actions = (("play", self.t("playing") if running else self.t("play"), self.play,
-                    selected and not running and not self.update_busy and not self.build_busy and not self.save_busy),
+        actions = (("play", self.t('mods_working') if self.mods_busy else self.t("playing") if running else self.t("play"), self.play,
+                    selected and not self.management_busy()),
                    ("update", self.t("action_update"), lambda: self.navigate("updates"), True),
                    ("build", self.t("action_build"), self.open_wizard, True))
         self.home_cards = []
@@ -372,30 +389,55 @@ class Launcher:
         self.check_updates()
 
     def render_updates(self):
+        if self.update_notice:
+            notice = self.card(self.content, padding=12)
+            ok = self.update_notice['success']
+            self.label(notice, self.t('update_installed' if ok else 'update_failed_result',
+                                     version=self.update_notice['release']), 15, GOLD, wraplength=620).pack(anchor='w')
+            if not ok:
+                self.label(notice, self.update_notice['error'], 10, MUTED, wraplength=620).pack(anchor='w', pady=8)
+                self.button(notice, self.t('update_report_issue'), self.report_update_failure).pack(anchor='w', pady=5)
+            self.button(notice, self.t('update_result_continue'), self.dismiss_update_result, pady=5).pack(anchor='w', pady=5)
         card = self.card(self.content)
         self.label(card, self.t("installed_version", version=__version__), 16).pack(anchor="w")
         self.label(card, self.t("update_channel") + ": " + self.t(self.preferences["update_channel"])).pack(anchor="w", pady=12)
         self.label(card, self.release_status or self.t("not_started"), wraplength=620).pack(anchor="w", pady=12)
         self.button(card, self.t("working" if self.release_busy else "check_now"), self.check_updates,
                     primary=True, state="disabled" if self.release_busy else "normal").pack(anchor="w")
-        self.label(card, self.t("release_choice"), 11).pack(anchor="w", pady=(18, 8))
-        versions = [r["version"] for r in self.releases]
-        value = tk.StringVar(value=self.selected_release or (versions[0] if versions else ""))
-        choice = ttk.Combobox(card, textvariable=value, values=versions, state="readonly" if versions else "disabled",
-                              style="Forge.TCombobox")
-        choice.pack(fill="x")
-        choice.bind("<<ComboboxSelected>>", lambda e: setattr(self, "selected_release", value.get()))
-        self.button(card, self.t("install_release"), self.install_selected_release,
-                    state="normal" if any(r.get("installable") for r in self.releases) and not self.management_busy() else "disabled", pady=5).pack(anchor="w", pady=(10, 0))
+        self.render_release_list(card)
         self.label(self.content, self.t("update_pending"), color=MUTED, wraplength=620).pack(anchor="w")
-        if (ROOT / "local/pending-game-update.json").is_file():
-            self.button(self.content, self.t("rebuild_update"), lambda: self.resume_game_update(manual=True), pady=5).pack(anchor="w")
-        self.button(self.content, self.t("local_versions"), self.open_library).pack(anchor="w", pady=12)
+
+    def show_update_result(self):
+        if self.update_notice:
+            self.navigate('updates')
+
+    def dismiss_update_result(self):
+        from .update_package import atomic_json
+        if self.update_notice:
+            ok = self.update_notice['success']
+            atomic_json(ROOT/'local/update-result-seen.json', {'id': self.update_notice['id']})
+            self.update_notice = None
+            self.render()
+            if ok:
+                self.root.after(50, self.resume_game_update)
+
+    def report_update_failure(self):
+        if not self.update_notice or self.update_notice['success'] or self.report_busy:
+            return
+        value = self.update_notice
+        self.report_incident = {**value, 'kind': 'application_update', 'current_version': __version__}
+        self.report_draft = {'title': self.t('update_issue_title', version=value['release']),
+            'details': self.t('update_issue_details', version=value['release'], current=__version__, error=value['error']),
+            'expected': self.t('update_issue_expected', version=value['release']), 'include_logs': True}
+        self.report_context = None
+        self.report_load_failed = False
+        self.report_submitted_url = ''
+        self.navigate('report')
 
     def install_selected_release(self, automatic=False):
         if not COMPONENTS['launcher'].get('updates', True):
             self.release_status = self.t('independent_updates_disabled')
-            self.render()
+            if self.page == 'updates': self.render()
             return
         if self.management_busy():
             return
@@ -407,6 +449,7 @@ class Launcher:
         if not automatic and not messagebox.askyesno("DekuForge", self.t("update_confirm", version=release["version"]), parent=self.root):
             return
         self.update_busy = True
+        self.update_release = release['version']
         self.release_status = self.t("update_downloading")
         self.render()
         def work():
@@ -418,6 +461,12 @@ class Launcher:
         threading.Thread(target=work, daemon=True).start()
 
     def resume_game_update(self, manual=False):
+        if COMPONENTS['engine'].get('backend') == 'independent':
+            self.release_status = self.t('independent_backend_incomplete')
+            if self.page == 'updates': self.render()
+            return
+        if self.update_notice and not manual:
+            return  # Let the user read the application outcome before rebuilding.
         pending = ROOT / "local/pending-game-update.json"
         if not pending.is_file() or self.management_busy():
             return
@@ -754,7 +803,7 @@ class Launcher:
         return self.library_entries[selection[0]] if selection else None
 
     def management_busy(self):
-        return self.report_busy or self.update_busy or self.build_busy or self.save_busy or self.progress.active or (self.process is not None and self.process.poll() is None)
+        return self.mods_busy or self.report_busy or self.update_busy or self.build_busy or self.save_busy or self.progress.active or (self.process is not None and self.process.poll() is None)
 
     def select_library_entry(self, _event=None):
         entry = self.selected_build()
@@ -896,8 +945,24 @@ class Launcher:
         self.render()
 
     def play(self):
-        if self.update_busy or self.build_busy or self.save_busy or (self.process is not None and self.process.poll() is None):
+        if self.management_busy():
             return
+        try:
+            library = ModLibrary(self.executable)
+            if library.folder.exists():
+                self.mods_work('prepare', play_after=True)
+                return
+        except (OSError, ValueError) as error:
+            if str(error) == 'mods_external_dir':
+                # Advanced external roots keep the runtime's existing behavior;
+                # this bounded manager never copies or changes those locations.
+                self.launch_ready()
+                return
+            self.show_error(error)
+            return
+        self.launch_ready()
+
+    def launch_ready(self):
         try:
             self.process = launch(self.executable)
             reports.record_run(ROOT,self.process,self.executable)
@@ -988,6 +1053,32 @@ class Launcher:
                 kind, value = self.events.get_nowait()
             except Empty:
                 break
+            if kind == 'mods_log':
+                self.mods_log = (self.mods_log + [value])[-200:]
+                if self.mods_log_widget is not None:
+                    self.mods_log_widget.configure(state='normal')
+                    self.mods_log_widget.insert('end', value)
+                    self.mods_log_widget.see('end')
+                    self.mods_log_widget.configure(state='disabled')
+                continue
+            if kind == 'mods_finished':
+                self.mods_busy = False
+                self.mods_loaded_for, self.mods_entries, play_after = value
+                self.mods_status = self.t('mods_ready')
+                if play_after:
+                    self.launch_ready()
+                changed = self.page == 'mods' or changed
+                continue
+            if kind == 'mods_error':
+                self.mods_busy = False
+                self.mods_loaded_for = self.executable
+                error, play_after = value
+                self.mods_status = self.t(error) if error in MESSAGES['en'] else error
+                if play_after:
+                    self.page = 'mods'
+                    self.render_navigation()
+                changed = self.page == 'mods' or changed
+                continue
             if kind == "report_ready":
                 self.report_context,self.report_authenticated = value
                 self.report_busy = False
@@ -1013,6 +1104,13 @@ class Launcher:
             if kind == "update_error":
                 self.update_busy = False
                 self.release_status = self.t("update_error", error=value)
+                from .update_package import atomic_json
+                from .update_status import pending_result
+                atomic_json(ROOT/'local/update-result.json', {'success': False, 'release': self.update_release or self.selected_release,
+                    'error': str(value), 'time': datetime.now(timezone.utc).isoformat()})
+                self.update_notice = pending_result(ROOT)
+                self.page = 'updates'
+                self.render_navigation()
                 changed = True
                 continue
             if kind == "update_ready":
@@ -1023,7 +1121,7 @@ class Launcher:
                     return
                 except Exception as error:
                     self.update_busy = False
-                    self.release_status = str(error)
+                    self.events.put(('update_error', str(error)))
                     changed = True
                 continue
             if kind == "update_build_complete":
@@ -1142,7 +1240,7 @@ class Launcher:
             self.show_error(error)
 
     def close(self):
-        if self.report_busy or self.update_busy or self.progress.active or self.save_busy or self.build_busy:
+        if self.mods_busy or self.report_busy or self.update_busy or self.progress.active or self.save_busy or self.build_busy:
             messagebox.showinfo("DekuForge", self.t("active_build"), parent=self.root)
             return
         self.cancel_intro()
@@ -1176,14 +1274,16 @@ def main():
         def self_test():
             application = root._launcher
             checked = []
+            checked_mods = []
             checked_reports = []
             try:
                 for language in LANGUAGES:
                     application.language = language
-                    for page in ("home", "updates", "saves", "build", "settings"):
+                    for page in ("home", "updates", "saves", "mods", "build", "settings"):
                         application.navigate(page)
                         root.update_idletasks()
-                        checked.append(f"{language}/{page}")
+                        # 0.2.0's frozen updater requires exactly 40 legacy views.
+                        (checked_mods if page == 'mods' else checked).append(f"{language}/{page}")
                     for step in (1, 2):
                         application.step = step
                         application.navigate("build")
@@ -1196,7 +1296,8 @@ def main():
                     application.library_view = False
                     application.navigate("report");root.update_idletasks()
                     checked_reports.append(f"{language}/report")
-                report = {"screens": checked, "report_screens":checked_reports, "logo_loaded": root._brand_icon.width() > 0,
+                report = {"screens": checked, "mod_screens": checked_mods, "report_screens":checked_reports,
+                          "launcher_version": __version__, "logo_loaded": root._brand_icon.width() > 0,
                           "native_icon_verified": getattr(root, "_native_icon_verified", os.name != "nt"),
                           "top_level_windows": 1 + sum(isinstance(child, tk.Toplevel) for child in root.winfo_children()),
                           "window_was_mapped": bool(mapped),

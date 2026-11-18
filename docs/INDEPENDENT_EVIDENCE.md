@@ -90,3 +90,24 @@ project-code repairs avoid worker-thread PhotoImage finalization and preserve
 Tk's inherited `_root()` method. They do not import main's vendor backend or
 update channel into the independent branch. Launcher identity advances to
 `0.3.0-independent.2`; no installer or release is produced.
+
+## 2026-11-18: module linker and owned launcher fixes
+
+Engine `0.1.0-independent.4` adds original bounded MOD0/ELF symbol discovery,
+RELA/RELR planning and transactional pointer writes. Seven synthetic tests cover
+malformed input, GNU/SysV hashes, cross-module symbols, weak/absolute/protected
+definitions, RELR bitmap windows and native sparse cross-module execution.
+A private read-only probe planned 578,422 pointer relocations across the same
+three local game modules. This is an in-memory linking result, not game boot.
+
+Launcher `0.3.0-independent.3` carries forward main's owned mod manager, styled
+release list, release notes, outcome reporting and updated installer-worker
+validation. Main-channel installation, legacy code-mod builds and pending main
+engine rebuilds remain disabled here. Mod management rejects game paths outside
+this worktree before changing files. Synthetic boundary tests assert those
+restrictions. Main issue 3's NVIDIA frame-generation packaging change belongs to
+the excluded runtime and is not imported. No independent installer is produced.
+
+The separately licensed runtime experiment is documented in
+[INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md). Neither its successful source
+generation nor shader-translator build is accepted as working gameplay.

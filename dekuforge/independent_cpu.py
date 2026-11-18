@@ -297,6 +297,10 @@ def emit_c(words, address=0x1000):
 
 def _program(words, address, memory):
     instructions = _block(words, address, 4096)
+    return _dispatch([(address+i*4,item) for i,item in enumerate(instructions)], memory)
+
+
+def _dispatch(instructions, memory):
     name = 'deku_machine' if memory else 'deku_run'
     arguments = 'DekuCpu *s, DekuMemory *m, ' if memory else 'DekuCpu *s, '
     lines = [HEADER.rstrip()]
@@ -304,8 +308,7 @@ def _program(words, address, memory):
         lines += [MEMORY_HEADER]
     lines += [f'int {name}({arguments}uint64_t budget, uint64_t *executed) {{',
               '  *executed = 0;', '  while (*executed < budget) {', '    switch (s->pc) {']
-    for index, item in enumerate(instructions):
-        pc = address + index * 4
+    for pc, item in instructions:
         body = _body(item, pc, memory)
         if body[-1] == '  return 0;':
             body = body[:-1]
@@ -313,6 +316,23 @@ def _program(words, address, memory):
         lines += body
         lines += ['      ++*executed;', '      break;', '    }']
     return '\n'.join(lines + ['    default: return 1;', '    }', '  }', '  return 0;', '}']) + '\n'
+
+
+def emit_image(blocks):
+    """Correctness runner for sparse, explicitly supplied module code blocks."""
+    instructions = {}
+    for index, (address, words) in enumerate(blocks):
+        if index >= 4096:
+            raise ValueError('Too many image blocks')
+        decoded = _block(words, address, 4096)
+        for i,item in enumerate(decoded):
+            pc = address+i*4
+            if pc in instructions or len(instructions) >= 4096:
+                raise ValueError('Overlapping or oversized image')
+            instructions[pc] = item
+    if not instructions:
+        raise ValueError('Empty execution image')
+    return _dispatch(sorted(instructions.items()),True)
 
 
 def emit_program(words, address=0x1000):

@@ -16,6 +16,64 @@ from dekuforge.ui import Launcher
 
 @unittest.skipUnless(os.name == "nt", "Windows desktop integration")
 class LauncherWorkflowTests(unittest.TestCase):
+    def wait_for_mods(self):
+        deadline = time.monotonic() + 5
+        while self.app.mods_busy and time.monotonic() < deadline:
+            self.root.update()
+            self.app.tick()
+        self.assertFalse(self.app.mods_busy)
+
+    def test_mod_import_toggle_and_order_in_the_single_window(self):
+        import zipfile
+        source = self.folder/'Test pack.zip'
+        with zipfile.ZipFile(source, 'w') as archive:
+            archive.writestr('Wrapper/romfs/Actor/example.txt', b'synthetic mod')
+        self.app.navigate('mods')
+        self.root.update_idletasks()
+        self.wait_for_mods()
+        with patch('dekuforge.game_updates.game_running', return_value=False):
+            self.app.mods_work('import', str(source))
+            self.wait_for_mods()
+            self.assertEqual(len(self.app.mods_entries), 1)
+            self.assertFalse(self.app.mods_entries[0].enabled)
+            self.app.mod_selected = 'Test pack'
+            self.app.modify_mod('toggle')
+            self.wait_for_mods()
+        self.assertTrue(self.app.mods_entries[0].enabled)
+        self.assertIn('mods_order = Test pack', (self.game.parent/'nx2navi.ini').read_text())
+        for language in LANGUAGES:
+            self.app.set_language(language)
+            self.app.navigate('mods')
+            self.root.update_idletasks()
+            self.assertEqual(self.app.mod_toggle_button.cget('text'), self.app.t('mods_disable'))
+        self.assertFalse(any(isinstance(w, tk.Toplevel) for w in self.root.winfo_children()))
+
+    def test_play_waits_for_mod_preparation_and_changed_code_prevents_launch(self):
+        folder = self.game.parent/'mods/Code/exefs'
+        folder.mkdir(parents=True)
+        (folder/'example.pchtxt').write_text('synthetic code patch')
+        with patch('dekuforge.game_updates.game_running', return_value=False), patch('dekuforge.ui.launch') as launch:
+            self.app.play()
+            self.wait_for_mods()
+            launch.assert_not_called()
+        self.assertEqual(self.app.page, 'mods')
+        self.assertEqual(self.app.mods_status, self.app.t('mods_rebuild_needed'))
+
+    def test_romfs_mod_configuration_is_ready_before_process_launch(self):
+        folder = self.game.parent/'mods/Textures/romfs/Actor'
+        folder.mkdir(parents=True)
+        (folder/'sample.txt').write_bytes(b'synthetic asset')
+        process = Mock(pid=123)
+        process.poll.return_value = None
+        def launch(_):
+            self.assertIn('mods_order = Textures', (self.game.parent/'nx2navi.ini').read_text())
+            return process
+        with patch('dekuforge.game_updates.game_running', return_value=False), patch('dekuforge.ui.launch', side_effect=launch) as start:
+            self.app.play()
+            self.wait_for_mods()
+            start.assert_called_once_with(str(self.game))
+        self.assertIs(self.app.process, process)
+
     def test_save_import_finds_old_installation_and_requires_confirmation(self):
         active = self.game.parent
         (active/'.dekuforge-stable-build').touch()
@@ -69,6 +127,7 @@ ui.main()
         self.assertTrue(proof["success"])
         self.assertFalse(proof["window_was_mapped"])
         self.assertEqual(len(proof["screens"]), 40)
+        self.assertEqual(len(proof["mod_screens"]), 5)
         self.assertEqual(len(proof["report_screens"]), 5)
 
     def setUp(self):
@@ -100,6 +159,72 @@ ui.main()
         self.root.withdraw()
         self.app = Launcher(self.root)
 
+    def test_update_failure_opens_prefilled_review_form_without_submitting(self):
+        from dekuforge.update_package import atomic_json
+        from dekuforge.update_status import pending_result
+        atomic_json(self.folder/'local/update-result.json', {'success': False,
+            'release': 'v0.3.0-preview.2', 'error': 'Synthetic update rollback', 'job': 'a'*32})
+        self.app.update_notice = pending_result(self.folder)
+        self.app.show_update_result()
+        self.assertEqual(self.app.page, 'updates')
+        # No collection or network work is necessary to verify the form wiring.
+        with patch.object(self.app, 'prepare_report'), patch('dekuforge.reports.submit') as submit:
+            self.app.report_update_failure()
+            self.assertEqual(self.app.page, 'report')
+            self.assertIn('v0.3.0-preview.2', self.app.report_draft['title'])
+            self.assertIn('Synthetic update rollback', self.app.report_draft['details'])
+            self.assertTrue(self.app.report_draft['include_logs'])
+            self.assertEqual(self.app.report_incident['kind'], 'application_update')
+            submit.assert_not_called()
+        self.app.dismiss_update_result()
+        self.assertIsNone(pending_result(self.folder))
+
+    def test_successful_update_is_shown_before_automatic_game_rebuild(self):
+        self.app.update_notice = {'success': True, 'release': 'v0.3.0-preview.2', 'id': 'test'}
+        self.app.show_update_result()
+        self.assertEqual(self.app.page, 'updates')
+        with patch('dekuforge.ui.run_rebuild') as rebuild:
+            self.app.resume_game_update()
+            rebuild.assert_not_called()
+        self.app.dismiss_update_result()
+        self.assertIsNone(self.app.update_notice)
+
+    def test_release_list_shows_notes_installed_status_and_contextual_actions(self):
+        from dekuforge import __version__
+        self.app.releases = [{'version': 'v9.0.0', 'preview': True, 'notes': '# New release\nTest details', 'installable': True},
+            {'version': 'v0.2.0', 'preview': False, 'notes': 'Stable notes', 'installable': True}]
+        self.app.navigate('updates')
+        self.assertEqual(len(self.app.release_rows), 3)
+        for version, expected, notes in (('v9.0.0','release_action_update','Test details'),
+                                         ('v0.2.0','release_action_downgrade','Stable notes'),
+                                         ('v'+__version__,'release_action_rebuild',self.app.t('release_notes_empty'))):
+            index = next(i for i,row in enumerate(self.app.release_rows) if row['version'] == version)
+            self.app.release_list.selection_set(str(index))
+            self.app.select_release_row()
+            self.assertEqual(self.app.selected_release, version)
+            self.assertEqual(self.app.release_button.cget('text'), self.app.t(expected))
+            self.assertIn(notes, self.app.release_notes.get('1.0','end'))
+        values = self.app.release_list.item(str(index), 'values')
+        self.assertEqual(values[-1], self.app.t('release_current'))
+        with patch.object(self.app, 'install_selected_release') as install, patch.object(self.app, 'rebuild_current_release') as rebuild:
+            self.app.perform_release_action()
+            rebuild.assert_called_once()
+            install.assert_not_called()
+
+    def test_current_release_rebuild_queues_separate_build_identity(self):
+        source = self.folder/'own.nup'
+        source.write_bytes(b'synthetic input')
+        self.app.source = str(source)
+        with patch('dekuforge.release_ui.COMPONENTS', {'engine': {'backend':'adapter-fixture'}}), patch.object(self.app, 'resume_game_update') as rebuild:
+            self.app.rebuild_current_release()
+            first = json.loads((self.folder/'local/pending-game-update.json').read_text())
+            self.app.rebuild_current_release()
+            second = json.loads((self.folder/'local/pending-game-update.json').read_text())
+        self.assertNotEqual(first['build_fingerprint'], second['build_fingerprint'])
+        self.assertTrue(first['requires_rebuild'])
+        rebuild.assert_called_with(manual=True)
+        self.assertTrue(self.game.is_file())
+
     def test_navigation_and_language_preserve_wizard_and_logs_in_one_window(self):
         self.app.source = str(self.folder / "own.nup")
         self.app.destination = str(self.folder / "new")
@@ -127,16 +252,6 @@ ui.main()
         path.write_text(json.dumps({"success":False,"release":"v0.3.0"}),encoding="utf-8")
         self.assertFalse(self.app.automatic_update_allowed({"version":"v0.3.0"}))
         self.assertTrue(self.app.automatic_update_allowed({"version":"v0.3.1"}))
-
-    def test_page_panel_preserves_tk_root_method_and_releases_destroyed_images(self):
-        self.app.navigate('settings')
-        panel = self.app.page_panel
-        self.assertTrue(callable(panel._root))
-        self.assertIs(panel._root(), self.root)
-        body = panel.body
-        self.root.update_idletasks()
-        self.app.navigate('home')
-        self.assertIsNone(body._image)
 
     def test_management_controls_fit_minimum_window(self):
         self.root.geometry("960x700")

@@ -15,7 +15,7 @@ investigations; it records reusable work, failed approaches and measurement scop
 | NUP/archive and module preparation | Original `nup.py`, `gameplan.py`, `modules.py`, `romfs.py` | Retained; lz4/zbic and other libraries retain their separate licenses |
 | CPU block generator | New `independent_cpu.py` | Original implementation from ISA facts, not a port of the NX2navi lifter |
 | CPU state and native correctness runner | Own integer/PC/SP/NZCV C ABI and explicit checked memory regions | Original; SIMD/FP, full dispatch and platform ABI still missing |
-| Guest memory/module prototype | New `guest_memory.py` | Original bounded permissions, NSO/BSS mappings and RELATIVE relocations; not a complete native linker |
+| Guest memory/module prototype | New `guest_memory.py`, `guest_linker.py` | Original bounded MOD0/ELF discovery, symbol and RELA/RELR pointer relocation; not a complete platform loader |
 | Historical `engine/` | Immutable earlier MIT import | Reference only; not selected as the new backend |
 | Stable 0.10.1 backend/patches | Inherited reference integration | Excluded from independent build route; scoped grants do not clear surrounding code |
 | Shader/Vulkan/guest services | Not implemented in this backend | Audit reusable upstream components or implement independently |
@@ -52,7 +52,13 @@ fault-handling contract of the correctness runner, not a claim of hardware
 atomicity, concurrent guest-memory ordering or complete architectural exceptions. Little-endian byte
 accesses avoid unaligned host casts. The Python memory prototype maps verified
 NSO segments RX/R/RW, zeroes BSS and applies RELATIVE relocations transactionally.
-Symbol/TLS imports, dynamic-table discovery, scheduling and full linking are absent.
+The original bounded module linker now discovers MOD0 dynamic tables, SysV/GNU
+symbol tables, RELA and RELR relocation streams. ABS64, GLOB_DAT, JUMP_SLOT and
+RELATIVE pointer writes are validated as one plan before any are committed.
+Synthetic tests include unresolved weak, absolute and protected symbols, malformed
+tables and cross-module calls through relocated function pointers. `emit_image`
+executes sparse synthetic code mappings. TLS, ELF symbol versions, initializers,
+dependency loading, scheduling and the full platform ABI remain absent.
 Generated C carries the game-output marker and stays local even for synthetic
 development inputs. Successful translation of a tiny block is not game readiness.
 
@@ -101,6 +107,24 @@ Main's application update channel is disabled so it cannot replace this branch
 with the old backend. No runtime, toolchain, generated source or user profile is
 copied from main into this worktree. An external development interpreter/compiler
 can run tests without becoming a distributed engine dependency.
+
+## Separately licensed runtime feasibility candidate
+
+An isolated developer experiment evaluates
+[Ocarina Recomp](https://github.com/sostenesfreitas/ocarina-recomp) at
+`406b3ae0321eff8dd083a607a8186aa56b52b873`. This is a GPL-3.0-or-later composed
+runtime, based on MIT TotK Recomp 0.2.8 and scoped MIT/GPL components listed in
+its notices. It is not the excluded NX2navi backend. Its GPL code must not be
+described or redistributed as original MIT DekuForge code. The source audit,
+managed translator build and game compilation remain local experiments until
+moving gameplay meets the acceptance gates below. No game outputs are published.
+
+The archive's 900 source blobs were checked against their pinned Git blob IDs;
+only documented CRLF checkout normalization was reversed. Its own ExeFS hashes
+are enforced. A managed, self-contained .NET translator build avoids an MSVC
+dependency; this build mode is distinct from the upstream NativeAOT identity.
+Existing packed game data is opened read-only; output and profiles stay in this
+worktree. This does not establish standalone installer or gameplay readiness.
 
 ## Implementation sequence for contributors
 

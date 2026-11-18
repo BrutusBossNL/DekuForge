@@ -14,6 +14,10 @@ Use the stable main game as a behavioral/performance reference only. Reuse only
 code with a recorded open-source or redistribution grant; comply with its terms.
 Rewriting, renaming or restructuring restricted code is not provenance clearance.
 Record source, revision, scope, license and validation for every imported part.
+The separately licensed GPL runtime candidate pinned in
+`docs/INDEPENDENT_ENGINE.md` may be built in ignored experiment directories.
+It is not an approved production backend until the gameplay acceptance gates
+pass. Preserve its GPL/MIT notices and document any local adaptations.
 
 Do not claim clean-room provenance: this branch inherits repository history and
 contributors may have seen reference source. The historical source and notices
@@ -131,7 +135,9 @@ Changes to future instruction lifting need differential tests against an
 independent ARM64 implementation. Changes to runtime memory or rendering need
 isolated in-game validation and measurements from repeatable scenes.
 
-`python run_launcher.py --self-test` renders 40 core views and five report forms across the five languages
+`python run_launcher.py --self-test` renders 40 legacy core views, five mod views
+and five report forms across the five languages. The legacy `screens=40` result
+is an updater compatibility protocol; added views have separate counters. It runs
 without starting a game or changing preferences. `tools/check_launcher.py` checks
 that this health check never maps a visible window: setup/update checks must not
 flash pages or language changes in front of the user. It also checks

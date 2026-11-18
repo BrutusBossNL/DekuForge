@@ -19,7 +19,6 @@ class StartupCanvas(BackgroundCanvas):
         gradient = self.gradient.resize(size, Image.Resampling.BILINEAR)
         return Image.blend(gradient, art, self.reveal) if art is not None else gradient
 
-
     def destroy(self):
         if hasattr(self, '_logo_frames'):
             self._logo_frames.clear()

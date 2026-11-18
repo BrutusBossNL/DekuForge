@@ -5,9 +5,10 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+from datetime import datetime, timezone
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from update_package import atomic_json, install, rollback
+from update_package import atomic_json, install, rollback, validate_launcher_health
 
 
 def main():
@@ -37,16 +38,17 @@ def main():
         subprocess.run([str(python), str(root / "run_launcher.py"), "--self-test"], cwd=root,
             check=True, timeout=90, creationflags=subprocess.CREATE_NO_WINDOW)
         proof = json.loads(report.read_text(encoding="utf-8"))
-        if report.stat().st_mtime_ns == before or not proof["success"] or len(proof["screens"]) != 40:
+        if report.stat().st_mtime_ns == before:
             raise RuntimeError("Updated launcher failed its health check")
-        if result["components"]["launcher"].get("bug_reports") and len(proof.get("report_screens",[]))!=5:
-            raise RuntimeError("Updated launcher failed its report-form checks")
+        validate_launcher_health(proof, result['components'])
         atomic_json(root / "local/pending-game-update.json", {**result, "release": job["release"], "status": "pending"})
-        atomic_json(root / "local/update-result.json", {"success": True, "release": job["release"], **result})
+        atomic_json(root / "local/update-result.json", {"success": True, "release": job["release"],
+            'job': job_path.parent.name, 'time': datetime.now(timezone.utc).isoformat(), **result})
     except Exception as error:
         if result:
             rollback(root, result["backup"])
-        atomic_json(root / "local/update-result.json", {"success": False, "error": str(error), "release": job["release"]})
+        atomic_json(root / "local/update-result.json", {"success": False, "error": str(error), "release": job["release"],
+            'job': job_path.parent.name, 'time': datetime.now(timezone.utc).isoformat()})
         print("Update rolled back:", error, flush=True)
     if job.get("restart", True):
         subprocess.Popen([str(root / "DekuForge.exe")], cwd=root, creationflags=subprocess.CREATE_NO_WINDOW)

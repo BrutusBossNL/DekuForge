@@ -296,6 +296,37 @@ for _language, _text in {
     MESSAGES[_language]["build_interrupted"] = _text
 
 
+from .mod_labels import extend as _extend_mods
+_extend_mods(MESSAGES)
+
+for _language, _text in {'en': 'Preview release', 'nl': 'Previewversie',
+                         'de': 'Vorschauversion', 'es': 'Version preliminar',
+                         'fr': 'Version preliminaire'}.items():
+    MESSAGES[_language]['preview_release'] = _text
+
+_UPDATE_RESULTS = {
+    'release_version': ('Version', 'Versie', 'Version', 'Version', 'Version'),
+    'release_channel_column': ('Channel', 'Kanaal', 'Kanal', 'Canal', 'Canal'),
+    'release_status_column': ('Status', 'Status', 'Status', 'Estado', 'Statut'),
+    'release_current': ('Installed', 'Geinstalleerd', 'Installiert', 'Instalada', 'Installee'),
+    'release_notes': ('Release notes', 'Releasenotes', 'Versionshinweise', 'Notas de la version', 'Notes de version'),
+    'release_notes_empty': ('No GitHub release notes are available for this version in the selected channel.', 'Voor deze versie zijn geen GitHub-releasenotes beschikbaar in het gekozen kanaal.', 'Fuer diese Version sind in diesem Kanal keine GitHub-Versionshinweise verfuegbar.', 'No hay notas de GitHub para esta version en el canal seleccionado.', 'Aucune note GitHub disponible pour cette version dans le canal choisi.'),
+    'release_action_update': ('Install update', 'Update installeren', 'Update installieren', 'Instalar actualizacion', 'Installer la mise a jour'),
+    'release_action_downgrade': ('Downgrade', 'Downgraden', 'Aeltere Version installieren', 'Instalar version anterior', 'Installer une version anterieure'),
+    'release_action_rebuild': ('Rebuild for current version', 'Rebuild voor huidige versie', 'Aktuelle Version neu bauen', 'Reconstruir la version actual', 'Reconstruire la version actuelle'),
+    'update_installed': ('Launcher update installed: {version}.', 'Launcherupdate geinstalleerd: {version}.', 'Launcher-Update installiert: {version}.', 'Actualizacion instalada: {version}.', 'Mise a jour installee : {version}.'),
+    'update_failed_result': ('Update to {version} failed. The previous launcher is retained.', 'Update naar {version} mislukt. De vorige launcher is behouden.', 'Update auf {version} fehlgeschlagen. Der bisherige Launcher bleibt erhalten.', 'Fallo la actualizacion a {version}. Se conserva el lanzador anterior.', 'Echec de la mise a jour vers {version}. Le lanceur precedent est conserve.'),
+    'update_report_issue': ('Report this update failure', 'Deze updatefout melden', 'Updatefehler melden', 'Informar de este error', 'Signaler cet echec'),
+    'update_result_continue': ('Continue', 'Verder', 'Weiter', 'Continuar', 'Continuer'),
+    'update_issue_title': ('Launcher update to {version} failed', 'Launcherupdate naar {version} mislukt', 'Launcher-Update auf {version} fehlgeschlagen', 'Fallo al actualizar el lanzador a {version}', 'Echec de la mise a jour du lanceur vers {version}'),
+    'update_issue_details': ('I selected {version} in Updates. The update failed. Current launcher: {current}.\n\nError: {error}', 'Ik koos {version} bij Updates. De update is mislukt. Huidige launcher: {current}.\n\nFout: {error}', 'Ich habe {version} unter Updates ausgewaehlt. Das Update ist fehlgeschlagen. Aktueller Launcher: {current}.\n\nFehler: {error}', 'Seleccione {version} en Actualizaciones. La actualizacion fallo. Lanzador actual: {current}.\n\nError: {error}', 'J\'ai choisi {version} dans Mises a jour. La mise a jour a echoue. Lanceur actuel : {current}.\n\nErreur : {error}'),
+    'update_issue_expected': ('Install {version}, restart and confirm the installed launcher version.', '{version} installeren, herstarten en de geinstalleerde launcherversie bevestigen.', '{version} installieren, neu starten und die installierte Version bestaetigen.', 'Instalar {version}, reiniciar y confirmar la version instalada.', 'Installer {version}, redemarrer et confirmer la version installee.'),
+}
+for _key, _values in _UPDATE_RESULTS.items():
+    for _language, _text in zip(('en', 'nl', 'de', 'es', 'fr'), _values):
+        MESSAGES[_language][_key] = _text
+
+
 def translate(language, key, **values):
     selected = language if language in MESSAGES else "en"
     text = FILE_LABELS[selected][key] if key in FILE_LABELS[selected] else MESSAGES[selected].get(key,MESSAGES["en"].get(key,key.replace("_"," ").title()))

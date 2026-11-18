@@ -50,6 +50,13 @@ def style_controls(window):
     """Style both ttk fields and the separate Tk combobox popdown list."""
     style = ttk.Style(window)
     style.theme_use("clam")
+    style.configure('Forge.Treeview', background=PANEL, fieldbackground=PANEL, foreground=TEXT,
+                    rowheight=34, borderwidth=0, bordercolor=BORDER, lightcolor=BORDER, darkcolor=BORDER,
+                    relief='flat', font=('Segoe UI',10))
+    style.configure('Forge.Treeview.Heading', background=BORDER, foreground=TEXT,
+                    relief='flat', padding=8, font=('Segoe UI',10,'bold'))
+    style.map('Forge.Treeview', background=[('selected',GOLD)], foreground=[('selected',BG)])
+    style.map('Forge.Treeview.Heading', background=[('active','#485e32')])
     style.configure("Forge.TCombobox", fieldbackground=PANEL, background=BORDER,
                     foreground=TEXT, arrowcolor=GOLD, bordercolor=BORDER,
                     lightcolor=BORDER, darkcolor=BORDER, padding=9)
@@ -166,26 +173,35 @@ class BackgroundCanvas(tk.Canvas):
         key = (self.winfo_width(), self.winfo_height(), owner.winfo_width(), owner.winfo_height(),
                self.winfo_rootx()-owner.winfo_rootx(), self.winfo_rooty()-owner.winfo_rooty(),
                self._opacity, getattr(self, "reveal", None), id(owner._art))
-        if key == self._draw_key:
-            return
-        subdued = self._region()
-        if subdued is None:
-            return
-        self._image = rgb_photo(self, subdued)
-        self._draw_key = key
-        self.itemconfigure(self._item, image=self._image)
-        self.tag_lower(self._item)
-        for child in self.winfo_children():
+        # Canvas items use scrolling content coordinates; the artwork belongs to
+        # the fixed viewport. Moving the item does not require new pixel data.
+        self.coords(self._item, self.canvasx(0), self.canvasy(0))
+        if key != self._draw_key:
+            subdued = self._region()
+            if subdued is not None:
+                self._image = rgb_photo(self, subdued)
+                self._draw_key = key
+                self.itemconfigure(self._item, image=self._image)
+                self.tag_lower(self._item)
+        # A scrolled child window can move without changing its own dimensions,
+        # even when our pixels are cached. Plain layout frames must not stop the
+        # refresh from reaching its translucent descendants.
+        self._redraw_descendants(self)
+
+    @staticmethod
+    def _redraw_descendants(widget):
+        for child in widget.winfo_children():
             if isinstance(child, BackgroundCanvas):
-                if child._resize_job is not None:
-                    child.after_cancel(child._resize_job)
                 child._redraw()
+            else:
+                BackgroundCanvas._redraw_descendants(child)
 
     def destroy(self):
         if self._resize_job is not None:
             self.after_cancel(self._resize_job)
         super().destroy()
-        # PhotoImage finalizers call Tk; release this on the UI thread.
+        # PhotoImage finalizers call Tk. Release them here on the UI thread,
+        # rather than during a later garbage collection in an import worker.
         self._image = None
 
 
@@ -200,6 +216,7 @@ class PagePanel(tk.Frame):
     def __init__(self, parent, surface, padding=28):
         super().__init__(parent, bg=BORDER, highlightthickness=0, borderwidth=0)
         self.padding = padding
+        self._scroll_job = None
         self.viewport = BackgroundCanvas(self, surface=surface, opacity=.15)
         self.viewport.pack(side="left", fill="both", expand=True, padx=1, pady=1)
         style = ttk.Style(self)
@@ -234,12 +251,20 @@ class PagePanel(tk.Frame):
             self.scroll.pack(side="right", fill="y", padx=(0,1), pady=6)
         elif not needed and self.scroll.winfo_manager():
             self.scroll.pack_forget()
+        if self._scroll_job is None:
+            self._scroll_job = self.after_idle(self._redraw_scrolled)
+
+    def _redraw_scrolled(self):
+        self._scroll_job = None
+        # Run once after Tk has placed the scrolled child window. All input
+        # routes (scrollbar, wheel and focus reveal) pass through yscrollcommand.
+        self.viewport._redraw()
 
     def _contains(self, widget):
         return widget is self.body or widget is not None and str(widget).startswith(str(self.body)+".")
 
     def _mousewheel(self, event):
-        if (event.widget is not self.viewport and not self._contains(event.widget)) or isinstance(event.widget, (tk.Text, tk.Listbox, ttk.Combobox)):
+        if (event.widget is not self.viewport and not self._contains(event.widget)) or isinstance(event.widget, (tk.Text, tk.Listbox, ttk.Combobox, ttk.Treeview)):
             return
         if self.scroll.winfo_manager():
             self.viewport.yview_scroll(-int(event.delta/120) or (-1 if event.delta>0 else 1), "units")
@@ -261,6 +286,9 @@ class PagePanel(tk.Frame):
             self.reveal(event.widget)
 
     def destroy(self):
+        if self._scroll_job is not None:
+            self.after_cancel(self._scroll_job)
+            self._scroll_job = None
         self._event_root.unbind("<MouseWheel>", self._wheel)
         self._event_root.unbind("<FocusIn>", self._focus)
         super().destroy()
@@ -294,7 +322,6 @@ class NavigationLogo(BackgroundCanvas):
         if key == "image":
             return self.itemcget(self._logo, "image")
         return super().cget(key)
-
 
     def destroy(self):
         super().destroy()
