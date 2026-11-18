@@ -12,7 +12,7 @@ from dekuforge.update_package import atomic_json
 class UpdateStatusTests(unittest.TestCase):
     def test_outcome_is_visible_until_acknowledged_and_new_attempt_reappears(self):
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
+            root = Path(temporary).resolve()
             self.assertIsNone(pending_result(root))
             atomic_json(root/'local/update-result.json', {'success': True, 'release': 'v0.3.0-preview.2'})
             first = pending_result(root)
@@ -27,7 +27,7 @@ class UpdateStatusTests(unittest.TestCase):
 
     def test_failed_update_report_prioritizes_its_reviewed_worker_log(self):
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
+            root = Path(temporary).resolve()
             job = root/'local/update-jobs'/('a'*32)
             job.mkdir(parents=True)
             atomic_json(job/'job.json', {'release': 'v0.3.0-preview.2'})
