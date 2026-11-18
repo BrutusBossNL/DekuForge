@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Recorded UI adaptations of the pinned GPL provider; no renderer changes.
+"""Recorded UI and cache preparation adaptations of the pinned GPL provider.
 
 Original provider files stay immutable. Only the affected translation units use
 generated, attributed copies, so unrelated CPU/renderer objects remain reusable.
@@ -102,13 +102,37 @@ def prepare(source, output):
     display = (source / 'host/display.c').read_text(encoding='utf-8')
     display = _replace(display, '#include "hos.h"', '#include "hos.h"\n#undef HOS_GAME_TITLE\n#define HOS_GAME_TITLE "DekuForge"')
     files['display.c'] = display
+    draw = (source / 'gpu/vk/vk_draw.cpp').read_text(encoding='utf-8')
+    draw = _replace(draw,
+        '    if (!gone_on && !prepare_stopped()) precompile_built_write(graphics_n);',
+        '''    if (!gone_on && !prepare_stopped()) {
+        // Ordinary window close only saves play generations. Persist the cache
+        // built here before reporting a build's preparation complete.
+        if (env_on("DEKUFORGE_SAVE_BUILD_CACHE")) {
+            // The startup size already includes merged play files. Use a
+            // fresh snapshot even when its size does not grow during warmup.
+            size_t bytes = 0;
+            const bool has_data = pcache && vkGetPipelineCacheData(dev.device, pcache, &bytes, nullptr) == VK_SUCCESS && bytes > 32;
+            const size_t saved = has_data ? play_file_write(pcache, pcache_path) : 0;
+            if (saved > 32) {
+                pcache_saved_size = saved;
+                logf("DekuForge: build pipeline cache saved (%zu bytes)", saved);
+            } else {
+                logf("DekuForge: build pipeline cache save failed");
+            }
+        }
+        precompile_built_write(graphics_n);
+    }''')
+    files['vk_draw.cpp'] = draw
     mapping, records = {}, {}
-    origins = {'vk_ui.h': 'gpu/vk/vk_ui.h', 'vk_menu.cpp': 'gpu/vk/vk_menu.cpp', 'display.c': 'host/display.c'}
+    origins = {'vk_ui.h': 'gpu/vk/vk_ui.h', 'vk_menu.cpp': 'gpu/vk/vk_menu.cpp',
+               'display.c': 'host/display.c', 'vk_draw.cpp': 'gpu/vk/vk_draw.cpp'}
     for name, text in files.items():
         path = output / name
         if path.exists() and (path.is_symlink() or getattr(path, 'is_junction', lambda: False)()):
             raise ValueError('Adapted source cannot be a link')
-        data = ('// DekuForge UI adaptation of Hookshot; GPL-3.0-or-later.\n' + text).encode('utf-8')
+        kind = 'cache preparation' if name == 'vk_draw.cpp' else 'UI'
+        data = (f'// DekuForge {kind} adaptation of Hookshot; GPL-3.0-or-later.\n' + text).encode('utf-8')
         if not path.is_file() or path.read_bytes() != data:
             path.write_bytes(data)
         original = source / origins[name]

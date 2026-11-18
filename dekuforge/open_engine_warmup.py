@@ -78,13 +78,16 @@ def warm(executable, work, notify, *, timeout=3600):
     arguments = list(options['args'])
     arguments[arguments.index('--user')+1] = str(user)
     name = 'dekuforge-build-'+uuid.uuid4().hex
-    env = dict(options['env'], HOS_CONTROL=name, HOS_AUDIO='0', HOS_WINDOW_NOACTIVATE='1')
+    env = dict(options['env'], HOS_CONTROL=name, HOS_AUDIO='0', HOS_WINDOW_NOACTIVATE='1',
+               DEKUFORGE_SAVE_BUILD_CACHE='1', RX_VK_PRECOMPILE_STALL_S='0')
     notify('phase', {'phase': 'pipelines', 'done': 0, 'total': 0})
     notify('log', 'Validating the ordinary-play driver cache; first-time preparation can take several minutes.\n')
     control = None
     log_path = work/'dekuforge-play-cache.log'
     started = time.monotonic()
     phase = 'pipelines'
+    cache_saved = False
+    ready_since = None
     try:
         with log_path.open('w', encoding='utf-8') as log:
             with subprocess.Popen(arguments, cwd=executable.parent, env=env, stdout=log, stderr=subprocess.STDOUT,
@@ -94,6 +97,10 @@ def warm(executable, work, notify, *, timeout=3600):
                         while process.poll() is None and time.monotonic()-started < timeout:
                             for line in reader:
                                 notify('log', line)
+                                if 'DekuForge: build pipeline cache save failed' in line:
+                                    raise RuntimeError('Could not persist the local driver cache; see '+str(log_path))
+                                if 'DekuForge: build pipeline cache saved' in line:
+                                    cache_saved = True
                                 match = re.search(r'compute pipelines: (\d+) of (\d+)', line)
                                 if match and phase != 'compute_pipelines':
                                     phase = 'compute_pipelines'
@@ -108,13 +115,21 @@ def warm(executable, work, notify, *, timeout=3600):
                                 except OSError:
                                     time.sleep(.25)
                                     continue
-                            if ready(control.request('status')):
+                            if not ready(control.request('status')):
+                                time.sleep(.25)
+                                continue
+                            if cache_saved:
                                 control.request('quit')
                                 if process.wait(timeout=30) != 0:
                                     raise RuntimeError('Cache validation runtime did not exit normally')
                                 notify('log', 'Ordinary-play driver cache validated and runtime exited normally.\n')
                                 return {'ordinary_play_cache_validated': True,
+                                        'pipeline_cache_saved': True,
                                         'validation_seconds': round(time.monotonic()-started, 2)}
+                            if ready_since is None:
+                                ready_since = time.monotonic()
+                            if time.monotonic()-ready_since >= 5:
+                                raise RuntimeError('Runtime started without confirming the pipeline cache save; see '+str(log_path))
                             time.sleep(.25)
                     raise RuntimeError('Runtime did not present frames after cache preparation; see '+str(log_path))
                 finally:

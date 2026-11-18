@@ -173,8 +173,9 @@ engine code, not original MIT DekuForge code. The development evaluation tool
 does not distribute its source, game outputs or compiled runtime in a launcher
 release. See `docs/OPEN_ENGINE_EVALUATION.md` for explicit build boundaries.
 
-`dekuforge/open_engine_branding.py` describes adaptations of this GPL provider's
-UI and is itself GPL-3.0-or-later (SPDX header), excepted from the root MIT grant.
+`dekuforge/open_engine_branding.py` adapts this GPL provider's UI and adds a
+pipeline cache save during build validation. The adapter is GPL-3.0-or-later
+(SPDX header), excepted from the root MIT grant.
 Generated adapted sources retain the original headers and add an attribution
 line; their original/adapted SHA-256 values are recorded locally. The complete
 GPL text is retained in `licenses/GPL-3.0.txt` and in the verified provider tree.

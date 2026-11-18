@@ -73,20 +73,20 @@ requires an additional ordinary-play driver-cache warmup on NVIDIA after its
 prepare-only process. DekuForge now starts its own preparation child with a
 separate empty profile, waits for actual Vulkan frames, and closes only that
 child before reporting success. It never manufactures the provider's completion
-marker. Inspect `dekuforge-play-cache.log` inside work for this final stage.
+marker. The validation child waits for pipeline preparation to finish and
+explicitly saves the driver cache next to the game executable before the build
+can succeed. Inspect `dekuforge-play-cache.log` inside work for this final stage.
 Graphics and compute pipeline preparation have separate measured progress stages;
 finishing the graphics count alone is not reported as a complete build.
 The experimental adapter selects the provider's documented `RX_VK_LOAD=start`
 mode. On the measured NVIDIA driver, cache-only loading at program creation
 still missed thousands of prepared pipelines and left incomplete initial world
-frames; start mode keeps known programs/pipelines ready before the title. This
-uses more memory and still needs startup/performance acceptance. It changes the
-loading policy, not shader translation or rendering formulas. The measured
-ordinary start prepared known pipelines in 445.9 seconds. Its first world frame
-and twelve consecutive settled captures were complete; a 59.833-second
-instrumented interval averaged 47.382 fps. The recurring startup wait remains
-unresolved. See the evidence ledger for scope; do not advertise a quick start or
-performance parity with main.
+frames; start mode keeps known programs and pipelines ready before the title.
+It still recreates the in-memory pipeline handles on each launch. Two starts
+of engine `0.1.0-independent.7` under the ordinary Windows account read the
+persisted cache and reached the menu in about 30 seconds each. Cold-cache
+timings, portable support and matched performance with main remain open.
+See the [evidence ledger](INDEPENDENT_EVIDENCE.md) for the measured scope.
 `--no-prepare-shaders` is diagnostic only and skips that readiness check too.
 
 The launcher retains its original async Play, save import/export, build inventory,

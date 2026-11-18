@@ -10,8 +10,9 @@
 
 The independent Windows developer route now composes the complete source-built
 NUP pipeline, pinned generic tools and source-built AV1 movies, with explicit
-launcher opt-in. Current work covers ordinary-play cache readiness, gameplay
-measurements and asset-mod/save integration. Official standalone Python/Tk/Pillow
+launcher opt-in. The build saves its driver pipeline cache before completion.
+Current work covers repeat startup time, gameplay measurements and asset-mod/save
+integration. Official standalone Python/Tk/Pillow
 now boots the launcher locally. Independent setup acceptance, the full
 Cheat Manager, matched performance and long-session acceptance remain open; see
 [OPEN_ENGINE_EVALUATION.md](OPEN_ENGINE_EVALUATION.md).

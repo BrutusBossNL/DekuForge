@@ -291,3 +291,31 @@ their pre-build SHA-256 values. The final ordinary-play readiness process
 presented Vulkan frames and exited normally (457.72 seconds for that stage).
 This confirms the connected launcher build route locally; installer, controller,
 audio, long-session and matched-main gates remain separate.
+
+## 2026-11-18: persisted build cache and repeat Play
+
+Engine `0.1.0-independent.7` snapshots the Vulkan pipeline cache next to the
+game before the build's validation process reports success. The build waits
+for the cache write and for Vulkan frames to be presented. The provider's
+pipeline writer stages the file before replacing the previous cache.
+
+An incremental NUP rebuild linked the adapted renderer. A separate invocation
+of the build's final validation stage under the owner's ordinary Windows account
+then wrote a 1,305,178,386-byte cache and exited normally after 113.21 seconds.
+The earlier sandboxed attempt did not confirm the save. The final run used the
+explicit snapshot writer and the driver had access to its own warm disk cache.
+The changed account and cache state prevent a controlled speedup claim against
+the earlier 445.9-second run.
+
+| Repeat Play | First visible replay | Menu | World detected | Native 1080p, FPS |
+|---|---:|---:|---:|---:|
+| A | 25.15 s | 30.67 s | 51.22 s | 48.08 |
+| B | 25.66 s | 30.17 s | 53.23 s | 47.67 |
+
+Both launches read the saved cache and restored all 1,107 known compute
+pipelines from cache. The 25,457 known graphics pipelines were made ready
+before the title, and the timed gameplay intervals each lasted about 20
+seconds on Death Mountain Trail. Both processes exited normally and the
+baseline profile hashes matched. The first world-detection screenshot in
+the repeat test could still fall during the load fade. These figures cover one
+RTX 2080 and its warmed driver, with frame generation off.

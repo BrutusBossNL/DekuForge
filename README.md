@@ -53,13 +53,13 @@ independent capabilities; `--prepare` prepares modules only and is not a game.
 
 ## Known experimental limits
 
-Startup loading now shows complete first-world and consecutive Death Mountain
-captures. The measured native-1080p test averaged 47.4 fps, including screenshot
-work. This is not a matched main benchmark. On the tested RTX 2080 driver,
-preparing known pipelines at each start still took about 7.5 minutes and used
-substantial memory; reducing that wait is unresolved. The full custom Cheat
-Manager, independent app updates, end-user setup, long-session/controller/audio
-acceptance and Linux/iOS gameplay remain open.
+The Windows game builder saves the Vulkan pipeline cache beside the game during
+its final validation step. With that cache and a warm NVIDIA driver cache, two
+starts on the tested RTX 2080 reached the menu in about 30 seconds and averaged
+about 48 fps at native 1080p on Death Mountain Trail. Driver changes and cold
+caches can take longer. See [the test evidence](docs/INDEPENDENT_EVIDENCE.md).
+The full custom Cheat Manager, independent app updates, end-user setup,
+long-session/controller/audio acceptance and Linux/iOS gameplay remain open.
 
 ## Reuse and contributions
 
