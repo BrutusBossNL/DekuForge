@@ -67,7 +67,10 @@ class IndependentAssetModTests(unittest.TestCase):
             prepare_mods(self.root/'external.exe', self.options, self.root)
 
     def test_runtime_path_limit_is_reported_before_snapshot_is_created(self):
-        long_file = self.game/'mods/A/romfs'/('x'*180+'.txt')
+        # Exercise the engine limit regardless of the OS's temporary-root length.
+        prefix = str(self.game/'.dfmods'/('0'*20)/'DekuForge/romfs')
+        length = max(12, 260-len(prefix.encode('utf-8'))+8)
+        long_file = self.game/'mods/A/romfs'/('x'*(length-4)+'.txt')
         long_file.write_bytes(b'fixture')
         with self.assertRaisesRegex(ValueError, 'mods_path_too_long'):
             self.prepare()

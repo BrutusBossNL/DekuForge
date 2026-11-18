@@ -48,6 +48,9 @@ Use a development Python 3.14+ with Tk and the dependencies in the requirements
 files. Run `python run_launcher.py` for the development UI and
 `python run_builder.py --doctor` for the independent status. `--prepare` remains
 an explicit local module-preparation operation; it does not produce a game.
+An explicitly configured development interpreter can also launch this UI through
+the locally compiled `DekuForge.exe`; see the experimental build guide. This is
+separate from a packaged end-user installation.
 
 ## Reuse and contributions
 

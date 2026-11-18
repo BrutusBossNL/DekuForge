@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "launcher": {
-    "version": "0.3.0-independent.5",
+    "version": "0.3.0-independent.6",
     "stage": "development",
     "bug_reports": true,
     "uninstaller": true,

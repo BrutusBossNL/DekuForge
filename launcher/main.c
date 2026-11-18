@@ -16,6 +16,30 @@ static int regular_file(const wchar_t *path) {
     return attributes != INVALID_FILE_ATTRIBUTES && !(attributes & FILE_ATTRIBUTE_DIRECTORY);
 }
 
+static int development_python(const wchar_t *root, wchar_t *python) {
+    if (wcscmp(DEKU_PYTHON_ID, L"development-interpreter")) return 0;
+    wchar_t config[32768];
+    swprintf(config,32768,L"%ls\\local\\python-path.txt",root);
+    FILE *stream = _wfopen(config,L"rb");
+    if (!stream) return 0;
+    char bytes[32768];
+    size_t count = fread(bytes,1,sizeof(bytes)-1,stream);
+    int extra = fgetc(stream);
+    fclose(stream);
+    if (!count || extra != EOF) return 0;
+    while (count && (bytes[count-1]=='\n' || bytes[count-1]=='\r')) --count;
+    bytes[count]=0;
+    if (memchr(bytes,'\n',count) || memchr(bytes,'\r',count) || memchr(bytes,0,count)) return 0;
+    wchar_t candidate[32768];
+    if (!MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,bytes,-1,candidate,32768)) return 0;
+    size_t length=wcslen(candidate);
+    // Explicit developer opt-in, never an implicit interpreter found on PATH.
+    if (length<=7 || candidate[1]!=L':' || candidate[2]!=L'\\' ||
+        _wcsicmp(candidate+length-4,L".exe") || !regular_file(candidate)) return 0;
+    wcscpy(python,candidate);
+    return 1;
+}
+
 static LRESULT CALLBACK setup_window(HWND window, UINT message, WPARAM wp, LPARAM lp) {
     if (message == WM_PAINT) {
         PAINTSTRUCT ps; HDC dc = BeginPaint(window, &ps); RECT r;
@@ -74,7 +98,13 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE previous, PWSTR args, int show
     wchar_t owned[32768];
     swprintf(owned,32768,L"%ls\\python\\%ls\\pythonw.exe",root,DEKU_PYTHON_ID);
     wcscpy(python,owned);
-    if (!regular_file(python)) {
+    int developer = development_python(root,python);
+    if (!regular_file(python) && !wcscmp(DEKU_PYTHON_ID,L"development-interpreter")) {
+        MessageBoxW(NULL,L"This development launcher needs Python with Tk and Pillow. Set its absolute python.exe path in local\\python-path.txt.",
+                    L"DekuForge development",MB_OK|MB_ICONINFORMATION);
+        return 1;
+    }
+    if (!regular_file(python) && !developer) {
         if (prepare_runtime(root,instance) && regular_file(owned)) wcscpy(python,owned);
     }
     if (!regular_file(python)) {

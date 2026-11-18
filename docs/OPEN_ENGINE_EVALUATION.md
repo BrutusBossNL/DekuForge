@@ -41,6 +41,15 @@ python -B tools/build_open_game.py --nup "C:\path\to\your-own.nup" --out build/w
 python run_launcher.py
 ```
 
+For a native development entry point, compile `tools/build_launcher.py
+--toolchain local/build-tools/hookshot-llvm-20261104/bin` with Python. Put the
+absolute path of your chosen development `python.exe` in the UTF-8 file
+`local/python-path.txt`. Then `DekuForge.exe` opens the same launcher without a
+console. This explicit development override is accepted only for the
+`development-interpreter` component; it neither downloads main's interpreter nor
+completes independent runtime packaging. The selected interpreter needs Tk and
+Pillow and must remain installed.
+
 The first command verifies the pinned GPL source and downloads hash-pinned
 LLVM-MinGW, codec/header and SDL packages. It extracts only generic dependencies,
 then compiles dav1d from source. The engine and instruction lifter are compiled
