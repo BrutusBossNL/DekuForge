@@ -71,6 +71,14 @@ prepare-only process. DekuForge now starts its own preparation child with a
 separate empty profile, waits for actual Vulkan frames, and closes only that
 child before reporting success. It never manufactures the provider's completion
 marker. Inspect `dekuforge-play-cache.log` inside work for this final stage.
+Graphics and compute pipeline preparation have separate measured progress stages;
+finishing the graphics count alone is not reported as a complete build.
+The experimental adapter selects the provider's documented `RX_VK_LOAD=start`
+mode. On the measured NVIDIA driver, cache-only loading at program creation
+still missed thousands of prepared pipelines and left incomplete initial world
+frames; start mode keeps known programs/pipelines ready before the title. This
+uses more memory and still needs startup/performance acceptance. It changes the
+loading policy, not shader translation or rendering formulas.
 `--no-prepare-shaders` is diagnostic only and skips that readiness check too.
 
 The launcher retains its original async Play, save import/export, build inventory,

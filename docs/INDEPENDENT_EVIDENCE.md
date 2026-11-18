@@ -211,3 +211,42 @@ included a deliberately opened settings overlay and screenshot work, so its
 cadence is not a comparable gameplay benchmark. PrintWindow produced black for
 the Vulkan window; this capture method does not establish UI appearance. Broader
 save/write, actual controller/audio and long-session acceptance remain open.
+
+## 2026-11-18: complete NUP composition and cache-policy correction
+
+The complete GPL source pipeline produced a self-contained private installation
+in `build/windows-independent`, with its own executable, image, RomFS, controller
+libraries, AV1 decoder and save profile. All 186,583 RomFS files (26,236,422,768
+bytes) were checked against the original NUP: zero mismatches. A fresh NUP
+extraction/build then reused the compiler cache: 3 of 696 files compiled, with
+six seconds reported for compilation. This does not measure a cold build.
+The original NUP, main's runtime and original saves were preserved.
+
+The first ordinary-start run of engine `0.1.0-independent.6` completed all 25,451
+noted graphics pipelines and 9,925 compute variants, with none reported unmade.
+This took 1,019.9 seconds after the separate prepare-only build process. A
+60-second instrumented Death Mountain interval then averaged 45.907 native fps
+at 1920x1080, with three scripted movements and normal exit. Twelve consecutive
+settled-world captures show complete terrain and vegetation. However, the first
+world capture was incomplete: this run is **not** an accepted rendering result.
+
+The cause was narrowed to the provider's cache-only load policy on the measured
+RTX 2080 driver: 4,832 graphics and 557 compute requests missed the prepared
+cache. The provider wrote its own safety marker and selected full startup loading
+on the next run. The independent runtime adapter now explicitly selects its
+documented `RX_VK_LOAD=start` policy: known programs/pipelines are held ready
+before the title. This needs its own gameplay/startup and memory measurements;
+neither a fabricated cache marker nor disabled waits are an acceptable fix.
+
+The original launcher issue fixes from main were retained: background/image
+lifetime (issue #2), mod archive UI/order/toggles (issue #1), release list/notes,
+async Play and update outcomes. Independent asset mods have their own merged,
+verified snapshot adapter rather than relying on the old renderer's mod loader.
+NVIDIA Frame Generation packaging from issue #3 is excluded with that engine;
+this experiment contains no NVIDIA proprietary SDK and does not advertise it.
+
+The local source suite passed 222 tests with 16 environment skips. Native launcher
+self-test passed with its embedded icon, five languages and one unmapped window.
+Commit `55b89d4` passed both Windows and Linux source CI; a Linux test-root length
+assumption found in the preceding run was corrected. These are source/UI results,
+not substitutes for gameplay acceptance. Main remains at `2ec49ef` unchanged.

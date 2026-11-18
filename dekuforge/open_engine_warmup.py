@@ -84,6 +84,7 @@ def warm(executable, work, notify, *, timeout=3600):
     control = None
     log_path = work/'dekuforge-play-cache.log'
     started = time.monotonic()
+    phase = 'pipelines'
     try:
         with log_path.open('w', encoding='utf-8') as log:
             with subprocess.Popen(arguments, cwd=executable.parent, env=env, stdout=log, stderr=subprocess.STDOUT,
@@ -93,9 +94,14 @@ def warm(executable, work, notify, *, timeout=3600):
                         while process.poll() is None and time.monotonic()-started < timeout:
                             for line in reader:
                                 notify('log', line)
-                                match = re.search(r'start-up: pipelines (\d+) of (\d+)', line)
+                                match = re.search(r'compute pipelines: (\d+) of (\d+)', line)
+                                if match and phase != 'compute_pipelines':
+                                    phase = 'compute_pipelines'
+                                    notify('phase', {'phase': phase, 'done': 0, 'total': 0})
+                                if not match and phase == 'pipelines':
+                                    match = re.search(r'start-up: pipelines (\d+) of (\d+)', line)
                                 if match:
-                                    notify('progress', {'phase': 'pipelines', 'done': int(match[1]), 'total': int(match[2])})
+                                    notify('progress', {'phase': phase, 'done': int(match[1]), 'total': int(match[2])})
                             if control is None:
                                 try:
                                     control = Control(name)

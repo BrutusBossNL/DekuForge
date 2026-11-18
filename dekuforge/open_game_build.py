@@ -129,11 +129,11 @@ def build(filename, notify, destination, *, config=None, romfs=None, exefs=None,
                 'provider_revision': record['revision'], 'experimental': True, 'gameplay_parity_accepted': False,
                 'gpu_preparation_requested': prepare_gpu, 'save_layout': 'user/save'}
         (output/'dekuforge-build-info.json').write_text(json.dumps(info, indent=2)+'\n')
-        (output/'.dekuforge-native').touch()
         if prepare_gpu:
             from .open_engine_warmup import warm
             info.update(warm(executable, work, notify))
             (output/'dekuforge-build-info.json').write_text(json.dumps(info, indent=2)+'\n')
+        (output/'.dekuforge-native').touch()
         return executable
     finally:
         lock.unlink()

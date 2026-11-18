@@ -105,6 +105,15 @@ _PIPELINE_PHASE_LABELS = {
 for _language, _label in _PIPELINE_PHASE_LABELS.items():
     MESSAGES[_language]["pipelines"] = _label
 
+for _language, _label in {
+    'en': 'Preparing compute pipelines',
+    'nl': 'Compute-pipelines voorbereiden',
+    'de': 'Compute-Pipelines vorbereiten',
+    'es': 'Preparando pipelines de c\u00e1lculo',
+    'fr': 'Pr\u00e9paration des pipelines de calcul',
+}.items():
+    MESSAGES[_language]['compute_pipelines'] = _label
+
 
 _UPDATE_MESSAGES = {'en': {'update_pending': 'Updates verify downloads, preserve your saves and keep the working game until a '
                           'rebuild succeeds.',

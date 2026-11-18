@@ -31,6 +31,7 @@ class IndependentRuntimeTests(unittest.TestCase):
                 options = launch_options(exe, root)
             self.assertEqual(options['args'], [str(exe), record['image'], '--romfs', record['romfs'], '--user', record['user']])
             self.assertEqual(options['env']['RX_BACKEND'], 'vulkan')
+            self.assertEqual(options['env']['RX_VK_LOAD'], 'start')
             self.assertNotIn('HOS_CONTROL_MEM', options['env'])
             self.assertEqual(options['env']['KEEP_ME'], 'yes')
             with (patch('dekuforge.open_engine_runtime.launch_options', return_value=options),

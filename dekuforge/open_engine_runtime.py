@@ -37,6 +37,9 @@ def launch_options(executable, root=ROOT):
         raise ValueError('Independent executable must stay inside this worktree build folder')
     env = {key: value for key, value in os.environ.items()
            if not key.startswith(('HOS_', 'RX_', 'HOOKSHOT_', 'TOTK_', 'NX2NAVI_', 'DEKUFORGE_', 'OOT_', 'DKB_'))}
-    env.update(RX_BACKEND='vulkan', HOS_DISCORD='0')
+    # The measured NVIDIA driver does not answer many cache-only requests after
+    # preparation. The provider's documented start mode keeps prepared programs
+    # and pipelines ready before the title instead of dropping first-use draws.
+    env.update(RX_BACKEND='vulkan', RX_VK_LOAD='start', HOS_DISCORD='0')
     return {'args': [str(executable), str(paths['image']), '--romfs', str(paths['romfs']), '--user', str(paths['user'])],
             'env': env}
