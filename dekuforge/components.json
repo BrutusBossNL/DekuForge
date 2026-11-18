@@ -1,14 +1,14 @@
 {
   "schema": 1,
   "launcher": {
-    "version": "0.3.0-independent.1",
+    "version": "0.3.0-independent.2",
     "stage": "development",
     "bug_reports": true,
     "uninstaller": true,
     "updates": false
   },
   "engine": {
-    "version": "0.1.0-independent.2",
+    "version": "0.1.0-independent.3",
     "backend": "independent",
     "reference_version": "main: 0.11.0 / NX2navi 0.10.1",
     "playable": false

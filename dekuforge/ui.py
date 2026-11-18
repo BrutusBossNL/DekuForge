@@ -296,6 +296,8 @@ class Launcher:
             # Include ttk's internal timers and redraws queued during teardown.
             for job in self.root.tk.splitlist(self.root.tk.call("after", "info")):
                 self.root.tk.call("after", "cancel", job)
+            getattr(self.root, '_brand_images', {}).clear()
+            self.root._brand_icon = None
 
     def render_settings(self):
         card = self.card(self.content, padding=12)

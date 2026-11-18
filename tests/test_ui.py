@@ -128,6 +128,16 @@ ui.main()
         self.assertFalse(self.app.automatic_update_allowed({"version":"v0.3.0"}))
         self.assertTrue(self.app.automatic_update_allowed({"version":"v0.3.1"}))
 
+    def test_page_panel_preserves_tk_root_method_and_releases_destroyed_images(self):
+        self.app.navigate('settings')
+        panel = self.app.page_panel
+        self.assertTrue(callable(panel._root))
+        self.assertIs(panel._root(), self.root)
+        body = panel.body
+        self.root.update_idletasks()
+        self.app.navigate('home')
+        self.assertIsNone(body._image)
+
     def test_management_controls_fit_minimum_window(self):
         self.root.geometry("960x700")
         self.root.deiconify()

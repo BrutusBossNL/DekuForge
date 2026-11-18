@@ -59,3 +59,34 @@ run or accepted gameplay. Source passes cannot promote gameplay gates. Owner
 observations of holes/flicker override attractive still-image metrics. Compare
 against `main` without modifying it. Acceptance requires all gates in
 [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md).
+
+## 2026-11-18: independent CPU memory addressing
+
+Engine `0.1.0-independent.3` adds original integer LDP/STP/LDPSW and scalar
+register-offset addressing. `test_independent_pairs.py` executes 770 encodings
+under three memory seeds (2,310 full-state/memory oracle comparisons);
+`test_independent_register_memory.py` executes 1,248 encodings with six seed/index
+combinations (7,488 comparisons). Both compare emitted native C with Unicorn,
+including registers, SP, PC, NZCV and memory. Separate native tests cover denied
+second pair elements, adjacent mappings, stack save/restore and address wrap.
+This is 9,798 additional comparisons, not game execution or a CPU benchmark.
+
+Stricter V-bit masks now reject SIMD/FP loads/stores that the previous scalar
+masks accepted incorrectly. This also invalidates part of the previous static
+coverage classification; it is not a new implementation of those vector forms.
+
+Read-only analysis reused the same three existing ExeFS module hashes as the
+2026-11-17 memory report, with no new extraction or modification of the input.
+Recognized words increased from 13,712,252 to 14,768,450 out of 18,162,788
+(75.496% to 81.312%), including the stricter SIMD rejection. Main alone changed
+from 11,972,673 to 12,829,922 recognized words out of 15,800,436. Text sections
+can contain data: these figures establish neither dynamic execution coverage
+nor playable-game progress as a percentage. Local reports retain module and
+analysis-source hashes; their raw input bytes are not published.
+
+The launcher also carries forward original image-lifetime cleanup from main
+`a04e2c1` and the PagePanel `_event_root` naming fix from `ad48093`. These scoped
+project-code repairs avoid worker-thread PhotoImage finalization and preserve
+Tk's inherited `_root()` method. They do not import main's vendor backend or
+update channel into the independent branch. Launcher identity advances to
+`0.3.0-independent.2`; no installer or release is produced.

@@ -2,6 +2,21 @@
 
 Component versions are independent. Published releases are not replaced in place.
 
+## Independent engine 0.1.0-independent.3 - memory addressing
+
+Launcher `0.3.0-independent.2`, engine `0.1.0-independent.3`; buildkit unchanged.
+On the experimental `independent` branch only: original LDP/STP/LDPSW and
+register-offset scalar memory emission, full-state/memory oracle comparisons,
+adjacent-region stack-frame execution and explicit pair-fault prevalidation.
+Reject SIMD encodings that the older scalar masks incorrectly accepted.
+This does not implement a complete CPU, guest services or renderer and is not
+a playable-game release. Main and its published releases are unchanged. The branch launcher retains
+main's original image-lifetime cleanup and Tk root-method naming repair.
+Static coverage evidence and its limitations are in [INDEPENDENT_EVIDENCE.md](INDEPENDENT_EVIDENCE.md).
+
+The historical main release entries below describe the inherited stable route,
+not the capabilities of this independent backend.
+
 ## Launcher 0.2.0 — first Early Access release
 
 Buildkit 0.2.1; engine 0.11.0. This release uses a normal version, without a

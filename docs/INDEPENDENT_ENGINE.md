@@ -33,15 +33,23 @@ The inherited tree/history is not automatically cleared by new work on this bran
 The original decoder/generator supports 32/64-bit ADD/SUB immediate and shifted
 register forms, NZCV updates, shifted logical operations, MOVN/MOVZ/MOVK, ADR/ADRP,
 direct/indirect calls/returns, condition/zero/bit branches and NOP. Scalar memory
-operations cover unsigned scaled, unscaled/pre/post-indexed offsets and literal
-loads, including sign extension. Unsupported encodings and constrained writeback
+operations cover unsigned scaled, unscaled/pre/post-indexed offsets, literal
+loads and register offsets (UXTW/LSL/SXTW/SXTX), including sign extension.
+Integer LDP/STP and LDPSW support signed-offset, pre- and post-index forms with
+32/64-bit results, SP/ZR handling and writeback. Reserved and constrained-overlap
+forms are rejected. SIMD/FP encodings are kept out of the integer decoder;
+non-temporal, exclusive and atomic accesses remain unsupported. Unsupported encodings and constrained writeback
 aliases are rejected. Register 31 follows each instruction's SP/zero-register rule.
 Blocks stop at branches/services. A bounded native development dispatcher executes
 loops/calls and resumes after an exact guest-instruction budget. It is not the
 final game's optimized dispatcher. SVC, unknown PCs and memory faults stop explicitly.
 
 `emit_machine` requires explicit guest regions and validates a complete memory
-access before touching bytes or applying register writeback. Little-endian byte
+access before touching bytes or applying register writeback. Pair operations
+prevalidate both elements, including adjacent mappings and the second element's
+permissions, before committing any bytes or registers. This is a deterministic
+fault-handling contract of the correctness runner, not a claim of hardware
+atomicity, concurrent guest-memory ordering or complete architectural exceptions. Little-endian byte
 accesses avoid unaligned host casts. The Python memory prototype maps verified
 NSO segments RX/R/RW, zeroes BSS and applies RELATIVE relocations transactionally.
 Symbol/TLS imports, dynamic-table discovery, scheduling and full linking are absent.
@@ -51,6 +59,8 @@ development inputs. Successful translation of a tiny block is not game readiness
 ISA references: [Arm ADD immediate](https://documentation-service.arm.com/static/68ffa09902789941c1920a53),
 [Arm instruction reference](https://documentation-service.arm.com/static/5f3fa899428f7a6b3328fd44),
 [Arm load/store addressing](https://support.arm.com/documentation/ddi0487/mb/-Part-C-The-AArch64-Instruction-Set/-C1-3-Address-generation/-C1-3-3-Load-store-addressing-modes)
+[Arm STP](https://support.arm.com/documentation/100076/0100/A64-Instruction-Set-Reference/A64-Data-Transfer-Instructions/STP),
+[Arm LDR register](https://support.arm.com/documentation/ddi0596/2020-12/Base-Instructions/LDR--register---Load-Register--register--?lang=en)
 and [Arm ELF64 ABI](https://github.com/ARM-software/abi-aa/blob/main/aaelf64/aaelf64.rst).
 The native differential test compiles emitted C and compares registers, SP, PC
 and NZCV with Unicorn on synthetic inputs. The oracle is a development dependency.
@@ -60,7 +70,12 @@ under all 16 NZCV combinations, link aliases, budgeted loops/calls, scalar memor
 forms and fault atomicity. A synthetic NSO is mapped, relocated and executed
 natively through checked stores/loads to an SVC boundary. This is not the game;
 the checks cover only the instruction subsets above.
-Other registers/state and instruction families are not validated by that test.
+Pair and register-offset tests add full-state and memory comparisons against
+Unicorn, signed/unsigned index extensions, negative and scaled offsets, SP/ZR,
+aliases and LDPSW sign extension. Native fault tests cover address wrap, partial
+mappings, second-element permission failures and stack save/restore across two
+adjacent regions. Other registers/state and instruction families are not
+validated by these tests.
 
 ## Build and tooling boundaries
 

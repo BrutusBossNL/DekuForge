@@ -19,7 +19,8 @@ original implementation and explicitly approved, redistributable components.
 - Original NUP inspection, package selection, verified module preparation and the
   launcher/save-management tooling are retained for development.
 - The original A64-to-C translator covers integer arithmetic/flags, branches and
-  scalar memory with a bounded native correctness runner, checked against an
+  scalar/register-offset and paired memory operations with a bounded native
+  correctness runner, checked against an
   independent ARM64 oracle. It is not a complete CPU backend.
 - A guest-memory prototype loads verified NSO segments and relative relocations.
   Read-only module analysis reuses extracted inputs without rebuilding them.

@@ -25,6 +25,8 @@ class Instruction:
     memory_size: int = 0
     sign_extend: bool = False
     writeback: int = 0
+    register_offset: bool = False
+    extension: int = 0
 
     @property
     def terminates(self):
@@ -62,9 +64,32 @@ def decode(word):
         if opcode != 1 and shift < width:
             return Instruction({0: 'movn', 2: 'movz', 3: 'movk'}[opcode], rd,
                                immediate=(word >> 5) & 65535, shift=shift, width=width)
-    if word & 0x3b000000 == 0x39000000 or word & 0x3b200000 == 0x38000000:
+    if word & 0x3e000000 == 0x28000000:
+        opcode, mode = word >> 30, (word >> 23) & 3
+        load, rt2 = bool(word & (1 << 22)), (word >> 10) & 31
+        writeback = mode in (1, 3)
+        # Reject reserved, non-temporal and constrained-unpredictable variants.
+        valid = opcode in (0, 2) or opcode == 1 and load
+        overlap = writeback and rn != 31 and rn in (rd, rt2)
+        if valid and mode and not overlap and not (load and rd == rt2):
+            size = 8 if opcode == 2 else 4
+            immediate = _signed((word >> 15) & 127, 7) * size
+            return Instruction('loadpair' if load else 'storepair', rd, rn, immediate,
+                               width=64 if opcode else 32, second=rt2, mode=mode,
+                               memory_size=size, sign_extend=opcode == 1,
+                               writeback=immediate if writeback else 0)
+    if word & 0x3f200c00 == 0x38200800:
+        size, opcode, option = (word >> 30) & 3, (word >> 22) & 3, (word >> 13) & 7
+        valid = opcode < 2 or opcode == 2 and size < 3 or opcode == 3 and size < 2
+        if valid and option in (2, 3, 6, 7):
+            return Instruction('store' if opcode == 0 else 'load', rd, rn,
+                               width=64 if size == 3 or opcode == 2 else 32,
+                               second=rm, shift=size if word & (1 << 12) else 0,
+                               memory_size=1 << size, sign_extend=opcode >= 2,
+                               register_offset=True, extension=option)
+    if word & 0x3f000000 == 0x39000000 or word & 0x3f200000 == 0x38000000:
         size, opcode = (word >> 30) & 3, (word >> 22) & 3
-        scaled = word & 0x3b000000 == 0x39000000
+        scaled = word & 0x3f000000 == 0x39000000
         mode = 0 if scaled else (word >> 10) & 3
         valid = opcode < 2 or (opcode == 2 and size < 3) or (opcode == 3 and size < 2)
         if valid and mode != 2 and not (mode and rn == rd and rn != 31):
@@ -73,7 +98,7 @@ def decode(word):
                                width=64 if size == 3 or opcode == 2 else 32,
                                mode=mode, memory_size=1 << size, sign_extend=opcode >= 2,
                                writeback=immediate if mode else 0)
-    if word & 0x3b000000 == 0x18000000:
+    if word & 0x3f000000 == 0x18000000:
         opcode = word >> 30
         if opcode < 3:
             return Instruction('loadliteral', rd, immediate=_signed((word >> 5) & 0x7ffff, 19) * 4,
@@ -137,20 +162,46 @@ def _condition(condition):
     return f'!({value})' if condition & 1 and condition != 15 else value
 
 
+def _memory_offset(item):
+    if not item.register_offset:
+        offset = 0 if item.mode == 1 else item.immediate
+        return f'UINT64_C({offset & ((1 << 64) - 1)})'
+    value = _read(item.second, 32 if item.extension in (2, 6) else 64)
+    if item.extension == 6:
+        value = f'(((uint64_t)({value}) ^ UINT64_C(2147483648)) - UINT64_C(2147483648))'
+    return f'((uint64_t)({value}) << {item.shift})'
+
+
 def _body(item, pc, memory=False):
     op, width = item.operation, item.width
     mask = (1 << width) - 1
     next_pc = (pc + 4) & ((1 << 64) - 1)
     lines = []
-    if op in {'load', 'store', 'loadliteral'}:
+    if op in {'loadpair', 'storepair'}:
+        if not memory:
+            raise UnsupportedInstruction('Memory instructions require emit_machine and an explicit address space')
+        store = op == 'storepair'
+        lines += ['  {', f'    uint64_t base = {_read(item.source, sp=True)};',
+                  f'    uint64_t address = base + {_memory_offset(item)};',
+                  f'    uint64_t first = {_read(item.destination) if store else "0"};',
+                  f'    uint64_t second = {_read(item.second) if store else "0"};',
+                  f'    if (deku_pair_access(m, address, {item.memory_size}, {int(store)}, &first, &second)) return 3;']
+        if item.sign_extend:
+            for name in ('first', 'second'):
+                lines += [f'    {name} = ({name} ^ UINT64_C(2147483648)) - UINT64_C(2147483648);']
+        if not store:
+            lines += _write(item.destination, 'first', width) + _write(item.second, 'second', width)
+        if item.mode in (1, 3):
+            lines += _write(item.source, f'base + UINT64_C({item.writeback & ((1 << 64) - 1)})', sp=True)
+        lines += ['  }']
+    elif op in {'load', 'store', 'loadliteral'}:
         if not memory:
             raise UnsupportedInstruction('Memory instructions require emit_machine and an explicit address space')
         base = f'UINT64_C({pc})' if op == 'loadliteral' else _read(item.source, sp=True)
-        offset = 0 if item.mode == 1 else item.immediate
         # Unsigned addition preserves architectural address wrap; the accessor then
         # rejects out-of-range guest addresses without converting them to host pointers.
         lines += ['  {', f'    uint64_t base = {base};',
-                  f'    uint64_t address = base + UINT64_C({offset & ((1 << 64) - 1)});',
+                  f'    uint64_t address = base + {_memory_offset(item)};',
                   f'    uint64_t value = {_read(item.destination)};' if op == 'store' else '    uint64_t value = 0;',
                   f'    if (deku_access(m, address, {item.memory_size}, {1 if op == "store" else 0}, &value)) return 3;']
         if item.sign_extend:
@@ -286,9 +337,8 @@ def emit_machine(words, address=0x1000):
 MEMORY_HEADER = r'''
 typedef struct { uint64_t base, size; uint8_t *data; uint32_t permissions; } DekuRegion;
 typedef struct { DekuRegion *regions; uint64_t count, fault_address; } DekuMemory;
-static int deku_access(DekuMemory *m, uint64_t address, unsigned size, int write, uint64_t *value) {
-    uint8_t *bytes[8];
-    if (!m || !size || size > 8) return 1;
+static int deku_bytes(DekuMemory *m, uint64_t address, unsigned size, int write, uint8_t **bytes) {
+    if (!m || !size || size > 16) return 1;
     if (address >= (UINT64_C(1) << 39) || size > (UINT64_C(1) << 39) - address || m->count > 4096) {
         m->fault_address = address;
         return 1;
@@ -306,12 +356,33 @@ static int deku_access(DekuMemory *m, uint64_t address, unsigned size, int write
         }
         if (!bytes[i]) { m->fault_address = address + i; return 1; }
     }
+    return 0;
+}
+static int deku_access(DekuMemory *m, uint64_t address, unsigned size, int write, uint64_t *value) {
+    uint8_t *bytes[8];
+    if (size > 8 || deku_bytes(m, address, size, write, bytes)) return 1;
     if (write) {
         for (unsigned i = 0; i < size; ++i) *bytes[i] = (uint8_t)(*value >> (8 * i));
     } else {
         *value = 0;
         for (unsigned i = 0; i < size; ++i) *value |= (uint64_t)*bytes[i] << (8 * i);
     }
+    return 0;
+}
+static int deku_pair_access(DekuMemory *m, uint64_t address, unsigned size, int write, uint64_t *first, uint64_t *second) {
+    uint8_t *bytes[16];
+    if ((size != 4 && size != 8) || deku_bytes(m, address, size * 2, write, bytes)) return 1;
+    /* Prevalidate both elements before committing. This is a checked runner,
+       not a claim of a hardware-atomic access for concurrent guest threads. */
+    uint64_t values[2] = {*first, *second};
+    for (unsigned n = 0; n < 2; ++n) {
+        if (!write) values[n] = 0;
+        for (unsigned i = 0; i < size; ++i) {
+            if (write) *bytes[n * size + i] = (uint8_t)(values[n] >> (8 * i));
+            else values[n] |= (uint64_t)*bytes[n * size + i] << (8 * i);
+        }
+    }
+    if (!write) { *first = values[0]; *second = values[1]; }
     return 0;
 }
 '''

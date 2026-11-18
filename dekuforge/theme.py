@@ -185,6 +185,8 @@ class BackgroundCanvas(tk.Canvas):
         if self._resize_job is not None:
             self.after_cancel(self._resize_job)
         super().destroy()
+        # PhotoImage finalizers call Tk; release this on the UI thread.
+        self._image = None
 
 
 class NavigationCanvas(BackgroundCanvas):
@@ -213,9 +215,9 @@ class PagePanel(tk.Frame):
         self._window = self.viewport.create_window(padding, padding, window=self.body, anchor="nw")
         self.viewport.bind("<Configure>", self._resize, add="+")
         self.body.bind("<Configure>", self._body_changed, add="+")
-        self._root = self.winfo_toplevel()
-        self._wheel = self._root.bind("<MouseWheel>", self._mousewheel, add="+")
-        self._focus = self._root.bind("<FocusIn>", self._focus_changed, add="+")
+        self._event_root = self.winfo_toplevel()
+        self._wheel = self._event_root.bind("<MouseWheel>", self._mousewheel, add="+")
+        self._focus = self._event_root.bind("<FocusIn>", self._focus_changed, add="+")
 
     def _resize(self, event):
         self.viewport.itemconfigure(self._window, width=max(1, event.width-2*self.padding))
@@ -259,8 +261,8 @@ class PagePanel(tk.Frame):
             self.reveal(event.widget)
 
     def destroy(self):
-        self._root.unbind("<MouseWheel>", self._wheel)
-        self._root.unbind("<FocusIn>", self._focus)
+        self._event_root.unbind("<MouseWheel>", self._wheel)
+        self._event_root.unbind("<FocusIn>", self._focus)
         super().destroy()
 
 
@@ -292,6 +294,11 @@ class NavigationLogo(BackgroundCanvas):
         if key == "image":
             return self.itemcget(self._logo, "image")
         return super().cget(key)
+
+
+    def destroy(self):
+        super().destroy()
+        self.image = None
 
 
 class ArtworkLabel(BackgroundCanvas):

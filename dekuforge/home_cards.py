@@ -20,6 +20,12 @@ class StartupCanvas(BackgroundCanvas):
         return Image.blend(gradient, art, self.reveal) if art is not None else gradient
 
 
+    def destroy(self):
+        if hasattr(self, '_logo_frames'):
+            self._logo_frames.clear()
+        super().destroy()
+
+
 class ActionCard(tk.Canvas):
     def __init__(self, parent, artwork, title, detail, command, enabled=True, badge="", badge_color=GOLD):
         super().__init__(parent, background=PANEL, highlightthickness=3,
@@ -103,6 +109,8 @@ class ActionCard(tk.Canvas):
         if self.resize_job:
             self.after_cancel(self.resize_job)
         super().destroy()
+        self.images.clear()
+        self.image = None
 
 
 def animate_intro(app):
