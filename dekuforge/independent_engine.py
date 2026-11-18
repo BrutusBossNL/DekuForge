@@ -17,13 +17,28 @@ STAGES = {
 
 
 def report(root=ROOT):
+    # Original CPU prototype status and evaluated GPL gameplay are separate.
+    from pathlib import Path
+    from .core import load_installation
+    from .open_engine_runtime import launch_options
+    active = load_installation(Path(root) / 'local/settings.json')
+    experiment = False
+    if active:
+        try:
+            experiment = Path(active).is_file() and launch_options(Path(active), root) is not None
+        except (OSError, ValueError, TypeError):
+            pass
     return {'backend': 'independent', 'branch': 'independent',
             'playable_build_available': False, 'game_1_1_1_port_validated': False,
             'upstream_fallback': False, 'stages': dict(STAGES),
             'missing': [name for name, state in STAGES.items() if state != 'implemented'],
             'reference': 'main: stable 0.10.1-based engine; comparison only',
             'provenance': 'docs/INDEPENDENT_ENGINE.md',
-            'runtime_packaged': False}
+            'runtime_packaged': False,
+            'experimental_game_available': experiment,
+            'experimental_provider': 'Hookshot GPL-3.0-or-later; separately evaluated',
+            'experimental_evidence': 'docs/INDEPENDENT_EVIDENCE.md',
+            'default_builder_ready': False}
 
 
 def build(filename, notify, destination):

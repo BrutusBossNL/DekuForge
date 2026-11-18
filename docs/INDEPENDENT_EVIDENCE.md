@@ -136,7 +136,9 @@ compute shaders has not been validated as a fix. Do not repeat this preparation
 or call it completed without a new reason.
 
 Full-size raw PNGs exceeded the image tool's output allowance. Local JPEG
-inspection copies at 1280x720 opened successfully, with original PNGs retained.
+inspection copies at 1280x720 opened successfully. Rejected-candidate raw PNGs
+and generated outputs were subsequently removed to recover disk space; compact
+inspection copies, source, canonical module inputs and measurement logs remain.
 Use compact inspection copies/native crops before concluding that visual tools
 require additional user permissions. Inspect actual presentation/crop behavior
 separately from unused black padding in a raw render-target capture.
@@ -154,3 +156,58 @@ the owner's own game input. No shared shader or pipeline cache was downloaded.
 Generic compiler, header/codec and SDL tools were fetched with pinned hashes;
 the engine/runtime itself is compiled from the audited source. The independent
 build is still under evaluation; main is unchanged.
+
+## 2026-11-18: direct NVN2 gameplay and DekuForge UI
+
+The second candidate compiled 695 files without errors in 1,246 seconds on the
+local Windows machine (NVIDIA GeForce RTX 2080). Its first local shader/pipeline
+preparation took 369 seconds: 38,809 programs, 46,666 translated variants and one
+reported shader failure. A rare stage-5 program reported a branch outside its
+program. This remains an investigation item; do not describe preparation as
+error-free. No compiled engine, game seed or pipeline cache was downloaded.
+
+Death Mountain ordinary-start tests used an isolated copy of the owner's save.
+The original save hashes stayed unchanged. A 59.663-second loaded-world interval,
+after loading/events settled, produced 2,835 native frames: **47.517 average fps**,
+48.15 median reported fps, at 1920x1080 output with the Vulkan native renderer.
+No world screenshots were taken during this measurement. This is not a matched
+main benchmark, a low-percentile result or a claim of stable 60 fps.
+
+Separate instrumented captures show complete terrain, rocks, grass, sky and
+correctly lit Link in shadow. Twelve successive Death Mountain frames and twelve
+Kokiri frames were inspected as contact sheets; a native-size crop was also
+inspected for terrain/character detail. No holes or flashes were visible in these
+samples. A 44.747-second instrumented Kokiri interval produced 2,067 native frames
+(46.193 average fps), including screenshot overhead. The debug age switch reached
+the child map but the character still appeared adult: age switching is not
+accepted as correct. Intro captures were black and do not validate movie playback.
+
+Engine identity `0.1.0-independent.5` adds a DekuForge window title, startup logo,
+menu build label and forest-green/gold panels without modifying the renderer.
+Only affected UI translation units are generated into a separate adaptation
+folder, with original/adapted SHA-256 records; the 2,188 source inputs stay
+unchanged. The incremental compile took eight seconds with zero failures.
+
+Original direct NUP-to-directory extraction now verifies each file, rechecks
+hashes before resuming and commits a completion marker only after all files pass.
+Four synthetic tests cover reuse, same-size corruption, interrupted extraction
+and protection of unowned output/another builder's lock. Runtime metadata can
+launch an isolated local build with explicit image, RomFS and save paths; it
+rejects resources outside this worktree. These are infrastructure contracts,
+not evidence that the default build wizard or standalone installer is finished.
+
+The black intro was traced to the generic FFmpeg package lacking an AV1 decoder
+and the Windows AV1 Store extension being absent. Building VideoLAN dav1d 1.5.4
+with LLVM-MinGW/NASM resolved this locally: logs identify the dav1d decoder at
+1920x1080; three successive intro frames and a native-size crop were inspected
+and show the moving moon/sky, horse/rider and vegetation. The source archive and
+source-tree hashes are pinned in `tools/build_av1_decoder.py`; its public command
+was rerun successfully against the existing tool cache. No OS codec was installed.
+
+Additional isolated runs reached Hyrule Field, Market and Forest Temple, completed
+scripted input, exited normally and preserved the original save hashes. The
+59.669-second Hyrule Field interval averaged 40.591 native fps. The dungeon test
+included a deliberately opened settings overlay and screenshot work, so its
+cadence is not a comparable gameplay benchmark. PrintWindow produced black for
+the Vulkan window; this capture method does not establish UI appearance. Broader
+save/write, actual controller/audio and long-session acceptance remain open.

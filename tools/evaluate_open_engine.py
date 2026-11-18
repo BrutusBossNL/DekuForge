@@ -96,6 +96,9 @@ def main():
     module = importlib.import_module(name)
     if Path(module.__file__).resolve().parent != source / 'nx2':
         raise ValueError('Another engine module is already loaded; use a fresh evaluation process')
+    if args.action == 'compile':
+        from dekuforge.open_engine_branding import configure
+        configure(module, source, work)
     sys.argv = [str(source / 'nx2' / (name+'.py')), '--standalone']
     if args.action == 'lift':
         sys.argv += ['--write', '--exefs', str(exefs), '--work', str(work)]

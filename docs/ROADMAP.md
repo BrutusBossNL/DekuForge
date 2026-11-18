@@ -1,5 +1,13 @@
 # Delivery priorities
 
+> **Independent branch status:** the stable-backend milestones below describe
+> main and remain reference evidence. This branch now runs a separately licensed
+> source-built experimental game with DekuForge UI adaptations, but has not
+> completed launcher provisioning or parity acceptance. Current work and measured
+> results are in [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md) and
+> [INDEPENDENT_EVIDENCE.md](INDEPENDENT_EVIDENCE.md). Do not use main's results as
+> acceptance of this different engine.
+
 The owner has since prioritized DekuForge's in-game UI and Cheat Manager directly
 after the stable Windows baseline, before Linux parity. The 0.11.0 candidate uses
 the stable 0.10.1 renderer with a separate extension layer. Preparing portable tests

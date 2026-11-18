@@ -50,4 +50,8 @@ def save_installation(value, settings=SETTINGS):
 
 def launch(value):
     executable = validate_installation(value)
+    from .open_engine_runtime import launch_options
+    options = launch_options(executable)
+    if options:
+        return subprocess.Popen(options['args'], cwd=str(executable.parent), env=options['env'], shell=False)
     return subprocess.Popen([str(executable)], cwd=str(executable.parent), shell=False)

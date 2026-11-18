@@ -164,3 +164,18 @@ including `third_party/a64-kit/NOTICE.TOTKPort.md`. This is separately licensed
 engine code, not original MIT DekuForge code. The development evaluation tool
 does not distribute its source, game outputs or compiled runtime in a launcher
 release. See `docs/OPEN_ENGINE_EVALUATION.md` for explicit build boundaries.
+
+`dekuforge/open_engine_branding.py` describes adaptations of this GPL provider's
+UI and is itself GPL-3.0-or-later (SPDX header), excepted from the root MIT grant.
+Generated adapted sources retain the original headers and add an attribution
+line; their original/adapted SHA-256 values are recorded locally. The complete
+GPL text is retained in `licenses/GPL-3.0.txt` and in the verified provider tree.
+This does not relicense the engine, remove its credits or grant rights to game
+content. No compiled game or game-derived shader/cache is distributed.
+
+The independent Windows movie path builds VideoLAN dav1d 1.5.4 from the official
+source mirror, under BSD-2-Clause. `tools/build_av1_decoder.py` pins archive and
+source-tree hashes and retains COPYING beside the local library. Meson 1.9.1
+(Apache-2.0), Ninja 1.13.0 (Apache-2.0) and NASM 2.16.03 (BSD-2-Clause) keep their
+distribution notices in the local tool tree. These tools and the decoder contain
+no game content and are not licensed under the project's MIT grant.

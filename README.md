@@ -13,7 +13,8 @@ Windows build remains on [main](https://github.com/BrutusBossNL/DekuForge/tree/m
 
 This branch starts the replacement of the NX2navi-dependent build path with an
 original implementation and explicitly approved, redistributable components.
-**It does not yet build a playable game or establish parity with main.**
+**A source-built experimental game now runs locally; the default launcher build
+wizard and installer are not ready, and parity with main is not established.**
 
 - The default independent backend reports its real capabilities with `--doctor`.
 - Original NUP inspection, package selection, verified module preparation and the
@@ -27,9 +28,12 @@ original implementation and explicitly approved, redistributable components.
   Read-only module analysis reuses extracted inputs without rebuilding them.
 - Main's original mod manager, release list/notes and update outcome reporting
   are retained. Independent updates and legacy code-mod builds remain disabled.
-- A pinned, separately licensed GPL runtime is being evaluated locally. Its
-  source-only stager verifies the complete archive and 900 Git blobs; see the
-  [engine plan](docs/INDEPENDENT_ENGINE.md). It is not gameplay-approved yet.
+- Two pinned, separately licensed GPL providers have been evaluated. The first
+  was rejected for incorrect shadows. The second verifies 2,188 source blobs
+  and runs moving Death Mountain and Kokiri scenes with DekuForge UI adaptations.
+  See the [engine plan](docs/INDEPENDENT_ENGINE.md) and
+  [scoped measurements](docs/INDEPENDENT_EVIDENCE.md). Full gameplay acceptance
+  and standalone launcher provisioning remain outstanding.
 - No automatic fallback to the old experimental 0.3.10 or stable 0.10.1 renderer.
 - Vendor runtime/tool downloads, main-channel app updates and installer packaging
   are disabled until independent replacements are ready.

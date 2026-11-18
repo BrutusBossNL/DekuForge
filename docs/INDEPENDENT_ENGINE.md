@@ -185,3 +185,12 @@ noise from regression; do not select only favorable frame windows.
 A failing gate keeps the independent engine experimental. The default production
 route on main is not replaced merely because new code compiles or one frame looks
 correct. No inferior result is accepted as equivalent to main.
+
+The direct NVN2 candidate now runs isolated moving scenes, with the DekuForge
+window/menu branding composed through generated GPL-attributed UI copies.
+Its original source remains immutable. Direct NUP directory extraction,
+explicit local runtime metadata and a pinned source-built dav1d AV1 dependency
+are implemented. An existing developer build can use this branch's launcher Play
+action; this does not complete first-install provisioning or the default wizard.
+See [OPEN_ENGINE_EVALUATION.md](OPEN_ENGINE_EVALUATION.md) for those commands and
+the evidence index for measured scope. Main remains unchanged.

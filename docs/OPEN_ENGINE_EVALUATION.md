@@ -55,6 +55,48 @@ documented runtime command. Test ordinary startup separately, using a copied
 save and the matching account identity. Do not benchmark a menu as gameplay,
 or compare instrumented captures with an uninstrumented baseline.
 
+Compilation applies `dekuforge/open_engine_branding.py`: generated GPL-attributed
+copies of the window/menu source use the DekuForge name, logo and forest palette.
+The original provider files remain unchanged. An adaptation manifest records both
+hashes. The engine component version is embedded without rebuilding unrelated
+guest-code objects. Internal DLL/cache names remain provider names for ABI/cache
+compatibility; attribution remains intact. This adaptation module is GPL-3.0-or-
+later, not covered by the root MIT grant; see the third-party notices.
+
+`dekuforge/romfs_directory.py` extracts a selected complete NUP RomFS snapshot
+directly to an owned directory, with atomic per-file commits and verified resume.
+It does not merge base/update trees or write into the user's archive. This avoids
+keeping both a packed image and an unpacked copy for the direct-file provider.
+`dekuforge/open_engine_runtime.py` validates explicit local launch resources;
+metadata cannot supply arbitrary command arguments, environment overrides or
+resources outside this worktree. These modules are not yet an automatic installer.
+
+For Windows AV1 movies, build dav1d into the explicit codec package before the
+game compile; the older generic FFmpeg package has no AV1 decoder. This avoids a
+dependency on Microsoft's separately installed Store extension:
+
+```powershell
+python -B tools/build_av1_decoder.py --compiler local/build-tools/<llvm-mingw> --deps local/build-tools/<codec-headers> --jobs 4
+```
+
+The tool checks fixed archive hashes, the VideoLAN 1.5.4 source-tree hash, safe
+extraction and existing files. It builds the BSD-2-Clause decoder with SIMD and
+retains its COPYING file. Meson, Ninja and NASM are generic build tools, not game
+engines. The default build wizard does not yet provision this dependency.
+
+An existing experimental executable can be connected to this branch's Play
+action without a command wrapper. Provide existing absolute or project-relative
+paths; all resources must remain under this worktree's `build/`:
+
+```powershell
+python -B tools/configure_open_game.py --executable build/<native>/DekuForgeGame.exe --image build/<work>/sa/image/image.bin --romfs build/<input>/romfs --user build/<profile> --activate
+```
+
+This registers an experiment, not a completed wizard build. It refuses to replace
+existing runtime metadata and leaves main's launcher and saves alone. The build
+library does not own/delete the shared source-evaluation workspace. A future
+standalone installation needs its own complete build lifecycle and acceptance.
+
 Acceptance gates and current findings are in
 [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md) and
 [INDEPENDENT_EVIDENCE.md](INDEPENDENT_EVIDENCE.md).
