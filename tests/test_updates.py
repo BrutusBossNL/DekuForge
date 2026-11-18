@@ -14,6 +14,7 @@ from dekuforge.update_package import install, validate_package, rollback, recove
 from dekuforge.update_service import AssetRedirect, newer_version, prepare_release, download_asset
 from dekuforge.source_patch import apply_patch
 from dekuforge.game_updates import run_rebuild
+from dekuforge.update_package import validate_launcher_health
 
 
 def fixture_package(path, text="new", extra=None):
@@ -34,6 +35,29 @@ def fixture_package(path, text="new", extra=None):
 
 
 class UpdateTests(unittest.TestCase):
+    def test_health_report_preserves_legacy_count_and_checks_target_extensions(self):
+        proof = {'screens': [str(i) for i in range(40)],
+                 'mod_screens': [str(i) for i in range(5)],
+                 'report_screens': [str(i) for i in range(5)],
+                 'launcher_version': COMPONENTS['launcher']['version'],
+                 'success': True, 'window_was_mapped': False, 'top_level_windows': 1,
+                 'logo_loaded': True, 'native_icon_verified': True}
+        # This is the exact screen-count condition in the frozen 0.2.0 helper.
+        self.assertTrue(proof['success'] and len(proof['screens']) == 40)
+        validate_launcher_health(proof, COMPONENTS)
+        for field, value in (('mod_screens', []), ('screens', ['same']*40),
+                             ('report_screens', []), ('launcher_version', '0.2.0'),
+                             ('window_was_mapped', True), ('success', False)):
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                validate_launcher_health({**proof, field: value}, COMPONENTS)
+
+    def test_legacy_target_health_does_not_require_new_extension_fields(self):
+        legacy = {'launcher': {'version': '0.2.0', 'bug_reports': True}}
+        proof = {'screens': [str(i) for i in range(40)], 'report_screens': list('abcde'),
+                 'success': True, 'window_was_mapped': False, 'top_level_windows': 1,
+                 'logo_loaded': True, 'native_icon_verified': True}
+        validate_launcher_health(proof, legacy)
+
     def test_pinned_text_patches_need_no_git_and_check_every_context_before_writing(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder).resolve();(root/"first.c").write_text("before\n",encoding="utf-8")

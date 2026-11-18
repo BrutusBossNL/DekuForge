@@ -2,6 +2,23 @@
 
 Component versions are independent. Published releases are not replaced in place.
 
+## Launcher 0.3.0-preview.2 / buildkit 0.2.3 - updater compatibility
+
+Fixes an application-update rollback from 0.2.0: that release's frozen helper
+requires exactly 40 entries in the health report's `screens` field. Preview 1
+returned 45 after adding Mods, causing a successful file installation to be
+rolled back. The original 40 views remain in `screens`; five Mods views have
+their own field, alongside the five report forms. All views are still tested.
+
+New helpers validate the target release's declared counts, launcher version,
+branding and hidden single-window checks instead of assuming a fixed total.
+An isolated Windows acceptance test runs the original 0.2.0 helper: it reproduces
+Preview 1's rollback, then installs Preview 2, verifies every package file and
+confirms that synthetic saves, settings and tool caches are unchanged.
+
+Preview 2 includes all Preview 1 features and fixes below. Stable stays on 0.2.0.
+Updating the application no longer requires an uninstall or setup workaround.
+
 ## Launcher 0.3.0-preview.1 / buildkit 0.2.3 - Preview
 
 Includes all changes since 0.2.0 listed below. Fixes

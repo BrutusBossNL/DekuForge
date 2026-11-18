@@ -108,7 +108,11 @@ independent ARM64 implementation. Changes to runtime memory or rendering need
 isolated in-game validation and measurements from repeatable scenes.
 
 `python run_launcher.py --self-test` renders 45 core views and five report forms across the five languages
-without starting a game or changing preferences. `tools/check_launcher.py` checks
+without starting a game or changing preferences. Keep the `screens` report field
+at the legacy 40-view contract: 0.2.0's frozen updater requires it. Additional
+pages use separate fields (`mod_screens`: five); target component metadata declares
+health-check requirements. Test releases through the previous release's frozen
+updater, not only the current install helper. `tools/check_launcher.py` checks
 that this health check never maps a visible window: setup/update checks must not
 flash pages or language changes in front of the user. It also checks
 the native executable, embedded icon and the same one-window flow. Compile

@@ -1222,6 +1222,7 @@ def main():
         def self_test():
             application = root._launcher
             checked = []
+            checked_mods = []
             checked_reports = []
             try:
                 for language in LANGUAGES:
@@ -1229,7 +1230,8 @@ def main():
                     for page in ("home", "updates", "saves", "mods", "build", "settings"):
                         application.navigate(page)
                         root.update_idletasks()
-                        checked.append(f"{language}/{page}")
+                        # 0.2.0's frozen updater requires exactly 40 legacy views.
+                        (checked_mods if page == 'mods' else checked).append(f"{language}/{page}")
                     for step in (1, 2):
                         application.step = step
                         application.navigate("build")
@@ -1242,7 +1244,8 @@ def main():
                     application.library_view = False
                     application.navigate("report");root.update_idletasks()
                     checked_reports.append(f"{language}/report")
-                report = {"screens": checked, "report_screens":checked_reports, "logo_loaded": root._brand_icon.width() > 0,
+                report = {"screens": checked, "mod_screens": checked_mods, "report_screens":checked_reports,
+                          "launcher_version": __version__, "logo_loaded": root._brand_icon.width() > 0,
                           "native_icon_verified": getattr(root, "_native_icon_verified", os.name != "nt"),
                           "top_level_windows": 1 + sum(isinstance(child, tk.Toplevel) for child in root.winfo_children()),
                           "window_was_mapped": bool(mapped),

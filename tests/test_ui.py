@@ -126,7 +126,8 @@ ui.main()
         proof = json.loads((self.folder/"local/launcher-selftest.json").read_text())
         self.assertTrue(proof["success"])
         self.assertFalse(proof["window_was_mapped"])
-        self.assertEqual(len(proof["screens"]), 45)
+        self.assertEqual(len(proof["screens"]), 40)
+        self.assertEqual(len(proof["mod_screens"]), 5)
         self.assertEqual(len(proof["report_screens"]), 5)
 
     def setUp(self):

@@ -13,7 +13,7 @@ pull requests and attached diagnostic files.
 
 ## Component versions
 
-Launcher 0.3.0-preview.1 and buildkit 0.2.3 include mod management, the scrolling
+Launcher 0.3.0-preview.2 and buildkit 0.2.3 include mod management, the scrolling
 fix and complete NVIDIA Frame Generation dependency preparation. The GitHub
 release is a prerelease, excluded from Stable updates; 0.2.0 remains the stable
 release. Engine 0.11.0 is unchanged. Existing games need the managed game rebuild
@@ -40,6 +40,13 @@ input identity and generated products; verified shader preparations can be reuse
 only when GPU source, translator and shader seed inputs still match.
 
 ## Updating without uninstalling
+
+Preview 1 had an update-health protocol mismatch: 0.2.0's frozen helper restored
+0.2.0 because the new report contained 45 rather than 40 legacy entries. Preview
+2 preserves the 40-view legacy field and records the five additional Mods views
+separately. Its compatibility test runs the original helper against both packages,
+including real bootstrap and hidden GUI health checks in a temporary installation.
+It does not modify a user's installed application or game.
 
 Normal updates do not require uninstalling DekuForge. The release ZIP replaces
 the native launcher, interface/source modules, build scripts, branding and the

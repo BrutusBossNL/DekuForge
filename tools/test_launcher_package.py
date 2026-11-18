@@ -33,7 +33,7 @@ def main():
     while not report.is_file() and time.monotonic() < deadline:
         time.sleep(.2)
     result = json.loads(report.read_text(encoding="utf-8"))
-    assert result["success"] and len(result["screens"]) == 45, result
+    assert result["success"] and len(result["screens"]) == 40 and len(result["mod_screens"]) == 5, result
     assert result["logo_loaded"] and result["native_icon_verified"]
     runtime = target / "python" / COMPONENTS["python"]["id"]
     assert (runtime / "python.exe").is_file()

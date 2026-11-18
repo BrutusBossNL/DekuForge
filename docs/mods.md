@@ -1,6 +1,6 @@
 # Mods in DekuForge
 
-Launcher 0.3.0-preview.1 adds an original DekuForge mod manager. Select a built game, then
+Launcher 0.3.0-preview.2 adds an original DekuForge mod manager. Select a built game, then
 open **Mods** in the left navigation. This works with the current stable-based
 game; you do not need to rebuild that game for ordinary RomFS asset mods.
 

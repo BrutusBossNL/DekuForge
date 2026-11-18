@@ -1,6 +1,6 @@
 # DekuForge roadmap
 
-Launcher 0.3.0-preview.1 adds the original [mod manager](docs/mods.md). Broader community-mod
+Launcher 0.3.0-preview.2 adds the original [mod manager](docs/mods.md). Broader community-mod
 gameplay testing remains welcome; recognized packaging alone does not prove that
 every asset/code patch is compatible. Engine development remains separately scoped.
 

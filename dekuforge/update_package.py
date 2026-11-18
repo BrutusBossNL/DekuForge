@@ -120,6 +120,23 @@ def build_input(name):
         "tools/bootstrap_stable_toolchain.py", "tools/bootstrap_shader_tools.py", "assets/branding/logo.png"})
 
 
+def validate_launcher_health(proof, components):
+    """Validate target-version requirements while preserving the legacy report fields."""
+    required = components['launcher'].get('healthcheck', {'screens': 40})
+    if (proof.get('success') is not True or proof.get('window_was_mapped') is not False
+            or proof.get('top_level_windows') != 1 or not proof.get('logo_loaded')
+            or not proof.get('native_icon_verified')):
+        raise ValueError('Updated launcher failed its health check')
+    if 'healthcheck' in components['launcher'] and proof.get('launcher_version') != components['launcher']['version']:
+        raise ValueError('Health check ran a different launcher version')
+    for field, count in required.items():
+        views = proof.get(field, [])
+        if not isinstance(views, list) or len(views) != count or len(set(views)) != count:
+            raise ValueError('Updated launcher failed its ' + field + ' checks')
+    if components['launcher'].get('bug_reports') and len(proof.get('report_screens', [])) != 5:
+        raise ValueError('Updated launcher failed its report-form checks')
+
+
 def needs_rebuild(root, inventory):
     return any(not (root / name).is_file() or sha(root / name) != digest
                for name, digest in inventory["sha256"].items() if build_input(name))
