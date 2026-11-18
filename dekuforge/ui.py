@@ -66,6 +66,9 @@ class Launcher(ModsUI):
         self.report_preview = None
         self.update_busy = False
         self.update_job = None
+        self.update_release = ''
+        from .update_status import pending_result
+        self.update_notice = pending_result(ROOT)
         self.save_busy = False
         self.mods_busy = False
         self.mods_entries = []
@@ -130,6 +133,7 @@ class Launcher(ModsUI):
         if settings["check_updates"] and "--self-test" not in sys.argv:
             root.after(2500, self.check_updates)
         if "--self-test" not in sys.argv:
+            root.after(2500, self.show_update_result)
             root.after(3000, self.resume_game_update)
             root.after(1000, self.check_previous_incident)
 
@@ -384,6 +388,15 @@ class Launcher(ModsUI):
         self.check_updates()
 
     def render_updates(self):
+        if self.update_notice:
+            notice = self.card(self.content, padding=12)
+            ok = self.update_notice['success']
+            self.label(notice, self.t('update_installed' if ok else 'update_failed_result',
+                                     version=self.update_notice['release']), 15, GOLD, wraplength=620).pack(anchor='w')
+            if not ok:
+                self.label(notice, self.update_notice['error'], 10, MUTED, wraplength=620).pack(anchor='w', pady=8)
+                self.button(notice, self.t('update_report_issue'), self.report_update_failure).pack(anchor='w', pady=5)
+            self.button(notice, self.t('update_result_continue'), self.dismiss_update_result, pady=5).pack(anchor='w', pady=5)
         card = self.card(self.content)
         self.label(card, self.t("installed_version", version=__version__), 16).pack(anchor="w")
         self.label(card, self.t("update_channel") + ": " + self.t(self.preferences["update_channel"])).pack(anchor="w", pady=12)
@@ -404,6 +417,33 @@ class Launcher(ModsUI):
             self.button(self.content, self.t("rebuild_update"), lambda: self.resume_game_update(manual=True), pady=5).pack(anchor="w")
         self.button(self.content, self.t("local_versions"), self.open_library).pack(anchor="w", pady=12)
 
+    def show_update_result(self):
+        if self.update_notice:
+            self.navigate('updates')
+
+    def dismiss_update_result(self):
+        from .update_package import atomic_json
+        if self.update_notice:
+            ok = self.update_notice['success']
+            atomic_json(ROOT/'local/update-result-seen.json', {'id': self.update_notice['id']})
+            self.update_notice = None
+            self.render()
+            if ok:
+                self.root.after(50, self.resume_game_update)
+
+    def report_update_failure(self):
+        if not self.update_notice or self.update_notice['success'] or self.report_busy:
+            return
+        value = self.update_notice
+        self.report_incident = {**value, 'kind': 'application_update', 'current_version': __version__}
+        self.report_draft = {'title': self.t('update_issue_title', version=value['release']),
+            'details': self.t('update_issue_details', version=value['release'], current=__version__, error=value['error']),
+            'expected': self.t('update_issue_expected', version=value['release']), 'include_logs': True}
+        self.report_context = None
+        self.report_load_failed = False
+        self.report_submitted_url = ''
+        self.navigate('report')
+
     def install_selected_release(self, automatic=False):
         if self.management_busy():
             return
@@ -415,6 +455,7 @@ class Launcher(ModsUI):
         if not automatic and not messagebox.askyesno("DekuForge", self.t("update_confirm", version=release["version"]), parent=self.root):
             return
         self.update_busy = True
+        self.update_release = release['version']
         self.release_status = self.t("update_downloading")
         self.render()
         def work():
@@ -426,6 +467,8 @@ class Launcher(ModsUI):
         threading.Thread(target=work, daemon=True).start()
 
     def resume_game_update(self, manual=False):
+        if self.update_notice and not manual:
+            return  # Let the user read the application outcome before rebuilding.
         pending = ROOT / "local/pending-game-update.json"
         if not pending.is_file() or self.management_busy():
             return
@@ -1059,6 +1102,13 @@ class Launcher(ModsUI):
             if kind == "update_error":
                 self.update_busy = False
                 self.release_status = self.t("update_error", error=value)
+                from .update_package import atomic_json
+                from .update_status import pending_result
+                atomic_json(ROOT/'local/update-result.json', {'success': False, 'release': self.update_release or self.selected_release,
+                    'error': str(value), 'time': datetime.now(timezone.utc).isoformat()})
+                self.update_notice = pending_result(ROOT)
+                self.page = 'updates'
+                self.render_navigation()
                 changed = True
                 continue
             if kind == "update_ready":
@@ -1069,7 +1119,7 @@ class Launcher(ModsUI):
                     return
                 except Exception as error:
                     self.update_busy = False
-                    self.release_status = str(error)
+                    self.events.put(('update_error', str(error)))
                     changed = True
                 continue
             if kind == "update_build_complete":

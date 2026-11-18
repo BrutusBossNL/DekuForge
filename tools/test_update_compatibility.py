@@ -13,17 +13,36 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from dekuforge.update_package import install, validate_package, validate_launcher_health
+from dekuforge import COMPONENTS
+
+
+def previous_release():
+    """Keep the oldest supported frozen updater pinned in packaging acceptance."""
+    from urllib.request import urlopen
+    target = ROOT/'local/build-tools/DekuForge-launcher-0.2.0-windows.zip'
+    expected = 'd4b20693da7cbdbfce40734f6a941384ccfca475936e82b8ba55f626e5e8a7a5'
+    size = 12556443
+    if target.is_file() and target.stat().st_size == size and hashlib.sha256(target.read_bytes()).hexdigest() == expected:
+        return target
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with urlopen('https://github.com/BrutusBossNL/DekuForge/releases/download/v0.2.0/DekuForge-launcher-0.2.0-windows.zip', timeout=90) as response:
+        data = response.read(size+1)
+    if len(data) != size or hashlib.sha256(data).hexdigest() != expected:
+        raise ValueError('Previous-release package size or hash mismatch')
+    target.write_bytes(data)
+    return target
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--previous', type=Path, required=True)
-    parser.add_argument('--candidate', type=Path, required=True)
-    parser.add_argument('--runtime', type=Path, required=True)
+    parser.add_argument('--previous', type=Path)
+    parser.add_argument('--candidate', type=Path, default=ROOT/'build/releases'/('DekuForge-launcher-'+COMPONENTS['launcher']['version']+'-windows.zip'))
+    parser.add_argument('--runtime', type=Path, default=ROOT/'python'/COMPONENTS['python']['id'])
     parser.add_argument('--known-bad', type=Path)
     args = parser.parse_args()
     if os.name != 'nt':
         parser.error('This acceptance test exercises the Windows updater')
+    args.previous = args.previous or previous_release()
     previous = validate_package(args.previous)
     candidate = validate_package(args.candidate)
     assert previous['components']['python']['id'] == candidate['components']['python']['id']

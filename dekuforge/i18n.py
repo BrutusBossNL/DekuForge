@@ -304,6 +304,19 @@ for _language, _text in {'en': 'Preview release', 'nl': 'Previewversie',
                          'fr': 'Version preliminaire'}.items():
     MESSAGES[_language]['preview_release'] = _text
 
+_UPDATE_RESULTS = {
+    'update_installed': ('Launcher update installed: {version}.', 'Launcherupdate geinstalleerd: {version}.', 'Launcher-Update installiert: {version}.', 'Actualizacion instalada: {version}.', 'Mise a jour installee : {version}.'),
+    'update_failed_result': ('Update to {version} failed. The previous launcher is retained.', 'Update naar {version} mislukt. De vorige launcher is behouden.', 'Update auf {version} fehlgeschlagen. Der bisherige Launcher bleibt erhalten.', 'Fallo la actualizacion a {version}. Se conserva el lanzador anterior.', 'Echec de la mise a jour vers {version}. Le lanceur precedent est conserve.'),
+    'update_report_issue': ('Report this update failure', 'Deze updatefout melden', 'Updatefehler melden', 'Informar de este error', 'Signaler cet echec'),
+    'update_result_continue': ('Continue', 'Verder', 'Weiter', 'Continuar', 'Continuer'),
+    'update_issue_title': ('Launcher update to {version} failed', 'Launcherupdate naar {version} mislukt', 'Launcher-Update auf {version} fehlgeschlagen', 'Fallo al actualizar el lanzador a {version}', 'Echec de la mise a jour du lanceur vers {version}'),
+    'update_issue_details': ('I selected {version} in Updates. The update failed. Current launcher: {current}.\n\nError: {error}', 'Ik koos {version} bij Updates. De update is mislukt. Huidige launcher: {current}.\n\nFout: {error}', 'Ich habe {version} unter Updates ausgewaehlt. Das Update ist fehlgeschlagen. Aktueller Launcher: {current}.\n\nFehler: {error}', 'Seleccione {version} en Actualizaciones. La actualizacion fallo. Lanzador actual: {current}.\n\nError: {error}', 'J\'ai choisi {version} dans Mises a jour. La mise a jour a echoue. Lanceur actuel : {current}.\n\nErreur : {error}'),
+    'update_issue_expected': ('Install {version}, restart and confirm the installed launcher version.', '{version} installeren, herstarten en de geinstalleerde launcherversie bevestigen.', '{version} installieren, neu starten und die installierte Version bestaetigen.', 'Instalar {version}, reiniciar y confirmar la version instalada.', 'Installer {version}, redemarrer et confirmer la version installee.'),
+}
+for _key, _values in _UPDATE_RESULTS.items():
+    for _language, _text in zip(('en', 'nl', 'de', 'es', 'fr'), _values):
+        MESSAGES[_language][_key] = _text
+
 
 def translate(language, key, **values):
     selected = language if language in MESSAGES else "en"

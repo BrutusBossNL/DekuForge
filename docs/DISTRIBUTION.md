@@ -46,7 +46,16 @@ Preview 1 had an update-health protocol mismatch: 0.2.0's frozen helper restored
 2 preserves the 40-view legacy field and records the five additional Mods views
 separately. Its compatibility test runs the original helper against both packages,
 including real bootstrap and hidden GUI health checks in a temporary installation.
-It does not modify a user's installed application or game.
+It does not modify a user's installed application or game. The Windows packaging
+workflow runs this compatibility check before making artifacts available.
+
+After the restarted launcher opens, Updates shows whether application installation
+succeeded. The notice stays until **Continue** is selected; automatic game
+rebuilding waits for that acknowledgment. A failure offers **Report this update
+failure**, opening the existing editable form with the requested release, current
+version, error, hardware details and a sanitized excerpt of the matching updater
+log. Download failures are shown too. The user reviews the report and explicitly
+submits it via GitHub or exports it; no automatic issue is posted.
 
 Normal updates do not require uninstalling DekuForge. The release ZIP replaces
 the native launcher, interface/source modules, build scripts, branding and the

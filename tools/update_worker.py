@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+from datetime import datetime, timezone
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from update_package import atomic_json, install, rollback, validate_launcher_health
@@ -41,11 +42,13 @@ def main():
             raise RuntimeError("Updated launcher failed its health check")
         validate_launcher_health(proof, result['components'])
         atomic_json(root / "local/pending-game-update.json", {**result, "release": job["release"], "status": "pending"})
-        atomic_json(root / "local/update-result.json", {"success": True, "release": job["release"], **result})
+        atomic_json(root / "local/update-result.json", {"success": True, "release": job["release"],
+            'job': job_path.parent.name, 'time': datetime.now(timezone.utc).isoformat(), **result})
     except Exception as error:
         if result:
             rollback(root, result["backup"])
-        atomic_json(root / "local/update-result.json", {"success": False, "error": str(error), "release": job["release"]})
+        atomic_json(root / "local/update-result.json", {"success": False, "error": str(error), "release": job["release"],
+            'job': job_path.parent.name, 'time': datetime.now(timezone.utc).isoformat()})
         print("Update rolled back:", error, flush=True)
     if job.get("restart", True):
         subprocess.Popen([str(root / "DekuForge.exe")], cwd=root, creationflags=subprocess.CREATE_NO_WINDOW)

@@ -16,6 +16,14 @@ An isolated Windows acceptance test runs the original 0.2.0 helper: it reproduce
 Preview 1's rollback, then installs Preview 2, verifies every package file and
 confirms that synthetic saves, settings and tool caches are unchanged.
 
+After restart, the Updates page confirms success or shows the failed update and
+its error until acknowledged. Failed downloads and installations offer a
+prefilled, editable issue form with release/error details, hardware and the
+relevant bounded, sanitized worker log. Nothing is submitted automatically.
+The Windows packaging workflow now requires frozen-updater acceptance before
+uploading its artifacts. Regression tests cover outcome acknowledgment, retry
+results, the form wiring and update-log selection.
+
 Preview 2 includes all Preview 1 features and fixes below. Stable stays on 0.2.0.
 Updating the application no longer requires an uninstall or setup workaround.
 

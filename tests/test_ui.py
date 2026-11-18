@@ -159,6 +159,36 @@ ui.main()
         self.root.withdraw()
         self.app = Launcher(self.root)
 
+    def test_update_failure_opens_prefilled_review_form_without_submitting(self):
+        from dekuforge.update_package import atomic_json
+        from dekuforge.update_status import pending_result
+        atomic_json(self.folder/'local/update-result.json', {'success': False,
+            'release': 'v0.3.0-preview.2', 'error': 'Synthetic update rollback', 'job': 'a'*32})
+        self.app.update_notice = pending_result(self.folder)
+        self.app.show_update_result()
+        self.assertEqual(self.app.page, 'updates')
+        # No collection or network work is necessary to verify the form wiring.
+        with patch.object(self.app, 'prepare_report'), patch('dekuforge.reports.submit') as submit:
+            self.app.report_update_failure()
+            self.assertEqual(self.app.page, 'report')
+            self.assertIn('v0.3.0-preview.2', self.app.report_draft['title'])
+            self.assertIn('Synthetic update rollback', self.app.report_draft['details'])
+            self.assertTrue(self.app.report_draft['include_logs'])
+            self.assertEqual(self.app.report_incident['kind'], 'application_update')
+            submit.assert_not_called()
+        self.app.dismiss_update_result()
+        self.assertIsNone(pending_result(self.folder))
+
+    def test_successful_update_is_shown_before_automatic_game_rebuild(self):
+        self.app.update_notice = {'success': True, 'release': 'v0.3.0-preview.2', 'id': 'test'}
+        self.app.show_update_result()
+        self.assertEqual(self.app.page, 'updates')
+        with patch('dekuforge.ui.run_rebuild') as rebuild:
+            self.app.resume_game_update()
+            rebuild.assert_not_called()
+        self.app.dismiss_update_result()
+        self.assertIsNone(self.app.update_notice)
+
     def test_navigation_and_language_preserve_wizard_and_logs_in_one_window(self):
         self.app.source = str(self.folder / "own.nup")
         self.app.destination = str(self.folder / "new")

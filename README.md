@@ -47,6 +47,7 @@ The repository is public and **0.2.0** is the latest published Early Access rele
 Preview **0.3.0-preview.2** adds the original mod manager, the scrolling fix and
 complete NVIDIA Frame Generation dependency preparation. Select the Preview
 update channel to receive it; Stable stays on 0.2.0. Preview 2 also fixes the update rollback from 0.2.0 that affected Preview 1.
+Update results are shown after restart; failures offer a prefilled issue form.
 Existing games need the
 managed game rebuild after this update to receive the missing libraries. The component terms noted in
 [the publication review](docs/PUBLICATION_REVIEW.md) remain unchanged. Early Access
