@@ -179,3 +179,12 @@ source-tree hashes and retains COPYING beside the local library. Meson 1.9.1
 (Apache-2.0), Ninja 1.13.0 (Apache-2.0) and NASM 2.16.03 (BSD-2-Clause) keep their
 distribution notices in the local tool tree. These tools and the decoder contain
 no game content and are not licensed under the project's MIT grant.
+
+`tools/provision_open_tools.py` pins the official LLVM-MinGW 20261104 UCRT
+toolchain archive and the GPL provider's generic CPM and SDL dependency packages
+by SHA-256 and size. Only the selected compiler/header/codec/SDL paths are used;
+the combined dependency archive's prebuilt engine/lifter components are not
+extracted or executed. SDL's license is retained beside the locally built game;
+the verified source tree retains all component notices. These dependencies do
+not make the composed GPL engine original MIT project code. NVIDIA's optional
+proprietary DLSS SDK is not downloaded, linked or included in this experiment.

@@ -121,12 +121,16 @@ class BuildLibrary:
             return None
         entry, folder = self.deletion_target(identity)
         backup = None
-        profile = folder / "profile"
-        if keep_saves and profile.is_dir():
+        profiles = [folder/name for name in ("profile", "user") if (folder/name).is_dir()]
+        if keep_saves and profiles:
             backup = self.project / "local" / "retained-saves" / (identity + "-" + uuid.uuid4().hex[:8])
             backup.parent.mkdir(parents=True, exist_ok=True)
             # Keep all profile data, including saves whose format is not yet known.
-            shutil.copytree(profile, backup)
+            if len(profiles) == 1:
+                shutil.copytree(profiles[0], backup)
+            else:
+                for profile in profiles:
+                    shutil.copytree(profile, backup/profile.name)
         # Revalidate the exact absolute target immediately before recursive removal.
         _, checked = self.deletion_target(identity)
         if checked != folder:

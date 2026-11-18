@@ -36,7 +36,7 @@ def launch_options(executable, root=ROOT):
     if executable.resolve() != executable or not executable.is_relative_to(root / 'build'):
         raise ValueError('Independent executable must stay inside this worktree build folder')
     env = {key: value for key, value in os.environ.items()
-           if not key.startswith(('HOS_', 'RX_', 'TOTK_', 'NX2NAVI_', 'DEKUFORGE_', 'OOT_', 'DKB_'))}
+           if not key.startswith(('HOS_', 'RX_', 'HOOKSHOT_', 'TOTK_', 'NX2NAVI_', 'DEKUFORGE_', 'OOT_', 'DKB_'))}
     env.update(RX_BACKEND='vulkan', HOS_DISCORD='0')
     return {'args': [str(executable), str(paths['image']), '--romfs', str(paths['romfs']), '--user', str(paths['user'])],
             'env': env}

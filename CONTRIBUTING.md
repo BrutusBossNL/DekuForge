@@ -5,10 +5,13 @@ For the `independent` branch, start with
 main's results before replacing it. Record provenance for reused code and accept
 only identified open-source/redistribution grants. Do not port restricted code
 by changing its style, names or layout. The inherited main-specific details below
-describe the reference release path, not a working independent game builder.
+describe the reference release path. An opt-in source-built Windows experiment
+has its own [build instructions](docs/OPEN_ENGINE_EVALUATION.md); it is not an
+accepted independent installer or a parity claim.
 
-Thank you for helping. DekuForge develops independently of NX2navi, using its
-stable 0.10.1 source as a reference and foundation. Preserve credits and notices
+Thank you for helping. Main uses NX2navi 0.10.1 as its stable foundation; this
+branch evaluates a separately licensed GPL runtime and uses main as a behavioral
+reference. Preserve credits and notices
 for upstream and other reused components. Original contributions use the root
 license; third-party components retain their own terms.
 

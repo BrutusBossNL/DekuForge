@@ -963,14 +963,22 @@ class Launcher(ModsUI, ReleaseListUI):
         self.launch_ready()
 
     def launch_ready(self):
+        executable = self.executable
+        self.mods_busy = True
+        self.activity = self.t("working")
+        self.render()
+
+        def worker():
+            try:
+                process = launch(executable)
+                self.events.put(("game_started", (process, executable)))
+            except Exception as error:
+                self.events.put(("game_start_failed", error))
+
         try:
-            self.process = launch(self.executable)
-            reports.record_run(ROOT,self.process,self.executable)
-            self.activity = self.t("playing")
-            self.render()
-            if self.hide_playing:
-                self.root.withdraw()
-        except (OSError, ValueError) as error:
+            threading.Thread(target=worker, daemon=False).start()
+        except RuntimeError as error:
+            self.mods_busy = False
             self.show_error(error)
 
     def start_build(self):
@@ -1170,6 +1178,19 @@ class Launcher(ModsUI, ReleaseListUI):
                 self.save_status = self.t("save_search_found", count=len(self.save_sources)) if self.save_sources else self.t("save_search_none")
                 if value["limited"]: self.save_status += " " + self.t("save_search_limited")
                 changed = self.page == "saves" or changed
+                continue
+            if kind == "game_started":
+                self.mods_busy = False
+                self.process, executable = value
+                reports.record_run(ROOT, self.process, executable)
+                self.activity = self.t("playing")
+                self.render()
+                if self.hide_playing:
+                    self.root.withdraw()
+                continue
+            if kind == "game_start_failed":
+                self.mods_busy = False
+                self.show_error(value)
                 continue
             if kind in ("progress", "phase"):
                 self.progress.update(value)

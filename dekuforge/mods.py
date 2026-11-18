@@ -111,11 +111,11 @@ class ModLibrary:
         if not executable or not regular(self.executable) or not self.executable.is_file():
             raise ValueError('mods_no_game')
         self.game = self.executable.parent
-        self.ini = self.game / 'nx2navi.ini'
+        self.ini = self.game / ('dekuforge-mods.ini' if (self.game/'.dekuforge-runtime.json').is_file() else 'nx2navi.ini')
         _, config = _config(self.ini)
         configured = Path(config.get('MODS_DIR') or 'mods')
         self.folder = (configured if configured.is_absolute() else self.game / configured).absolute()
-        protected = {'profile', 'romfs', 'exefs', 'build-cache', 'shader-cache', '.git', 'local', 'python'}
+        protected = {'profile', 'user', 'romfs', 'exefs', 'build-cache', 'shader-cache', '.git', 'local', 'python', '.dfmods'}
         if (not self.folder.is_relative_to(self.game) or self.folder == self.game or not regular(self.folder)
                 or self.folder.relative_to(self.game).parts[0].casefold() in protected):
             raise ValueError('mods_external_dir')

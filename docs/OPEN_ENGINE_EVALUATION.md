@@ -29,6 +29,53 @@ hot-function profile, shader cache or game installation.
 
 ## Stages
 
+### Complete experimental Windows NUP build
+
+Use a development Python 3.14+ with the repository's development requirements.
+This is an opt-in developer route; it does not install Python or ship a setup.
+From the independent checkout:
+
+```powershell
+python -B tools/provision_open_tools.py --work build/open-engine-work --jobs 4 --configure-launcher
+python -B tools/build_open_game.py --nup "C:\path\to\your-own.nup" --out build/windows-independent
+python run_launcher.py
+```
+
+The first command verifies the pinned GPL source and downloads hash-pinned
+LLVM-MinGW, codec/header and SDL packages. It extracts only generic dependencies,
+then compiles dav1d from source. The engine and instruction lifter are compiled
+from verified source; no NX2navi install, downloaded compiled engine or shared
+game shader cache is used. `--source build/<verified-source>` reuses an existing
+verified checkout. `--configure-launcher` explicitly enables the experimental
+Build game wizard; without it the default backend stays gated.
+
+The output contains `DekuForgeGame.exe`, its own image/RomFS, libraries, notices,
+runtime metadata and `user/save`. Keep every output under this worktree's
+`build/`; the original NUP must remain outside the output. Work, source and
+installed game folders must be separate. Keep the same work folder to reuse
+unchanged object files. The provider cleans its transient native link folder
+after copying the installation, so never register an executable inside work.
+
+Shader preparation can be long on a cold cache. The pinned provider deliberately
+requires an additional ordinary-play driver-cache warmup on NVIDIA after its
+prepare-only process. DekuForge now starts its own preparation child with a
+separate empty profile, waits for actual Vulkan frames, and closes only that
+child before reporting success. It never manufactures the provider's completion
+marker. Inspect `dekuforge-play-cache.log` inside work for this final stage.
+`--no-prepare-shaders` is diagnostic only and skips that readiness check too.
+
+The launcher retains its original async Play, save import/export, build inventory,
+release list/notes and update-outcome views. Main-channel installs remain blocked.
+Asset mods use immutable verified snapshots so the first enabled provider wins,
+matching the launcher order; disabled mods are excluded. No base game file is
+overwritten. Code-patch/cheat mods remain blocked. The provider's Windows path
+limit is checked before starting; excessively long mod paths report an error.
+Crash reports include bounded text logs and graphics settings, never binary
+shader/pipeline caches. Deleting an owned build can preserve its `user` profile,
+as well as the legacy `profile` layout; the original game archive is protected.
+
+### Individual investigation stages
+
 Fetch and verify source only:
 
 ```powershell

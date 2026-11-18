@@ -58,6 +58,15 @@ class BuildLibraryTests(unittest.TestCase):
         self.assertIsNone(self.library.delete(entry["id"], keep_saves=False))
         self.assertFalse(self.folder.exists())
 
+    def test_independent_user_and_legacy_profiles_both_survive_retention(self):
+        user = self.folder/'user/save'/('f'*32)/'slot_00'
+        user.mkdir(parents=True)
+        (user/'progress.sav').write_bytes(b'independent save')
+        entry = self.library.register(self.exe, owned=True)
+        backup = self.library.delete(entry['id'], keep_saves=True)
+        self.assertEqual((backup/'profile/save/user/slot_00/progress.sav').read_bytes(), b'keep me')
+        self.assertEqual((backup/'user/save'/('f'*32)/'slot_00/progress.sav').read_bytes(), b'independent save')
+
     def test_external_installation_and_tampered_marker_are_protected(self):
         entry = self.library.register(self.exe)
         with self.assertRaises(ValueError):

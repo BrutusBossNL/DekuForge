@@ -8,6 +8,13 @@
 > [INDEPENDENT_EVIDENCE.md](INDEPENDENT_EVIDENCE.md). Do not use main's results as
 > acceptance of this different engine.
 
+The independent Windows developer route now composes the complete source-built
+NUP pipeline, pinned generic tools and source-built AV1 movies, with explicit
+launcher opt-in. Current work covers ordinary-play cache readiness, gameplay
+measurements and asset-mod/save integration. A portable Python/setup, the full
+Cheat Manager, matched performance and long-session acceptance remain open; see
+[OPEN_ENGINE_EVALUATION.md](OPEN_ENGINE_EVALUATION.md).
+
 The owner has since prioritized DekuForge's in-game UI and Cheat Manager directly
 after the stable Windows baseline, before Linux parity. The 0.11.0 candidate uses
 the stable 0.10.1 renderer with a separate extension layer. Preparing portable tests

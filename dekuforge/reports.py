@@ -97,16 +97,19 @@ def collect(root, executable="", incident=None):
     if folder:
         try:
             info=json.loads((folder/"dekuforge-build-info.json").read_text(encoding="utf-8"))
-            metadata["game_build"]={key:info[key] for key in ("engine_version","base_engine_version","game_version","build_id","runtime_sha256") if key in info}
+            metadata["game_build"]={key:info[key] for key in ("engine_version","base_engine_version","game_version","build_id","runtime_sha256","provider_revision","experimental") if key in info}
         except (OSError,ValueError):pass
         config=folder/"nx2navi.ini"
+        if (folder/'.dekuforge-runtime.json').is_file():
+            config=folder/'hookshot_options.ini'
         if config.is_file():
             with config.open("rb") as stream:ini=stream.read(65536).decode("utf-8",errors="replace")
-            names={"game_res","dlss","dlaa","framegen","fps_limit","hdr","fullscreen","ocarina_realtime","prewarm_full","lib_warm"}
+            names={"game_res","dlss","dlaa","framegen","fps_limit","hdr","fullscreen","ocarina_realtime","prewarm_full","lib_warm",
+                   "quality_preset","output_res","resolution","frame_generation","frame_generation_by","frame_pacing","frame_rate_cap","vsync","upscaling","sharpness"}
             metadata["graphics_settings"]={match[1]:sanitize(match[2]) for match in re.finditer(r"(?m)^\s*([a-z_]+)\s*=([^\r\n]*)",ini) if match[1] in names}
         for directory in (folder/"logs",):
             if directory.is_dir():paths.extend(p for p in directory.glob("*.log") if p.is_file())
-        for name in ("nx2navi.log","DekuForge.log"):
+        for name in ("nx2navi.log","DekuForge.log","hookshot_log.txt","hookshot_log.1.txt"):
             if (folder/name).is_file():paths.append(folder/name)
         try:metadata["game_disk_free_gib"]=round(shutil.disk_usage(folder).free/1024**3,1)
         except OSError:pass
@@ -119,7 +122,7 @@ def collect(root, executable="", incident=None):
     candidates=update_logs + sorted(set(paths)-set(update_logs),key=lambda p:p.stat().st_mtime,reverse=True)
     logs=[];remaining=24000
     for path in candidates[:3]:
-        if path.is_symlink() or path.suffix!=".log":continue
+        if path.is_symlink() or (path.suffix!=".log" and path.name not in {"hookshot_log.txt","hookshot_log.1.txt"}):continue
         try:
             text=read_log(path,min(MAX_LOG,remaining));remaining-=len(text)
             logs.append({"name":path.name,"text":text})

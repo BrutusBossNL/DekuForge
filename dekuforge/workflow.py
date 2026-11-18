@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 import math
+import json
 from pathlib import Path
 import time
 
@@ -29,7 +30,20 @@ def validate_destination(value, current_installation=""):
         raise ValueError("invalid_destination")
     if current_installation:
         protected = Path(current_installation).resolve().parent
-        if destination == protected or destination.is_relative_to(protected) or protected.is_relative_to(destination):
+        rebuild = False
+        if destination == protected and destination.is_relative_to(ROOT/'build'):
+            from . import COMPONENTS
+            marker = destination/'.dekuforge-open-output.json'
+            if (COMPONENTS['engine'].get('backend') == 'independent' and marker.is_file()
+                    and marker.resolve() == marker and marker.stat().st_size <= 16384
+                    and (destination/'.dekuforge-owned').is_file()):
+                from .open_engine import manifest
+                try:
+                    record = json.loads(marker.read_text(encoding='utf-8'))
+                    rebuild = record.get('provider_revision') == manifest('hookshot')['revision']
+                except (OSError, ValueError, AttributeError):
+                    pass
+        if not rebuild and (destination == protected or destination.is_relative_to(protected) or protected.is_relative_to(destination)):
             raise ValueError("invalid_destination")
     if destination.exists():
         if not destination.is_dir():

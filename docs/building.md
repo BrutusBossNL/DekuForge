@@ -6,6 +6,12 @@
 > `python run_builder.py --doctor` and the source tests. See
 > [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md) for the current independent route.
 
+For the complete opt-in Windows NUP experiment, use
+[OPEN_ENGINE_EVALUATION.md](OPEN_ENGINE_EVALUATION.md). Its generic tool
+provisioner, source compiler and independent launcher adapter are separate from
+the inherited setup commands below. Do not run main's bootstrap to supply its
+runtime to this branch. A development Python remains required.
+
 The independent development route also provides read-only module analysis:
 `python tools/analyze_independent.py --exefs PATH --out local/analysis.json`.
 This reuses extracted input; it neither builds nor validates a playable game.

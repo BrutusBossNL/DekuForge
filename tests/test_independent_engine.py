@@ -28,7 +28,9 @@ class IndependentContractTests(unittest.TestCase):
         events = []
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve()
-            with patch('dekuforge.stable_engine.build_stable') as vendor, patch('dekuforge.engine.prepare_game') as extract:
+            with (patch('dekuforge.stable_engine.build_stable') as vendor,
+                  patch('dekuforge.engine.prepare_game') as extract,
+                  patch('dekuforge.open_game_build.CONFIG', root/'no-local-config.json')):
                 with self.assertRaisesRegex(RuntimeError, 'independent_backend_incomplete'):
                     engine.build_independent(root/'own.nup', lambda *args:events.append(args),workspace=root)
                 vendor.assert_not_called();extract.assert_not_called()

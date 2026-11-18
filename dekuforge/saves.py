@@ -2,6 +2,7 @@
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 import os
+import json
 import re
 import shutil
 import tempfile
@@ -24,9 +25,25 @@ def game_save_profiles(executable):
     if not executable or not Path(executable).is_file():
         return []
     game = Path(executable).absolute().parent
-    if not (game / '.dekuforge-stable-build').is_file():
+    if (game / '.dekuforge-stable-build').is_file():
+        folder = game / 'profile/save'
+    elif (game / '.dekuforge-native').is_file():
+        try:
+            info = json.loads((game/'dekuforge-build-info.json').read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            return []
+        if info.get('save_layout') != 'user/save':
+            return []
+        folder = game/'user/save'
+    elif (game/'.dekuforge-runtime.json').is_file():
+        from .open_engine_runtime import launch_options
+        try:
+            options = launch_options(Path(executable).absolute())
+            folder = Path(options['args'][-1])/'save'
+        except (OSError, ValueError, TypeError):
+            return []
+    else:
         return []
-    folder = game / 'profile/save'
     if folder.resolve() != folder or not folder.is_dir():
         return []
     result = []

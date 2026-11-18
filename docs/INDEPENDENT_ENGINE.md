@@ -192,5 +192,11 @@ Its original source remains immutable. Direct NUP directory extraction,
 explicit local runtime metadata and a pinned source-built dav1d AV1 dependency
 are implemented. An existing developer build can use this branch's launcher Play
 action; this does not complete first-install provisioning or the default wizard.
+The complete experimental NUP pipeline now has an original orchestration layer,
+owned output/work folders, pinned generic-tool provisioning and explicit local
+launcher opt-in. Save discovery understands its `user/save` layout. Asset mods
+are composed in launcher priority order without altering base assets; code mods
+and the Cheat Manager are not yet connected. Automatic installer/Python bootstrap
+and main performance parity remain acceptance gaps.
 See [OPEN_ENGINE_EVALUATION.md](OPEN_ENGINE_EVALUATION.md) for those commands and
 the evidence index for measured scope. Main remains unchanged.

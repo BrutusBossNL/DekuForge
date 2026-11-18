@@ -42,6 +42,13 @@ def report(root=ROOT):
 
 
 def build(filename, notify, destination):
+    import json
+    from .open_game_build import CONFIG, build as build_experiment
+    if CONFIG.is_file():
+        config = json.loads(CONFIG.read_text(encoding='utf-8'))
+        if config.get('enable_launcher_build') is True:
+            notify('log', 'Building the explicitly configured experimental GPL provider; gameplay parity is not accepted.\n')
+            return build_experiment(filename, notify, destination or ROOT/'build/independent-game', config=config)
     # Do not extract another multi-gigabyte game while essential backends are absent.
     status = report()
     notify('checked', status)

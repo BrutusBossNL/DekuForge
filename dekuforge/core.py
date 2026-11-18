@@ -53,5 +53,7 @@ def launch(value):
     from .open_engine_runtime import launch_options
     options = launch_options(executable)
     if options:
+        from .open_engine_mods import prepare_mods
+        options = prepare_mods(executable, options)
         return subprocess.Popen(options['args'], cwd=str(executable.parent), env=options['env'], shell=False)
     return subprocess.Popen([str(executable)], cwd=str(executable.parent), shell=False)

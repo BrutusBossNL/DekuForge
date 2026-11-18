@@ -33,7 +33,9 @@ class IndependentRuntimeTests(unittest.TestCase):
             self.assertEqual(options['env']['RX_BACKEND'], 'vulkan')
             self.assertNotIn('HOS_CONTROL_MEM', options['env'])
             self.assertEqual(options['env']['KEEP_ME'], 'yes')
-            with patch('dekuforge.open_engine_runtime.launch_options', return_value=options), patch('dekuforge.core.subprocess.Popen') as popen:
+            with (patch('dekuforge.open_engine_runtime.launch_options', return_value=options),
+                  patch('dekuforge.open_engine_mods.prepare_mods', side_effect=lambda exe, opts: opts),
+                  patch('dekuforge.core.subprocess.Popen') as popen):
                 launch(str(exe))
                 popen.assert_called_once_with(options['args'], cwd=str(exe.parent), env=options['env'], shell=False)
 

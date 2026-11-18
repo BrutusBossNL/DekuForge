@@ -1,13 +1,39 @@
 from pathlib import Path
+import json
 import string
 import tempfile
 import unittest
+from unittest.mock import patch
 
 from dekuforge.i18n import LANGUAGES, MESSAGES, translate
 from dekuforge.workflow import BuildRequest, Progress, duration, validate_destination, validate_source
 
 
 class WorkflowTests(unittest.TestCase):
+    def test_current_build_rebuild_requires_exact_owned_independent_provider(self):
+        from dekuforge.open_engine import manifest
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            installed = root/'build/game'
+            installed.mkdir(parents=True)
+            exe = installed/'DekuForgeGame.exe'
+            exe.touch()
+            (installed/'.dekuforge-owned').touch()
+            marker = installed/'.dekuforge-open-output.json'
+            with patch('dekuforge.workflow.ROOT', root), patch('dekuforge.COMPONENTS', {'engine': {'backend': 'independent'}}):
+                for content in ('{}', '{broken', json.dumps({'provider_revision': 'another'})):
+                    marker.write_text(content)
+                    with self.assertRaises(ValueError):
+                        validate_destination(installed, str(exe))
+                marker.write_text(json.dumps({'provider_revision': manifest('hookshot')['revision']}))
+                self.assertEqual(validate_destination(installed, str(exe)), installed)
+                for forbidden in (installed/'nested', installed.parent):
+                    with self.assertRaises(ValueError):
+                        validate_destination(forbidden, str(exe))
+            with patch('dekuforge.workflow.ROOT', root), patch('dekuforge.COMPONENTS', {'engine': {'backend': 'stable'}}):
+                with self.assertRaises(ValueError):
+                    validate_destination(installed, str(exe))
+
     def test_all_languages_have_complete_matching_placeholders(self):
         keys = set(MESSAGES["en"])
         for code in LANGUAGES:

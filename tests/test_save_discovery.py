@@ -1,4 +1,5 @@
 import os
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -7,6 +8,19 @@ from dekuforge.saves import discover_saves, game_save_profiles, import_save
 
 
 class SaveDiscoveryTests(unittest.TestCase):
+    def test_independent_native_profile_is_found_only_with_explicit_layout(self):
+        with tempfile.TemporaryDirectory() as temp:
+            game = Path(temp).resolve()
+            executable = game/'DekuForgeGame.exe'
+            executable.touch()
+            (game/'.dekuforge-native').touch()
+            profile = self.profile(game/'user/save'/('e'*32))
+            self.assertEqual(game_save_profiles(executable), [])
+            (game/'dekuforge-build-info.json').write_text(json.dumps({'save_layout': 'user/save'}))
+            self.assertEqual([p['folder'] for p in game_save_profiles(executable)], [str(profile)])
+            (game/'dekuforge-build-info.json').write_text(json.dumps({'save_layout': '../../outside'}))
+            self.assertEqual(game_save_profiles(executable), [])
+
     def profile(self, folder, data=b'synthetic save'):
         (folder/'slot_00').mkdir(parents=True)
         (folder/'slot_00/progress.sav').write_bytes(data)

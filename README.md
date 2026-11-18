@@ -13,8 +13,9 @@ Windows build remains on [main](https://github.com/BrutusBossNL/DekuForge/tree/m
 
 This branch starts the replacement of the NX2navi-dependent build path with an
 original implementation and explicitly approved, redistributable components.
-**A source-built experimental game now runs locally; the default launcher build
-wizard and installer are not ready, and parity with main is not established.**
+**A source-built experimental Windows game runs locally. The complete NUP build
+route is available with explicit developer opt-in; standalone installer support
+and parity with main are not established.**
 
 - The default independent backend reports its real capabilities with `--doctor`.
 - Original NUP inspection, package selection, verified module preparation and the
@@ -27,16 +28,21 @@ wizard and installer are not ready, and parity with main is not established.**
   symbol and RELA/RELR pointer relocations; synthetic cross-module calls execute.
   Read-only module analysis reuses extracted inputs without rebuilding them.
 - Main's original mod manager, release list/notes and update outcome reporting
-  are retained. Independent updates and legacy code-mod builds remain disabled.
+  are retained. Asset-mod order and On/Off selections now reach the independent
+  runtime through verified snapshots. Independent updates and code-mod builds
+  remain disabled.
 - Two pinned, separately licensed GPL providers have been evaluated. The first
   was rejected for incorrect shadows. The second verifies 2,188 source blobs
   and runs moving Death Mountain and Kokiri scenes with DekuForge UI adaptations.
   See the [engine plan](docs/INDEPENDENT_ENGINE.md) and
   [scoped measurements](docs/INDEPENDENT_EVIDENCE.md). Full gameplay acceptance
-  and standalone launcher provisioning remain outstanding.
+  and standalone launcher provisioning remain outstanding. The
+  [experimental Windows build guide](docs/OPEN_ENGINE_EVALUATION.md) covers
+  pinned generic tools, source compilation and explicit launcher opt-in.
 - No automatic fallback to the old experimental 0.3.10 or stable 0.10.1 renderer.
-- Vendor runtime/tool downloads, main-channel app updates and installer packaging
-  are disabled until independent replacements are ready.
+- NX2navi runtime/tool downloads, main-channel app updates and installer packaging
+  are disabled. The experimental provisioner downloads verified generic tools;
+  the selected GPL engine and AV1 decoder are compiled from source.
 
 Use a development Python 3.14+ with Tk and the dependencies in the requirements
 files. Run `python run_launcher.py` for the development UI and

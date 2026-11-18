@@ -8,6 +8,19 @@ from dekuforge import reports
 
 
 class ReportTests(unittest.TestCase):
+    def test_independent_runtime_logs_and_graphics_are_collected_without_caches(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder).resolve();game=root/'game';game.mkdir()
+            (game/'game.exe').touch()
+            (game/'.dekuforge-runtime.json').write_text('{}')
+            (game/'hookshot_log.txt').write_text('FATAL: synthetic independent failure\n')
+            (game/'hookshot_options.ini').write_text('resolution=1\noutput_res=20\nsecret=never include\n')
+            (game/'hookshot_programs.bin').write_bytes(b'never include shader cache')
+            with patch.object(reports,'hardware',return_value={}):
+                result=reports.collect(root,str(game/'game.exe'))
+            self.assertEqual([log['name'] for log in result['logs']],['hookshot_log.txt'])
+            self.assertEqual(result['metadata']['graphics_settings'],{'resolution':'1','output_res':'20'})
+
     def context(self):
         return {"metadata":{"system":{"os":"Windows 11 build test","cpu":"Test CPU","gpus":[{"model":"Test GPU","driver":"1.2.3"}],"ram_gib":32}},
                 "logs":[{"name":"game.log","text":"FATAL: synthetic graphics failure\n"}]}
