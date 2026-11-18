@@ -72,6 +72,14 @@ the original NUP are retained. A game update builds into a separate destination
 and activates it only after success; the local full-rebuild acceptance limits
 below still apply.
 
+The Updates page lists versions newest first, with Preview/Stable and Installed
+indications. Selecting a row shows its GitHub release notes alongside it. A newer
+selection offers **Install update**, an older one **Downgrade**, and the installed
+version **Rebuild for current version**. The installed version remains in the
+list even if it is not published in the selected channel. Rebuilding uses a new
+managed build identity; it does not overwrite the active game. Build switching
+and removal remain on **Build game**, not the Updates page.
+
 Use **Updates**, choose **Preview** for prereleases, check for releases and install
 the selected version. Draft releases are never listed, even with credentials.
 Public releases do not require GitHub sign-in. Non-draft releases from a private

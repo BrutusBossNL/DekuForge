@@ -2,7 +2,7 @@
 import json
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
-from .update_service import github_token
+from .update_service import github_token, version_key
 
 REPOSITORY = "BrutusBossNL/DekuForge"
 
@@ -26,9 +26,10 @@ def list_releases(preview=False):
     if not isinstance(releases, list):
         raise ValueError("Unexpected release response")
     candidates = [r for r in releases if not r.get("draft") and (preview or not r.get("prerelease"))]
-    candidates.sort(key=lambda r: r.get("published_at") or "", reverse=True)
+    candidates.sort(key=lambda r: (version_key(str(r['tag_name'])) or (0,0,0,False,()), r.get('published_at') or ''), reverse=True)
     return [{"version": str(r["tag_name"]), "date": str(r.get("published_at", "")),
              "preview": bool(r.get("prerelease")), "assets": r.get("assets", []),
+             "notes": str(r.get('body') or '')[:80000],
              "installable": any(a.get("name")=="DekuForge-release.json" for a in r.get("assets", []))}
             for r in candidates]
 

@@ -50,6 +50,13 @@ def style_controls(window):
     """Style both ttk fields and the separate Tk combobox popdown list."""
     style = ttk.Style(window)
     style.theme_use("clam")
+    style.configure('Forge.Treeview', background=PANEL, fieldbackground=PANEL, foreground=TEXT,
+                    rowheight=34, borderwidth=0, bordercolor=BORDER, lightcolor=BORDER, darkcolor=BORDER,
+                    relief='flat', font=('Segoe UI',10))
+    style.configure('Forge.Treeview.Heading', background=BORDER, foreground=TEXT,
+                    relief='flat', padding=8, font=('Segoe UI',10,'bold'))
+    style.map('Forge.Treeview', background=[('selected',GOLD)], foreground=[('selected',BG)])
+    style.map('Forge.Treeview.Heading', background=[('active','#485e32')])
     style.configure("Forge.TCombobox", fieldbackground=PANEL, background=BORDER,
                     foreground=TEXT, arrowcolor=GOLD, bordercolor=BORDER,
                     lightcolor=BORDER, darkcolor=BORDER, padding=9)
@@ -257,7 +264,7 @@ class PagePanel(tk.Frame):
         return widget is self.body or widget is not None and str(widget).startswith(str(self.body)+".")
 
     def _mousewheel(self, event):
-        if (event.widget is not self.viewport and not self._contains(event.widget)) or isinstance(event.widget, (tk.Text, tk.Listbox, ttk.Combobox)):
+        if (event.widget is not self.viewport and not self._contains(event.widget)) or isinstance(event.widget, (tk.Text, tk.Listbox, ttk.Combobox, ttk.Treeview)):
             return
         if self.scroll.winfo_manager():
             self.viewport.yview_scroll(-int(event.delta/120) or (-1 if event.delta>0 else 1), "units")

@@ -189,6 +189,42 @@ ui.main()
         self.app.dismiss_update_result()
         self.assertIsNone(self.app.update_notice)
 
+    def test_release_list_shows_notes_installed_status_and_contextual_actions(self):
+        from dekuforge import __version__
+        self.app.releases = [{'version': 'v9.0.0', 'preview': True, 'notes': '# New release\nTest details', 'installable': True},
+            {'version': 'v0.2.0', 'preview': False, 'notes': 'Stable notes', 'installable': True}]
+        self.app.navigate('updates')
+        self.assertEqual(len(self.app.release_rows), 3)
+        for version, expected, notes in (('v9.0.0','release_action_update','Test details'),
+                                         ('v0.2.0','release_action_downgrade','Stable notes'),
+                                         ('v'+__version__,'release_action_rebuild',self.app.t('release_notes_empty'))):
+            index = next(i for i,row in enumerate(self.app.release_rows) if row['version'] == version)
+            self.app.release_list.selection_set(str(index))
+            self.app.select_release_row()
+            self.assertEqual(self.app.selected_release, version)
+            self.assertEqual(self.app.release_button.cget('text'), self.app.t(expected))
+            self.assertIn(notes, self.app.release_notes.get('1.0','end'))
+        values = self.app.release_list.item(str(index), 'values')
+        self.assertEqual(values[-1], self.app.t('release_current'))
+        with patch.object(self.app, 'install_selected_release') as install, patch.object(self.app, 'rebuild_current_release') as rebuild:
+            self.app.perform_release_action()
+            rebuild.assert_called_once()
+            install.assert_not_called()
+
+    def test_current_release_rebuild_queues_separate_build_identity(self):
+        source = self.folder/'own.nup'
+        source.write_bytes(b'synthetic input')
+        self.app.source = str(source)
+        with patch.object(self.app, 'resume_game_update') as rebuild:
+            self.app.rebuild_current_release()
+            first = json.loads((self.folder/'local/pending-game-update.json').read_text())
+            self.app.rebuild_current_release()
+            second = json.loads((self.folder/'local/pending-game-update.json').read_text())
+        self.assertNotEqual(first['build_fingerprint'], second['build_fingerprint'])
+        self.assertTrue(first['requires_rebuild'])
+        rebuild.assert_called_with(manual=True)
+        self.assertTrue(self.game.is_file())
+
     def test_navigation_and_language_preserve_wizard_and_logs_in_one_window(self):
         self.app.source = str(self.folder / "own.nup")
         self.app.destination = str(self.folder / "new")

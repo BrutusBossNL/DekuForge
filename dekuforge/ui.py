@@ -29,9 +29,10 @@ from .workflow import BuildRequest, Progress, duration, validate_destination, va
 from .theme import button_feedback, NavigationCanvas, NavigationLogo, PagePanel, ScrolledText
 from .mod_ui import ModsUI
 from .mods import ModLibrary
+from .release_ui import ReleaseListUI
 
 
-class Launcher(ModsUI):
+class Launcher(ModsUI, ReleaseListUI):
     def __init__(self, root):
         self.root = root
         root.title("DekuForge")
@@ -403,19 +404,8 @@ class Launcher(ModsUI):
         self.label(card, self.release_status or self.t("not_started"), wraplength=620).pack(anchor="w", pady=12)
         self.button(card, self.t("working" if self.release_busy else "check_now"), self.check_updates,
                     primary=True, state="disabled" if self.release_busy else "normal").pack(anchor="w")
-        self.label(card, self.t("release_choice"), 11).pack(anchor="w", pady=(18, 8))
-        versions = [r["version"] for r in self.releases]
-        value = tk.StringVar(value=self.selected_release or (versions[0] if versions else ""))
-        choice = ttk.Combobox(card, textvariable=value, values=versions, state="readonly" if versions else "disabled",
-                              style="Forge.TCombobox")
-        choice.pack(fill="x")
-        choice.bind("<<ComboboxSelected>>", lambda e: setattr(self, "selected_release", value.get()))
-        self.button(card, self.t("install_release"), self.install_selected_release,
-                    state="normal" if any(r.get("installable") for r in self.releases) and not self.management_busy() else "disabled", pady=5).pack(anchor="w", pady=(10, 0))
+        self.render_release_list(card)
         self.label(self.content, self.t("update_pending"), color=MUTED, wraplength=620).pack(anchor="w")
-        if (ROOT / "local/pending-game-update.json").is_file():
-            self.button(self.content, self.t("rebuild_update"), lambda: self.resume_game_update(manual=True), pady=5).pack(anchor="w")
-        self.button(self.content, self.t("local_versions"), self.open_library).pack(anchor="w", pady=12)
 
     def show_update_result(self):
         if self.update_notice:

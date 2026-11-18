@@ -305,6 +305,15 @@ for _language, _text in {'en': 'Preview release', 'nl': 'Previewversie',
     MESSAGES[_language]['preview_release'] = _text
 
 _UPDATE_RESULTS = {
+    'release_version': ('Version', 'Versie', 'Version', 'Version', 'Version'),
+    'release_channel_column': ('Channel', 'Kanaal', 'Kanal', 'Canal', 'Canal'),
+    'release_status_column': ('Status', 'Status', 'Status', 'Estado', 'Statut'),
+    'release_current': ('Installed', 'Geinstalleerd', 'Installiert', 'Instalada', 'Installee'),
+    'release_notes': ('Release notes', 'Releasenotes', 'Versionshinweise', 'Notas de la version', 'Notes de version'),
+    'release_notes_empty': ('No GitHub release notes are available for this version in the selected channel.', 'Voor deze versie zijn geen GitHub-releasenotes beschikbaar in het gekozen kanaal.', 'Fuer diese Version sind in diesem Kanal keine GitHub-Versionshinweise verfuegbar.', 'No hay notas de GitHub para esta version en el canal seleccionado.', 'Aucune note GitHub disponible pour cette version dans le canal choisi.'),
+    'release_action_update': ('Install update', 'Update installeren', 'Update installieren', 'Instalar actualizacion', 'Installer la mise a jour'),
+    'release_action_downgrade': ('Downgrade', 'Downgraden', 'Aeltere Version installieren', 'Instalar version anterior', 'Installer une version anterieure'),
+    'release_action_rebuild': ('Rebuild for current version', 'Rebuild voor huidige versie', 'Aktuelle Version neu bauen', 'Reconstruir la version actual', 'Reconstruire la version actuelle'),
     'update_installed': ('Launcher update installed: {version}.', 'Launcherupdate geinstalleerd: {version}.', 'Launcher-Update installiert: {version}.', 'Actualizacion instalada: {version}.', 'Mise a jour installee : {version}.'),
     'update_failed_result': ('Update to {version} failed. The previous launcher is retained.', 'Update naar {version} mislukt. De vorige launcher is behouden.', 'Update auf {version} fehlgeschlagen. Der bisherige Launcher bleibt erhalten.', 'Fallo la actualizacion a {version}. Se conserva el lanzador anterior.', 'Echec de la mise a jour vers {version}. Le lanceur precedent est conserve.'),
     'update_report_issue': ('Report this update failure', 'Deze updatefout melden', 'Updatefehler melden', 'Informar de este error', 'Signaler cet echec'),

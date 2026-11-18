@@ -24,6 +24,12 @@ The Windows packaging workflow now requires frozen-updater acceptance before
 uploading its artifacts. Regression tests cover outcome acknowledgment, retry
 results, the form wiring and update-log selection.
 
+Updates now uses a styled, newest-first version list with Installed and
+Preview/Stable indications. GitHub release notes appear alongside the selection.
+The action becomes Install update, Downgrade or Rebuild for current version;
+rebuilding queues a separate managed game build. The build-switch shortcut was
+removed from this page. Installed-build management remains under Build game.
+
 Preview 2 includes all Preview 1 features and fixes below. Stable stays on 0.2.0.
 Updating the application no longer requires an uninstall or setup workaround.
 

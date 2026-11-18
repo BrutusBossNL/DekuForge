@@ -110,14 +110,16 @@ def start_worker(job):
             cwd=job, stdin=subprocess.DEVNULL, stdout=log, stderr=log, close_fds=True, creationflags=flags)
 
 
+def version_key(value):
+    match = re.fullmatch(r"v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?", value)
+    if not match:
+        return None
+    main = tuple(map(int, match.groups()[:3]))
+    suffix = match[4]
+    extra = tuple((0, int(part)) if part.isdigit() else (1, part) for part in (suffix or "").split("."))
+    return (*main, suffix is None, extra)
+
+
 def newer_version(remote, installed):
-    def number(value):
-        match = re.fullmatch(r"v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?", value)
-        if not match:
-            return None
-        main = tuple(map(int, match.groups()[:3]))
-        suffix = match[4]
-        extra = tuple((0, int(part)) if part.isdigit() else (1, part) for part in (suffix or "").split("."))
-        return (*main, suffix is None, extra)
-    a, b = number(remote), number(installed)
+    a, b = version_key(remote), version_key(installed)
     return a is not None and b is not None and a > b
