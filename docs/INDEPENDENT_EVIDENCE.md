@@ -281,5 +281,13 @@ The launcher uses its own official Python-build-standalone 20261110 / CPython
 wheels. Cold bootstrap and cached reuse passed; native `DekuForge.exe` self-test
 passed on that interpreter. The full source suite passed **226 tests with two
 environment skips** using the owned Python, LLVM-MinGW and development ARM64
-oracles. Main remains unchanged. Full launcher-rebuild acceptance is tracked
-separately from the successful direct NUP build and gameplay measurement.
+oracles. Main remains unchanged.
+
+The actual `Launcher.start_build` worker then completed a NUP rebuild using the
+owned interpreter/tools in **1,090.72 seconds**, compiling 2 of 696 files. It
+returned the installed `DekuForgeGame.exe`, with no worker or Tk callback errors.
+The developer test kept its window unmapped; all 14 owned profile files retained
+their pre-build SHA-256 values. The final ordinary-play readiness process
+presented Vulkan frames and exited normally (457.72 seconds for that stage).
+This confirms the connected launcher build route locally; installer, controller,
+audio, long-session and matched-main gates remain separate.
