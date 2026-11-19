@@ -92,6 +92,9 @@ def prepare(source, output):
     for old, new in (
         ('"Controls", "Debug"}', '"Controls", "Cheat Manager"}'),
         ('{TAB_DEBUG, "Debug tools",', '{TAB_DEBUG, "Enable cheats",'),
+        ('"Testing tools: no-clip flight, a free camera, teleport, Link\'s age, the inventory, the clock, heart protection and "\n'
+         '     "movement speed. Off puts flight, the free camera and heart protection away and Link back to his own speed."',
+         '"Turns the cheats below on or off."'),
         ('{TAB_DEBUG, "Movement speed",', '{TAB_DEBUG, "Sprint speed",'),
         ('How fast Link walks, runs and swims, as a multiple of his own speed. Choose with Left or Right.',
          'Sets the speed multiplier while sprinting. Hold the left stick click (L3) or the normal sprint button while moving.'),
@@ -110,8 +113,6 @@ def prepare(source, output):
     world_include = f'#include "{(ROOT / "engine_overrides/independent/world_markers.h").as_posix()}"'
     menu = '\n'.join((sprint_include, resource_include, projectile_include, world_include, menu))
     menu = _replace(menu, 'namespace mkwvk {', aura_include + '\nnamespace mkwvk {')
-    menu = _replace(menu, 'if (rows[tab_row_to_global(TAB_DEBUG, k)].cheat == debug_tools_order[t]) out[n++] = k;',
-                    'if (debug_tools_order[t] != 0 && rows[tab_row_to_global(TAB_DEBUG, k)].cheat == debug_tools_order[t]) out[n++] = k;')
     menu = _replace(menu, '    return cheats_on() || v < 0 ? v : 0;', '    return 0;')
     menu = _replace(menu, 'int menu_heart_protection() {\n    const int v = protect_hearts.load(std::memory_order_relaxed);',
                     'int menu_heart_protection() {')
@@ -160,11 +161,6 @@ const char* tx_bottle_content(int v) {
         "Blue fire", "Fish", "Letter", "Big Poe", "Poe", "Bugs", "Fairy", "Milk", "Half milk"};
     return v >= 0 && v < DF_BOTTLE_TYPES ? names[v] : "Locked";
 }
-static bool df_resource_row(const int* value) {
-    if (value == &df_air_jump) return true;
-    for (int& resource : df_resources) if (value == &resource) return true;
-    return false;
-}
 const char* tx_l3_sprint(int v) { return v ? "Click to toggle" : "Hold L3"; }
 const char* tx_auto_run(int v)''')
     menu = _replace(menu, '    {TAB_CONTROLS, "Auto run",',
@@ -200,23 +196,8 @@ const char* tx_auto_run(int v)''')
     return mask;
 }
 } // namespace mkwvk''')
-    developer_rows = '''    for (int k = 0; k < count; ++k) {
-        const Row& r = rows[tab_row_to_global(TAB_DEBUG, k)];
-        if (r.heading) *dev_head = k;
-        else if (*dev_head >= 0 && r.cheat < 0 && r.value != &opts.debug_tools) out[n++] = k;
-    }
-'''
-    menu = _replace(menu, developer_rows, '''    if (cheats_on())
-        for (int k = 0; k < count; ++k) {
-            const Row& r = rows[tab_row_to_global(TAB_DEBUG, k)];
-            if (r.heading) *dev_head = k;
-            else if (df_resource_row(r.value) || df_bottle_slot(r.value) >= 0 || df_equipment_row(r.value) ||
-                     (df_world_ready() && df_world_row(r.value))) out[n++] = k;
-        }
-''')
     menu = _replace(menu, '    {TAB_DEBUG, "Developer", nullptr, 0, 0, 0, nullptr, nullptr, nullptr, false, true, -1, true},',
-                    '''    {TAB_DEBUG, "Link and resources", nullptr, 0, 0, 0, nullptr, nullptr, nullptr, false, true, -1, true},
-    {TAB_DEBUG, "Unlimited jumps", &df_air_jump, 0, 1, 1, tx_onoff,
+                    '''    {TAB_DEBUG, "Unlimited jumps", &df_air_jump, 0, 1, 1, tx_onoff,
      "Press the jump button again in the air to jump again.", nullptr, false, true},
     {TAB_DEBUG, "Auto-refill hearts", &df_resources[DF_RESOURCE_HEARTS], 0, 1, 1, tx_onoff,
      "Refills existing hearts while Link is alive.", nullptr, false, true},
@@ -254,32 +235,108 @@ const char* tx_auto_run(int v)''')
      "Changes the contents once. The item is used normally and kept by an in-game save.", nullptr, false, true},
     DF_BOTTLE_ROW(1) DF_BOTTLE_ROW(2) DF_BOTTLE_ROW(3) DF_BOTTLE_ROW(4) DF_BOTTLE_ROW(5)
 #undef DF_BOTTLE_ROW''')
-    menu = _replace(menu,
-        '''    for (int i = dev; i < n; ++i) vrow[i] = dev_row + 1 + (i - dev);
-    const int visual_count = n > dev ? dev_row + 1 + (n - dev) : foot;''',
-        '''    int extra_row = dev_row + 1, equipment_head = -1, world_head = -1, bottles_head = -1;
-    for (int i = dev; i < n; ++i) {
-        const int* v = rows[tab_row_to_global(TAB_DEBUG, order[i])].value;
-        if (df_equipment_row(v) && equipment_head < 0) {
-            extra_row++;
-            equipment_head = extra_row++;
-        }
-        if (df_world_row(v) && world_head < 0) {
-            extra_row++;
-            world_head = extra_row++;
-        }
-        if (df_bottle_slot(v) >= 0 && bottles_head < 0) {
-            extra_row++;
-            bottles_head = extra_row++;
-        }
-        vrow[i] = extra_row++;
+    # Share the same ordering between rendering, scrolling and controller navigation.
+    start = menu.index('/// (hookshot) The Debug tab\'s order:')
+    end = menu.index("/// The Debug tab's row after", start)
+    menu = _replace(menu, menu[start:end], '''enum DfCheatGroup { DF_LINK, DF_EQUIPMENT, DF_WORLD, DF_INVENTORY, DF_AMMUNITION, DF_TIMERS, DF_GROUP_COUNT };
+constexpr const char* df_cheat_groups[] = {"Link", "Equipment", "World", "Inventory", "Ammunition", "Timers & minigames"};
+
+int df_cheat_group(const Row& row) {
+    switch (row.cheat) {
+        case 1: case 9: case 11: return DF_LINK;       // flight, age, sprint speed
+        case 2: case 3: case 4: case 7: case 8: return DF_WORLD;  // position, time, camera, travel
+        case 10: return DF_INVENTORY;                // inventory editor
     }
-    const int visual_count = n > dev ? extra_row : foot;''')
-    menu = _replace(menu, '    if (dev_head >= 0 && n > dev) heading(left, right, dev_row, rows[tab_row_to_global(TAB_DEBUG, dev_head)].name);',
-                    '''    if (dev_head >= 0 && n > dev) heading(left, right, dev_row, rows[tab_row_to_global(TAB_DEBUG, dev_head)].name);
-    if (equipment_head >= 0) heading(left, right, equipment_head, "Equipment");
-    if (world_head >= 0) heading(left, right, world_head, "World");
-    if (bottles_head >= 0) heading(left, right, bottles_head, "Bottle contents");''')
+    const int* value = row.value;
+    if (df_equipment_row(value)) return DF_EQUIPMENT;
+    if (df_world_row(value)) return DF_WORLD;
+    if (df_bottle_slot(value) >= 0) return DF_INVENTORY;
+    if (value == &df_air_jump) return DF_LINK;
+    for (int i = 0; i < DF_RESOURCE_OPTIONS; ++i) {
+        if (value != &df_resources[i]) continue;
+        switch (i) {
+            case DF_RESOURCE_HEARTS: case DF_RESOURCE_MAGIC: case DF_RESOURCE_RUPEES: return DF_LINK;
+            case DF_RESOURCE_BEANS: case DF_RESOURCE_SCRUB: return DF_INVENTORY;
+            case DF_RESOURCE_TIMER: case DF_RESOURCE_FISH: return DF_TIMERS;
+            default: return DF_AMMUNITION;
+        }
+    }
+    return -1;
+}
+
+int debug_rows(int* out, int* groups) {
+    const int count = tab_row_count(TAB_DEBUG);
+    int categorized[kRows];
+    int n = 0;
+    for (int k = 0; k < count; ++k) {
+        const Row& row = rows[tab_row_to_global(TAB_DEBUG, k)];
+        categorized[k] = df_cheat_group(row);
+        if (row.value == &opts.debug_tools) {
+            out[n] = k;
+            groups[n++] = -1;
+        }
+    }
+    if (cheats_on())
+        for (int group = 0; group < DF_GROUP_COUNT; ++group)
+            for (int k = 0; k < count; ++k)
+                if (categorized[k] == group) {
+                    out[n] = k;
+                    groups[n++] = group;
+                }
+    return n;
+}
+''')
+    menu = _replace(menu, '''    int order[64], dev = 0, head = -1;
+    const int n = debug_rows(order, &dev, &head);''',
+                    '''    int order[kRows], groups[kRows];
+    const int n = debug_rows(order, groups);''')
+    start = menu.index("/// (hookshot) The Debug tab's rows from top down")
+    end = menu.index('void draw_debug_rows(', start)
+    menu = _replace(menu, menu[start:end], '/// Draw the Cheat Manager groups in the same order used for input.\n')
+    menu = _replace(menu, '''    const float s = c.s, px = 18 * s, pitch = 48 * s, rh = 40 * s, gap = 24 * s;   // (the other tabs' rows: 40 high, 48 apart)
+    const float left = cx0 + 44 * s, right = cx1 - 44 * s, mid = (left + right) * .5f;
+    int order[64], dev = 0, dev_head = -1;
+    const int n = debug_rows(order, &dev, &dev_head);''',
+                    '''    const float s = c.s, px = 18 * s, pitch = 48 * s, rh = 40 * s;
+    const float left = cx0 + 44 * s, right = cx1 - 44 * s;
+    int order[kRows], groups[kRows];
+    const int n = debug_rows(order, groups);''')
+    start = menu.index('    float name_need[2] =')
+    end = menu.index('    int sel_at = 0;', start)
+    menu = _replace(menu, menu[start:end], '''    int vrow[kRows] = {}, head_row[DF_GROUP_COUNT];
+    std::fill_n(head_row, DF_GROUP_COUNT, -1);
+    int visual_count = 0;
+    for (int i = 0; i < n; ++i) {
+        const int group = groups[i];
+        if (group >= 0 && head_row[group] < 0) {
+            ++visual_count;
+            head_row[group] = visual_count++;
+        }
+        vrow[i] = visual_count++;
+    }
+''')
+    start = menu.index("    // (the value cells' widths,")
+    end = menu.index('    auto heading =', start)
+    menu = _replace(menu, menu[start:end], '''    float width = 0, name_width = 0;
+    for (int i = 0; i < n; ++i) {
+        const Row& row = rows[tab_row_to_global(TAB_DEBUG, order[i])];
+        width = std::max(width, need(row, false));
+        name_width = std::max(name_width, ui::size_of(c.f.strong, 18.5f * s, row.name).x + 40 * s);
+    }
+    width = std::min(width, std::max((right - left) * 0.4f, right - left - name_width));
+''')
+    start = menu.index('    for (int g = 0; tools && g < kDebugGroups;')
+    end = menu.index('    for (int i = 0; i < n; ++i) {', start)
+    menu = _replace(menu, menu[start:end], '''    for (int group = 0; group < DF_GROUP_COUNT; ++group)
+        if (head_row[group] >= 0) heading(left, right, head_row[group], df_cheat_groups[group]);
+''')
+    menu = _replace(menu, '''        const bool in_tools = i > 0 && i < dev;
+        const float x0 = two && in_tools && vcol[i] ? mid + gap * .5f : left;
+        const float x1 = !two || !in_tools || vcol[i] ? right : mid - gap * .5f;
+        const bool selected = k == sel;
+        const float width = in_tools ? cell_w[vcol[i]] : std::max(need(r, false), cell_w[two ? 1 : 0]);''',
+                    '''        const float x0 = left, x1 = right;
+        const bool selected = k == sel;''')
     menu = _replace(menu, 'bool row_shown(int i) {\n    const int* v = rows[i].value;',
                     '''bool row_shown(int i) {
     const int* v = rows[i].value;
@@ -501,11 +558,21 @@ static int move_stick_held;''')
             if (!strcmp(l.code, row[0]))
                 for (size_t i = 0; i < sizeof labels / sizeof *labels; ++i)
                     t[lang]->exact.emplace(labels[i], row[i + 1]);
+        static const char* const group_labels[] = {"Equipment", "World", "Inventory", "Ammunition", "Timers & minigames"};
+        static const char* const group_translations[][6] = {
+            {"nl", "Uitrusting", "Wereld", "Inventaris", "Munitie", "Timers en minigames"},
+            {"de", "Ausrüstung", "Welt", "Inventar", "Munition", "Zeitlimits und Minispiele"},
+            {"es", "Equipamiento", "Mundo", "Inventario", "Munición", "Temporizadores y minijuegos"},
+            {"fr", "Équipement", "Monde", "Inventaire", "Munitions", "Chronos et mini-jeux"},
+        };
+        for (const auto& row : group_translations)
+            if (!strcmp(l.code, row[0]))
+                for (size_t i = 0; i < sizeof group_labels / sizeof *group_labels; ++i)
+                    t[lang]->exact.emplace(group_labels[i], row[i + 1]);
         if (!strcmp(l.code, "nl")) {
             static const char* const cheats[][2] = {
                 {"L3 sprint", "Sprinten met L3"}, {"Hold L3", "L3 vasthouden"}, {"Click to toggle", "Klikken om te wisselen"},
-                {"Link and resources", "Link en voorraden"}, {"Unlimited jumps", "Onbeperkt springen"},
-                {"Equipment", "Uitrusting"}, {"Bottle contents", "Flesinhoud"},
+                {"Unlimited jumps", "Onbeperkt springen"},
                 {"Auto-refill hearts", "Hartjes automatisch aanvullen"}, {"Freeze countdown", "Afteltimer stilzetten"},
                 {"Instant fish catch", "Vis direct binnenhalen"},
                 {"Lands the fish immediately after you hook it in the fishing minigame.",
@@ -518,7 +585,7 @@ static int move_stick_held;''')
                 {"Bottle 3", "Fles 3"}, {"Bottle 4", "Fles 4"}, {"Bottle 5", "Fles 5"},
                 {"Spin attack range", "Bereik draai-aanval"}, {"Magic spin charge", "Magische draai-aanval opladen"},
                 {"Bomb arrows", "Bompijlen"}, {"Explosive Deku seeds", "Explosieve Deku-zaden"},
-                {"World", "Wereld"}, {"Gold Skulltulas", "Gouden Skulltula’s"}, {"Heart pieces", "Hartstukjes"},
+                {"Gold Skulltulas", "Gouden Skulltula’s"}, {"Heart pieces", "Hartstukjes"},
                 {"Grottos", "Grotten"}, {"Chests", "Kisten"}, {"Bean plots", "Plantplekken"},
                 {"Great Fairies", "Grote feeën"}, {"Upgrades", "Upgrades"},
             };

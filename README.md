@@ -81,10 +81,12 @@ sprint** offers **Hold L3** or **Click to toggle**. A second click or stopping
 movement ends a toggled sprint. Sprint speed includes the original 2×, 3.5×
 and 5× settings.
 
-The Cheat Manager has separate controls for unlimited jumps, shared countdown
-freeze, heart, wallet, ammunition and magic refills, and each unlocked bottle's contents.
-**Instant fish catch** skips the reeling phase once you hook a fish at the
-fishing pond.
+The Cheat Manager is grouped into **Link**, **Equipment**, **World**,
+**Inventory**, **Ammunition**, and **Timers & minigames**. Link holds sprint,
+jumps, heart, wallet and magic refills. Inventory holds the individual edits
+for unlocked bottles, magic beans and Scrub seeds. Timers & minigames contains
+the shared countdown freeze and **Instant fish catch**, which skips reeling
+once you hook a fish at the fishing pond.
 Bottle edits apply once and can be kept with an in-game save. Equipment
 options cover charged spin range, magic spin charge and bomb arrows. Bomb
 arrows require adult Link's bow. The separate explosive Deku seed option
