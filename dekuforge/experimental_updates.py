@@ -51,7 +51,7 @@ def prepare_build(row, progress, root=ROOT):
     job = root / "local/update-jobs" / uuid.uuid4().hex
     job.mkdir(parents=True)
     source = job / "artifact.zip"
-    download_asset(row["artifact"], source, progress)
+    download_asset(row["artifact"], source, progress, accept="application/vnd.github+json")
     version = row["version"].removeprefix("v")
     filename = f"DekuForge-launcher-{version}-windows.zip"
     package = job / "package.zip"

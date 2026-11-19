@@ -64,8 +64,9 @@ class UpdateTests(unittest.TestCase):
                 artifact.write(inner, f'DekuForge-launcher-{version}-windows.zip')
             row = {"version": "v" + version, "commit": commit, "artifact": {}}
             with patch('dekuforge.experimental_updates.download_asset',
-                       side_effect=lambda _asset, path, _progress: shutil.copyfile(outer, path)):
+                       side_effect=lambda _asset, path, _progress, **kwargs: shutil.copyfile(outer, path)) as download:
                 job = prepare_build(row, lambda *_: None, root)
+                self.assertEqual(download.call_args.kwargs['accept'], 'application/vnd.github+json')
                 self.assertEqual(json.loads((job/'job.json').read_text())['release'], row['version'])
                 with self.assertRaisesRegex(ValueError, 'selected commit'):
                     prepare_build(dict(row, commit='b' * 40), lambda *_: None, root)

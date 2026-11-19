@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from tools.check_source import forbidden
 
-from dekuforge.update_package import SOURCE_DIRS as DIRECTORIES, ROOT_FILES, allowed, validate_package
+from dekuforge.update_package import SOURCE_DIRS as DIRECTORIES, ROOT_FILES, SOURCE_SUFFIXES, allowed, validate_package
 
 
 def included(path):
@@ -47,6 +47,8 @@ def package(root=ROOT):
         if path.is_symlink() or path.resolve() != path.absolute():
             raise ValueError("Linked package source refused: " + relative.as_posix())
         data = path.read_bytes()
+        if path.suffix in SOURCE_SUFFIXES:
+            data = data.replace(b"\r\n", b"\n")
         if forbidden(relative.as_posix(), data[:8192]):
             raise ValueError("Forbidden launcher package content: " + relative.as_posix())
         files[relative.as_posix()] = data

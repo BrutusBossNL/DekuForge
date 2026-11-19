@@ -47,7 +47,7 @@ def github_request(url, accept="application/vnd.github+json"):
     return build_opener(AssetRedirect()).open(Request(url, headers=headers), timeout=60)
 
 
-def download_asset(asset, target, progress=lambda done, total: None):
+def download_asset(asset, target, progress=lambda done, total: None, *, accept="application/octet-stream"):
     digest = asset.get("digest", "")
     size = asset.get("size", 0)
     if not re.fullmatch(r"sha256:[0-9a-f]{64}", digest) or not isinstance(size, int) or not 0 < size <= MAX_PACKAGE:
@@ -59,7 +59,7 @@ def download_asset(asset, target, progress=lambda done, total: None):
                 return
     partial = target.with_suffix(target.suffix + ".part")
     hasher = hashlib.sha256(); count = 0
-    with github_request(asset["url"], "application/octet-stream") as response, partial.open("wb") as output:
+    with github_request(asset["url"], accept) as response, partial.open("wb") as output:
         while block := response.read(1024**2):
             count += len(block)
             if count > size:
