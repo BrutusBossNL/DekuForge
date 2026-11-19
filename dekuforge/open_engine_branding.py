@@ -98,13 +98,155 @@ def prepare(source, output):
         ('"Nintendo (Def)", "Xbox / PC", "Swap Face", "Custom"', '"Nintendo", "PlayStation / Xbox", "Swap Face", "Custom"'),
     ):
         menu = _replace(menu, old, new)
+    sprint_header = (ROOT / 'engine_overrides/independent/sprint.h').as_posix()
+    sprint_include = f'#include "{sprint_header}"'
+    resource_include = f'#include "{(ROOT / "engine_overrides/independent/resources.h").as_posix()}"'
+    projectile_include = f'#include "{(ROOT / "engine_overrides/independent/projectiles.h").as_posix()}"'
+    menu = '\n'.join((sprint_include, resource_include, projectile_include, menu))
+    menu = _replace(menu, 'const char* tx_auto_run(int v)',
+                    '''static int df_sprint_mode;
+static int df_resources[DF_RESOURCE_OPTIONS];
+static int df_spin_range, df_spin_charge;
+static int df_bomb_arrows, df_explosive_seeds;
+static bool df_equipment_row(const int* value) {
+    return value == &df_spin_range || value == &df_spin_charge ||
+           value == &df_bomb_arrows || value == &df_explosive_seeds;
+}
+const char* tx_spin_range(int v) {
+    static const char* const labels[] = {"Normal", "1.5x", "2x", "2.5x"};
+    return labels[std::clamp(v, 0, 3)];
+}
+const char* tx_spin_charge(int v) { return v ? "Instant" : "Normal"; }
+static int df_bottles[DF_BOTTLES] = {-1, -1, -1, -1, -1};
+static int df_bottle_edit[DF_BOTTLES];
+static int df_bottle_slot(const int* value) {
+    for (int i = 0; i < DF_BOTTLES; ++i) if (value == &df_bottles[i]) return i;
+    return -1;
+}
+const char* tx_bottle_content(int v) {
+    static const char* const names[DF_BOTTLE_TYPES] = {"Empty", "Red potion", "Green potion", "Blue potion",
+        "Blue fire", "Fish", "Letter", "Big Poe", "Poe", "Bugs", "Fairy", "Milk", "Half milk"};
+    return v >= 0 && v < DF_BOTTLE_TYPES ? names[v] : "Locked";
+}
+static bool df_resource_row(const int* value) {
+    for (int& resource : df_resources) if (value == &resource) return true;
+    return false;
+}
+const char* tx_l3_sprint(int v) { return v ? "Click to toggle" : "Hold L3"; }
+const char* tx_auto_run(int v)''')
+    menu = _replace(menu, '    {TAB_CONTROLS, "Auto run",',
+                    '''    {TAB_CONTROLS, "L3 sprint", &df_sprint_mode, 0, 1, 1, tx_l3_sprint,
+     "Hold L3 to sprint, or click to toggle. In toggle mode, stopping movement cancels the sprint.", nullptr, false, true},
+    {TAB_CONTROLS, "Auto run",''')
+    menu = _replace(menu, '} // namespace mkwvk',
+                    '''int menu_dekuforge_option(int id) {
+    std::lock_guard lk(menu_mu);
+    if (id == DF_OPT_L3_SPRINT) return df_sprint_mode;
+    if (id == DF_OPT_SPIN) return cheats_on() ? df_spin_range | (df_spin_charge ? DF_SPIN_INSTANT : 0) : 0;
+    if (id == DF_OPT_EXPLOSIVE_SHOTS) return cheats_on() ?
+        (df_bomb_arrows ? DF_BOMB_ARROW : 0) | (df_explosive_seeds ? DF_EXPLOSIVE_SEED : 0) : 0;
+    if (id == DF_OPT_BOTTLE_EDITS) {
+        const bool enabled = cheats_on();
+        int packed = 0;
+        for (int i = 0; i < DF_BOTTLES; ++i) {
+            if (enabled) packed |= df_bottle_edit[i] << (i * 4);
+            df_bottle_edit[i] = 0;
+        }
+        return enabled ? packed : -1;
+    }
+    int mask = 0;
+    if (cheats_on())
+        for (int i = 0; i < DF_RESOURCE_OPTIONS; ++i) if (df_resources[i]) mask |= 1 << i;
+    return mask;
+}
+} // namespace mkwvk''')
     developer_rows = '''    for (int k = 0; k < count; ++k) {
         const Row& r = rows[tab_row_to_global(TAB_DEBUG, k)];
         if (r.heading) *dev_head = k;
         else if (*dev_head >= 0 && r.cheat < 0 && r.value != &opts.debug_tools) out[n++] = k;
     }
 '''
-    menu = _replace(menu, developer_rows, '')
+    menu = _replace(menu, developer_rows, '''    if (cheats_on())
+        for (int k = 0; k < count; ++k) {
+            const Row& r = rows[tab_row_to_global(TAB_DEBUG, k)];
+            if (r.heading) *dev_head = k;
+            else if (df_resource_row(r.value) || df_bottle_slot(r.value) >= 0 || df_equipment_row(r.value)) out[n++] = k;
+        }
+''')
+    menu = _replace(menu, '    {TAB_DEBUG, "Developer", nullptr, 0, 0, 0, nullptr, nullptr, nullptr, false, true, -1, true},',
+                    '''    {TAB_DEBUG, "Resources", nullptr, 0, 0, 0, nullptr, nullptr, nullptr, false, true, -1, true},
+    {TAB_DEBUG, "Auto-refill hearts", &df_resources[DF_RESOURCE_HEARTS], 0, 1, 1, tx_onoff,
+     "Refills existing hearts while Link is alive.", nullptr, false, true},
+    {TAB_DEBUG, "Freeze countdown", &df_resources[DF_RESOURCE_TIMER], 0, 1, 1, tx_onoff,
+     "Freezes the shared event and minigame countdown while it is running.", nullptr, false, true},
+    {TAB_DEBUG, "Refill magic", &df_resources[DF_RESOURCE_MAGIC], 0, 1, 1, tx_onoff,
+     "Refills the unlocked magic meter up to its current capacity.", nullptr, false, true},
+#define DF_RESOURCE_ROW(id, label, ...) \\
+    {TAB_DEBUG, label, &df_resources[DF_RESOURCE_##id], 0, 1, 1, tx_onoff, \\
+     "Refills the resource up to its current limit once available.", nullptr, false, true},
+    DF_RESOURCE_ROWS(DF_RESOURCE_ROW)
+#undef DF_RESOURCE_ROW
+    {TAB_DEBUG, "Spin attack range", &df_spin_range, 0, 3, 1, tx_spin_range,
+     "Scales the charged spin attack for the equipped sword.", nullptr, false, true},
+    {TAB_DEBUG, "Magic spin charge", &df_spin_charge, 0, 1, 1, tx_spin_charge,
+     "Charges the magic spin instantly once the Great Fairy has unlocked it.", nullptr, false, true},
+    {TAB_DEBUG, "Bomb arrows", &df_bomb_arrows, 0, 1, 1, tx_onoff,
+     "Adult Link's normal arrows can consume a bomb to explode on impact.", nullptr, false, true},
+    {TAB_DEBUG, "Explosive Deku seeds", &df_explosive_seeds, 0, 1, 1, tx_onoff,
+     "Young Link's slingshot seeds can consume a bomb to explode on impact.", nullptr, false, true},
+#define DF_BOTTLE_ROW(n) \\
+    {TAB_DEBUG, "Bottle " #n, &df_bottles[n - 1], 0, DF_BOTTLE_TYPES - 1, 1, tx_bottle_content, \\
+     "Changes the contents once. The item is used normally and kept by an in-game save.", nullptr, false, true},
+    DF_BOTTLE_ROW(1) DF_BOTTLE_ROW(2) DF_BOTTLE_ROW(3) DF_BOTTLE_ROW(4) DF_BOTTLE_ROW(5)
+#undef DF_BOTTLE_ROW''')
+    menu = _replace(menu,
+        '''    for (int i = dev; i < n; ++i) vrow[i] = dev_row + 1 + (i - dev);
+    const int visual_count = n > dev ? dev_row + 1 + (n - dev) : foot;''',
+        '''    int extra_row = dev_row + 1, equipment_head = -1, bottles_head = -1;
+    for (int i = dev; i < n; ++i) {
+        const int* v = rows[tab_row_to_global(TAB_DEBUG, order[i])].value;
+        if (df_equipment_row(v) && equipment_head < 0) {
+            extra_row++;
+            equipment_head = extra_row++;
+        }
+        if (df_bottle_slot(v) >= 0 && bottles_head < 0) {
+            extra_row++;
+            bottles_head = extra_row++;
+        }
+        vrow[i] = extra_row++;
+    }
+    const int visual_count = n > dev ? extra_row : foot;''')
+    menu = _replace(menu, '    if (dev_head >= 0 && n > dev) heading(left, right, dev_row, rows[tab_row_to_global(TAB_DEBUG, dev_head)].name);',
+                    '''    if (dev_head >= 0 && n > dev) heading(left, right, dev_row, rows[tab_row_to_global(TAB_DEBUG, dev_head)].name);
+    if (equipment_head >= 0) heading(left, right, equipment_head, "Equipment");
+    if (bottles_head >= 0) heading(left, right, bottles_head, "Bottle contents");''')
+    menu = _replace(menu, 'bool row_shown(int i) {\n    const int* v = rows[i].value;',
+                    '''bool row_shown(int i) {
+    const int* v = rows[i].value;
+    if (const int slot = df_bottle_slot(v); slot >= 0) return cheats_on() && df_bottles[slot] >= 0;''')
+    menu = _replace(menu, 'void set_row(Row& r, int v, int dir, bool keep = true) {',
+                    '''void set_row(Row& r, int v, int dir, bool keep = true) {
+    if (const int slot = df_bottle_slot(r.value); slot >= 0) {
+        if (cheats_on() && df_bottles[slot] >= 0) {
+            df_bottles[slot] = v < r.lo ? r.hi : v > r.hi ? r.lo : v;
+            df_bottle_edit[slot] = df_bottles[slot] + 1;
+            menu_refresh = true;
+        }
+        return;
+    }''')
+    menu = _replace(menu, 'void menu_option_set(int id, int value) {',
+                    '''void menu_option_set(int id, int value) {
+    if (id >= DF_OPT_BOTTLE_REPORT && id < DF_OPT_BOTTLE_REPORT + DF_BOTTLES) {
+        std::lock_guard lk(menu_mu);
+        const int slot = id - DF_OPT_BOTTLE_REPORT;
+        if (!df_bottle_edit[slot]) df_bottles[slot] = value;
+        menu_refresh = true;
+        return;
+    }''')
+    menu = _replace(menu, 'else if (r.value && r.value != &opts.game_lang) {',
+                    'else if (r.value && r.value != &opts.game_lang && df_bottle_slot(r.value) < 0) {')
+    menu = _replace(menu, 'if (!r.value || r.value == &opts.game_lang || strcmp(line, ini_key(r))) continue;',
+                    'if (!r.value || r.value == &opts.game_lang || df_bottle_slot(r.value) >= 0 || strcmp(line, ini_key(r))) continue;')
     menu = _replace(menu, '''        c.d->AddRectFilled(ImVec2(cx, ty - 13 * s), ImVec2(cx + cw, ty + 13 * s), hover ? ui::kTabInset : ui::kBannerInk, 3 * s);
         ui::text_mid_centre(c, c.f.strong, 14 * s, cx + cw * 0.5f, ty, ui::kInk, keys[i]);''',
                     '''        const ImVec2 a(cx, ty - 13 * s), b(cx + cw, ty + 13 * s);
@@ -164,6 +306,7 @@ def prepare(source, output):
     display = _replace(display, '#include "hos.h"', '#include "hos.h"\n#undef HOS_GAME_TITLE\n#define HOS_GAME_TITLE "DekuForge"')
     files['display.c'] = display
     hid = (source / 'host/nn_hid.c').read_text(encoding='utf-8')
+    hid = sprint_include + '\n' + hid
     hid = _replace(hid, 'static int move_stick_held;',
                    '''static int sprint_held;
 int hos_dekuforge_sprint_held(void) { return __atomic_load_n(&sprint_held, __ATOMIC_RELAXED); }
@@ -173,7 +316,10 @@ static int move_stick_held;''')
         const int sprint_allowed = !menu_open && !free_camera && !flying && hos_oc_wait != 1 &&
                                    !(buttons & ((1ULL << B_PLUS) | (1ULL << B_MINUS))) &&
                                    (abs(stick[0]) > 4096 || abs(stick[1]) > 4096) && hos_oot_player_free();
-        if (sprint_allowed && (buttons & (1ULL << B_LS))) {
+        static DfSprint sprint;
+        const int l3 = !!(buttons & (1ULL << B_LS));
+        const int l3_active = df_sprint(&sprint, rx_option(DF_OPT_L3_SPRINT, 0), l3, sprint_allowed);
+        if (l3_active) {
             static int told;
             if (!__atomic_exchange_n(&told, 1, __ATOMIC_RELAXED)) hos_log("hid: left-stick click activated sprint");
             buttons &= ~(1ULL << B_LS);
@@ -182,7 +328,22 @@ static int move_stick_held;''')
         __atomic_store_n(&sprint_held, sprint_allowed && (buttons & (1ULL << B_A)), __ATOMIC_RELAXED);
         __atomic_store_n(&flight_input, flight, __ATOMIC_RELAXED);''')
     files['nn_hid.c'] = hid
+    replay = (source / 'gpu/vk/vk_replay.cpp').read_text(encoding='utf-8')
+    replay = '\n'.join((sprint_include, resource_include, projectile_include, replay))
+    replay = _replace(replay, '        if (id == HOS_OPT_AUTO_RUN)',
+                      '''        extern int menu_dekuforge_option(int);
+        if (id == DF_OPT_L3_SPRINT || id == DF_OPT_RESOURCE_MASK || id == DF_OPT_BOTTLE_EDITS ||
+            id == DF_OPT_SPIN || id == DF_OPT_EXPLOSIVE_SHOTS)
+            return menu_dekuforge_option(id);
+        if (id == HOS_OPT_AUTO_RUN)''')
+    files['vk_replay.cpp'] = replay
     host = (source / 'host/hos_main.c').read_text(encoding='utf-8')
+    host = _replace(host, 'static void oot_update_player_cheats(Ctx *c,',
+                    '\n'.join(('#define DF_RESOURCE_HOST', resource_include, '#define DF_PROJECTILE_HOST',
+                               projectile_include, 'static void oot_update_player_cheats(Ctx *c,')))
+    host = _replace(host, '    oot_player_speed(c, components);',
+                    '''    oot_player_speed(c, components);
+    df_refill_resources(c, actor, rx_option(DF_OPT_RESOURCE_MASK, 0), rx_option(DF_OPT_BOTTLE_EDITS, -1));''')
     host = _replace(host, '''    int hos_move_stick_held(void);   /* host/nn_hid.c */
     if (percent <= 100 || percent > 400 || !hos_move_stick_held()) return;''',
                     '''    int hos_dekuforge_sprint_held(void);   /* host/nn_hid.c */
@@ -268,7 +429,23 @@ static int move_stick_held;''')
         for (const auto& row : translations)
             if (!strcmp(l.code, row[0]))
                 for (size_t i = 0; i < sizeof labels / sizeof *labels; ++i)
-                    t[lang]->exact.emplace(labels[i], row[i + 1]);''')
+                    t[lang]->exact.emplace(labels[i], row[i + 1]);
+        if (!strcmp(l.code, "nl")) {
+            static const char* const cheats[][2] = {
+                {"L3 sprint", "Sprinten met L3"}, {"Hold L3", "L3 vasthouden"}, {"Click to toggle", "Klikken om te wisselen"},
+                {"Resources", "Voorraden"}, {"Equipment", "Uitrusting"}, {"Bottle contents", "Flesinhoud"},
+                {"Auto-refill hearts", "Hartjes automatisch aanvullen"}, {"Freeze countdown", "Afteltimer stilzetten"},
+                {"Refill magic", "Magie aanvullen"}, {"Refill rupees", "Roepies aanvullen"}, {"Refill bombs", "Bommen aanvullen"},
+                {"Refill arrows", "Pijlen aanvullen"}, {"Refill bombchus", "Bombchu's aanvullen"},
+                {"Refill Deku nuts", "Deku-noten aanvullen"}, {"Refill Deku seeds", "Deku-zaden aanvullen"},
+                {"Refill Deku sticks", "Deku-stokken aanvullen"}, {"Refill magic beans", "Toverbonen aanvullen"},
+                {"Refill Scrub seeds", "Scrub-zaden aanvullen"}, {"Bottle 1", "Fles 1"}, {"Bottle 2", "Fles 2"},
+                {"Bottle 3", "Fles 3"}, {"Bottle 4", "Fles 4"}, {"Bottle 5", "Fles 5"},
+                {"Spin attack range", "Bereik draai-aanval"}, {"Magic spin charge", "Magische draai-aanval opladen"},
+                {"Bomb arrows", "Bompijlen"}, {"Explosive Deku seeds", "Explosieve Deku-zaden"},
+            };
+            for (const auto& row : cheats) t[lang]->exact.emplace(row[0], row[1]);
+        }''')
     files['vk_menu_i18n.cpp'] = language
     draw = (source / 'gpu/vk/vk_draw.cpp').read_text(encoding='utf-8')
     draw = _replace(draw,
@@ -296,7 +473,8 @@ static int move_stick_held;''')
     origins = {'vk_ui.h': 'gpu/vk/vk_ui.h', 'vk_menu.cpp': 'gpu/vk/vk_menu.cpp',
                'display.c': 'host/display.c', 'vk_draw.cpp': 'gpu/vk/vk_draw.cpp',
                'nn_hid.c': 'host/nn_hid.c', 'hos_main.c': 'host/hos_main.c', 'pad_sdl.c': 'host/pad_sdl.c',
-               'nn_applet.c': 'host/nn_applet.c', 'vk_menu_i18n.cpp': 'gpu/vk/vk_menu_i18n.cpp'}
+               'nn_applet.c': 'host/nn_applet.c', 'vk_menu_i18n.cpp': 'gpu/vk/vk_menu_i18n.cpp',
+               'vk_replay.cpp': 'gpu/vk/vk_replay.cpp'}
     for name, text in files.items():
         path = output / name
         if path.exists() and (path.is_symlink() or getattr(path, 'is_junction', lambda: False)()):
@@ -333,6 +511,9 @@ def configure(module, source, work):
             # Quoted provider includes formerly resolved beside the original file.
             flags = [*flags, '-I' + str(Path(src).parent)]
             deps += Path(mapping[str(source / 'gpu/vk/vk_ui.h')]).read_bytes()
+            deps += (ROOT / 'engine_overrides/independent/sprint.h').read_bytes()
+            deps += (ROOT / 'engine_overrides/independent/resources.h').read_bytes()
+            deps += (ROOT / 'engine_overrides/independent/projectiles.h').read_bytes()
             src = replacement
         return cc, src, obj, flags, deps
 

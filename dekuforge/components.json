@@ -8,13 +8,13 @@
     "updates": false
   },
   "engine": {
-    "version": "0.1.0-independent.8",
+    "version": "0.1.0-independent.9",
     "backend": "independent",
     "reference_version": "main: 0.11.0 / NX2navi 0.10.1",
     "playable": false
   },
   "buildkit": {
-    "version": "0.3.0-independent.11"
+    "version": "0.3.0-independent.12"
   },
   "python": {
     "version": "3.14.10",

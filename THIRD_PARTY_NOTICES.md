@@ -191,6 +191,11 @@ and [archspec 0.2.7](https://pypi.org/project/archspec/0.2.7/) (Apache-2.0 OR MI
 Their wheel metadata and license files remain installed with those tools.
 Controller textures and fonts are generated locally from the player's copy.
 
+The independent cheat headers and checked lift hooks use the project-owned
+gameplay extensions identified by `engine_overrides/dekuforge_0110/LICENSE-CUSTOM-ADDITIONS`
+as a behavioral and version-specific reference. The independent integration
+uses Hookshot's GPL host APIs and does not apply the composite legacy patch.
+
 The independent Windows movie path builds VideoLAN dav1d 1.5.4 from the official
 source mirror, under BSD-2-Clause. `tools/build_av1_decoder.py` pins archive and
 source-tree hashes and retains COPYING beside the local library. Meson 1.9.1

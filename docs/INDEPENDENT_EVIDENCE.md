@@ -337,3 +337,20 @@ Physical button presses across the other controller families remain untested.
 Separate overlay captures showed the active-tab accent, the Cheat Manager,
 and the frame-time graph on the green and gold performance panel. These
 headless captures are for UI inspection only.
+
+## 2026-11-19: configurable sprint and Cheat Manager
+
+Engine `0.1.0-independent.9` rebuilt the locally lifted 1.1.1 program with
+validated guest hooks. On Death Mountain Trail, a normal launch on the warmed
+RTX 2080 reached the menu after 31.40 seconds and the adult world after 53.45
+seconds. The adult gameplay interval produced 1,936 frames in 42.615 seconds
+(45.43 FPS). The native log recorded two normal arrow impacts followed by
+two bomb detonations, plus the instant magic charge and spin range multiplier.
+The input log recorded an L3 sprint activation with click-to-toggle selected.
+
+In a separate child-world run, bottle 1 reported Fairy and bottle 2 reported
+Milk after independent edits. Both runs exited normally and the original
+save hashes matched. The native fixture covers individual unlocked bottles,
+hold and toggle sprint, and freezing and resuming a running countdown. The
+countdown still needs gameplay acceptance in an actual minigame. World-map
+markers, the black arrow aura and full Cheat Manager parity remain open.

@@ -39,6 +39,16 @@ def main():
         return module.main()
     if script.name == 'make_game.py':
         module = importlib.import_module('make_game')
+        import hashlib
+        from dekuforge import open_engine_cheat_lift
+        lift_key = module.lift_key
+        hook_source = Path(open_engine_cheat_lift.__file__).read_bytes()
+
+        def key_with_hooks(*args, **kwargs):
+            return hashlib.sha1(lift_key(*args, **kwargs).encode() + hook_source,
+                                usedforsecurity=False).hexdigest()
+
+        module.lift_key = key_with_hooks
         module.LANGUAGES = [*module.LANGUAGES, ('system', 'System language')]
         build_language = module.build_language
 
@@ -66,6 +76,17 @@ def main():
 
         module.clear_folder = clear_owned
         return module.main()
+    if script.name == 'lift.py':
+        importlib.import_module('kit')
+        fov = importlib.import_module('oot_fov')
+        from dekuforge.open_engine_cheat_lift import install
+        original_install = fov.install
+
+        def install_with_cheats(lifter, image, build_id):
+            install(lifter, image, build_id)
+            return original_install(lifter, image, build_id)
+
+        fov.install = install_with_cheats
     runpy.run_path(str(script), run_name='__main__')
     return 0
 

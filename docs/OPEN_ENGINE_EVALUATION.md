@@ -96,6 +96,10 @@ Controller prompt generation requires the locked Windows build wheels in
 packs before selecting the new executable. Auto prompts follow input from the
 most recently used SDL controller. Controls keeps separate prompt and layout
 choices so a manually remapped pad can keep its own button icons.
+The build fingerprints the independent gameplay hook source as part of the CPU
+translation key. On 1.1.1, every expected guest instruction must match before
+any magic or spin hook is attached. The Cheat Manager's one-shot bottle editor
+validates each unlocked slot and the game's list of allowed contents.
 Asset mods use immutable verified snapshots so the first enabled provider wins,
 matching the launcher order; disabled mods are excluded. No base game file is
 overwritten. Code-patch/cheat mods remain blocked. The provider's Windows path
