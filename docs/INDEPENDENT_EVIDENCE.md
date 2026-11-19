@@ -383,3 +383,17 @@ bomb detonation. The stock and equipment gates use the same native projectile
 path. The control bridge's game-image captures precede the presentation overlay,
 so they do not independently show its opacity. Git source tests checked the
 archive offsets, native hook words, local asset selection and mod priority.
+
+## Instant fish catch
+
+The 1.1.1 bass and loach actor data both reference the same immediate-landing
+condition in their underwater battle sequence. The independent hook changes
+only the evaluated result of that exact action-sequence condition while the
+setting is enabled. The original bite, hook, and catch handling remain in the
+game. The native fixture checks the disabled toggle, the exact resource path,
+and an absent condition reference.
+
+The native Windows build linked successfully and reached gameplay on an
+RTX 2080. Its control bridge read the fishing setting as off by default and
+accepted both off and on while gameplay was active. The copied test profile
+left the baseline save hashes unchanged.

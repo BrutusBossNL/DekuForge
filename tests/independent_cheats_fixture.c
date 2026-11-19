@@ -20,10 +20,12 @@ static void recomp_store32(Ctx *c, uint64_t a, uint32_t v) { (void)c; assert(hos
 static void wr64(uint64_t a,uint64_t v) { assert(hos_mem_region(a,8)); memcpy(guest+a,&v,8); }
 static int64_t hos_now_ns(void) { return 1000000000LL; }
 static void hos_log(const char *message, ...) { (void)message; }
-int rx_option(int id, int otherwise) { (void)id; return otherwise; }
+static int resource_mask;
+int rx_option(int id, int otherwise);
 void rx_option_set(int id,int value) { (void)id; (void)value; }
 #define DF_RESOURCE_HOST
 #include "engine_overrides/independent/resources.h"
+int rx_option(int id, int otherwise) { return id == DF_OPT_RESOURCE_MASK ? resource_mask : otherwise; }
 
 static uint64_t alloc(size_t bytes) { uint64_t a=next;next=(next+bytes+7)&~7u;assert(next<sizeof guest);return a; }
 static void table(uint64_t mgr,int offs,uint32_t count,uint32_t stride) {
@@ -46,7 +48,35 @@ static uint64_t entry(uint64_t mgr,int offs,uint32_t hash,uint32_t index,uint32_
 static void value_f(uint64_t a,float f) { memcpy(guest+a,&f,4); }
 static float read_f(uint64_t a) { float f;memcpy(&f,guest+a,4);return f; }
 
+static void fishing_condition(void) {
+    static const char ref[] =
+        "Work/BSA/ConditionContainer/Animal_Fish_Bass_IfImmediateGet.game__bsa__ConditionContainer.gyml";
+    const uint64_t seq = alloc(0x18), config = alloc(0xbc), path = alloc(sizeof ref);
+    Ctx c = {0};
+    c.x[22] = seq;
+    wr64(seq + 0x10, config);
+    wr64(config + 0x90, path);
+    memcpy(guest + path, ref, sizeof ref);
+    recomp_store8(&c, config + 0xbb, 1);
+    resource_mask = 1 << DF_RESOURCE_TIMER;
+    df_guest_fishing_condition(&c);
+    assert(c.x[27] == 0);
+    resource_mask = 1 << DF_RESOURCE_FISH;
+    df_guest_fishing_condition(&c);
+    assert(c.x[27] == 1);
+    c.x[27] = 0;
+    recomp_store8(&c, path + sizeof ref - 1, 'X');
+    df_guest_fishing_condition(&c);
+    assert(c.x[27] == 0);
+    recomp_store8(&c, path + sizeof ref - 1, 0);
+    recomp_store8(&c, config + 0xbb, 0);
+    df_guest_fishing_condition(&c);
+    assert(c.x[27] == 0);
+    resource_mask = 0;
+}
+
 int main(void) {
+    fishing_condition();
     DfSprint s={0};
     assert(!df_sprint(&s,0,0,1));
     assert(df_sprint(&s,0,1,1));

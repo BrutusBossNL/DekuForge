@@ -222,6 +222,8 @@ const char* tx_auto_run(int v)''')
      "Refills existing hearts while Link is alive.", nullptr, false, true},
     {TAB_DEBUG, "Freeze countdown", &df_resources[DF_RESOURCE_TIMER], 0, 1, 1, tx_onoff,
      "Freezes the shared event and minigame countdown while it is running.", nullptr, false, true},
+    {TAB_DEBUG, "Instant fish catch", &df_resources[DF_RESOURCE_FISH], 0, 1, 1, tx_onoff,
+     "Lands the fish immediately after you hook it in the fishing minigame.", nullptr, false, true},
     {TAB_DEBUG, "Refill magic", &df_resources[DF_RESOURCE_MAGIC], 0, 1, 1, tx_onoff,
      "Refills the unlocked magic meter up to its current capacity.", nullptr, false, true},
 #define DF_RESOURCE_ROW(id, label, ...) \\
@@ -505,6 +507,9 @@ static int move_stick_held;''')
                 {"Link and resources", "Link en voorraden"}, {"Unlimited jumps", "Onbeperkt springen"},
                 {"Equipment", "Uitrusting"}, {"Bottle contents", "Flesinhoud"},
                 {"Auto-refill hearts", "Hartjes automatisch aanvullen"}, {"Freeze countdown", "Afteltimer stilzetten"},
+                {"Instant fish catch", "Vis direct binnenhalen"},
+                {"Lands the fish immediately after you hook it in the fishing minigame.",
+                 "Haalt de vis direct binnen zodra je hem aan de haak slaat."},
                 {"Refill magic", "Magie aanvullen"}, {"Refill rupees", "Roepies aanvullen"}, {"Refill bombs", "Bommen aanvullen"},
                 {"Refill arrows", "Pijlen aanvullen"}, {"Refill bombchus", "Bombchu's aanvullen"},
                 {"Refill Deku nuts", "Deku-noten aanvullen"}, {"Refill Deku seeds", "Deku-zaden aanvullen"},

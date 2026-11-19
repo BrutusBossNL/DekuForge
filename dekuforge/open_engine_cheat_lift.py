@@ -10,6 +10,7 @@ HOOKS = (
     (0x82ecbc30, 0xd503237f, 'df_guest_projectile'),
     (0x82ecb934, 0xb9002693, 'df_guest_seed_transition'),
     (0x80706be0, 0xd503237f, 'df_guest_projectile_frame'),
+    (0x80e1ac40, 0x4a08033b, 'df_guest_fishing_condition'),
     (0x802290a8, 0x39517268, 'df_guest_world_master'),
     (0x802291a4, 0xb94017e9, 'df_guest_world_visibility'),
     (0x80229348, 0x1e290d40, 'df_guest_world_style'),

@@ -15,7 +15,7 @@
 
 #define DF_RESOURCE_ENUM(id, label, ...) DF_RESOURCE_##id,
 enum { DF_RESOURCE_ROWS(DF_RESOURCE_ENUM) DF_RESOURCE_COUNT, DF_RESOURCE_HEARTS = DF_RESOURCE_COUNT, DF_RESOURCE_TIMER,
-       DF_RESOURCE_MAGIC, DF_RESOURCE_OPTIONS };
+       DF_RESOURCE_MAGIC, DF_RESOURCE_FISH, DF_RESOURCE_OPTIONS };
 #undef DF_RESOURCE_ENUM
 enum { DF_OPT_RESOURCE_MASK = 702 };
 enum { DF_BOTTLES = 5, DF_BOTTLE_TYPES = 13, DF_OPT_BOTTLE_EDITS = 703, DF_OPT_BOTTLE_REPORT = 720 };
@@ -101,6 +101,25 @@ void df_guest_air_jump(Ctx *c) {
     recomp_store8(c, state + 0x4c, 1);
     recomp_store32(c, parent + 0x20, recomp_load32(c, parent + 0x20) | 2);
     hos_log("cheats: player jump impulse applied");
+}
+
+void df_guest_fishing_condition(Ctx *c) {
+    int rx_option(int id, int otherwise);
+    if (!(rx_option(DF_OPT_RESOURCE_MASK, 0) & (1 << DF_RESOURCE_FISH))) return;
+
+    /* The battle sequence for both fish species has a dedicated condition
+     * for immediate landing. Override only its evaluated result (w27). */
+    static const char condition[] =
+        "Work/BSA/ConditionContainer/Animal_Fish_Bass_IfImmediateGet.game__bsa__ConditionContainer.gyml";
+    const uint64_t sequence = c->x[22];
+    if (!hos_mem_region(sequence, 0x18)) return;
+    const uint64_t config = recomp_load64(c, sequence + 0x10);
+    if (!hos_mem_region(config, 0xbc) || !(recomp_load8(c, config + 0xbb) & 1)) return;
+    const uint64_t path = recomp_load64(c, config + 0x90);
+    if (!hos_mem_region(path, sizeof condition)) return;
+    for (unsigned i = 0; i < sizeof condition; ++i)
+        if (recomp_load8(c, path + i) != (unsigned char)condition[i]) return;
+    c->x[27] = 1;
 }
 
 void df_guest_magic(Ctx *c) {

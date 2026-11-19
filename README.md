@@ -74,6 +74,8 @@ and 5× settings.
 
 The Cheat Manager has separate controls for unlimited jumps, shared countdown
 freeze, heart, wallet, ammunition and magic refills, and each unlocked bottle's contents.
+**Instant fish catch** skips the reeling phase once you hook a fish at the
+fishing pond.
 Bottle edits apply once and can be kept with an in-game save. Equipment
 options cover charged spin range, magic spin charge and bomb arrows. Bomb
 arrows require adult Link's bow. The separate explosive Deku seed option
