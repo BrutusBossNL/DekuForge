@@ -362,3 +362,24 @@ log recorded two queued impacts and two bomb detonations. The test recorded
 1,269 frames in 22.963 seconds (55.26 FPS) and exited normally.
 The retest without diagnostic code recorded three seed detonations and
 three native jump impulses from separate jump presses.
+
+## 2026-11-19: native World markers and projectile aura
+
+The build generated 163 additional marker records and 24 night-only hints
+from local game files. The first copy of the layout archive moved offsets
+used by the controller prompt patcher and crashed at the title. Appending the
+grown map members preserved the original offsets. The corrected build then
+loaded the DualSense layouts and entered ordinary gameplay.
+
+A child-Link run used the same copied save to capture the Kakariko region
+map before and after enabling the seven World settings. Night Skulltulas
+gained crescent-marked icons on the region map and minimap. The existing
+collected state stayed visible. Both test games exited normally with
+unchanged baseline saves.
+
+Separate adult bow and child slingshot runs on Death Mountain Trail logged
+eligible aura points, projection in the presentation thread and subsequent
+bomb detonation. The stock and equipment gates use the same native projectile
+path. The control bridge's game-image captures precede the presentation overlay,
+so they do not independently show its opacity. Git source tests checked the
+archive offsets, native hook words, local asset selection and mod priority.

@@ -89,10 +89,10 @@ the native game acceptance gate.
 
 The independent Windows candidate has separate resource cheats, countdown
 freeze, individual bottle contents, L3 sprint modes, spin range and charge,
-bomb arrows and explosive Deku seeds. Verify countdown freeze in a minigame
-and heart refill after a capacity upgrade. Port the bomb-arrow aura and the
-world markers with per-age filtering, night icons, collected-state checks
-and a toggle per category. Carry verified cheats and controller fixes to Linux
+bomb arrows and explosive Deku seeds. Both projectiles include a black aura,
+and the World group has separate marker switches with age and completion
+handling. Verify countdown freeze in a minigame and heart refill after a
+capacity upgrade. Carry verified cheats and controller fixes to Linux
 and repeat the performance and memory comparisons.
 
 ## 4. Public open-source repository

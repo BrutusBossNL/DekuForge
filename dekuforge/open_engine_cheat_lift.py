@@ -10,6 +10,12 @@ HOOKS = (
     (0x82ecbc30, 0xd503237f, 'df_guest_projectile'),
     (0x82ecb934, 0xb9002693, 'df_guest_seed_transition'),
     (0x80706be0, 0xd503237f, 'df_guest_projectile_frame'),
+    (0x802290a8, 0x39517268, 'df_guest_world_master'),
+    (0x802291a4, 0xb94017e9, 'df_guest_world_visibility'),
+    (0x80229348, 0x1e290d40, 'df_guest_world_style'),
+    (0x80227760, 0x39516e69, 'df_guest_world_chests'),
+    (0x80223af0, 0x94001a3c, 'df_guest_world_facility_position'),
+    (0x802232a8, 0x5e21d800, 'df_guest_world_facility_style'),
 )
 
 

@@ -8,6 +8,8 @@ typedef struct {
     uint64_t actor;
     uint32_t generation, state;
     int armed;
+    int aura;
+    float position[3];
     int64_t seen;
 } DfShot;
 
@@ -36,7 +38,7 @@ static uint64_t df_projectile_call(Ctx *c, uint64_t target, const uint64_t *argu
     return result;
 }
 
-static int df_bomb_stock(Ctx *c) {
+static int df_bomb_stock(Ctx *c, int take) {
     const uint64_t manager = df_pointer(c, df_pointer(c, OOT_GAMEDATA_SLOT));
     const uint64_t ammo = df_resource_entry(c, manager, 0xdb1bcd4fu, 1007, DF_DATA_COUNT);
     const uint64_t bag = df_resource_entry(c, manager, 0xe753508bu, 972, DF_DATA_COUNT);
@@ -46,8 +48,10 @@ static int df_bomb_stock(Ctx *c) {
     if (oot_item_count(c, "Item_BombBag_Small") <= 0 &&
         oot_item_count(c, "Item_BombBag_Medium") <= 0 &&
         oot_item_count(c, "Item_BombBag_Large") <= 0) return 0;
-    recomp_store32(c, ammo, stock - 1);
-    recomp_store32(c, ammo + 4, stock - 1);
+    if (take) {
+        recomp_store32(c, ammo, stock - 1);
+        recomp_store32(c, ammo + 4, stock - 1);
+    }
     return 1;
 }
 
@@ -95,22 +99,45 @@ static void df_track_projectile(Ctx *c, uint64_t component, int seed_only) {
         *shot = (DfShot){.actor = actor, .generation = generation};
     }
     if (state == 2 && shot->state != 2) shot->armed = 1;
-    if ((state == 0 || (seed && state == 4)) && shot->armed) {
-        shot->armed = 0;
-        float position[3];
+    // The same native world position drives the aura and the eventual impact.
+    const int visualize = (state == 1 || state == 2) && df_bomb_stock(c, 0);
+    if (visualize || shot->armed)
         for (unsigned i = 0; i < 3; ++i) {
             const uint32_t raw = recomp_load32(c, actor + 0x31c + 4 * i);
-            memcpy(position + i, &raw, 4);
+            memcpy(shot->position + i, &raw, 4);
         }
-        if (isfinite(position[0]) && isfinite(position[1]) && isfinite(position[2]) &&
-            df_impact_count < DF_BLASTS && df_bomb_stock(c)) {
-            memcpy(df_impacts[df_impact_count++], position, sizeof(position));
+    const int valid = isfinite(shot->position[0]) && isfinite(shot->position[1]) && isfinite(shot->position[2]);
+    shot->aura = visualize && valid;
+    static unsigned seen_aura;
+    if (shot->aura) {
+        const unsigned bit = 1u << seed;
+        if (!(seen_aura & bit)) hos_log("cheats: %s aura active", seed ? "Deku seed" : "bomb arrow");
+        seen_aura |= bit;
+    }
+    if ((state == 0 || (seed && state == 4)) && shot->armed) {
+        shot->armed = 0;
+        if (valid && df_impact_count < DF_BLASTS && df_bomb_stock(c, 1)) {
+            memcpy(df_impacts[df_impact_count++], shot->position, sizeof(shot->position));
             hos_log("cheats: %s impact queued", seed ? "explosive Deku seed" : "bomb arrow");
         }
     }
     shot->state = state;
     shot->seen = now;
     ReleaseSRWLockExclusive(&df_shot_lock);
+}
+
+#ifdef _WIN32
+__declspec(dllexport)
+#endif
+unsigned df_projectile_aura_points(float (*out)[3], unsigned capacity) {
+    unsigned count = 0;
+    const int64_t now = hos_now_ns();
+    AcquireSRWLockShared(&df_shot_lock);
+    for (unsigned i = 0; i < DF_TRACKED_SHOTS && count < capacity; ++i)
+        if (df_shots[i].aura && now - df_shots[i].seen < 120000000LL)
+            memcpy(out[count++], df_shots[i].position, sizeof(df_shots[i].position));
+    ReleaseSRWLockShared(&df_shot_lock);
+    return count;
 }
 
 void df_guest_projectile(Ctx *c) {

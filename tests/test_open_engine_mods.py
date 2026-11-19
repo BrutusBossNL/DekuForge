@@ -58,6 +58,19 @@ class IndependentAssetModTests(unittest.TestCase):
         self.assertNotEqual(first['env']['HOS_MODS'], second['env']['HOS_MODS'])
         self.assertEqual((Path(second['env']['HOS_MODS'])/'DekuForge/romfs/Actor/item.txt').read_bytes(), b'new mod data')
 
+    def test_user_map_mod_has_priority_over_world_markers(self):
+        from dekuforge.world_extra import MAP
+        mod = self.game/'mods/A/romfs'/MAP
+        mod.parent.mkdir(parents=True)
+        mod.write_bytes(b'user map')
+        self.options['env'].update(DEKUFORGE_WORLD_DATA='world cache', HOS_FS_OVERLAY='overlay')
+        chosen = self.prepare()['env']
+        self.assertNotIn('DEKUFORGE_WORLD_DATA', chosen)
+        self.assertNotIn('HOS_FS_OVERLAY', chosen)
+        self.assertEqual((Path(chosen['HOS_MODS'])/'DekuForge/romfs'/MAP).read_bytes(), b'user map')
+        self.library.toggle('A')
+        self.assertEqual(self.prepare()['env']['DEKUFORGE_WORLD_DATA'], 'world cache')
+
     def test_code_mods_are_gated_and_external_game_is_refused(self):
         code = SimpleNamespace(enabled=True, problem='', code={'test': Path('fixture.txt')})
         with patch('dekuforge.open_engine_mods.ModLibrary.scan', return_value=[code]):

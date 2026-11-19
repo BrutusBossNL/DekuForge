@@ -58,5 +58,9 @@ def launch_options(executable, root=ROOT):
     # and pipelines ready before the title instead of dropping first-use draws.
     env.update(RX_BACKEND='vulkan', RX_VK_LOAD='start', HOS_DISCORD='0',
                DEKUFORGE_SYSTEM_LANGUAGE=game_language(system_locale()))
+    from .world_assets import selected
+    world = selected(executable.parent)
+    if world:
+        env.update(DEKUFORGE_WORLD_DATA=str(world), HOS_FS_OVERLAY=str(world/'overlay'))
     return {'args': [str(executable), str(paths['image']), '--romfs', str(paths['romfs']), '--user', str(paths['user'])],
             'env': env}

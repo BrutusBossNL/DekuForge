@@ -74,6 +74,12 @@ installed game folders must be separate. Keep the same work folder to reuse
 unchanged object files. The provider cleans its transient native link folder
 after copying the installation, so never register an executable inside work.
 
+The independent builder generates the optional World map materials in
+`<game>/.world-markers` from the local ROM filesystem. The same prompt pipeline
+still applies the selected controller glyphs to the map's derived UI resources.
+A user mod replacing the affected UI archive, MapParam or resource-size table
+takes priority and disables World markers for that launch.
+
 Shader preparation can be long on a cold cache. The pinned provider deliberately
 requires an additional ordinary-play driver-cache warmup on NVIDIA after its
 prepare-only process. DekuForge now starts its own preparation child with a

@@ -195,6 +195,13 @@ The independent cheat headers and checked lift hooks use the project-owned
 gameplay extensions identified by `engine_overrides/dekuforge_0110/LICENSE-CUSTOM-ADDITIONS`
 as a behavioral and version-specific reference. The independent integration
 uses Hookshot's GPL host APIs and does not apply the composite legacy patch.
+The independent map generator reuses the original scoped MIT additions for
+BYML serialization, collectible layouts and map icons from the DekuForge
+0.11 runtime-layer import (`f3e0ffd`). For compression and texture codecs it
+uses the pinned Hookshot prompt tooling and the same Pillow, zstandard,
+ASTC encoder and texture decoder dependencies. Native hooks and controller
+prompt integration are adapted for Hookshot. Map textures and metadata are
+generated from the player's local files and are kept out of distributions.
 
 The independent Windows movie path builds VideoLAN dav1d 1.5.4 from the official
 source mirror, under BSD-2-Clause. `tools/build_av1_decoder.py` pins archive and

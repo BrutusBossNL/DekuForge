@@ -75,7 +75,11 @@ def main():
             return original_clear(path)
 
         module.clear_folder = clear_owned
-        return module.main()
+        result = module.main()
+        if not result and (output/'prompts/rsizetable.zs').is_file():
+            from dekuforge.world_assets import prepare
+            prepare(output, output/'romfs', lambda kind, line: print(line, end='', flush=True))
+        return result
     if script.name == 'lift.py':
         importlib.import_module('kit')
         fov = importlib.import_module('oot_fov')

@@ -79,12 +79,21 @@ options cover charged spin range, magic spin charge and bomb arrows. Bomb
 arrows require adult Link's bow. The separate explosive Deku seed option
 requires young Link's slingshot. Both require an unlocked bomb bag and
 use one bomb per explosive impact.
-World-map markers and the bomb arrow's black aura still need to be ported.
+Both explosive projectiles have a black aura while held ready or in flight.
+**Cheat Manager → World** controls Gold Skulltulas, heart pieces, grottos,
+chests, bean plots, Great Fairies and upgrades separately. The markers follow
+Link's current age. Night-only Skulltulas carry a crescent, and markers with
+known completion data show their collected state. Rebuild to generate the map
+assets from your own game files. A mod replacing the same map resources takes
+priority over these markers.
+
+DekuForge's heart-refill option is the only health cheat shown. The existing
+engine tools for flight, teleporting, time, age and inventory remain available.
 
 **Gameplay → Game language → System language** follows the system UI language
 on restart, falling back to English. New builds select it by default. Explicit
-game and overlay language choices are kept. The full set of custom cheats,
-independent app updates, end-user setup, broad controller/audio validation and
+game and overlay language choices are kept. Independent app updates,
+end-user setup, broad controller/audio validation and
 Linux/iOS gameplay remain open.
 
 ## Reuse and contributions

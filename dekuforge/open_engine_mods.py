@@ -36,6 +36,11 @@ def prepare_mods(executable, options, root=ROOT):
     if cache.resolve() != cache:
         raise ValueError('mods_external_dir')
     env = dict(options['env'])
+    from .world_assets import CONFLICTS
+    if any(relative.casefold() in CONFLICTS for _, relative in winners.values()):
+        # User-selected mods keep priority over this optional local patch.
+        env.pop('DEKUFORGE_WORLD_DATA', None)
+        env.pop('HOS_FS_OVERLAY', None)
     env['HOS_MODS'] = str(cache/'disabled')
     result = {**options, 'env': env}
     if not winners:
