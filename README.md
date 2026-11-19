@@ -55,6 +55,8 @@ uses that runtime without depending on main's interpreter. Follow the experiment
 build guide; an independent end-user installer is not published. A development
 Python is also supported for source commands. `run_builder.py --doctor` reports
 independent capabilities; `--prepare` prepares modules only and is not a game.
+With the experimental builder configured, **Updates → Rebuild for current
+version** starts a local game build and opens its progress and log view.
 
 ## Known experimental limits
 

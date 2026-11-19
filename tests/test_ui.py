@@ -225,6 +225,49 @@ ui.main()
         rebuild.assert_called_with(manual=True)
         self.assertTrue(self.game.is_file())
 
+    def test_independent_rebuild_button_starts_local_build_for_active_installation(self):
+        from dekuforge.open_engine import manifest
+
+        active = self.folder / "build" / "owned"
+        active.mkdir(parents=True)
+        executable = active / "DekuForgeGame.exe"
+        executable.touch()
+        (active / ".dekuforge-owned").touch()
+        (active / ".dekuforge-open-output.json").write_text(
+            json.dumps({"provider_revision": manifest("hookshot")["revision"]}), encoding="utf-8")
+        source = self.folder / "own.nup"
+        source.write_bytes(b"NUP\x01")
+        self.app.library.register(executable, source, owned=True)
+        self.app.executable = str(executable)
+        self.app.source = str(self.folder / "missing.nup")
+        self.app.navigate("updates")
+
+        def build(archive, notify, *, destination):
+            notify("log", "Independent rebuild started")
+            (destination / "dekuforge-build-info.json").write_text(
+                '{"engine_version":"0.1.0-test","game_version":"1.1.1"}', encoding="utf-8")
+            return executable
+
+        with (patch("dekuforge.workflow.ROOT", self.folder),
+              patch("dekuforge.ui.game_running", return_value=False),
+              patch("dekuforge.ui.build_independent", side_effect=build) as worker,
+              patch("dekuforge.ui.run_rebuild") as legacy):
+            self.app.release_button.invoke()
+            self.assertEqual(self.app.page, "build")
+            self.assertEqual(self.app.step, 2)
+            deadline = time.monotonic() + 3
+            while self.app.progress.active and time.monotonic() < deadline:
+                self.root.update()
+                self.app.tick()
+            legacy.assert_not_called()
+        self.assertFalse(self.app.progress.active)
+        self.assertEqual(worker.call_args.args[0], source)
+        self.assertEqual(worker.call_args.kwargs["destination"], active)
+        self.assertIn("Independent rebuild started", self.app.log_path.read_text())
+        self.assertEqual(self.app.result, str(executable))
+        self.assertEqual(self.app.build_version(), "0.1.0-test / 1.1.1")
+        self.assertFalse((self.folder / "local/pending-game-update.json").exists())
+
     def test_navigation_and_language_preserve_wizard_and_logs_in_one_window(self):
         self.app.source = str(self.folder / "own.nup")
         self.app.destination = str(self.folder / "new")

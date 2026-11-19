@@ -5,10 +5,12 @@ import json
 import os
 from pathlib import Path
 from queue import Empty, Queue
+import subprocess
 import threading
 import sys
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
+from uuid import uuid4
 
 from . import __version__, COMPONENTS
 from . import reports
@@ -462,8 +464,6 @@ class Launcher(ModsUI, ReleaseListUI):
 
     def resume_game_update(self, manual=False):
         if COMPONENTS['engine'].get('backend') == 'independent':
-            self.release_status = self.t('independent_backend_incomplete')
-            if self.page == 'updates': self.render()
             return
         if self.update_notice and not manual:
             return  # Let the user read the application outcome before rebuilding.
@@ -981,11 +981,49 @@ class Launcher(ModsUI, ReleaseListUI):
             self.mods_busy = False
             self.show_error(error)
 
-    def start_build(self):
+    def rebuild_independent_installation(self):
         if self.management_busy():
             return
         try:
-            request = BuildRequest.create(self.source, self.destination, self.executable)
+            if game_running():
+                self.show_error("rebuild_close_game")
+                return
+
+            active = Path(self.executable)
+            destination = ROOT / "build" / "installations" / ("rebuild-" + uuid4().hex[:12])
+            source = self.source
+            if active.name == "DekuForgeGame.exe" and active.is_file():
+                try:
+                    destination = validate_destination(active.parent, self.executable)
+                except ValueError:
+                    pass  # A custom installation needs a separate build folder.
+                else:
+                    entry = next((item for item in self.build_entries() if Path(item["executable"]) == active), {})
+                    dump = entry.get("dump")
+                    if dump and Path(dump).is_file():
+                        source = dump
+
+            if not Path(source).is_file():
+                self.choose_source()
+                source = self.source
+                if not Path(source).is_file():
+                    return
+            request = BuildRequest.create(source, destination, self.executable)
+        except (OSError, ValueError, subprocess.SubprocessError) as error:
+            self.show_error(error)
+            return
+
+        self.source, self.destination = str(request.source), str(request.destination)
+        self.step, self.library_view = 2, False
+        self.navigate("build")
+        self.start_build(request)
+
+    def start_build(self, request=None):
+        if self.management_busy():
+            return
+        try:
+            if request is None:
+                request = BuildRequest.create(self.source, self.destination, self.executable)
             folder = ROOT / "local" / "logs"
             folder.mkdir(parents=True, exist_ok=True)
             self.log_path = folder / ("build-" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ") + ".log")

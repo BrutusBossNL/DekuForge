@@ -119,8 +119,12 @@ limit is checked before starting; excessively long mod paths report an error.
 Crash reports include bounded text logs and graphics settings, never binary
 shader/pipeline caches. Deleting an owned build can preserve its `user` profile,
 as well as the legacy `profile` layout; the original game archive is protected.
-Both the launcher and direct legacy update API reject main-engine rebuilds on
-this branch before changing a pending update or calling the excluded backend.
+With the experimental builder enabled, **Updates → Rebuild for current
+version** opens the regular build progress view and starts the independent
+builder. It reuses a compatible owned installation and its cache, or creates
+a separate local build for a custom installation. It prompts for an archive
+when the saved path is unavailable. Main-engine rebuilds through the legacy
+update API remain disabled.
 
 ### Individual investigation stages
 

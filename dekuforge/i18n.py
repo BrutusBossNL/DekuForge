@@ -323,6 +323,7 @@ _UPDATE_RESULTS = {
     'release_action_update': ('Install update', 'Update installeren', 'Update installieren', 'Instalar actualizacion', 'Installer la mise a jour'),
     'release_action_downgrade': ('Downgrade', 'Downgraden', 'Aeltere Version installieren', 'Instalar version anterior', 'Installer une version anterieure'),
     'release_action_rebuild': ('Rebuild for current version', 'Rebuild voor huidige versie', 'Aktuelle Version neu bauen', 'Reconstruir la version actual', 'Reconstruire la version actuelle'),
+    'rebuild_close_game': ('Close the game before rebuilding.', 'Sluit het spel voordat je opnieuw bouwt.', 'Schließe das Spiel vor dem Neubau.', 'Cierra el juego antes de volver a compilarlo.', 'Fermez le jeu avant de le recompiler.'),
     'update_installed': ('Launcher update installed: {version}.', 'Launcherupdate geinstalleerd: {version}.', 'Launcher-Update installiert: {version}.', 'Actualizacion instalada: {version}.', 'Mise a jour installee : {version}.'),
     'update_failed_result': ('Update to {version} failed. The previous launcher is retained.', 'Update naar {version} mislukt. De vorige launcher is behouden.', 'Update auf {version} fehlgeschlagen. Der bisherige Launcher bleibt erhalten.', 'Fallo la actualizacion a {version}. Se conserva el lanzador anterior.', 'Echec de la mise a jour vers {version}. Le lanceur precedent est conserve.'),
     'update_report_issue': ('Report this update failure', 'Deze updatefout melden', 'Updatefehler melden', 'Informar de este error', 'Signaler cet echec'),

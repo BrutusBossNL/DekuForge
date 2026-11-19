@@ -38,6 +38,13 @@ class BuildLibrary:
         exe = Path(executable).absolute()
         if not exe.is_file():
             raise ValueError("Build executable is missing")
+        if owned and not version:
+            info = exe.parent / "dekuforge-build-info.json"
+            if info.is_file():
+                metadata = json.loads(info.read_text(encoding="utf-8"))
+                if isinstance(metadata, dict):
+                    version = " / ".join(str(metadata[key]) for key in ("engine_version", "game_version")
+                                         if metadata.get(key))
         entries = self.entries()
         existing = next((e for e in entries if Path(e["executable"]) == exe), None)
         if existing:
@@ -68,10 +75,7 @@ class BuildLibrary:
             for folder in build.iterdir():
                 exe = folder / "DekuForgeGame.exe"
                 if ((folder / ".dekuforge-native").is_file() or (folder / ".dekuforge-stable-build").is_file()) and exe.is_file():
-                    info = folder / "dekuforge-build-info.json"
-                    metadata = json.loads(info.read_text(encoding="utf-8")) if info.is_file() else {}
-                    version = " / ".join(str(metadata[key]) for key in ("engine_version", "game_version") if metadata.get(key))
-                    self.register(exe, dump if str(exe) == selected else "", version=version, owned=True)
+                    self.register(exe, dump if str(exe) == selected else "", owned=True)
         if selected and Path(selected).is_file():
             self.register(selected, dump)
         return self.entries()

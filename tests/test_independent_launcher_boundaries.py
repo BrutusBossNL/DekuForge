@@ -49,12 +49,15 @@ class IndependentLauncherBoundaries(unittest.TestCase):
         with patch('dekuforge.ui.run_rebuild') as rebuild:
             Launcher.resume_game_update(app, manual=True)
         rebuild.assert_not_called()
-        self.assertEqual(app.release_status, 'independent_backend_incomplete')
+        app.render.assert_not_called()
 
     def test_release_rebuild_cannot_use_old_backend(self):
         app = self.fake()
+        app.rebuild_independent_installation = Mock()
+        app.resume_game_update = Mock()
         ReleaseListUI.rebuild_current_release(app)
-        self.assertEqual(app.release_status, 'independent_backend_incomplete')
+        app.rebuild_independent_installation.assert_called_once_with()
+        app.resume_game_update.assert_not_called()
 
     def test_code_mod_rebuild_rejects_before_accessing_library(self):
         with self.assertRaisesRegex(ValueError, 'independent_backend_incomplete'):

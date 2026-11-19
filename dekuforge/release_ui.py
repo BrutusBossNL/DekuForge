@@ -106,8 +106,7 @@ class ReleaseListUI:
 
     def rebuild_current_release(self):
         if COMPONENTS['engine'].get('backend') == 'independent':
-            self.release_status = self.t('independent_backend_incomplete')
-            self.render()
+            self.rebuild_independent_installation()
             return
         if self.management_busy():
             return
