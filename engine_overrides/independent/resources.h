@@ -57,6 +57,52 @@ static uint64_t df_pointer(Ctx *c, uint64_t at) {
     return hos_mem_region(at, 8) ? recomp_load64(c, at) : 0;
 }
 
+static uint64_t df_jump_parameters(Ctx *c, uint64_t components) {
+    const uint64_t board = df_pointer(c, components + 0xa8);
+    if (!board || !hos_mem_region(board, 0x40)) return 0;
+    const uint32_t count = recomp_load32(c, board + 0x30);
+    const uint64_t entries = df_pointer(c, board + 0x38);
+    if (!entries || !count || count > 4096 || !hos_mem_region(entries, 8 * count)) return 0;
+    for (uint32_t low = 0, high = count; low < high;) {
+        const uint32_t mid = low + (high - low) / 2;
+        const uint64_t entry = df_pointer(c, entries + 8 * mid);
+        if (!entry || !hos_mem_region(entry, 16)) return 0;
+        const uint32_t key = recomp_load32(c, entry);
+        if (key < 0x6b7e094au) low = mid + 1;
+        else if (key > 0x6b7e094au) high = mid;
+        else return df_pointer(c, df_pointer(c, entry + 8) + 0x150);
+    }
+    return 0;
+}
+
+void df_guest_air_jump(Ctx *c) {
+    if (strcmp(hos_main_build_id, "e0f3ccfaf50065ae4ea01eb5aeb13b1a45da3348")) return;
+    const uint64_t player = df_pointer(c, df_pointer(c, 0x84e571d0ULL) + 0x480);
+    if (df_pointer(c, player) != 0x84b45e18ULL) return;
+    const uint64_t components = df_pointer(c, player + 0x270);
+    const uint64_t action = df_pointer(c, components + 0x358);
+    if (df_pointer(c, action) != 0x84b6dfc0ULL) return;
+    const uint64_t physics = df_pointer(c, components + 0x50);
+    const uint64_t controller = df_pointer(c, physics + 0x20);
+    const uint64_t character = df_pointer(c, controller + 0x10);
+    const uint64_t motion = df_pointer(c, character + 8);
+    const uint64_t state = df_pointer(c, motion + 0x30);
+    if (!hos_mem_region(state, 0x4d) || df_pointer(c, state) != 0x84bbc298ULL ||
+        df_pointer(c, state + 0x10) != character) return;
+    const uint64_t parent = df_pointer(c, state + 0x30);
+    const uint64_t params = df_jump_parameters(c, components);
+    if (df_pointer(c, params) != 0x84b8d1a8ULL || !hos_mem_region(params + 0x334, 4) ||
+        !hos_mem_region(parent + 0x20, 4)) return;
+    const uint32_t bits = recomp_load32(c, params + 0x334);
+    float impulse;
+    memcpy(&impulse, &bits, sizeof(impulse));
+    if (!(impulse > 0 && impulse <= 5)) return;
+    recomp_store32(c, state + 0x3c, bits);
+    recomp_store8(c, state + 0x4c, 1);
+    recomp_store32(c, parent + 0x20, recomp_load32(c, parent + 0x20) | 2);
+    hos_log("cheats: player jump impulse applied");
+}
+
 void df_guest_magic(Ctx *c) {
     int rx_option(int id, int otherwise);
     if (!(rx_option(DF_OPT_RESOURCE_MASK, 0) & (1 << DF_RESOURCE_MAGIC))) return;

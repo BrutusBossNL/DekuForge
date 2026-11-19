@@ -1,6 +1,6 @@
 #pragma once
 
-enum { DF_OPT_L3_SPRINT = 701 };
+enum { DF_OPT_L3_SPRINT = 701, DF_OPT_AIR_JUMP = 706 };
 
 typedef struct {
     int pressed;

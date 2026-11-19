@@ -354,3 +354,11 @@ save hashes matched. The native fixture covers individual unlocked bottles,
 hold and toggle sprint, and freezing and resuming a running countdown. The
 countdown still needs gameplay acceptance in an actual minigame. World-map
 markers, the black arrow aura and full Cheat Manager parity remain open.
+
+The follow-up child acceptance on the same trail equipped the Fairy Slingshot
+in the inventory and fired into the rock wall. The guest identifies the
+in-flight actor as `Item_DekuSeed`. With the separate cheat enabled, the
+log recorded two queued impacts and two bomb detonations. The test recorded
+1,269 frames in 22.963 seconds (55.26 FPS) and exited normally.
+The retest without diagnostic code recorded three seed detonations and
+three native jump impulses from separate jump presses.

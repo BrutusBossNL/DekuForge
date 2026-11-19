@@ -64,14 +64,16 @@ confirm (Cross or A), or **Nintendo** for right-button confirm. Hold the left
 stick click (L3) while moving to sprint. The **Cheat Manager** includes sprint
 speed and the engine's player, inventory and travel cheats. **Controls → L3
 sprint** offers **Hold L3** or **Click to toggle**. A second click or stopping
-movement ends a toggled sprint.
+movement ends a toggled sprint. Sprint speed includes the original 2×, 3.5×
+and 5× settings.
 
-The Cheat Manager has separate controls for shared countdown freeze, heart,
-wallet, ammunition and magic refills, and each unlocked bottle's contents.
+The Cheat Manager has separate controls for unlimited jumps, shared countdown
+freeze, heart, wallet, ammunition and magic refills, and each unlocked bottle's contents.
 Bottle edits apply once and can be kept with an in-game save. Equipment
 options cover charged spin range, magic spin charge and bomb arrows. Bomb
-arrows require adult Link's bow and bomb stock. The separate explosive
-Deku seed option targets young Link's slingshot and requires bomb stock.
+arrows require adult Link's bow. The separate explosive Deku seed option
+requires young Link's slingshot. Both require an unlocked bomb bag and
+use one bomb per explosive impact.
 World-map markers and the bomb arrow's black aura still need to be ported.
 
 **Gameplay → Game language → System language** follows the system UI language

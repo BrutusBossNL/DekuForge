@@ -43,23 +43,24 @@ static int df_bomb_stock(Ctx *c) {
     if (!ammo || !bag) return 0;
     const uint32_t stock = recomp_load32(c, ammo), capacity = recomp_load32(c, bag);
     if (!stock || stock > capacity || capacity > 9999) return 0;
+    if (oot_item_count(c, "Item_BombBag_Small") <= 0 &&
+        oot_item_count(c, "Item_BombBag_Medium") <= 0 &&
+        oot_item_count(c, "Item_BombBag_Large") <= 0) return 0;
     recomp_store32(c, ammo, stock - 1);
     recomp_store32(c, ammo + 4, stock - 1);
     return 1;
 }
 
-void df_guest_projectile(Ctx *c) {
+static void df_track_projectile(Ctx *c, uint64_t component, int seed_only) {
     int rx_option(int id, int otherwise);
     const int modes = rx_option(DF_OPT_EXPLOSIVE_SHOTS, 0);
-    if (!modes) return;
-    const uint64_t component = c->x[0];
+    if (!modes || (seed_only && !(modes & DF_EXPLOSIVE_SEED))) return;
     if (!hos_mem_region(component, 0xe0)) return;
     const uint64_t actor = df_pointer(c, component + 0x18);
     if (!actor || !hos_mem_region(actor, 0x328)) return;
-    const int seed = df_actor_named(c, actor, "Shootable_DekuSeed");
-    if (seed ? !(modes & DF_EXPLOSIVE_SEED) :
-        (!(modes & DF_BOMB_ARROW) || (!df_actor_named(c, actor, "Item_Arrow_Normal") &&
-                                    !df_actor_named(c, actor, "NormalArrow")))) return;
+    const int seed = (modes & DF_EXPLOSIVE_SEED) && df_actor_named(c, actor, "Item_DekuSeed");
+    if (!seed && (seed_only || !(modes & DF_BOMB_ARROW) ||
+        (!df_actor_named(c, actor, "Item_Arrow_Normal") && !df_actor_named(c, actor, "NormalArrow")))) return;
     const uint64_t player = df_pointer(c, df_pointer(c, 0x84e571d0ULL) + 0x480);
     const uint64_t ref = df_pointer(c, component + 0x78);
     const uint32_t serial = recomp_load32(c, component + 0x80);
@@ -94,7 +95,7 @@ void df_guest_projectile(Ctx *c) {
         *shot = (DfShot){.actor = actor, .generation = generation};
     }
     if (state == 2 && shot->state != 2) shot->armed = 1;
-    if (state == 0 && shot->armed) {
+    if ((state == 0 || (seed && state == 4)) && shot->armed) {
         shot->armed = 0;
         float position[3];
         for (unsigned i = 0; i < 3; ++i) {
@@ -110,6 +111,14 @@ void df_guest_projectile(Ctx *c) {
     shot->state = state;
     shot->seen = now;
     ReleaseSRWLockExclusive(&df_shot_lock);
+}
+
+void df_guest_projectile(Ctx *c) {
+    df_track_projectile(c, c->x[0], 0);
+}
+
+void df_guest_seed_transition(Ctx *c) {
+    df_track_projectile(c, c->x[20], 1);
 }
 
 void df_guest_projectile_frame(Ctx *c) {

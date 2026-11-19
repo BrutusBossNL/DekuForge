@@ -87,11 +87,13 @@ the native game acceptance gate.
 
 ## 3. Custom features
 
-The Windows candidate already composes the owned Cheat Manager. Validate its
-features individually before claiming parity, then carry them to Linux: Equipment (bomb arrows with black aura, spin reach/charge), World markers,
-health refill/max-heart handling, controller fixes and measured memory fixes.
-Preserve per-age filtering, night icons, collected-state checks and independent
-category toggles. Validate fixes individually and repeat affected baseline tests.
+The independent Windows candidate has separate resource cheats, countdown
+freeze, individual bottle contents, L3 sprint modes, spin range and charge,
+bomb arrows and explosive Deku seeds. Verify countdown freeze in a minigame
+and heart refill after a capacity upgrade. Port the bomb-arrow aura and the
+world markers with per-age filtering, night icons, collected-state checks
+and a toggle per category. Carry verified cheats and controller fixes to Linux
+and repeat the performance and memory comparisons.
 
 ## 4. Public open-source repository
 

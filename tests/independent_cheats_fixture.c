@@ -15,6 +15,7 @@ static int hos_mem_region(uint64_t a, uint64_t n) { return a && n && a < sizeof 
 static uint64_t recomp_load64(Ctx *c, uint64_t a) { uint64_t v; (void)c; assert(hos_mem_region(a,8)); memcpy(&v,guest+a,8); return v; }
 static uint32_t recomp_load32(Ctx *c, uint64_t a) { uint32_t v; (void)c; assert(hos_mem_region(a,4)); memcpy(&v,guest+a,4); return v; }
 static uint8_t recomp_load8(Ctx *c, uint64_t a) { (void)c; assert(hos_mem_region(a,1)); return guest[a]; }
+static void recomp_store8(Ctx *c, uint64_t a, uint8_t v) { (void)c; assert(hos_mem_region(a,1)); guest[a]=v; }
 static void recomp_store32(Ctx *c, uint64_t a, uint32_t v) { (void)c; assert(hos_mem_region(a,4)); memcpy(guest+a,&v,4); }
 static void wr64(uint64_t a,uint64_t v) { assert(hos_mem_region(a,8)); memcpy(guest+a,&v,8); }
 static int64_t hos_now_ns(void) { return 1000000000LL; }

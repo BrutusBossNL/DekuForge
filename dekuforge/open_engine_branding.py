@@ -98,13 +98,17 @@ def prepare(source, output):
         ('"Nintendo (Def)", "Xbox / PC", "Swap Face", "Custom"', '"Nintendo", "PlayStation / Xbox", "Swap Face", "Custom"'),
     ):
         menu = _replace(menu, old, new)
+    menu = _replace(menu, 'constexpr int link_speeds[] = {100, 125, 150, 200, 300};',
+                    'constexpr int link_speeds[] = {100, 125, 150, 200, 300, 350, 500};')
+    menu = _replace(menu, 'constexpr const char* link_speed_names[] = {"1x", "1.25x", "1.5x", "2x", "3x"};',
+                    'constexpr const char* link_speed_names[] = {"1x", "1.25x", "1.5x", "2x", "3x", "3.5x", "5x"};')
     sprint_header = (ROOT / 'engine_overrides/independent/sprint.h').as_posix()
     sprint_include = f'#include "{sprint_header}"'
     resource_include = f'#include "{(ROOT / "engine_overrides/independent/resources.h").as_posix()}"'
     projectile_include = f'#include "{(ROOT / "engine_overrides/independent/projectiles.h").as_posix()}"'
     menu = '\n'.join((sprint_include, resource_include, projectile_include, menu))
     menu = _replace(menu, 'const char* tx_auto_run(int v)',
-                    '''static int df_sprint_mode;
+                    '''static int df_sprint_mode, df_air_jump;
 static int df_resources[DF_RESOURCE_OPTIONS];
 static int df_spin_range, df_spin_charge;
 static int df_bomb_arrows, df_explosive_seeds;
@@ -129,6 +133,7 @@ const char* tx_bottle_content(int v) {
     return v >= 0 && v < DF_BOTTLE_TYPES ? names[v] : "Locked";
 }
 static bool df_resource_row(const int* value) {
+    if (value == &df_air_jump) return true;
     for (int& resource : df_resources) if (value == &resource) return true;
     return false;
 }
@@ -142,6 +147,7 @@ const char* tx_auto_run(int v)''')
                     '''int menu_dekuforge_option(int id) {
     std::lock_guard lk(menu_mu);
     if (id == DF_OPT_L3_SPRINT) return df_sprint_mode;
+    if (id == DF_OPT_AIR_JUMP) return cheats_on() && df_air_jump;
     if (id == DF_OPT_SPIN) return cheats_on() ? df_spin_range | (df_spin_charge ? DF_SPIN_INSTANT : 0) : 0;
     if (id == DF_OPT_EXPLOSIVE_SHOTS) return cheats_on() ?
         (df_bomb_arrows ? DF_BOMB_ARROW : 0) | (df_explosive_seeds ? DF_EXPLOSIVE_SEED : 0) : 0;
@@ -174,7 +180,9 @@ const char* tx_auto_run(int v)''')
         }
 ''')
     menu = _replace(menu, '    {TAB_DEBUG, "Developer", nullptr, 0, 0, 0, nullptr, nullptr, nullptr, false, true, -1, true},',
-                    '''    {TAB_DEBUG, "Resources", nullptr, 0, 0, 0, nullptr, nullptr, nullptr, false, true, -1, true},
+                    '''    {TAB_DEBUG, "Link and resources", nullptr, 0, 0, 0, nullptr, nullptr, nullptr, false, true, -1, true},
+    {TAB_DEBUG, "Unlimited jumps", &df_air_jump, 0, 1, 1, tx_onoff,
+     "Press the jump button again in the air to jump again.", nullptr, false, true},
     {TAB_DEBUG, "Auto-refill hearts", &df_resources[DF_RESOURCE_HEARTS], 0, 1, 1, tx_onoff,
      "Refills existing hearts while Link is alive.", nullptr, false, true},
     {TAB_DEBUG, "Freeze countdown", &df_resources[DF_RESOURCE_TIMER], 0, 1, 1, tx_onoff,
@@ -313,9 +321,15 @@ int hos_dekuforge_sprint_held(void) { return __atomic_load_n(&sprint_held, __ATO
 static int move_stick_held;''')
     hid = _replace(hid, '        __atomic_store_n(&flight_input, flight, __ATOMIC_RELAXED);',
                    '''        int hos_oot_player_free(void);
-        const int sprint_allowed = !menu_open && !free_camera && !flying && hos_oc_wait != 1 &&
-                                   !(buttons & ((1ULL << B_PLUS) | (1ULL << B_MINUS))) &&
-                                   (abs(stick[0]) > 4096 || abs(stick[1]) > 4096) && hos_oot_player_free();
+        void df_guest_air_jump(Ctx *);
+        const int player_input = !menu_open && !free_camera && !flying && hos_oc_wait != 1 &&
+                                 !(buttons & ((1ULL << B_PLUS) | (1ULL << B_MINUS))) && hos_oot_player_free();
+        static int jump_held;
+        const int jump_down = !!(buttons & (1ULL << B_X));
+        const int jump_was_down = __atomic_exchange_n(&jump_held, jump_down, __ATOMIC_RELAXED);
+        if (jump_down && !jump_was_down &&
+            player_input && rx_option(DF_OPT_AIR_JUMP, 0)) df_guest_air_jump(c);
+        const int sprint_allowed = player_input && (abs(stick[0]) > 4096 || abs(stick[1]) > 4096);
         static DfSprint sprint;
         const int l3 = !!(buttons & (1ULL << B_LS));
         const int l3_active = df_sprint(&sprint, rx_option(DF_OPT_L3_SPRINT, 0), l3, sprint_allowed);
@@ -333,7 +347,7 @@ static int move_stick_held;''')
     replay = _replace(replay, '        if (id == HOS_OPT_AUTO_RUN)',
                       '''        extern int menu_dekuforge_option(int);
         if (id == DF_OPT_L3_SPRINT || id == DF_OPT_RESOURCE_MASK || id == DF_OPT_BOTTLE_EDITS ||
-            id == DF_OPT_SPIN || id == DF_OPT_EXPLOSIVE_SHOTS)
+            id == DF_OPT_SPIN || id == DF_OPT_EXPLOSIVE_SHOTS || id == DF_OPT_AIR_JUMP)
             return menu_dekuforge_option(id);
         if (id == HOS_OPT_AUTO_RUN)''')
     files['vk_replay.cpp'] = replay
@@ -344,10 +358,12 @@ static int move_stick_held;''')
     host = _replace(host, '    oot_player_speed(c, components);',
                     '''    oot_player_speed(c, components);
     df_refill_resources(c, actor, rx_option(DF_OPT_RESOURCE_MASK, 0), rx_option(DF_OPT_BOTTLE_EDITS, -1));''')
+    host = _replace(host, '    if (percent < 100 || percent > 400) percent = 100;',
+                    '    if (percent < 100 || percent > 500) percent = 100;')
     host = _replace(host, '''    int hos_move_stick_held(void);   /* host/nn_hid.c */
     if (percent <= 100 || percent > 400 || !hos_move_stick_held()) return;''',
                     '''    int hos_dekuforge_sprint_held(void);   /* host/nn_hid.c */
-    if (percent <= 100 || percent > 400 || !hos_dekuforge_sprint_held()) return;''')
+    if (percent <= 100 || percent > 500 || !hos_dekuforge_sprint_held()) return;''')
     host = _replace(host, '    speed *= percent / 100.0f;',
                     '''    static int logged_multiplier;
     if (__atomic_exchange_n(&logged_multiplier, percent, __ATOMIC_RELAXED) != percent)
@@ -433,7 +449,8 @@ static int move_stick_held;''')
         if (!strcmp(l.code, "nl")) {
             static const char* const cheats[][2] = {
                 {"L3 sprint", "Sprinten met L3"}, {"Hold L3", "L3 vasthouden"}, {"Click to toggle", "Klikken om te wisselen"},
-                {"Resources", "Voorraden"}, {"Equipment", "Uitrusting"}, {"Bottle contents", "Flesinhoud"},
+                {"Link and resources", "Link en voorraden"}, {"Unlimited jumps", "Onbeperkt springen"},
+                {"Equipment", "Uitrusting"}, {"Bottle contents", "Flesinhoud"},
                 {"Auto-refill hearts", "Hartjes automatisch aanvullen"}, {"Freeze countdown", "Afteltimer stilzetten"},
                 {"Refill magic", "Magie aanvullen"}, {"Refill rupees", "Roepies aanvullen"}, {"Refill bombs", "Bommen aanvullen"},
                 {"Refill arrows", "Pijlen aanvullen"}, {"Refill bombchus", "Bombchu's aanvullen"},
