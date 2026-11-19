@@ -64,6 +64,8 @@ licensed engine source. Then select your own NUP in **Build game**. Updates on
 **Preview** use the independent release package. **Experimental** uses checked
 commits built by GitHub Actions without a release tag. Experimental downloads
 require GitHub CLI sign-in or a token with Actions read access.
+To move between Preview and Experimental, select a build and choose **Switch
+channel**. This switch requires confirmation even with automatic updates enabled.
 
 ## Known experimental limits
 

@@ -10,16 +10,23 @@ from .theme import GOLD, PANEL, TEXT, ScrolledText
 from .update_service import newer_version, version_key
 
 
+def is_experimental_version(version):
+    return re.fullmatch(r'v?\d+\.\d+\.\d+-experimental\.\d+\.\d+', version) is not None
+
+
 def displayed_releases(releases, installed=__version__):
     rows = [dict(item) for item in releases]
     if not any(item['version'].removeprefix('v') == installed for item in rows):
-        rows.append({'version': 'v'+installed, 'preview': '-' in installed, 'notes': '', 'installable': False})
+        rows.append({'version': 'v'+installed, 'preview': '-' in installed,
+                     'experimental': is_experimental_version(installed), 'notes': '', 'installable': False})
     return sorted(rows, key=lambda item: version_key(item['version']) or (0,0,0,False,()), reverse=True)
 
 
 def release_action(version, installed=__version__):
     if version.removeprefix('v') == installed:
         return 'rebuild'
+    if is_experimental_version(version) != is_experimental_version(installed):
+        return 'switch_channel'
     return 'update' if newer_version(version, installed) else 'downgrade'
 
 

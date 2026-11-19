@@ -159,6 +159,7 @@ whether it was ever mapped, and fails if it becomes visible. Setup and updates
 therefore show no page/language tour before the normal launcher starts.
 Stable/Preview filtering and manual release selection also support downgrades.
 Automatic updates are opt-in and install only a newer semantic launcher version.
+Switching into or out of the Experimental channel requires a manual selection.
 The native setup was tested from an empty destination: it downloaded its own
 runtime and complete toolchain, installed successfully in 57 seconds on the
 local machine, and passed all 40 UI views. A clean Windows VM is still a separate

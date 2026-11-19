@@ -192,11 +192,14 @@ ui.main()
     def test_release_list_shows_notes_installed_status_and_contextual_actions(self):
         from dekuforge import __version__
         self.app.releases = [{'version': 'v9.0.0', 'preview': True, 'notes': '# New release\nTest details', 'installable': True},
+            {'version': 'v0.4.0-experimental.10.1', 'preview': True, 'experimental': True,
+             'notes': 'Experimental notes', 'installable': True},
             {'version': 'v0.2.0', 'preview': False, 'notes': 'Stable notes', 'installable': True}]
         self.app.navigate('updates')
-        self.assertEqual(len(self.app.release_rows), 3)
+        self.assertEqual(len(self.app.release_rows), 4)
         for version, expected, notes in (('v9.0.0','release_action_update','Test details'),
                                          ('v0.2.0','release_action_downgrade','Stable notes'),
+                                         ('v0.4.0-experimental.10.1','release_action_switch_channel','Experimental notes'),
                                          ('v'+__version__,'release_action_rebuild',self.app.t('release_notes_empty'))):
             index = next(i for i,row in enumerate(self.app.release_rows) if row['version'] == version)
             self.app.release_list.selection_set(str(index))
@@ -210,6 +213,9 @@ ui.main()
             self.app.perform_release_action()
             rebuild.assert_called_once()
             install.assert_not_called()
+            self.app.selected_release = 'v0.4.0-experimental.10.1'
+            self.app.perform_release_action()
+            install.assert_called_once()
 
     def test_current_release_rebuild_queues_separate_build_identity(self):
         source = self.folder/'own.nup'

@@ -39,3 +39,13 @@ class ReleaseChannelTests(unittest.TestCase):
             with self.subTest(preview=preview), patch('dekuforge.releases.github_token', return_value=None), \
                     patch('dekuforge.releases.urlopen', return_value=io.BytesIO(json.dumps(releases).encode())):
                 self.assertEqual([r['version'] for r in list_releases(preview)], expected)
+
+    def test_experimental_switch_is_distinct_from_version_changes(self):
+        preview = '0.4.0-preview.5'
+        experimental = '0.4.0-experimental.10.1'
+        self.assertEqual(release_action('v'+experimental, preview), 'switch_channel')
+        self.assertEqual(release_action('v'+preview, experimental), 'switch_channel')
+        self.assertEqual(release_action('v0.4.0-experimental.11.1', experimental), 'update')
+        self.assertEqual(release_action('v0.4.0-experimental.9.1', experimental), 'downgrade')
+        self.assertEqual(release_action('v'+experimental, experimental), 'rebuild')
+        self.assertTrue(displayed_releases([], experimental)[0]['experimental'])

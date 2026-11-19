@@ -21,7 +21,7 @@ from .i18n import LANGUAGES, MESSAGES, translate
 from .native import prepare_archive
 from .preferences import DEFAULTS, resolve_language
 from .releases import list_releases
-from .update_service import prepare_release, start_worker, newer_version
+from .update_service import prepare_release, start_worker
 from .game_updates import run_rebuild, game_running
 from .build_library import BuildLibrary
 from .home_cards import ActionCard, animate_intro
@@ -31,7 +31,7 @@ from .workflow import BuildRequest, Progress, duration, validate_destination, va
 from .theme import button_feedback, NavigationCanvas, NavigationLogo, PagePanel, ScrolledText
 from .mod_ui import ModsUI
 from .mods import ModLibrary
-from .release_ui import ReleaseListUI
+from .release_ui import ReleaseListUI, release_action
 
 
 class Launcher(ModsUI, ReleaseListUI):
@@ -1218,7 +1218,9 @@ class Launcher(ModsUI, ReleaseListUI):
                 if kind == "release":
                     self.releases = result
                     self.selected_release = result[0]["version"] if result else ""
-                    if result and result[0].get("installable") and self.preferences["auto_update"] and newer_version(result[0]["version"], __version__) and self.automatic_update_allowed(result[0]) and not self.management_busy():
+                    if (result and result[0].get("installable") and self.preferences["auto_update"]
+                            and release_action(result[0]["version"]) == "update"
+                            and self.automatic_update_allowed(result[0]) and not self.management_busy()):
                         self.install_selected_release(automatic=True)
                     self.release_status = self.t("release_found", version=result[0]["version"]) if result else self.t("release_none")
                 else:

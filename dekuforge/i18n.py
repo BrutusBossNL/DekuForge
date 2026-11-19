@@ -322,6 +322,7 @@ _UPDATE_RESULTS = {
     'release_notes_empty': ('No GitHub release notes are available for this version in the selected channel.', 'Voor deze versie zijn geen GitHub-releasenotes beschikbaar in het gekozen kanaal.', 'Fuer diese Version sind in diesem Kanal keine GitHub-Versionshinweise verfuegbar.', 'No hay notas de GitHub para esta version en el canal seleccionado.', 'Aucune note GitHub disponible pour cette version dans le canal choisi.'),
     'release_action_update': ('Install update', 'Update installeren', 'Update installieren', 'Instalar actualizacion', 'Installer la mise a jour'),
     'release_action_downgrade': ('Downgrade', 'Downgraden', 'Aeltere Version installieren', 'Instalar version anterior', 'Installer une version anterieure'),
+    'release_action_switch_channel': ('Switch channel', 'Van kanaal wisselen', 'Kanal wechseln', 'Cambiar de canal', 'Changer de canal'),
     'release_action_rebuild': ('Rebuild for current version', 'Rebuild voor huidige versie', 'Aktuelle Version neu bauen', 'Reconstruir la version actual', 'Reconstruire la version actuelle'),
     'rebuild_close_game': ('Close the game before rebuilding.', 'Sluit het spel voordat je opnieuw bouwt.', 'Schließe das Spiel vor dem Neubau.', 'Cierra el juego antes de volver a compilarlo.', 'Fermez le jeu avant de le recompiler.'),
     'experimental': ('Experimental', 'Experimenteel', 'Experimentell', 'Experimental', 'Expérimental'),
