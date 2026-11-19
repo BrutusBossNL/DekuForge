@@ -16,6 +16,21 @@ from dekuforge.ui import Launcher
 
 @unittest.skipUnless(os.name == "nt", "Windows desktop integration")
 class LauncherWorkflowTests(unittest.TestCase):
+    def test_source_only_preview_links_to_github_without_installing(self):
+        version = "v0.4.0-preview.1"
+        self.app.releases = [{"version": version, "preview": True, "installable": False, "notes": "Source preview"}]
+        self.app.selected_release = version
+        self.app.navigate("updates")
+        self.assertEqual(self.app.release_button.cget("text"), self.app.t("release_action_github"))
+        self.assertIn(self.app.t("release_external_help"), self.app.release_notes.get("1.0", "end"))
+        row = self.app.release_list.selection()[0]
+        self.assertEqual(self.app.release_list.item(row, "values")[-1], self.app.t("release_external"))
+        with (patch("dekuforge.release_ui.webbrowser.open", return_value=True) as browser,
+              patch.object(self.app, "install_selected_release") as install):
+            self.app.release_button.invoke()
+            browser.assert_called_once_with("https://github.com/BrutusBossNL/DekuForge/releases/tag/" + version)
+            install.assert_not_called()
+
     def test_source_only_preview_does_not_block_automatic_stable_update(self):
         self.app.preferences.update(update_channel="preview", auto_update=True)
         self.app.events.put(("release", ("preview", [

@@ -4,8 +4,10 @@ from tkinter import ttk
 from pathlib import Path
 import uuid
 import re
+import webbrowser
 
 from . import COMPONENTS, __version__
+from .releases import REPOSITORY
 from .theme import GOLD, PANEL, TEXT, ScrolledText
 from .update_service import newer_version, version_key
 
@@ -52,8 +54,10 @@ class ReleaseListUI:
         for index, row in enumerate(self.release_rows):
             current = release_action(row['version']) == 'rebuild'
             channel = 'preview' if row.get('preview') else 'stable'
+            status = 'release_current' if current else 'release_external' if not row.get('installable') else None
             self.release_list.insert('', 'end', iid=str(index), values=(row['version'], self.t(channel),
-                self.t('release_current') if current else ''), tags=(channel, 'current' if current else channel))
+                self.t(status) if status else ''),
+                tags=(channel, 'current' if current else channel))
         right = tk.Frame(panel, bg=PANEL)
         right.grid(row=0, column=1, sticky='nsew')
         self.label(right, self.t('release_notes'), 12, GOLD).pack(anchor='w', pady=(0,8))
@@ -77,8 +81,11 @@ class ReleaseListUI:
             return
         row = self.release_rows[int(selection[0])]
         self.selected_release = row['version']
+        action = self.release_row_action(row)
         self.release_notes.configure(state='normal')
         self.release_notes.delete('1.0','end')
+        if action == 'github':
+            self.release_notes.insert('end', self.t('release_external_help') + '\n\n')
         for line in (row.get('notes') or self.t('release_notes_empty')).splitlines():
             heading = line.lstrip().startswith('#')
             if heading:
@@ -94,12 +101,23 @@ class ReleaseListUI:
                 self.release_notes.insert('end','\n')
         self.release_notes.configure(state='disabled')
         self.release_notes.yview_moveto(0)
-        action = release_action(row['version'])
         self.release_button.configure(text=self.t('release_action_'+action),
-            state='normal' if not self.management_busy() and (action == 'rebuild' or row.get('installable')) else 'disabled')
+            state='normal' if not self.management_busy() and version_key(row['version']) else 'disabled')
+
+    @staticmethod
+    def release_row_action(row):
+        action = release_action(row['version'])
+        return 'github' if action != 'rebuild' and not row.get('installable') else action
 
     def perform_release_action(self):
-        if release_action(self.selected_release) == 'rebuild':
+        row = next((row for row in self.release_rows if row['version'] == self.selected_release), None)
+        if not row or not version_key(row['version']) or self.management_busy():
+            return
+        action = self.release_row_action(row)
+        if action == 'github':
+            if not webbrowser.open(f"https://github.com/{REPOSITORY}/releases/tag/{row['version']}"):
+                self.show_error(self.t('release_browser_failed'))
+        elif action == 'rebuild':
             self.rebuild_current_release()
         else:
             self.install_selected_release()

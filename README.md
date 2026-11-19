@@ -52,7 +52,8 @@ update channel to receive it; Stable stays on the 0.2.x line. The frozen 0.2.0
 updater remains supported. The installer hotfix alone does not require rebuilding a game.
 Update results are shown after restart; failures offer a prefilled issue form.
 Updates lists versions with their GitHub release notes, update/downgrade actions
-and a rebuild action for the installed version.
+and a rebuild action for the installed version. Releases without a launcher
+update package, including the independent source preview, link to GitHub.
 Existing games need the
 managed game rebuild after this update to receive the missing libraries. The component terms noted in
 [the publication review](docs/PUBLICATION_REVIEW.md) remain unchanged. Early Access

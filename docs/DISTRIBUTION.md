@@ -73,6 +73,9 @@ the native launcher, interface/source modules, build scripts, branding and the
 uninstaller. A helper waits for the launcher to exit, installs the verified
 package, prepares the selected Python runtime, runs the invisible health check
 and restarts the launcher. Failed application updates retain recovery copies.
+Releases without an updater package are labelled **Via GitHub**. Their
+**View release on GitHub** action opens the download and build instructions.
+Source-only independent previews appear in this category.
 
 Build-tool installation is demand-driven: changing the distributed buildkit does
 not eagerly download every compiler during an application update. The next local

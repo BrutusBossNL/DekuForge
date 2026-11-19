@@ -1134,12 +1134,12 @@ class Launcher(ModsUI, ReleaseListUI):
                 if kind == "release":
                     self.releases = result
                     self.selected_release = result[0]["version"] if result else ""
+                    self.release_status = self.t("release_found", version=result[0]["version"]) if result else self.t("release_none")
                     if self.preferences["auto_update"] and not self.management_busy():
                         available = next((release for release in result if release.get("installable")), None)
                         if available and newer_version(available["version"], __version__) and self.automatic_update_allowed(available):
                             self.selected_release = available["version"]
                             self.install_selected_release(automatic=True)
-                    self.release_status = self.t("release_found", version=result[0]["version"]) if result else self.t("release_none")
                 else:
                     self.release_status = str(result)
                 changed = self.page in ("updates", "home") or changed
