@@ -1,13 +1,9 @@
 # Provenance and reuse
 
-> Independent branch status: the stable backend described below is inherited
-> reference material, not the default build route here. The new original CPU
-> component and reuse gates are documented in [INDEPENDENT_ENGINE.md](docs/INDEPENDENT_ENGINE.md).
-> Existing notices/history remain intact; no blanket relicensing or clean-room
-> claim is made. The independent setup distributes the launcher and build
-> orchestration. It downloads the pinned GPL provider source locally and keeps
-> its license. The inherited stable backend and its runtime patches are omitted
-> from the independent package.
+> Current Windows releases locally build the pinned GPL Hookshot provider with
+> DekuForge adaptations. The original launcher and build tooling use the root
+> MIT license. See the provider notice below for the GPL runtime boundary.
+> The old NX2navi 0.10.1 path is frozen with the 0.3.0 Legacy release.
 
 The independent integer/control-flow/scalar, register-offset and paired-memory
 generator, bounded native
@@ -17,9 +13,9 @@ and behavior facts, not imported runtime code. Unicorn is a separately licensed
 development oracle, not the game's CPU backend. Reuse and measurement scope are
 indexed in [INDEPENDENT_EVIDENCE.md](docs/INDEPENDENT_EVIDENCE.md).
 
-## Active Windows backend and scope of the root license
+## Historical NX2navi backend (0.3.0 Legacy)
 
-The default builder stages NX2navi **0.10.1**, revision
+The retired builder staged NX2navi **0.10.1**, revision
 `5ae55db41c7d11c4e997d2676019939a936e560b`, into ignored
 `build/engine-0.10.1`. Source: https://github.com/tangerineturtle1/NX2navi .
 `dekuforge/stable_engine_source.json` pins the original file hashes;
@@ -38,11 +34,11 @@ keeping this preview private does not change those terms.
 
 `dekuforge/runtime_layer.py` composes the DekuForge UI and scoped custom Cheat
 Manager changes, recorded from fork revision
-`8cb3f1c6c168fd36ff2dc08ecdd606508af10f9a`, over that backend. The original
+`8cb3f1c6c168fd36ff2dc08ecdd606508af10f9a`, over the retired backend. The original
 contributions' scoped grant is retained in
 `engine_overrides/dekuforge_0110/LICENSE-CUSTOM-ADDITIONS`; it does not relicense
 surrounding upstream implementation. The complete patch and its provenance must
-be considered together.
+be considered together. The patch is retained through the Legacy tag and Git history.
 
 The verified official application archive supplies release-only pipeline
 metadata, controller art, tool locks and credits for local preparation. It is
@@ -60,7 +56,7 @@ their accompanying licenses and notices in downloaded installations. The full
 upstream component inventory is in the staged `THIRD_PARTY_NOTICES.md`; do not
 replace it with this overview or infer a common license for all dependencies.
 
-The active build can download NVIDIA DLSS 310.9.1 under the NVIDIA RTX SDKs
+The Legacy build could download NVIDIA DLSS 310.9.1 under the NVIDIA RTX SDKs
 License, pinned by upstream `tools/dlss_pin.py`, with its notice copied beside the
 local game. It is not MIT licensed and is not bundled in our small launcher ZIP.
 Optional SDK features remain subject to their own terms and hardware support.
@@ -104,8 +100,7 @@ they do not import gem5's platform simulator. Source:
 https://github.com/gem5/gem5/blob/9d368896ce119c17e1289dcbb18f33624724b843/src/arch/arm/qarma.cc .
 
 The DekuForge launcher and original archive orchestration are project code.
-The active game build also calls the reused stable upstream builder described
-above. No game-derived output is part of the launcher package.
+The historical game build called the reused upstream builder described above. No game-derived output is part of the launcher package.
 
 ## AV1 decoding dependency
 
@@ -146,7 +141,7 @@ NX2navi installation: `tools/make_game.py --nup --check`, or `--nup --out --msys
 The backend stays external and its license remains unchanged. The adapter is not
 a port of its builder implementation and does not grant rights to the backend.
 
-## Independent branch experiment
+## Active independent Windows backend
 
 The independent Windows launcher bootstrap uses official Astral
 python-build-standalone release 20261110 / CPython 3.14.10 (PSF license and bundled

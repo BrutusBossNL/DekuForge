@@ -100,7 +100,7 @@ int WINAPI wWinMain(HINSTANCE instance,HINSTANCE previous,PWSTR args,int show) {
     LocalFree(argv);
     WNDCLASSW wc={0};wc.lpfnWndProc=window_proc;wc.hInstance=instance;wc.lpszClassName=L"DekuForgeSetup";
     wc.hbrBackground=background;wc.hCursor=LoadCursorW(NULL,IDC_ARROW);wc.hIcon=LoadIconW(instance,MAKEINTRESOURCEW(101));RegisterClassW(&wc);
-    HWND w=CreateWindowW(wc.lpszClassName,L"DekuForge Preview Setup",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,
+    HWND w=CreateWindowW(wc.lpszClassName,L"DekuForge Setup",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,
         (GetSystemMetrics(SM_CXSCREEN)-650)/2,(GetSystemMetrics(SM_CYSCREEN)-350)/2,650,350,NULL,NULL,instance,NULL);
     HFONT font=CreateFontW(-17,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,DEFAULT_CHARSET,0,0,CLEARTYPE_QUALITY,0,L"Segoe UI");
     CreateWindowW(L"STATIC",L"DekuForge - Reforging a legend.",WS_CHILD|WS_VISIBLE,26,22,580,30,w,NULL,instance,NULL);

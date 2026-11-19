@@ -1,15 +1,11 @@
 # DekuForge roadmap
 
-> This is the independent-engine development branch. Its overriding roadmap and
-> equal-or-better acceptance gates are in [INDEPENDENT_ENGINE.md](docs/INDEPENDENT_ENGINE.md).
-> The inherited release roadmap below applies to the stable reference on main.
-> Consult [earlier evidence](docs/INDEPENDENT_EVIDENCE.md) before repeating old
-> renderer experiments. The repository is now public; historical private-release
-> wording below does not describe its current visibility.
+Main uses the independent engine. Windows has a tagged Stable update channel.
+The [engine plan](docs/INDEPENDENT_ENGINE.md) describes compatibility and
+performance gates. The [evidence log](docs/INDEPENDENT_EVIDENCE.md) records
+tested cases. Legacy 0.3.0 remains available as a frozen reference.
 
-This roadmap records planned work, not promises of support or delivery dates.
-The repository remains private until Windows release gates and component
-distribution requirements are satisfied.
+This roadmap records planned work and has no fixed delivery dates.
 
 ## Windows - current priority
 
@@ -27,7 +23,7 @@ distribution requirements are satisfied.
 
 ## Linux
 
-Bring the stable core, portable build-tool provisioning, launcher and Cheat
+Bring the independent engine, portable build-tool provisioning, launcher and Cheat
 Manager to Linux, then validate gameplay and performance against Windows.
 **Contributors wanted specifically for Linux builds, drivers and testing.**
 Source checks passing on Linux do not establish game support.

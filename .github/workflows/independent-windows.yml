@@ -2,7 +2,7 @@ name: Independent Windows packages
 on:
   push:
     branches: [independent]
-    tags: ['v*-preview.*']
+    tags: ['v*']
 permissions:
   contents: read
 jobs:
@@ -21,16 +21,23 @@ jobs:
           python-version: '3.14'
       - run: python -m pip install Pillow==12.0.0
       - name: Stamp commit identity
-        if: github.ref_type == 'branch'
         shell: python
         run: |
-          import json, os
+          import json, os, re
           from pathlib import Path
           path = Path('dekuforge/components.json')
           components = json.loads(path.read_text(encoding='utf-8'))
           launcher = components['launcher']
           base = launcher['version'].split('-', 1)[0]
-          launcher['version'] = f"{base}-experimental.{os.environ['GITHUB_RUN_NUMBER']}.{os.environ['GITHUB_RUN_ATTEMPT']}"
+          if os.environ['GITHUB_REF_TYPE'] == 'tag':
+              tag = os.environ['GITHUB_REF_NAME']
+              if not re.fullmatch(r'v\d+\.\d+\.\d+(-preview\.\d+)?', tag):
+                  raise ValueError(f'Unsupported release tag: {tag}')
+              launcher['version'] = tag.removeprefix('v')
+              launcher['stage'] = 'preview' if '-preview.' in tag else 'stable'
+          else:
+              launcher['version'] = f"{base}-experimental.{os.environ['GITHUB_RUN_NUMBER']}.{os.environ['GITHUB_RUN_ATTEMPT']}"
+              launcher['stage'] = 'experimental'
           launcher['commit'] = os.environ['GITHUB_SHA']
           path.write_text(json.dumps(components, indent=2) + '\n', encoding='utf-8')
           with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as env:
@@ -48,7 +55,7 @@ jobs:
           unpack(archive(base, pin), pin[4], base / pin[5])
       - run: python tools/build_launcher.py --toolchain local/build-tools/hookshot-llvm-20261104/bin
       - run: python tools/build_setup.py --toolchain local/build-tools/hookshot-llvm-20261104/bin
-      - name: Test clean native setup for Preview
+      - name: Test clean native setup for tagged releases
         if: github.ref_type == 'tag'
         run: python tools/test_independent_setup.py --with-tools
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -62,7 +69,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: github.ref_type == 'tag'
         with:
-          name: DekuForge-independent-preview
+          name: DekuForge-independent-release
           path: |
             build/releases/DekuForge-Setup.exe
             build/releases/DekuForge-independent-release.json

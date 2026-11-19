@@ -12,7 +12,7 @@ $rootPath=[IO.Path]::GetFullPath($Root).TrimEnd('\')
 $components=Get-Content -Raw -LiteralPath (Join-Path $rootPath 'dekuforge\components.json') | ConvertFrom-Json
 $registry='HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\DekuForgePreview'
 New-Item -Path $registry -Force | Out-Null
-New-ItemProperty -LiteralPath $registry -Name DisplayName -Value 'DekuForge Preview' -PropertyType String -Force | Out-Null
+New-ItemProperty -LiteralPath $registry -Name DisplayName -Value 'DekuForge' -PropertyType String -Force | Out-Null
 New-ItemProperty -LiteralPath $registry -Name DisplayVersion -Value $components.launcher.version -PropertyType String -Force | Out-Null
 New-ItemProperty -LiteralPath $registry -Name InstallLocation -Value $rootPath -PropertyType String -Force | Out-Null
 New-ItemProperty -LiteralPath $registry -Name UninstallString -Value ('"'+(Join-Path $rootPath 'DekuForge-Uninstall.exe')+'"') -PropertyType String -Force | Out-Null

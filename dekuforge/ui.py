@@ -188,7 +188,8 @@ class Launcher(ModsUI, ReleaseListUI):
             selected = self.page == name
             self.button(self.sidebar, self.t(name), lambda value=name: self.navigate(value),
                         primary=selected, anchor="w").pack(fill="x", padx=16, pady=5)
-        stage = {"early-access": "early_access", "preview": "preview_release"}.get(COMPONENTS["launcher"].get("stage"), "development")
+        stage = {"early-access": "early_access", "preview": "preview_release", "stable": "stable",
+                 "experimental": "experimental"}.get(COMPONENTS["launcher"].get("stage"), "development")
         self.label(self.sidebar, f"{self.t(stage)}\n{__version__}", 9, MUTED).pack(side="bottom", padx=22, pady=24)
 
     def navigate(self, page):

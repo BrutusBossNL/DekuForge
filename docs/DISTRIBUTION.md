@@ -1,16 +1,17 @@
 # Local builds and launcher distribution
 
-The independent Windows Preview setup installs side by side with Stable. It
-uses `DekuForge-independent-release.json` to identify compatible packages.
-The experimental gameplay scope is documented in
-[INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md).
+The independent Windows installer configures the same source-based backend on
+Stable and Preview. The frozen NX2navi-based 0.3.0 Legacy release is a separate
+installation. The launcher identifies compatible Windows packages with
+`DekuForge-independent-release.json`.
 
-Preview downloads a verified launcher package. Experimental selects the
-Windows artifacts of successful pushes to `independent`, using the GitHub
-Actions digest and the package's embedded commit identity. Expired artifacts
-drop out of the list. No release tag is required. GitHub CLI sign-in or a
-token with Actions read permission is required to download those artifacts.
-Independent and main packages cannot replace each other in-place.
+Experimental selects Windows artifacts of successful pushes to `independent`,
+using the GitHub Actions digest and the embedded commit identity. Expired
+artifacts drop out of the list. GitHub CLI sign-in or a token with Actions read
+permission is required. Tag Stable and Preview from the same source commit
+when promoting the same changes. Each package embeds its own version and the
+same commit identity as the corresponding Experimental artifact. The tagged
+Windows jobs validate a clean install before publication.
 
 Changes limited to the launcher skip the game build. Engine inputs and build
 tool changes queue a local rebuild. A compatible installed build keeps its
@@ -19,7 +20,7 @@ recomputed by the pinned provider. A new provider revision may require a
 separate build and save import.
 
 The repository retains the latest 10 published stable releases and 15
-published previews. Git tags and drafts are retained. Experimental artifacts
+published previews. Legacy `v0.3.0` is permanently exempt. Git tags and drafts are retained. Experimental artifacts
 expire after 14 days and are outside the release counts.
 
 Distribute the small Windows launcher package, not a built game. The package

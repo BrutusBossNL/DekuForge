@@ -636,12 +636,89 @@ static int move_stick_held;''')
             f'    if (getenv("DEKUFORGE_WORLD_DATA")) snprintf({target}, {capacity}, "%s/{file}", getenv("DEKUFORGE_WORLD_DATA"));\n'
             f'    else snprintf({target}, {capacity}, "%sprompts/{file}", dir);')
     files['prompts.c'] = prompts
+    memory = (source / 'gpu/vk/vk_memory.cpp').read_text(encoding='utf-8')
+    start = memory.index('        for (uint8_t* q = ptr; q < ptr + bytes;) {', memory.index('bool import_pool('))
+    end = memory.index('#ifdef __linux__', start)
+    memory = _replace(memory, memory[start:end], '''        for (uint8_t* q = ptr; q < ptr + bytes;) {
+            MEMORY_BASIC_INFORMATION mi{};
+            if (VirtualQuery(q, &mi, sizeof mi) != sizeof mi || mi.State == MEM_FREE) {
+                import_result = VK_ERROR_INVALID_EXTERNAL_HANDLE;
+                import_remember_failure(lo, hi);
+                return false;
+            }
+            uint8_t* end = std::min((uint8_t*)mi.BaseAddress + mi.RegionSize, ptr + bytes);
+            if (mi.State == MEM_RESERVE && VirtualAlloc(q, (size_t)(end - q), MEM_COMMIT, PAGE_READWRITE) != q) {
+                import_result = VK_ERROR_OUT_OF_HOST_MEMORY;
+                import_remember_failure(lo, hi);
+                return false;
+            }
+            q = end;
+        }
+''')
+    start = memory.index("    // (the host allocations' memory type: the same for every pointer")
+    end = memory.index('    VkExternalMemoryBufferCreateInfo eb', start)
+    memory = _replace(memory, memory[start:end], '''    VkMemoryHostPointerPropertiesEXT hp{VK_STRUCTURE_TYPE_MEMORY_HOST_POINTER_PROPERTIES_EXT};
+    import_result = vkGetMemoryHostPointerPropertiesEXT(
+        dev.device, VK_EXTERNAL_MEMORY_HANDLE_TYPE_HOST_ALLOCATION_BIT_EXT, ptr, &hp);
+    if (import_result != VK_SUCCESS) {
+        import_remember_failure(lo, hi);
+        return false;
+    }
+    t1 = clk::now();
+''')
+    memory = _replace(memory, '''    if (vkCreateBuffer(dev.device, &bi, nullptr, &p.buffer) != VK_SUCCESS) {
+        import_remember_failure(lo, hi);
+        return false;
+    }
+    t2 = clk::now();''', '''    import_result = vkCreateBuffer(dev.device, &bi, nullptr, &p.buffer);
+    if (import_result != VK_SUCCESS) {
+        import_remember_failure(lo, hi);
+        return false;
+    }
+    VkMemoryRequirements requirements{};
+    vkGetBufferMemoryRequirements(dev.device, p.buffer, &requirements);
+    const uint32_t types = requirements.memoryTypeBits & hp.memoryTypeBits;
+    constexpr VkMemoryPropertyFlags coherent = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+    uint32_t type = UINT32_MAX;
+    for (uint32_t i = 0; i < dev.memory.memoryTypeCount; ++i) {
+        if ((types & (1u << i)) && (dev.memory.memoryTypes[i].propertyFlags & coherent) == coherent) {
+            type = i;
+            break;
+        }
+    }
+    if (type == UINT32_MAX || requirements.size > bytes) {
+        destroy_import_buffer(p.buffer);
+        p.buffer = VK_NULL_HANDLE;
+        import_result = VK_ERROR_INVALID_EXTERNAL_HANDLE;
+        import_remember_failure(lo, hi);
+        return false;
+    }
+    t2 = clk::now();''')
+    files['vk_memory.cpp'] = memory
+    textures = (source / 'gpu/vk/vk_texture.cpp').read_text(encoding='utf-8')
+    textures = _replace(textures, '''    static const uint64_t v = getenv("RX_VK_COMMIT_RESERVE_MB") ? (uint64_t)std::max(0, atoi(getenv("RX_VK_COMMIT_RESERVE_MB"))) << 20
+                                                                : 2560ull << 20;''', '''    static const uint64_t v = []() -> uint64_t {
+        constexpr uint64_t default_reserve = 2560ull << 20;
+        if (const char* override_mb = getenv("RX_VK_COMMIT_RESERVE_MB"))
+            return (uint64_t)std::max(0, atoi(override_mb)) << 20;
+#if defined(_WIN32)
+        if (dev.props.vendorID == 0x1002) {
+            MEMORYSTATUSEX status{};
+            status.dwLength = sizeof status;
+            if (GlobalMemoryStatusEx(&status))
+                return std::clamp<uint64_t>(status.ullTotalPageFile / 8, default_reserve, 8192ull << 20);
+        }
+#endif
+        return default_reserve;
+    }();''')
+    files['vk_texture.cpp'] = textures
     mapping, records = {}, {}
     origins = {'vk_ui.h': 'gpu/vk/vk_ui.h', 'vk_menu.cpp': 'gpu/vk/vk_menu.cpp',
                'display.c': 'host/display.c', 'vk_draw.cpp': 'gpu/vk/vk_draw.cpp',
                'nn_hid.c': 'host/nn_hid.c', 'hos_main.c': 'host/hos_main.c', 'pad_sdl.c': 'host/pad_sdl.c',
                'nn_applet.c': 'host/nn_applet.c', 'vk_menu_i18n.cpp': 'gpu/vk/vk_menu_i18n.cpp',
-               'vk_replay.cpp': 'gpu/vk/vk_replay.cpp', 'prompts.c': 'host/prompts.c'}
+               'vk_replay.cpp': 'gpu/vk/vk_replay.cpp', 'prompts.c': 'host/prompts.c',
+               'vk_memory.cpp': 'gpu/vk/vk_memory.cpp', 'vk_texture.cpp': 'gpu/vk/vk_texture.cpp'}
     for name, text in files.items():
         path = output / name
         if path.exists() and (path.is_symlink() or getattr(path, 'is_junction', lambda: False)()):

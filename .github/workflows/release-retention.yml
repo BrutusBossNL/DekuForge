@@ -1,0 +1,36 @@
+name: Release retention
+on:
+  release:
+    types: [published]
+  schedule:
+    - cron: '21 4 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: release-retention
+  cancel-in-progress: false
+jobs:
+  retain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Retain the newest 10 stable and 15 preview releases
+        shell: python
+        run: |
+          import json, os, subprocess
+          repo = os.environ['GH_REPO']
+          pages = json.loads(subprocess.check_output(
+              ['gh', 'api', '--paginate', '--slurp', f'repos/{repo}/releases?per_page=100']))
+          releases = sorted(
+              (r for page in pages for r in page if r['tag_name'] != 'v0.3.0' and not r['draft'] and r.get('published_at')),
+              key=lambda r: (r['published_at'], r['id']), reverse=True)
+          for preview, count in ((False, 10), (True, 15)):
+              channel = [r for r in releases if r['prerelease'] == preview]
+              for release in channel[count:]:
+                  print(f"Deleting release {release['tag_name']} ({release['id']}); retaining its tag", flush=True)
+                  subprocess.run(['gh', 'api', '--method', 'DELETE',
+                                  f"repos/{repo}/releases/{release['id']}"], check=True)

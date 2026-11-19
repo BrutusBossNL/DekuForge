@@ -2,8 +2,12 @@
 import locale
 import os
 
+from . import COMPONENTS
+
+stage = COMPONENTS['launcher'].get('stage')
 DEFAULTS = {"language": "system", "check_updates": True, "hide_playing": True,
-            "auto_update": False, "keep_cache": True, "update_channel": "preview"}
+            "auto_update": False, "keep_cache": True,
+            "update_channel": stage if stage in {'stable', 'experimental'} else 'preview'}
 
 
 def system_locale():

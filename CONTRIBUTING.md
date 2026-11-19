@@ -1,19 +1,15 @@
 # Contributing to DekuForge
 
-For the `independent` branch, start with
-[INDEPENDENT_ENGINE.md](docs/INDEPENDENT_ENGINE.md). This branch must meet or exceed
-main's results before replacing it. Record provenance for reused code and accept
-only identified open-source/redistribution grants. Do not port restricted code
-by changing its style, names or layout. The inherited main-specific details below
-describe the reference release path. The independent Windows setup and update
-channels have their own [distribution guide](docs/DISTRIBUTION.md). Use the
-[developer build instructions](docs/OPEN_ENGINE_EVALUATION.md) for source work.
+Develop against the independent engine on `main`. Use
+[the Windows source-build guide](docs/OPEN_ENGINE_EVALUATION.md) and
+[distribution guide](docs/DISTRIBUTION.md). The `independent` branch supplies
+Experimental commit packages. DekuForge 0.3.0 is the frozen NX2navi-based Legacy
+release.
 
-Thank you for helping. Main uses NX2navi 0.10.1 as its stable foundation; this
-branch evaluates a separately licensed GPL runtime and uses main as a behavioral
-reference. Preserve credits and notices
-for upstream and other reused components. Original contributions use the root
-license; third-party components retain their own terms.
+Record provenance for reused code and preserve credits and component notices.
+Original contributions use the root MIT license. The pinned Hookshot provider
+and its adaptations use their own GPL terms. Only reuse material with a verified
+open-source license or redistribution grant.
 
 Issues, documentation, reproducible bug reports, performance measurements and
 pull requests are welcome. We aim to acknowledge or review within **48 hours**;

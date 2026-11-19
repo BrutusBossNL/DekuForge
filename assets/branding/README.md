@@ -27,3 +27,7 @@ three home action cards follow. Hover and keyboard focus highlight action cards.
 `home-actions.png` is the owner-provided triptych; its derived `home-play.png`,
 `home-update.png` and `home-build.png` supply the separate action cards.
 Pillow enables this artwork; without it the launcher retains its plain theme.
+
+Stable, Preview and Experimental builds of the independent launcher use the
+same branding assets. The Windows package displays the installed launcher
+channel and version in the sidebar.

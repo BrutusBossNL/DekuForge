@@ -1,12 +1,9 @@
 # Independent engine: implementation and acceptance
 
-This branch develops alongside main. Its original CPU prototype is incomplete.
-The Windows Preview installer sets up the separately evaluated provider in its
-own installation.
-Main's stable 0.10.1-based game supplies behavior/performance evidence, not an
-automatic source-code dependency. No existing user game or save is part of a test.
-Consult [INDEPENDENT_EVIDENCE.md](INDEPENDENT_EVIDENCE.md) before repeating earlier
-investigations; it records reusable work, failed approaches and measurement scope.
+Main uses the independent Windows build through the pinned GPL Hookshot provider.
+The original CPU prototype described below remains an incomplete development
+component. Legacy 0.3.0 supplies historical behavior and performance evidence.
+Consult [INDEPENDENT_EVIDENCE.md](INDEPENDENT_EVIDENCE.md) for scoped validation.
 
 ## Initial code and provenance inventory
 

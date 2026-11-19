@@ -4,54 +4,34 @@ Reforging a legend. An independent desktop launcher and local game-build project
 The project's original source is open source under the root MIT license.
 
 
-## Independent branch overrides
+## Engine and branches
 
-This branch is `independent`, not the stable main build. The default backend is
-`dekuforge/independent_engine.py`; never fall back to the old 0.3.10 or stable
-0.10.1 engine. Ship the independent launcher in a separate Preview installation
-with its own descriptor and Experimental commit packages. Stable components and
-historical runtime patches stay outside these packages.
-The independent Windows launcher now has an official hash-pinned standalone
-Python/Tk/Pillow bootstrap. Generic build wheels may be provisioned into that
-owned interpreter only; never modify external Python automatically.
-Use the stable main game as a behavioral/performance reference only. Reuse only
-code with a recorded open-source or redistribution grant; comply with its terms.
-Rewriting, renaming or restructuring restricted code is not provenance clearance.
-Record source, revision, scope, license and validation for every imported part.
-The separately licensed GPL runtime candidate pinned in
-`docs/INDEPENDENT_ENGINE.md` may be built in ignored experiment directories.
-It is not an approved production backend until the gameplay acceptance gates
-pass. Preserve its GPL/MIT notices and document any local adaptations.
+The independent builder is the release backend on `main`. The `independent`
+branch publishes Experimental commit packages. Stable and Preview release
+packages are tagged from the independent source and carry its component IDs.
+Protect `v0.3.0` as the final NX2navi-based Legacy release.
 
-Do not claim clean-room provenance: this branch inherits repository history and
-contributors may have seen reference source. The historical source and notices
-below remain for audit, not as approved inputs to the new implementation. See
-`docs/INDEPENDENT_ENGINE.md`. Equal or better results than main are the acceptance
-gate, not an achieved property of this initial branch. Keep current games/saves
-and main's runtime, preferences and tools outside branch experiments.
+Use the pinned GPL Hookshot source and preserve its notices. Do not re-enable
+the Legacy engine, fetch its proprietary additions, or reintroduce its runtime
+patches into a release. Only reuse code with an identified open-source or
+redistribution grant. Record source, revision, scope, license and validation
+for every imported component. The historical source and notices serve audit
+and behavioral reference. Do not claim clean-room provenance.
 
-Before investigating a subsystem, consult `docs/INDEPENDENT_EVIDENCE.md` and its
-linked historical measurements. Reuse unchanged original components and scoped
-results; do not repeat rejected renderer workarounds without new evidence.
-Never reuse gameplay acceptance for another renderer/build or run legacy
-harnesses against main's installed game. Keep main stable; all experiments stay
-in this worktree's ignored output directories.
-
-The Architecture section below describes the inherited main route. These branch
-overrides take precedence wherever they conflict with that historical route.
+Before investigating a subsystem, consult
+[the evidence log](docs/INDEPENDENT_EVIDENCE.md). Record measurable gameplay
+results with exact revisions, drivers and scenarios. Scope claims to the
+tested hardware. Keep game inputs, generated game outputs, shader data and
+user saves in local ignored paths. Ship only the verified packaging allowlist.
 
 ## Architecture
 
-- The base game backend is stable 0.10.1, pinned in `dekuforge/stable_engine.py`.
-- Compose owned UI and cheats through `dekuforge/runtime_layer.py`; keep the
-  stable renderer unchanged. Component versions belong in `dekuforge/components.json`.
-- Ship only the launcher/tooling allowlist; never include local game build results.
-- `tools/build_stable_translator.py` builds its unmodified shader translation logic.
-- Include the separately verified 0.10.1 release pipeline data and controller art;
-  the Git source checkout alone lacks these inputs and produced incomplete first-play frames.
-- Test ordinary startup: `--shot` disables asynchronous pipeline work and cannot
-  establish ordinary Play behavior. Preserve measured graphics preferences.
-- Follow `docs/STABLE_ENGINE_MIGRATION.md`; the old `engine/` import is diagnostic history.
+- `dekuforge/independent_engine.py` and `open_game_build.py`: the local build
+  entry and pinned provider orchestration.
+- `dekuforge/open_engine_branding.py` and `engine_overrides/independent/`:
+  scoped UI, gameplay and runtime adaptations.
+- `dekuforge/components.json`: launcher, engine, tool and update identities.
+- `tools/prepare_installation.py`: pinned Windows runtime and build tools.
 
 - `dekuforge/core.py`: installation selection and local preferences.
 - `dekuforge/nup.py`: bounded NUP v1 parsing and verified streaming reads.

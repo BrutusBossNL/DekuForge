@@ -1,9 +1,12 @@
 <p align="center"><img src="assets/branding/logo.png" alt="DekuForge" width="600"></p>
 
-# DekuForge: independent engine development
+# DekuForge
 
-**Reforging a legend.** This is the `independent` branch. The existing working
-Windows build remains on [main](https://github.com/BrutusBossNL/DekuForge/tree/main).
+**Reforging a legend.** DekuForge builds a local Windows game from your own
+game archive. Main uses the independent build path with the pinned GPL Hookshot
+engine and DekuForge's launcher and runtime adaptations. Thanks to the NX2navi
+contributors for the original reference and to the Hookshot contributors for
+their work on the engine.
 
 > [!IMPORTANT]
 > No ROMs, game assets, keys, generated game source or compiled games are supplied.
@@ -11,14 +14,16 @@ Windows build remains on [main](https://github.com/BrutusBossNL/DekuForge/tree/m
 
 ## Current status
 
-This branch starts the replacement of the NX2navi-dependent build path with an
-original implementation and explicitly approved, redistributable components.
-The engine replacement is planned so future releases can use engine components
-with clear open-source and redistribution rights. This Windows preview is for
-testing the migration.
-**A source-built experimental Windows game runs locally. The complete NUP build
-route is available through the Preview setup or the developer build guide.
-Full gameplay parity with main is still under evaluation.**
+Windows is the current release platform. The **Stable** channel now ships
+the independent launcher, build tools and source-based engine path. Preview
+and Experimental are for testing. Gameplay parity with the retired engine and
+full coverage on AMD hardware are still under evaluation.
+
+The last NX2navi-based release is [DekuForge 0.3.0 Legacy](https://github.com/BrutusBossNL/DekuForge/releases/tag/v0.3.0).
+It is retained for existing users as a frozen release. All new development
+and releases use the independent build path.
+
+## Features
 
 - The default independent backend reports its real capabilities with `--doctor`.
 - Original NUP inspection, package selection, verified module preparation and the
@@ -30,7 +35,7 @@ Full gameplay parity with main is still under evaluation.**
 - A guest-memory prototype loads verified NSO segments and bounded MOD0/ELF
   symbol and RELA/RELR pointer relocations; synthetic cross-module calls execute.
   Read-only module analysis reuses extracted inputs without rebuilding them.
-- Main's original mod manager, release list/notes and update outcome reporting
+- DekuForge's mod manager, release list/notes and update outcome reporting
   are retained. Asset-mod order and On/Off selections now reach the independent
   runtime through verified snapshots. Code-mod builds remain disabled.
 - Two pinned, separately licensed GPL providers have been evaluated. The first
@@ -40,17 +45,16 @@ Full gameplay parity with main is still under evaluation.**
   [scoped measurements](docs/INDEPENDENT_EVIDENCE.md). Full gameplay acceptance
   remains outstanding. The
   [experimental Windows build guide](docs/OPEN_ENGINE_EVALUATION.md) covers
-  pinned generic tools, source compilation and explicit launcher opt-in.
+  pinned generic tools and compilation from source.
 - No automatic fallback to the old experimental 0.3.10 or stable 0.10.1 renderer.
-- FSR 3.1 is native to the preview renderer. FSR 4 requires AMD's separate
+- FSR 3.1 is supported by the renderer. FSR 4 requires AMD's separate
   runtime and a supported GPU. The Windows build guide explains the opt-in.
-- NX2navi runtime/tool downloads and main-channel app updates are excluded.
-  The independent provisioner downloads verified generic tools;
-  the selected GPL engine and AV1 decoder are compiled from source.
+- The provisioner downloads verified generic tools. The pinned GPL engine and
+  AV1 decoder are compiled locally from source.
 
 The independent Windows bootstrap provisions official generic Python 3.14.10/Tk
 and hash-pinned Pillow in this checkout. The locally compiled `DekuForge.exe`
-uses that runtime without depending on main's interpreter. A development
+uses that runtime for the launcher. A development
 Python is also supported for source commands. `run_builder.py --doctor` reports
 independent capabilities; `--prepare` prepares modules only and is not a game.
 With the experimental builder configured, **Updates → Rebuild for current
@@ -58,16 +62,40 @@ version** starts a local game build and opens its progress and log view.
 
 ## Install or update on Windows
 
-Run `DekuForge-Setup.exe` from an installable independent Preview release and
-choose a separate folder. Setup provisions Python, the pinned build tools and the
-licensed engine source. Then select your own NUP in **Build game**. Updates on
-**Preview** use the independent release package. **Experimental** uses checked
-commits built by GitHub Actions without a release tag. Experimental downloads
-require GitHub CLI sign-in or a token with Actions read access.
-To move between Preview and Experimental, select a build and choose **Switch
-channel**. This switch requires confirmation even with automatic updates enabled.
+Download `DekuForge-Setup.exe` from [Releases](https://github.com/BrutusBossNL/DekuForge/releases)
+and choose an installation folder. Setup provisions Python, the pinned build
+tools and licensed engine source. Keep a Legacy installation in a separate
+folder. Select your own NUP in **Build game** and use **Saves** to import
+progress from a previous installation.
 
-## Known experimental limits
+- **Stable** installs tagged independent Windows releases.
+- **Preview** also lists tagged prereleases.
+- **Experimental** offers checked commits from the `independent` branch via
+  GitHub Actions for 14 days. Downloads require a GitHub CLI sign-in or a token
+  with Actions read access. A Preview and an Experimental build from the same
+  commit carry the same engine changes.
+
+Switches into or out of Experimental need confirmation. A launcher-only
+update skips the game build, and an engine update reuses compatible local
+build caches. Windows SmartScreen can prompt about the unsigned installer.
+To uninstall, open **Installed apps** in Windows or run
+`DekuForge-Uninstall.exe` from the installation folder. The uninstaller offers to keep
+a backup of your saves. Your input game archive stays in place.
+
+## Building from source
+
+Follow the [Windows source-build guide](docs/OPEN_ENGINE_EVALUATION.md) for
+the compiler, tool provisioning, and local build. Build outputs and caches stay
+in ignored directories. Run `python tools/check_source.py --tracked` and the
+source tests before contributing.
+
+## Known issues
+
+The legacy reports for Hyrule Town and Lon Lon Ranch document a Radeon
+RX 9070 XT configuration. The independent engine validates Vulkan imports and
+reclaims cached textures earlier under Windows memory pressure. The original
+reports still need confirmation on that AMD setup. Report new issues through
+the launcher, including from its crash prompt.
 
 The Windows game builder saves the Vulkan pipeline cache beside the game during
 its final validation step. With that cache and a warm NVIDIA driver cache, two
@@ -115,17 +143,13 @@ and Linux/iOS gameplay remain open.
 Reuse only components with an identified open-source license or redistribution
 grant, preserving all applicable notices. Changing names or structure does not
 remove upstream terms. Original project code remains MIT licensed. The inherited
-engine and historical patches remain available for provenance review, not as
-blanket-approved inputs to the new backend. This branch also inherits Git history;
+legacy patches are recorded in Git history for provenance review. The repository also inherits Git history;
 it is not presented as a clean-room or fully cleared codebase.
 
-The goal is **at least main's stability, rendering, timing and performance**.
-Main remains the reference until the independent implementation passes the same
-scenarios. See [INDEPENDENT_ENGINE.md](docs/INDEPENDENT_ENGINE.md) for the component
-inventory, acceptance gates and contributor work. Windows comes first; Linux and
-iOS testing contributors are welcome after the desktop core is ready.
-Earlier failed approaches and reusable measurements are indexed in
-[INDEPENDENT_EVIDENCE.md](docs/INDEPENDENT_EVIDENCE.md); main remains untouched.
+We welcome issues and pull requests and aim to respond or review within 48 hours,
+subject to volunteer availability. See [CONTRIBUTING.md](CONTRIBUTING.md) and the
+[roadmap](roadmap.md) for Linux, iOS and VR plans. Linux and iOS build and
+testing contributors are especially welcome.
 
 This is a non-commercial hobby project. We oppose piracy, encourage purchasing
 the game/console and do not provide dump/acquisition instructions. We are not

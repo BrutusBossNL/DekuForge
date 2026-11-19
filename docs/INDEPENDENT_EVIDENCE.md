@@ -1,10 +1,9 @@
 # Reusing earlier evidence without repeating failed experiments
 
-This ledger carries forward earlier results. It does not turn old logs, source
-tests or screenshots into acceptance of the independent engine. The stable
-`main` branch and its installed games remain unchanged. Do not run old harnesses
-against those installations: several write settings, captures or profiles. Read
-existing records; use isolated copies for future gameplay tests.
+This ledger records measurements on explicit hardware and revisions. The
+NX2navi-based 0.3.0 Legacy release is historical. Its results do not establish
+independent-engine acceptance. Use isolated copies of profiles with test
+harnesses.
 
 ## Established results
 
@@ -397,3 +396,18 @@ The native Windows build linked successfully and reached gameplay on an
 RTX 2080. Its control bridge read the fishing setting as off by default and
 accepted both off and on while gameplay was active. The copied test profile
 left the baseline save hashes unchanged.
+
+## 2026-11-19: Windows Vulkan memory hardening
+
+Legacy reports #5 and #7 show `0xC0000409` on the same Radeon RX 9070 XT.
+The Hyrule Town report includes rejected external memory imports. The Lon Lon
+Ranch reload report shows low Windows commit headroom after a texture burst.
+These observations support investigating both paths without establishing a
+shared cause or driver-specific regression.
+
+The independent renderer validates the backing range and Vulkan buffer memory
+types for every imported host allocation, and records Vulkan failures for
+the existing retry path. On Windows Radeon devices the existing texture
+reclaimer starts responding at 12.5% of the commit budget, bounded to
+2,560?8,192 MiB. Users with an explicit override keep their own value. Affected
+Radeon hardware still needs a retest.

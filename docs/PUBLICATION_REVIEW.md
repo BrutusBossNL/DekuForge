@@ -1,10 +1,9 @@
 # First Early Access publication review
 
-Target: DekuForge 0.2.0 — Early Access. The owner has requested public release.
-The owner subsequently made the repository public separately. That visibility
-change does not resolve the findings below. The `independent` branch now starts
-replacing the dependencies identified here; it is not yet a cleared replacement
-engine. See [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md).
+> Historical review of the pre-cutover NX2navi-based release path. DekuForge
+> 0.3.0 is now frozen as Legacy. Current releases use the pinned GPL Hookshot
+> provider and omit the retired runtime patch. This document preserves the
+> findings about the older path and its historical terms.
 
 ## Content and validation
 

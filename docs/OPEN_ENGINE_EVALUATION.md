@@ -1,8 +1,8 @@
 # Licensed engine evaluation
 
-This guide covers the developer build route on `independent`. The Preview
-installer configures the same experimental Windows builder in its own folder.
-Gameplay parity with main remains under evaluation.
+This guide covers the independent Windows source build on main. Stable and
+Preview installers provision the same backend. Gameplay parity with Legacy
+remains under evaluation.
 
 `tools/evaluate_open_engine.py` evaluates the GPL Hookshot provider pinned in
 `dekuforge/hookshot_source.json`. Source archive and individual Git blob checks
