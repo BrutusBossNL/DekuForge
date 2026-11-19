@@ -2,6 +2,8 @@ name: Release retention
 on:
   release:
     types: [published]
+  schedule:
+    - cron: '21 4 * * *'
   workflow_dispatch:
 permissions:
   contents: write
