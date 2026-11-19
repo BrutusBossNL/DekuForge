@@ -12,13 +12,19 @@ function Local-Path([string]$Path) {
     }
     return $resolved
 }
+function File-Sha256([string]$Path) {
+    $algorithm=[Security.Cryptography.SHA256]::Create()
+    $stream=[IO.File]::OpenRead($Path)
+    try { return [BitConverter]::ToString($algorithm.ComputeHash($stream)).Replace('-','').ToLowerInvariant() }
+    finally { $stream.Dispose(); $algorithm.Dispose() }
+}
 function Fetch-Pinned($Pin,[string]$Name) {
     if ($Pin.sha256 -notmatch '^[0-9a-f]{64}$' -or $Pin.size -lt 1 -or $Pin.size -gt 100MB) { throw 'Invalid generic runtime pin' }
     $file=Local-Path (Join-Path $cache $Name)
-    if (-not ((Test-Path -LiteralPath $file) -and (Get-Item -LiteralPath $file).Length -eq $Pin.size -and (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant() -eq $Pin.sha256)) {
+    if (-not ((Test-Path -LiteralPath $file) -and (Get-Item -LiteralPath $file).Length -eq $Pin.size -and (File-Sha256 $file) -eq $Pin.sha256)) {
         $partial=Local-Path ($file+'.part')
         Invoke-WebRequest -UseBasicParsing -Uri $Pin.url -OutFile $partial
-        if ((Get-Item -LiteralPath $partial).Length -ne $Pin.size -or (Get-FileHash -LiteralPath $partial -Algorithm SHA256).Hash.ToLowerInvariant() -ne $Pin.sha256) { throw 'Generic runtime checksum mismatch' }
+        if ((Get-Item -LiteralPath $partial).Length -ne $Pin.size -or (File-Sha256 $partial) -ne $Pin.sha256) { throw 'Generic runtime checksum mismatch' }
         Move-Item -LiteralPath $partial -Destination $file -Force
     }
     return $file
