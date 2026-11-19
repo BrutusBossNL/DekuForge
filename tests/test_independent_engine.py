@@ -48,13 +48,15 @@ class IndependentContractTests(unittest.TestCase):
         self.assertEqual(decode(0x91000400).operation, 'add')
         self.assertIn('UINT64_C(18446744073709486080)', emit_c([0xf2800000]))
 
-    def test_packaging_and_vendor_tool_preparation_are_blocked(self):
-        from tools import build_setup, prepare_installation, package_launcher
-        with self.assertRaisesRegex(RuntimeError, 'not ready'): build_setup.main()
-        with patch('dekuforge.stable_engine.stage_stable') as vendor:
-            with self.assertRaisesRegex(RuntimeError, 'No NX2navi'): prepare_installation.main()
-            vendor.assert_not_called()
-        with self.assertRaisesRegex(ValueError, 'not a distributable'): package_launcher.package()
+    def test_setup_prepares_only_the_independent_builder(self):
+        from tools import prepare_installation
+        with (patch('dekuforge.stable_engine.stage_stable') as vendor,
+              patch('tools.prepare_installation.subprocess.run') as provision):
+            prepare_installation.main()
+        vendor.assert_not_called()
+        command = provision.call_args.args[0]
+        self.assertEqual(Path(command[2]).name, 'provision_open_tools.py')
+        self.assertIn('--configure-launcher', command)
 
     def test_native_c_matches_independent_arm64_oracle(self):
         compiler = os.environ.get('DEKUFORGE_TEST_CC') or shutil.which('clang') or shutil.which('cc')

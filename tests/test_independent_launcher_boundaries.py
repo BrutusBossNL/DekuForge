@@ -30,14 +30,14 @@ class IndependentLauncherBoundaries(unittest.TestCase):
     def fake(self):
         return SimpleNamespace(page='home', t=lambda key: key, render=Mock())
 
-    def test_branch_identity_keeps_updates_disabled(self):
+    def test_branch_identity_enables_independent_updates(self):
         self.assertEqual(COMPONENTS['engine']['backend'], 'independent')
-        self.assertFalse(COMPONENTS['launcher']['updates'])
+        self.assertTrue(COMPONENTS['launcher']['updates'])
         self.assertFalse(COMPONENTS['engine']['playable'])
 
     def test_update_actions_return_before_network_worker_or_install(self):
         app = self.fake()
-        with patch('dekuforge.ui.list_releases') as fetch, patch('dekuforge.ui.prepare_release') as install:
+        with patch.dict(COMPONENTS['launcher'], updates=False), patch('dekuforge.ui.list_releases') as fetch, patch('dekuforge.ui.prepare_release') as install:
             Launcher.check_updates(app)
             Launcher.install_selected_release(app)
         fetch.assert_not_called()

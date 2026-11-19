@@ -88,7 +88,7 @@ static LRESULT CALLBACK window_proc(HWND w,UINT msg,WPARAM wp,LPARAM lp) {
 int WINAPI wWinMain(HINSTANCE instance,HINSTANCE previous,PWSTR args,int show) {
     (void)previous;(void)args;(void)show;app=instance;CoInitializeEx(NULL,COINIT_APARTMENTTHREADED);
     background=CreateSolidBrush(RGB(12,30,19));
-    wchar_t initial[32768];SHGetFolderPathW(NULL,CSIDL_LOCAL_APPDATA,NULL,0,initial);wcscat(initial,L"\\Programs\\DekuForge");
+    wchar_t initial[32768];SHGetFolderPathW(NULL,CSIDL_LOCAL_APPDATA,NULL,0,initial);wcscat(initial,L"\\Programs\\DekuForge Preview");
     int argc;wchar_t **argv=CommandLineToArgvW(GetCommandLineW(),&argc);
     for(int i=1;i<argc;i++) {
         if(!_wcsicmp(argv[i],L"/SILENT")) silent_mode=1;
@@ -100,7 +100,7 @@ int WINAPI wWinMain(HINSTANCE instance,HINSTANCE previous,PWSTR args,int show) {
     LocalFree(argv);
     WNDCLASSW wc={0};wc.lpfnWndProc=window_proc;wc.hInstance=instance;wc.lpszClassName=L"DekuForgeSetup";
     wc.hbrBackground=background;wc.hCursor=LoadCursorW(NULL,IDC_ARROW);wc.hIcon=LoadIconW(instance,MAKEINTRESOURCEW(101));RegisterClassW(&wc);
-    HWND w=CreateWindowW(wc.lpszClassName,L"DekuForge Setup",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,
+    HWND w=CreateWindowW(wc.lpszClassName,L"DekuForge Preview Setup",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,
         (GetSystemMetrics(SM_CXSCREEN)-650)/2,(GetSystemMetrics(SM_CYSCREEN)-350)/2,650,350,NULL,NULL,instance,NULL);
     HFONT font=CreateFontW(-17,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,DEFAULT_CHARSET,0,0,CLEARTYPE_QUALITY,0,L"Segoe UI");
     CreateWindowW(L"STATIC",L"DekuForge - Reforging a legend.",WS_CHILD|WS_VISIBLE,26,22,580,30,w,NULL,instance,NULL);

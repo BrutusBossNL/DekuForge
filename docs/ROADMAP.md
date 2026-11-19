@@ -2,8 +2,8 @@
 
 > **Independent branch status:** the stable-backend milestones below describe
 > main and remain reference evidence. This branch now runs a separately licensed
-> source-built experimental game with DekuForge UI adaptations, but has not
-> completed end-user installer or parity acceptance. Current work and measured
+> source-built experimental game with DekuForge UI adaptations. The separate
+> Windows setup has a local provisioning test. Gameplay parity remains open. Current work and measured
 > results are in [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md) and
 > [INDEPENDENT_EVIDENCE.md](INDEPENDENT_EVIDENCE.md). Do not use main's results as
 > acceptance of this different engine.

@@ -4,7 +4,10 @@
 > reference material, not the default build route here. The new original CPU
 > component and reuse gates are documented in [INDEPENDENT_ENGINE.md](docs/INDEPENDENT_ENGINE.md).
 > Existing notices/history remain intact; no blanket relicensing or clean-room
-> claim is made. Independent runtime/installer distribution is not ready.
+> claim is made. The independent setup distributes the launcher and build
+> orchestration. It downloads the pinned GPL provider source locally and keeps
+> its license. The inherited stable backend and its runtime patches are omitted
+> from the independent package.
 
 The independent integer/control-flow/scalar, register-offset and paired-memory
 generator, bounded native

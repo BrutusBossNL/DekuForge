@@ -73,7 +73,7 @@ def download_asset(asset, target, progress=lambda done, total: None):
 
 def prepare_release(release, progress=lambda done, total: None, root=ROOT):
     assets = {asset["name"]: asset for asset in release.get("assets", [])}
-    descriptor = assets.get("DekuForge-release.json")
+    descriptor = assets.get(release.get("descriptor", "DekuForge-release.json"))
     if not descriptor:
         raise ValueError("This release does not contain a DekuForge updater manifest")
     job = root / "local/update-jobs" / uuid.uuid4().hex
@@ -96,10 +96,14 @@ def prepare_release(release, progress=lambda done, total: None, root=ROOT):
     inventory = validate_package(archive)
     if inventory["components"] != manifest["components"]:
         raise ValueError("Release component identities do not match")
+    return prepare_job(root, job, archive, release["version"])
+
+
+def prepare_job(root, job, archive, version):
     shutil.copy2(ROOT / "tools/update_worker.py", job / "worker.py")
     shutil.copy2(ROOT / "dekuforge/update_package.py", job / "update_package.py")
     atomic_json(job / "job.json", {"root": str(root), "archive": str(archive), "parent_pid": os.getpid(),
-        "release": release["version"]})
+        "release": version})
     return job
 
 

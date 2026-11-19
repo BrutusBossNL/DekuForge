@@ -41,7 +41,14 @@ def main():
         if report.stat().st_mtime_ns == before:
             raise RuntimeError("Updated launcher failed its health check")
         validate_launcher_health(proof, result['components'])
-        atomic_json(root / "local/pending-game-update.json", {**result, "release": job["release"], "status": "pending"})
+        if result.get("prepare_tools"):
+            subprocess.run([str(python), "-B", str(root/"tools/prepare_installation.py")],
+                           cwd=root, check=True, timeout=1800, creationflags=subprocess.CREATE_NO_WINDOW)
+        pending = root / "local/pending-game-update.json"
+        previous = json.loads(pending.read_text(encoding="utf-8")) if pending.is_file() and pending.stat().st_size <= 65536 else {}
+        needs_game = result["requires_rebuild"] or (result["components"]["engine"].get("backend") == "independent"
+            and previous.get("requires_rebuild") and previous.get("status") in {"pending", "failed"})
+        atomic_json(pending, {**result, "requires_rebuild": bool(needs_game), "release": job["release"], "status": "pending"})
         atomic_json(root / "local/update-result.json", {"success": True, "release": job["release"],
             'job': job_path.parent.name, 'time': datetime.now(timezone.utc).isoformat(), **result})
     except Exception as error:

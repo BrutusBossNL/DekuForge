@@ -127,11 +127,12 @@ def main():
         from dekuforge.open_game_build import CONFIG
         previous = json.loads(CONFIG.read_text(encoding='utf-8')) if CONFIG.is_file() else {}
         previous.update(source=str(source), work=str(work), toolchain=str(compiler), deps=str(deps),
-                        sdl=str(base/PINS[2][5]), jobs=args.jobs, enable_launcher_build=True)
+                        sdl=str(base/PINS[2][5]), jobs=args.jobs, enable_launcher_build=True,
+                        provider_revision=manifest('hookshot')['revision'])
         temporary = CONFIG.with_suffix('.tmp')
         temporary.write_text(json.dumps(previous, indent=2)+'\n', encoding='utf-8')
         temporary.replace(CONFIG)
-        print('Experimental launcher builds explicitly enabled; main updates/installer remain disabled.', flush=True)
+        print('Independent launcher build tools configured.', flush=True)
     return 0
 
 

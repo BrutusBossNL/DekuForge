@@ -9,20 +9,39 @@ function File-Sha256([string]$Path) {
 }
 $ProgressPreference = 'SilentlyContinue'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
+function Get-InstallerStaging([string]$PayloadPath) {
+    # .NET expands existing Windows 8.3 names. Resolve the extraction root with
+    # the same API as entry targets before comparing their containment.
+    $canonicalPayload = [IO.Path]::GetFullPath($PayloadPath)
+    $stagingRoot = [IO.Path]::GetFullPath((Join-Path ([IO.Path]::GetDirectoryName($canonicalPayload)) 'application'))
+    $archive = [IO.Compression.ZipFile]::OpenRead($canonicalPayload)
+    try {
+        $size = 0L
+        $seen = New-Object 'Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+        if ($archive.Entries.Count -gt 20000) { throw 'Unsafe installer payload: too many entries' }
+        foreach ($entry in $archive.Entries) {
+            $name = $entry.FullName
+            if ($name.Contains('\') -or $name.Contains(':') -or [IO.Path]::IsPathRooted($name) -or ($name.Split('/') -contains '..')) {
+                throw "Unsafe installer payload: invalid entry name '$name'"
+            }
+            $target = [IO.Path]::GetFullPath((Join-Path $stagingRoot $name))
+            if (-not $target.StartsWith($stagingRoot+'\',[StringComparison]::OrdinalIgnoreCase)) {
+                throw "Unsafe installer payload: entry '$name' escapes the extraction folder"
+            }
+            if (-not $seen.Add($target)) { throw "Unsafe installer payload: duplicate entry '$name'" }
+            $size += $entry.Length
+            if ($size -gt 256MB) { throw 'Unsafe installer payload: expanded size exceeds 256 MiB' }
+            if ((($entry.ExternalAttributes -shr 16) -band 61440) -eq 40960) {
+                throw "Unsafe installer payload: symbolic link '$name'"
+            }
+        }
+    } finally { $archive.Dispose() }
+    return $stagingRoot
+}
+$Payload = [IO.Path]::GetFullPath($Payload)
 $installRoot = [IO.Path]::GetFullPath($Root).TrimEnd('\')
 if ($installRoot -eq [IO.Path]::GetPathRoot($installRoot).TrimEnd('\')) { throw 'Choose an application folder, not a drive root' }
-$staging = Join-Path ([IO.Path]::GetDirectoryName($Payload)) 'application'
-$archive = [IO.Compression.ZipFile]::OpenRead($Payload)
-try {
-    $size = 0L
-    $seen = New-Object 'Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
-    foreach ($entry in $archive.Entries) {
-        $name = $entry.FullName
-        $target = [IO.Path]::GetFullPath((Join-Path $staging $name))
-        $size += $entry.Length
-        if ($name.Contains('\') -or $name.Contains(':') -or -not $target.StartsWith($staging+'\',[StringComparison]::OrdinalIgnoreCase) -or -not $seen.Add($target) -or $size -gt 256MB -or (($entry.ExternalAttributes -shr 16) -band 61440) -eq 40960) { throw 'Unsafe installer payload' }
-    }
-} finally { $archive.Dispose() }
+$staging = Get-InstallerStaging $Payload
 [IO.Compression.ZipFile]::ExtractToDirectory($Payload,$staging)
 $pins = Get-Content -Raw -LiteralPath (Join-Path $staging 'dekuforge\components.json') | ConvertFrom-Json
 $runtime = Join-Path $installRoot ('python\'+$pins.python.id)

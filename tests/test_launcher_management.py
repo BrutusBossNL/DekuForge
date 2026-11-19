@@ -60,7 +60,10 @@ class ManagementTests(unittest.TestCase):
         releases = [{"tag_name": "1", "published_at": "2026-01-01"},
                     {"tag_name": "2", "published_at": "2026-02-01", "prerelease": True},
                     {"tag_name": "3", "published_at": "2026-03-01", "draft": True}]
-        with patch("dekuforge.releases.urlopen") as request:
+        from dekuforge.releases import INDEPENDENT_DESCRIPTOR
+        for release in releases:
+            release['assets'] = [{'name': INDEPENDENT_DESCRIPTOR}]
+        with patch("dekuforge.releases.urlopen") as request, patch("dekuforge.releases.github_token", return_value=None):
             request.return_value.__enter__.return_value.read.return_value = json.dumps(releases).encode()
             self.assertEqual(check_release()["version"], "1")
             self.assertEqual(check_release(True)["version"], "2")

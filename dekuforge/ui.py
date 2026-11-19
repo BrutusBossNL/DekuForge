@@ -70,6 +70,7 @@ class Launcher(ModsUI, ReleaseListUI):
         self.update_busy = False
         self.update_job = None
         self.update_release = ''
+        self.independent_pending = None
         from .update_status import pending_result
         self.update_notice = pending_result(ROOT)
         self.save_busy = False
@@ -382,7 +383,9 @@ class Launcher(ModsUI, ReleaseListUI):
         self.render()
 
     def toggle_channel(self):
-        self.preferences["update_channel"] = "preview" if self.preferences["update_channel"] == "stable" else "stable"
+        channels = ("stable", "preview", "experimental")
+        current = self.preferences["update_channel"]
+        self.preferences["update_channel"] = channels[(channels.index(current) + 1) % len(channels)] if current in channels else "preview"
         self.persist({"update_channel": self.preferences["update_channel"]})
         self.release_status = ""
         self.releases = []
@@ -456,7 +459,12 @@ class Launcher(ModsUI, ReleaseListUI):
         self.render()
         def work():
             try:
-                job = prepare_release(release, lambda done,total: self.events.put(("update_progress", (done,total))))
+                progress = lambda done, total: self.events.put(("update_progress", (done, total)))
+                if release.get("experimental"):
+                    from .experimental_updates import prepare_build
+                    job = prepare_build(release, progress)
+                else:
+                    job = prepare_release(release, progress)
                 self.events.put(("update_ready", job))
             except Exception as error:
                 self.events.put(("update_error", str(error)))
@@ -464,6 +472,20 @@ class Launcher(ModsUI, ReleaseListUI):
 
     def resume_game_update(self, manual=False):
         if COMPONENTS['engine'].get('backend') == 'independent':
+            if not manual and self.update_notice:
+                return
+            from .update_status import read_record
+            pending = read_record(ROOT/"local/pending-game-update.json")
+            if (pending.get("requires_rebuild") and pending.get("status") == "pending"
+                    and pending.get("components", {}).get("engine", {}).get("backend") == "independent"
+                    and self.executable and Path(self.executable).is_file() and Path(self.source).is_file()
+                    and not self.management_busy()):
+                try:
+                    validate_destination(Path(self.executable).parent, self.executable)
+                    if not game_running():
+                        self.rebuild_independent_installation()
+                except (OSError, ValueError, subprocess.SubprocessError):
+                    self.release_status = self.t("update_rebuild_wait")
             return
         if self.update_notice and not manual:
             return  # Let the user read the application outcome before rebuilding.
@@ -518,7 +540,12 @@ class Launcher(ModsUI, ReleaseListUI):
         preview = channel == "preview"
         def work():
             try:
-                self.events.put(("release", (channel, list_releases(preview))))
+                if channel == "experimental":
+                    from .experimental_updates import list_builds
+                    releases = list_builds()
+                else:
+                    releases = list_releases(preview)
+                self.events.put(("release", (channel, releases)))
             except Exception as error:
                 self.events.put(("release_error", (channel, str(error))))
         threading.Thread(target=work, daemon=True).start()
@@ -1014,6 +1041,12 @@ class Launcher(ModsUI, ReleaseListUI):
             return
 
         self.source, self.destination = str(request.source), str(request.destination)
+        from .update_status import read_record
+        pending = read_record(ROOT/"local/pending-game-update.json")
+        if (pending.get("requires_rebuild") and pending.get("status") in {"pending", "failed"}
+                and pending.get("components", {}).get("engine", {}).get("backend") == "independent"
+                and request.destination == active.parent):
+            self.independent_pending = pending
         self.step, self.library_view = 2, False
         self.navigate("build")
         self.start_build(request)
@@ -1189,7 +1222,7 @@ class Launcher(ModsUI, ReleaseListUI):
                         self.install_selected_release(automatic=True)
                     self.release_status = self.t("release_found", version=result[0]["version"]) if result else self.t("release_none")
                 else:
-                    self.release_status = str(result)
+                    self.release_status = self.t(result) if result in MESSAGES["en"] else str(result)
                 changed = self.page in ("updates", "home") or changed
                 continue
             if kind in ("build_deleted", "build_delete_error"):
@@ -1245,6 +1278,14 @@ class Launcher(ModsUI, ReleaseListUI):
             elif kind == "done":
                 self.progress.finish()
                 self.build_busy = False
+                if self.independent_pending:
+                    from .update_package import atomic_json
+                    try:
+                        atomic_json(ROOT/"local/pending-game-update.json",
+                                    {**self.independent_pending, "status": "complete" if self.result else "failed"})
+                    except OSError as error:
+                        self.log_lines.append(str(error) + "\n")
+                    self.independent_pending = None
                 changed = True
         if len(self.log_lines) > 1600:
             self.log_lines = self.log_lines[-900:]

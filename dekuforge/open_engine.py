@@ -98,6 +98,8 @@ def stage(root=ROOT, notify=lambda message: None, provider='ocarina'):
     root = Path(root).resolve()
     record = manifest(provider)
     target = root / 'build' / ('open-engine-source-' + record['revision'])
+    if provider == 'hookshot' and not target.exists():
+        target = root / 'build' / ('hs-' + record['revision'][:12])
     cache = root / 'local/build-tools' / ('open-engine-' + record['revision'] + '.zip')
     marker = target / '.dekuforge-open-engine-source.json'
     for path in (target, cache):
@@ -125,10 +127,14 @@ def stage(root=ROOT, notify=lambda message: None, provider='ocarina'):
         if cache.stat().st_size > MAX_ARCHIVE:
             raise ValueError('Engine archive cache exceeds bounded size')
         files = verified_files(cache.read_bytes(), record)
-    target.mkdir(parents=True)
-    for name, content in files.items():
-        path = target.joinpath(*_name(name).parts)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(content)
-    marker.write_text(json.dumps({key: record[key] for key in ('revision', 'archive_sha256')}), encoding='utf-8')
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(dir=target.parent, prefix='s-') as folder:
+        staging = Path(folder)
+        for name, content in files.items():
+            path = staging.joinpath(*_name(name).parts)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(content)
+        (staging/marker.name).write_text(json.dumps({key: record[key] for key in ('revision', 'archive_sha256')}),
+                                        encoding='utf-8')
+        staging.replace(target)
     return target

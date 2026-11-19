@@ -1,8 +1,8 @@
 # Licensed engine evaluation
 
-This is developer tooling on `independent`, not a released installer or a claim
-of gameplay parity. Main's working installation is outside the experiment.
-The default launcher builder remains gated until an evaluated provider is ready.
+This guide covers the developer build route on `independent`. The Preview
+installer configures the same experimental Windows builder in its own folder.
+Gameplay parity with main remains under evaluation.
 
 `tools/evaluate_open_engine.py` evaluates the GPL Hookshot provider pinned in
 `dekuforge/hookshot_source.json`. Source archive and individual Git blob checks
@@ -20,8 +20,7 @@ the user's original files.
 Python requirements are those in the pinned provider's `requirements.txt`.
 Development now uses its own Python 3.14.10, Capstone 5.0.9 and a pinned official
 LLVM-MinGW 20261104 compiler. Codec/header libraries and control DLLs retain
-their individual FFmpeg, Vulkan, SPIR-V, VMA and SDL terms. These dependencies
-are not yet provisioned by an independent installer.
+their individual codec, Vulkan, SPIR-V, VMA and SDL terms.
 
 The evaluation requires explicit compiler and dependency paths. It does not
 silently select another project's compiler, source tree, generated runtime,
@@ -31,8 +30,8 @@ hot-function profile, shader cache or game installation.
 
 ### Complete experimental Windows NUP build
 
-This opt-in Windows developer route provisions its own generic Python/Tk and
-tools. An independent end-user installer is not published. From PowerShell:
+This Windows developer route provisions its own generic Python/Tk and tools.
+From PowerShell:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File tools/bootstrap_runtime.ps1 -Root $PWD

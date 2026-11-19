@@ -15,6 +15,7 @@ from dekuforge.update_package import install, validate_package, rollback, recove
 from dekuforge.update_service import AssetRedirect, newer_version, prepare_release, download_asset
 from dekuforge.source_patch import apply_patch
 from dekuforge.game_updates import run_rebuild
+from dekuforge.experimental_updates import list_builds, prepare_build, API
 
 
 def fixture_package(path, text="new", extra=None):
@@ -35,6 +36,40 @@ def fixture_package(path, text="new", extra=None):
 
 
 class UpdateTests(unittest.TestCase):
+    def test_experimental_channel_uses_only_successful_first_party_commit_artifacts(self):
+        sha = 'a' * 40
+        run = {"id": 17, "head_branch": "independent", "head_sha": sha, "conclusion": "success",
+               "head_repository": {"full_name": "BrutusBossNL/DekuForge"}}
+        assets = [{"id": 11, "name": "dekuforge-windows-0.4.0-experimental.2.1-" + sha,
+                   "size_in_bytes": 123, "digest": "sha256:" + "b" * 64}]
+        with (patch('dekuforge.experimental_updates.github_token', return_value='test'),
+              patch('dekuforge.experimental_updates.read_response', side_effect=[
+                  {"workflow_runs": [dict(run, conclusion="failure"), run]},
+                  {"artifacts": [dict(assets[0], expired=True), *assets]}])):
+            rows = list_builds()
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]['commit'], sha)
+        self.assertEqual(rows[0]['artifact']['url'], f'{API}/actions/artifacts/11/zip')
+
+    def test_experimental_download_checks_package_commit_and_version(self):
+        version = '0.4.0-experimental.2.1'
+        commit = 'a' * 40
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            inner = root/'fixture.zip'
+            outer = root/'artifact.zip'
+            with patch.dict(COMPONENTS['launcher'], version=version, commit=commit):
+                fixture_package(inner)
+            with zipfile.ZipFile(outer, 'w') as artifact:
+                artifact.write(inner, f'DekuForge-launcher-{version}-windows.zip')
+            row = {"version": "v" + version, "commit": commit, "artifact": {}}
+            with patch('dekuforge.experimental_updates.download_asset',
+                       side_effect=lambda _asset, path, _progress: shutil.copyfile(outer, path)):
+                job = prepare_build(row, lambda *_: None, root)
+                self.assertEqual(json.loads((job/'job.json').read_text())['release'], row['version'])
+                with self.assertRaisesRegex(ValueError, 'selected commit'):
+                    prepare_build(dict(row, commit='b' * 40), lambda *_: None, root)
+
     def test_low_disk_keeps_active_game_and_save_without_starting_reference_builder(self):
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder).resolve()
@@ -161,7 +196,7 @@ class UpdateTests(unittest.TestCase):
             fixture_package(archive);install(archive,root,log=lambda _:None)
             inventory=fixture_package(archive,"new launcher",{"README.md":b"new documentation"})
             self.assertFalse(needs_rebuild(root,inventory))
-            inventory=fixture_package(archive,extra={"dekuforge/runtime_layer.py":b"changed engine"})
+            inventory=fixture_package(archive,extra={"engine_overrides/independent/resources.h":b"changed engine"})
             self.assertTrue(needs_rebuild(root,inventory))
 
     def test_linked_destination_does_not_write_outside_installation(self):

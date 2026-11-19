@@ -14,11 +14,11 @@ Windows build remains on [main](https://github.com/BrutusBossNL/DekuForge/tree/m
 This branch starts the replacement of the NX2navi-dependent build path with an
 original implementation and explicitly approved, redistributable components.
 The engine replacement is planned so future releases can use engine components
-with clear open-source and redistribution rights. This preview is a source
-release for testing the migration.
+with clear open-source and redistribution rights. This Windows preview is for
+testing the migration.
 **A source-built experimental Windows game runs locally. The complete NUP build
-route is available with explicit developer opt-in; standalone installer support
-and parity with main are not established.**
+route is available through the Preview setup or the developer build guide.
+Full gameplay parity with main is still under evaluation.**
 
 - The default independent backend reports its real capabilities with `--doctor`.
 - Original NUP inspection, package selection, verified module preparation and the
@@ -32,31 +32,38 @@ and parity with main are not established.**
   Read-only module analysis reuses extracted inputs without rebuilding them.
 - Main's original mod manager, release list/notes and update outcome reporting
   are retained. Asset-mod order and On/Off selections now reach the independent
-  runtime through verified snapshots. Independent updates and code-mod builds
-  remain disabled.
+  runtime through verified snapshots. Code-mod builds remain disabled.
 - Two pinned, separately licensed GPL providers have been evaluated. The first
   was rejected for incorrect shadows. The second verifies 2,188 source blobs
   and runs moving Death Mountain and Kokiri scenes with DekuForge UI adaptations.
   See the [engine plan](docs/INDEPENDENT_ENGINE.md) and
   [scoped measurements](docs/INDEPENDENT_EVIDENCE.md). Full gameplay acceptance
-  and standalone installer acceptance remain outstanding. The
+  remains outstanding. The
   [experimental Windows build guide](docs/OPEN_ENGINE_EVALUATION.md) covers
   pinned generic tools, source compilation and explicit launcher opt-in.
 - No automatic fallback to the old experimental 0.3.10 or stable 0.10.1 renderer.
 - FSR 3.1 is native to the preview renderer. FSR 4 requires AMD's separate
   runtime and a supported GPU. The Windows build guide explains the opt-in.
-- NX2navi runtime/tool downloads, main-channel app updates and installer packaging
-  are disabled. The experimental provisioner downloads verified generic tools;
+- NX2navi runtime/tool downloads and main-channel app updates are excluded.
+  The independent provisioner downloads verified generic tools;
   the selected GPL engine and AV1 decoder are compiled from source.
 
 The independent Windows bootstrap provisions official generic Python 3.14.10/Tk
 and hash-pinned Pillow in this checkout. The locally compiled `DekuForge.exe`
-uses that runtime without depending on main's interpreter. Follow the experimental
-build guide; an independent end-user installer is not published. A development
+uses that runtime without depending on main's interpreter. A development
 Python is also supported for source commands. `run_builder.py --doctor` reports
 independent capabilities; `--prepare` prepares modules only and is not a game.
 With the experimental builder configured, **Updates → Rebuild for current
 version** starts a local game build and opens its progress and log view.
+
+## Install or update on Windows
+
+Run `DekuForge-Setup.exe` from an installable independent Preview release and
+choose a separate folder. Setup provisions Python, the pinned build tools and the
+licensed engine source. Then select your own NUP in **Build game**. Updates on
+**Preview** use the independent release package. **Experimental** uses checked
+commits built by GitHub Actions without a release tag. Experimental downloads
+require GitHub CLI sign-in or a token with Actions read access.
 
 ## Known experimental limits
 
@@ -96,9 +103,8 @@ engine tools for flight, teleporting, time, age and inventory remain available.
 
 **Gameplay → Game language → System language** follows the system UI language
 on restart, falling back to English. New builds select it by default. Explicit
-game and overlay language choices are kept. Independent app updates,
-end-user setup, broad controller/audio validation and
-Linux/iOS gameplay remain open.
+game and overlay language choices are kept. Broad controller/audio validation
+and Linux/iOS gameplay remain open.
 
 ## Reuse and contributions
 

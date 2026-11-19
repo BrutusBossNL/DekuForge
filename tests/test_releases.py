@@ -4,13 +4,14 @@ import json
 import unittest
 from unittest.mock import patch
 
-from dekuforge.releases import list_releases
+from dekuforge.releases import INDEPENDENT_DESCRIPTOR, list_releases
 from dekuforge.release_ui import displayed_releases, release_action
 
 
 class ReleaseChannelTests(unittest.TestCase):
     def test_versions_are_sorted_numerically_and_notes_come_from_github(self):
-        releases = [{'tag_name': name, 'body': 'Notes for '+name, 'prerelease': True}
+        releases = [{'tag_name': name, 'body': 'Notes for '+name, 'prerelease': True,
+                     'assets': [{'name': INDEPENDENT_DESCRIPTOR}]}
                     for name in ('v0.3.0-preview.2', 'v0.3.0-preview.10', 'v0.2.0')]
         with patch('dekuforge.releases.github_token', return_value=None), \
                 patch('dekuforge.releases.urlopen', return_value=io.BytesIO(json.dumps(releases).encode())):
@@ -31,6 +32,9 @@ class ReleaseChannelTests(unittest.TestCase):
             {'tag_name': 'v0.2.0', 'published_at': '2026-11-17', 'prerelease': False},
             {'tag_name': 'v9.0.0', 'published_at': '2026-11-19', 'draft': True},
         ]
+        for release in releases:
+            release['assets'] = [{'name': INDEPENDENT_DESCRIPTOR}]
+        releases.append({'tag_name': 'v9.0.1', 'assets': [{'name': 'DekuForge-release.json'}]})
         for preview, expected in ((False, ['v0.2.0']), (True, ['v0.3.0-preview.1', 'v0.2.0'])):
             with self.subTest(preview=preview), patch('dekuforge.releases.github_token', return_value=None), \
                     patch('dekuforge.releases.urlopen', return_value=io.BytesIO(json.dumps(releases).encode())):

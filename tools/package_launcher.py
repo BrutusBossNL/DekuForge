@@ -14,14 +14,17 @@ from dekuforge.update_package import SOURCE_DIRS as DIRECTORIES, ROOT_FILES, all
 
 
 def included(path):
-    name=Path(path).as_posix()
-    return name != "DekuForge.exe" and allowed(name) and "__pycache__" not in Path(path).parts
+    path = Path(path)
+    name = path.as_posix()
+    if name in {"DekuForge.exe", "dekuforge/stable_engine.py", "dekuforge/stable_engine_source.json",
+                "dekuforge/shader_tools.lock.json", "dekuforge/runtime_layer.py"}:
+        return False
+    return (allowed(name) and "__pycache__" not in path.parts
+            and (path.parts[0] != "engine_overrides" or path.parts[1] == "independent"))
 
 
 def package(root=ROOT):
     pins = json.loads((root / "dekuforge/components.json").read_text(encoding="utf-8"))
-    if pins['engine'].get('backend') == 'independent':
-        raise ValueError('Independent branch is not a distributable game builder yet')
     launcher = (root / "DekuForge.exe").read_bytes()
     header = struct.unpack_from("<I", launcher, 60)[0]
     if (len(launcher) > 2 * 1024 * 1024 or launcher[header:header+4] != b"PE\0\0"

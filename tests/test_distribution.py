@@ -12,11 +12,12 @@ class DistributionTests(unittest.TestCase):
         for name in ("local/settings.json", "build/world.c", "python/python.exe",
                      "pydeps/zbic.pyd", "romfs/textures.png", "assets/branding/dump.nup",
                      "engine/generated/main.c", "tools/seed-programs.bin",
-                     "dekuforge/__pycache__/ui.pyc", "assets/branding/save.png"):
+                     "dekuforge/__pycache__/ui.pyc", "assets/branding/save.png",
+                     "engine_overrides/dekuforge_0110/cheat_manager.patch", "dekuforge/stable_engine.py"):
             self.assertFalse(included(name), name)
         for name in ("run_launcher.py", "tools/bootstrap_runtime.ps1",
                      "dekuforge/components.json", "assets/branding/logo.png",
-                     "engine_overrides/dekuforge_0110/cheat_manager.patch"):
+                     "engine_overrides/independent/resources.h", "requirements-open-engine.txt"):
             self.assertTrue(included(name), name)
 
     def test_renamed_game_inputs_are_refused_even_in_an_allowed_source_path(self):

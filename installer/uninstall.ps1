@@ -47,8 +47,10 @@ if (Test-Path -LiteralPath $libraryPath) {
         $record=Get-Content -Raw -LiteralPath $marker | ConvertFrom-Json
         if ($record.id -ne $entry.id -or $record.executable -ne [IO.Path]::GetFileName($entry.executable)) { throw 'Managed build ownership does not match' }
         [void]$targets.Add($folder)
-        $profile=Join-Path $folder 'profile'
-        if (Test-Path -LiteralPath $profile) { [void]$profiles.Add($profile) }
+        foreach ($profileName in @('profile','user\save')) {
+            $profile=Join-Path $folder $profileName
+            if (Test-Path -LiteralPath $profile) { [void]$profiles.Add($profile) }
+        }
     }
 }
 foreach ($path in @((Join-Path $installRoot 'local\retained-saves'),(Join-Path $installRoot 'local\preserved-saves-before-cleanup'),(Join-Path $installRoot 'profile'))) {
@@ -65,6 +67,7 @@ foreach ($target in $targets) {
         if ($item.PSIsContainer) {
             [void]$directories.Add($item.FullName)
             if ($item.Name -eq 'profile' -and ((Test-Path -LiteralPath (Join-Path $item.Parent.FullName '.dekuforge-stable-build')) -or (Test-Path -LiteralPath (Join-Path $item.Parent.FullName '.dekuforge-owned')))) { [void]$profiles.Add($item.FullName) }
+            if ($item.Name -eq 'save' -and $item.Parent.Name -eq 'user' -and (Test-Path -LiteralPath (Join-Path $item.Parent.Parent.FullName '.dekuforge-open-output.json'))) { [void]$profiles.Add($item.FullName) }
         } else { [void]$allFiles.Add($item.FullName) }
     }
 }
@@ -132,12 +135,12 @@ function Invoke-Uninstall([bool]$Keep,[string]$Destination) {
         if ((Test-Path -LiteralPath $path) -and -not (Get-ChildItem -LiteralPath $path -Force | Select-Object -First 1)) { [IO.Directory]::Delete($path,$false) }
     }
     if (-not $NoShellCleanup) {
-        $shortcut=Join-Path ([Environment]::GetFolderPath('Programs')) 'DekuForge.lnk'
+        $shortcut=Join-Path ([Environment]::GetFolderPath('Programs')) 'DekuForge Preview.lnk'
         if (Test-Path -LiteralPath $shortcut) {
             $shell=New-Object -ComObject WScript.Shell
             if ($shell.CreateShortcut($shortcut).TargetPath -eq (Join-Path $installRoot 'DekuForge.exe')) { Remove-Item -LiteralPath $shortcut -Force }
         }
-        $registry='HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\DekuForge'
+        $registry='HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\DekuForgePreview'
         if ((Test-Path $registry) -and (Get-ItemProperty $registry).InstallLocation -eq $installRoot) { Remove-Item -LiteralPath $registry -Recurse -Force }
     }
     if (-not (Get-ChildItem -LiteralPath $installRoot -Force | Select-Object -First 1)) { [IO.Directory]::Delete($installRoot,$false) }

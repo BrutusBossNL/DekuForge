@@ -1,9 +1,26 @@
 # Local builds and launcher distribution
 
-> Independent branch override: this inherited guide describes main's release
-> system. Installer/runtime provisioning and main-channel updates are disabled
-> here. The independent engine cannot yet produce a playable or distributable
-> game builder. See [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md).
+The independent Windows Preview setup installs side by side with Stable. It
+uses `DekuForge-independent-release.json` to identify compatible packages.
+The experimental gameplay scope is documented in
+[INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md).
+
+Preview downloads a verified launcher package. Experimental selects the
+Windows artifacts of successful pushes to `independent`, using the GitHub
+Actions digest and the package's embedded commit identity. Expired artifacts
+drop out of the list. No release tag is required. GitHub CLI sign-in or a
+token with Actions read permission is required to download those artifacts.
+Independent and main packages cannot replace each other in-place.
+
+Changes limited to the launcher skip the game build. Engine inputs and build
+tool changes queue a local rebuild. A compatible installed build keeps its
+working directory, shader cache and saves. Stages whose inputs change are
+recomputed by the pinned provider. A new provider revision may require a
+separate build and save import.
+
+The repository retains the latest 10 published stable releases and 15
+published previews. Git tags and drafts are retained. Experimental artifacts
+expire after 14 days and are outside the release counts.
 
 Distribute the small Windows launcher package, not a built game. The package
 contains `DekuForge.exe`, launcher source, original extensions, branding and build

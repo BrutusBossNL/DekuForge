@@ -7,13 +7,13 @@ The project's original source is open source under the root MIT license.
 ## Independent branch overrides
 
 This branch is `independent`, not the stable main build. The default backend is
-`dekuforge/independent_engine.py`; vendor runtime/source downloads, main-channel
-application updates and installer packaging are disabled until independent
-replacements exist. Never fall back to the old 0.3.10 or stable 0.10.1 engine.
+`dekuforge/independent_engine.py`; never fall back to the old 0.3.10 or stable
+0.10.1 engine. Ship the independent launcher in a separate Preview installation
+with its own descriptor and Experimental commit packages. Stable components and
+historical runtime patches stay outside these packages.
 The independent Windows launcher now has an official hash-pinned standalone
 Python/Tk/Pillow bootstrap. Generic build wheels may be provisioned into that
-owned interpreter only; never modify external Python automatically. This does
-not enable main's runtime downloads or independent installer publication.
+owned interpreter only; never modify external Python automatically.
 Use the stable main game as a behavioral/performance reference only. Reuse only
 code with a recorded open-source or redistribution grant; comply with its terms.
 Rewriting, renaming or restructuring restricted code is not provenance clearance.

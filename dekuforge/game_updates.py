@@ -6,7 +6,6 @@ import subprocess
 import os
 import csv
 from .core import ROOT, load_settings, save_installation
-from .stable_engine import build_stable
 from .update_package import atomic_json
 from . import COMPONENTS
 
@@ -14,6 +13,12 @@ from . import COMPONENTS
 def check_backend():
     if COMPONENTS['engine'].get('backend') == 'independent':
         raise RuntimeError('Main-channel engine rebuilds are disabled on the independent branch')
+
+
+def build_stable(*args, **kwargs):
+    check_backend()
+    from .stable_engine import build_stable as build
+    return build(*args, **kwargs)
 
 
 def game_running():

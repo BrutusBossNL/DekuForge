@@ -15,8 +15,6 @@ from dekuforge import COMPONENTS
 
 
 def main():
-    if COMPONENTS['engine'].get('backend') == 'independent':
-        raise RuntimeError('Independent branch setup is not ready; vendor-backend packaging is disabled')
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--toolchain",type=Path,required=True)
     parser.add_argument("--tag",default="v"+COMPONENTS["launcher"]["version"])
@@ -49,7 +47,7 @@ def main():
     release={"schema":1,"tag":args.tag,"components":manifest["components"],"contains_game_files":False,
         "package":{"name":archive.name,"size":archive.stat().st_size,"sha256":digest},
         "installer":{"name":executable.name,"size":executable.stat().st_size,"sha256":hashlib.sha256(executable.read_bytes()).hexdigest()}}
-    (ROOT/"build/releases/DekuForge-release.json").write_text(json.dumps(release,indent=2)+'\n',encoding="utf-8")
+    (ROOT/"build/releases/DekuForge-independent-release.json").write_text(json.dumps(release,indent=2)+'\n',encoding="utf-8")
     print("Built standalone setup:",executable,flush=True)
 
 

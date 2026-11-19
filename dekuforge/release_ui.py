@@ -51,7 +51,7 @@ class ReleaseListUI:
         self.release_list.tag_configure('current', font=('Segoe UI',10,'bold'))
         for index, row in enumerate(self.release_rows):
             current = release_action(row['version']) == 'rebuild'
-            channel = 'preview' if row.get('preview') else 'stable'
+            channel = 'experimental' if row.get('experimental') else 'preview' if row.get('preview') else 'stable'
             self.release_list.insert('', 'end', iid=str(index), values=(row['version'], self.t(channel),
                 self.t('release_current') if current else ''), tags=(channel, 'current' if current else channel))
         right = tk.Frame(panel, bg=PANEL)

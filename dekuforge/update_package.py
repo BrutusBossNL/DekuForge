@@ -13,7 +13,8 @@ import zipfile
 SOURCE_DIRS = {"dekuforge", "tools", "launcher", "engine_overrides", "docs", "installer"}
 SOURCE_SUFFIXES = {".py", ".ps1", ".json", ".c", ".cpp", ".h", ".patch", ".md", ".txt"}
 ROOT_FILES = {"run_launcher.py", "run_builder.py", "backend_entry.py", "engine_entry.py",
-              "README.md", "roadmap.md", "LICENSE", "THIRD_PARTY_NOTICES.md", "CONTRIBUTING.md"}
+              "README.md", "roadmap.md", "LICENSE", "THIRD_PARTY_NOTICES.md", "CONTRIBUTING.md",
+              "requirements-open-engine.txt"}
 ARTWORK = {"logo.png", "icon.png", "launcher.ico", "background.png",
            "home-actions.png", "home-play.png", "home-update.png", "home-build.png"}
 MAX_PACKAGE = 128 * 1024**2
@@ -113,7 +114,13 @@ def validate_package(archive):
         return inventory
 
 
-def build_input(name):
+def build_input(name, independent=False):
+    if independent:
+        return (name.startswith(("engine_overrides/independent/", "dekuforge/open_engine", "dekuforge/world_"))
+                or name in {"dekuforge/open_game_build.py", "dekuforge/hookshot_source.json", "tools/open_provider_entry.py",
+                            "requirements-open-engine.txt",
+                            "tools/provision_open_tools.py", "tools/build_av1_decoder.py",
+                            "assets/branding/logo.png"})
     return (name.startswith("engine_overrides/") or name in {
         "dekuforge/stable_engine.py", "dekuforge/stable_engine_source.json", "dekuforge/runtime_layer.py",
         "dekuforge/shader_tools.lock.json", "dekuforge/source_patch.py", "tools/build_stable_translator.py", "tools/run_stable_build.py",
@@ -138,8 +145,20 @@ def validate_launcher_health(proof, components):
 
 
 def needs_rebuild(root, inventory):
-    return any(not (root / name).is_file() or sha(root / name) != digest
-               for name, digest in inventory["sha256"].items() if build_input(name))
+    components = inventory["components"]
+    independent = components["engine"].get("backend") == "independent"
+    current_manifest = root / "dekuforge/components.json"
+    if independent and current_manifest.is_file():
+        current = json.loads(current_manifest.read_text(encoding="utf-8"))
+        if any(current.get(key) != components.get(key) for key in ("engine", "buildkit")):
+            return True
+    inputs = {name for name in inventory["sha256"] if build_input(name, independent)}
+    old_inventory = root / "local/installed-package.json"
+    if independent and old_inventory.is_file():
+        previous = json.loads(old_inventory.read_text(encoding="utf-8"))["sha256"]
+        if any(build_input(name, True) and name not in inputs for name in previous):
+            return True
+    return any(not (root / name).is_file() or sha(root / name) != inventory["sha256"][name] for name in inputs)
 
 
 def recover(root):
@@ -198,7 +217,18 @@ def install(archive, root, log=print, fail_after=None):
             import fcntl
             fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
         recover(root)
+        current_manifest = root / "dekuforge/components.json"
+        independent = inventory["components"]["engine"].get("backend") == "independent"
+        if current_manifest.is_file():
+            old_backend = json.loads(current_manifest.read_text(encoding="utf-8")).get("engine", {}).get("backend")
+            if (old_backend == "independent") != independent:
+                raise ValueError("Stable and independent installations need separate folders")
         rebuild = needs_rebuild(root, inventory)
+        tool_inputs = {"dekuforge/hookshot_source.json", "dekuforge/open_python_build.py", "requirements-open-engine.txt",
+                       "tools/prepare_installation.py", "tools/provision_open_tools.py", "tools/build_av1_decoder.py"}
+        prepare_tools = independent and (not (local/"open-engine-builder.json").is_file() or any(
+            name in inventory["sha256"] and (not (root/name).is_file() or sha(root/name) != inventory["sha256"][name])
+            for name in tool_inputs))
         previous_inventory = local / "installed-package.json"
         old = json.loads(previous_inventory.read_text(encoding="utf-8")) if previous_inventory.is_file() else {"sha256": {}}
         previous_names = set(old["sha256"])
@@ -247,8 +277,8 @@ def install(archive, root, log=print, fail_after=None):
                 recover(root)
                 raise
     fingerprint=hashlib.sha256(json.dumps({name:digest for name,digest in inventory["sha256"].items()
-        if build_input(name)},sort_keys=True).encode()).hexdigest()
-    return {"requires_rebuild": rebuild, "backup": str(backup), "components": inventory["components"],
+        if build_input(name, independent)},sort_keys=True).encode()).hexdigest()
+    return {"requires_rebuild": rebuild, "prepare_tools": prepare_tools, "backup": str(backup), "components": inventory["components"],
             "build_fingerprint":fingerprint}
 
 

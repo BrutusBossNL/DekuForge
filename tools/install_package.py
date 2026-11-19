@@ -9,7 +9,7 @@ import sys
 
 SOURCE=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(SOURCE))
-from dekuforge.update_package import install, atomic_json, rollback
+from dekuforge.update_package import install, atomic_json, rollback, validate_launcher_health
 
 
 def main():
@@ -40,10 +40,12 @@ def main():
             print("Preparing pinned build tools; this can take several minutes...",flush=True)
             subprocess.run([str(python),str(root/"tools/prepare_installation.py")],cwd=root,check=True)
         report=root/"local/launcher-selftest.json"
+        before = report.stat().st_mtime_ns if report.is_file() else 0
         subprocess.run([str(python),str(root/"run_launcher.py"),"--self-test"],cwd=root,check=True,timeout=90)
         proof=json.loads(report.read_text(encoding="utf-8"))
-        if not proof["success"] or result["components"]["launcher"].get("bug_reports") and len(proof.get("report_screens",[]))!=5:
+        if report.stat().st_mtime_ns == before:
             raise RuntimeError("Installed launcher failed its health check")
+        validate_launcher_health(proof, result["components"])
         atomic_json(root/"local/setup-result.json",{"success":True,"components":result["components"],"tools_prepared":not args.skip_tools})
         if has_game and result["requires_rebuild"]:
             atomic_json(root/"local/pending-game-update.json",{**result,"status":"pending",

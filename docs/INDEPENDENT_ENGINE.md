@@ -1,7 +1,8 @@
 # Independent engine: implementation and acceptance
 
-This branch develops alongside main. Its initial independent engine is incomplete;
-it must not replace a working installation or be published as a playable installer.
+This branch develops alongside main. Its original CPU prototype is incomplete.
+The Windows Preview installer sets up the separately evaluated provider in its
+own installation.
 Main's stable 0.10.1-based game supplies behavior/performance evidence, not an
 automatic source-code dependency. No existing user game or save is part of a test.
 Consult [INDEPENDENT_EVIDENCE.md](INDEPENDENT_EVIDENCE.md) before repeating earlier
@@ -102,11 +103,9 @@ source as well as each input module. Reuse only results for the same source/inpu
 identities; changing the decoder invalidates prior coverage, not all old gameplay
 or movie benchmarks.
 
-Installer packaging and vendor-based tool/runtime provisioning are blocked.
-Main's application update channel is disabled so it cannot replace this branch
-with the old backend. No runtime, toolchain, generated source or user profile is
-copied from main into this worktree. An external development interpreter/compiler
-can run tests without becoming a distributed engine dependency.
+Independent setup and updates use the pinned generic toolchain and licensed
+provider source. A stable installation cannot be converted in-place. No
+runtime, toolchain, generated source or user profile is copied from main.
 
 ## Separately licensed runtime feasibility candidate
 
@@ -198,6 +197,7 @@ launcher opt-in. Save discovery understands its `user/save` layout. Asset mods
 are composed in launcher priority order without altering base assets; code mods
 and the Cheat Manager are not yet connected. The official Python/Tk/Pillow
 bootstrap and owned build-wheel provisioning now work separately from main.
-Independent installer acceptance and main performance parity remain open.
+The independent installer passed local Windows setup and tool provisioning.
+First-build gameplay on fresh installations and main performance parity remain open.
 See [OPEN_ENGINE_EVALUATION.md](OPEN_ENGINE_EVALUATION.md) for those commands and
 the evidence index for measured scope. Main remains unchanged.
