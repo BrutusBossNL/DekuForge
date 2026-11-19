@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
+import time
 import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,8 +22,16 @@ def main():
     setup = ROOT/"build/releases/DekuForge-Setup.exe"
     target = ROOT/"build"/f"independent-setup-{uuid.uuid4().hex[:8]}"
     flags = [] if args.with_tools else ["/SKIPTOOLS"]
-    subprocess.run([str(setup), "/SILENT", "/NOLAUNCH", "/NOSHORTCUT", f"/DIR={target}", *flags],
-                   check=True, timeout=1800 if args.with_tools else 600)
+    started = time.time()
+    try:
+        subprocess.run([str(setup), "/SILENT", "/NOLAUNCH", "/NOSHORTCUT", f"/DIR={target}", *flags],
+                       check=True, timeout=1800 if args.with_tools else 600)
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        logs = Path(tempfile.gettempdir()).glob("DekuForge-setup-*/setup.log")
+        for log in logs:
+            if log.stat().st_mtime >= started - 1:
+                print(log.read_text(encoding="utf-8", errors="replace"), file=sys.stderr, flush=True)
+        raise
     meta = json.loads((target/"local/setup-result.json").read_text(encoding="utf-8"))
     assert meta["success"] and meta["components"] == COMPONENTS and meta["tools_prepared"] == args.with_tools
     proof = json.loads((target/"local/launcher-selftest.json").read_text(encoding="utf-8"))
