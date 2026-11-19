@@ -327,6 +327,16 @@ for _key, _values in _UPDATE_RESULTS.items():
         MESSAGES[_language][_key] = _text
 
 
+for _language, (_button, _help) in zip(("en", "nl", "de", "es", "fr"), (
+    ("Retry with copied GPU buffers", "The game log contains Vulkan host-memory import errors. You can try copied buffers for one launch."),
+    ("Opnieuw proberen met gekopieerde GPU-buffers", "Het spellog bevat Vulkan-fouten bij het importeren van hostgeheugen. Je kunt voor één start gekopieerde buffers proberen."),
+    ("Mit kopierten GPU-Puffern erneut starten", "Das Spielprotokoll enthält Vulkan-Importfehler beim Hostspeicher. Kopierte Puffer gelten für einen Start."),
+    ("Reintentar con búferes de GPU copiados", "El registro contiene errores de Vulkan al importar memoria del host. Puedes probar búferes copiados durante un inicio."),
+    ("Réessayer avec des tampons GPU copiés", "Le journal contient des erreurs Vulkan lors de l’importation de mémoire hôte. Vous pouvez essayer des tampons copiés pour un lancement."),
+)):
+    MESSAGES[_language].update(report_copied_buffers=_button, report_copied_buffers_help=_help)
+
+
 def translate(language, key, **values):
     selected = language if language in MESSAGES else "en"
     text = FILE_LABELS[selected][key] if key in FILE_LABELS[selected] else MESSAGES[selected].get(key,MESSAGES["en"].get(key,key.replace("_"," ").title()))

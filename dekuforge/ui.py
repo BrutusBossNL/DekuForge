@@ -541,6 +541,9 @@ class Launcher(ModsUI, ReleaseListUI):
     def render_report(self):
         self.prepare_report()
         self.label(self.content,self.report_status or self.t("report_help"),10,MUTED,wraplength=640).pack(anchor="w",pady=(0,8))
+        if (self.report_incident or {}).get("gpu_memory_import_errors") and reports.can_retry_copied_buffers(ROOT, self.executable):
+            self.label(self.content,self.t("report_copied_buffers_help"),10,MUTED,wraplength=640).pack(anchor="w",pady=(0,6))
+            self.button(self.content,self.t("report_copied_buffers"),lambda:self.play(copied_gpu_buffers=True)).pack(anchor="w",pady=(0,8))
         card=self.card(self.content,padding=12)
         system=(self.report_context or {}).get("metadata",{}).get("system",{})
         if system:
@@ -932,9 +935,10 @@ class Launcher(ModsUI, ReleaseListUI):
         self.step = step
         self.render()
 
-    def play(self):
+    def play(self, *, copied_gpu_buffers=False):
         if self.management_busy():
             return
+        self.copied_gpu_buffers_next_launch = copied_gpu_buffers
         try:
             library = ModLibrary(self.executable)
             if library.folder.exists():
@@ -952,8 +956,11 @@ class Launcher(ModsUI, ReleaseListUI):
 
     def launch_ready(self):
         try:
-            self.process = launch(self.executable)
-            reports.record_run(ROOT,self.process,self.executable)
+            copied_gpu_buffers = getattr(self, "copied_gpu_buffers_next_launch", False)
+            self.copied_gpu_buffers_next_launch = False
+            options = {"copied_gpu_buffers": True} if copied_gpu_buffers else {}
+            self.process = launch(self.executable, **options)
+            reports.record_run(ROOT,self.process,self.executable,**options)
             self.activity = self.t("playing")
             self.render()
             if self.hide_playing:
@@ -1127,8 +1134,11 @@ class Launcher(ModsUI, ReleaseListUI):
                 if kind == "release":
                     self.releases = result
                     self.selected_release = result[0]["version"] if result else ""
-                    if result and result[0].get("installable") and self.preferences["auto_update"] and newer_version(result[0]["version"], __version__) and self.automatic_update_allowed(result[0]) and not self.management_busy():
-                        self.install_selected_release(automatic=True)
+                    if self.preferences["auto_update"] and not self.management_busy():
+                        available = next((release for release in result if release.get("installable")), None)
+                        if available and newer_version(available["version"], __version__) and self.automatic_update_allowed(available):
+                            self.selected_release = available["version"]
+                            self.install_selected_release(automatic=True)
                     self.release_status = self.t("release_found", version=result[0]["version"]) if result else self.t("release_none")
                 else:
                     self.release_status = str(result)

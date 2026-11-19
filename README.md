@@ -153,6 +153,14 @@ inside a DekuForge folder. Such a folder can remain solely to hold that archive.
 Found another issue? Use **Report a problem** in the launcher, or review the
 report offered after a detected crash. Check the diagnostics before submitting.
 
+- To restore AMD FSR 3.1 and FSR 4 on an existing game, rebuild it once with
+  build kit 0.2.5 or later. The builder verifies the required DLLs and places
+  them beside the local game. The graphics menu checks GPU support.
+- If Windows reports `0xC0000409` and the game logs Vulkan host-memory import
+  errors, the crash page offers a one-launch retry with copied GPU buffers.
+  The Hyrule Town crash on the reported AMD setup remains under investigation.
+  [GitHub issue #5](https://github.com/BrutusBossNL/DekuForge/issues/5)
+
 - Full first-time Windows installation and automatic-update acceptance are still
   being tested. Local package checks do not replace a clean-machine game test.
 - Release EXEs are unsigned and can trigger SmartScreen; see the

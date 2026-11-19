@@ -109,6 +109,8 @@ class StableEngineTests(unittest.TestCase):
             z.writestr("bin/runtime.dll",b"must not be extracted")
             for name in stable_engine.FRAMEGEN_FILES:
                 z.writestr('bin/dlssg/'+name, b'synthetic '+name.encode())
+            for name in stable_engine.FSR_FILES:
+                z.writestr('bin/'+name, name.encode())
         data=package.getvalue()
         with tempfile.TemporaryDirectory() as folder:
             root=Path(folder).resolve();source=root/"source";source.mkdir()
@@ -122,6 +124,8 @@ class StableEngineTests(unittest.TestCase):
             self.assertFalse((source/'bin/runtime.dll').exists())
             for name in stable_engine.FRAMEGEN_FILES:
                 self.assertEqual((source/'bin/dlssg'/name).read_bytes(), b'synthetic '+name.encode())
+            for name in stable_engine.FSR_FILES:
+                self.assertEqual((source/'bin'/name).read_bytes(), name.encode())
             # Reused verified archives also repair a missing or damaged staged DLL.
             (source/'bin/dlssg/sl.common.dll').write_bytes(b'damaged')
             with patch.object(stable_engine,"ROOT",root),patch.object(stable_engine,"RELEASE_SIZE",len(data)),patch.object(stable_engine,"RELEASE_SHA256",hashlib.sha256(data).hexdigest()),patch.object(stable_engine,"urlopen") as download:
@@ -142,6 +146,23 @@ class StableEngineTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, 'Frame Generation'):
                     stable_engine.prepare_release_data(source,lambda *args:None)
             self.assertEqual(list(source.iterdir()), [])
+
+    def test_fsr_runtime_is_repaired_without_running_the_compiler(self):
+        with tempfile.TemporaryDirectory() as folder:
+            source, output = Path(folder)/"source", Path(folder)/"game"
+            (source/"bin").mkdir(parents=True)
+            output.mkdir()
+            for name in stable_engine.FSR_FILES:
+                (source/"bin"/name).write_bytes(name.encode())
+            for name, sdk in stable_engine.FSR_NOTICES.items():
+                notice = source/"runtime/third_party"/sdk/"LICENSE.txt"
+                notice.parent.mkdir(parents=True)
+                notice.write_bytes(name.encode())
+            first = stable_engine.FSR_FILES[0]
+            (output/first).write_bytes(b"wrong")
+            stable_engine.place_fsr_runtime(source, output)
+            for name in (*stable_engine.FSR_FILES, *stable_engine.FSR_NOTICES):
+                self.assertEqual((output/name).read_bytes(), name.encode())
 
     def test_game_runtime_requires_every_framegen_library_and_notice_to_match(self):
         with tempfile.TemporaryDirectory() as folder:

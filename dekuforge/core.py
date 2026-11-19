@@ -48,6 +48,7 @@ def save_installation(value, settings=SETTINGS):
     return executable
 
 
-def launch(value):
+def launch(value, *, copied_gpu_buffers=False):
     executable = validate_installation(value)
-    return subprocess.Popen([str(executable)], cwd=str(executable.parent), shell=False)
+    options = {"env": {**os.environ, "NX2NAVI_SHADOW": "1"}} if copied_gpu_buffers else {}
+    return subprocess.Popen([str(executable)], cwd=str(executable.parent), shell=False, **options)

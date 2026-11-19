@@ -25,6 +25,8 @@ class InstallationTests(unittest.TestCase):
                 launch(load_installation(settings))
                 popen.assert_called_once_with([str(executable.resolve())],
                                               cwd=str(executable.parent.resolve()), shell=False)
+                launch(str(executable), copied_gpu_buffers=True)
+                self.assertEqual(popen.call_args.kwargs["env"]["NX2NAVI_SHADOW"], "1")
             self.assertEqual(executable.read_bytes(), b"")
 
     def test_invalid_installation_is_not_saved_or_launched(self):

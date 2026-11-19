@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "launcher": {
-    "version": "0.3.0-preview.3",
-    "stage": "preview",
+    "version": "0.3.0",
+    "stage": "stable",
     "bug_reports": true,
     "uninstaller": true,
     "healthcheck": {"screens": 40, "mod_screens": 5, "report_screens": 5}
@@ -13,7 +13,7 @@
     "base_revision": "5ae55db41c7d11c4e997d2676019939a936e560b"
   },
   "buildkit": {
-    "version": "0.2.4"
+    "version": "0.2.5"
   },
   "python": {
     "version": "3.14.9",

@@ -63,6 +63,10 @@ Streamline interposer/plugins and `nvngx_dlssg.dll`. The complete upstream
 `dlssg-NOTICE.txt`, `streamline-LICENSE.txt` (MIT) and
 `nvidia-rtx-sdks-LICENSE.txt` accompany them beside the game. Neither the bridge
 nor vendor binaries are bundled in our launcher package or committed here.
+The same hash-pinned 0.10.1 archive supplies the AMD FidelityFX SDK Vulkan
+library for FSR 3.1 and the AMD FSR SDK Vulkan loader, upscaler and frame
+generation libraries for FSR 4. Their notices accompany the locally built
+game. The Windows installer and launcher ZIP omit these SDK binaries.
 Optional SDK features remain subject to their own terms and hardware support.
 Upstream feature availability does not establish that every option has been
 tested in DekuForge.

@@ -2,6 +2,20 @@
 
 Component versions are independent. Published releases are not replaced in place.
 
+## Launcher 0.3.0 / buildkit 0.2.5
+
+Promotes the Mods and Updates improvements and the native installer fix to
+Stable. The builder now restores and verifies the four AMD FSR DLLs and their
+notices, including when it reuses compiled game code. Rebuild an existing
+installation once to get them ([#6](https://github.com/BrutusBossNL/DekuForge/issues/6)).
+
+Crash reports include the Windows fast-fail status and recent Vulkan import
+errors. When both are present, the crash screen can retry one launch with
+copied GPU buffers. The original Hyrule Town crash remains open for AMD
+confirmation ([#5](https://github.com/BrutusBossNL/DekuForge/issues/5)).
+Source-only previews stay visible in the Preview channel alongside installable
+releases. The automatic updater picks the latest installable release.
+
 ## Launcher 0.3.0-preview.3 / buildkit 0.2.4 - installer correction
 
 Fixes [issue #4](https://github.com/BrutusBossNL/DekuForge/issues/4): setup compared

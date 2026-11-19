@@ -5,6 +5,7 @@ import importlib.util
 import json
 import os
 import re
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -23,6 +24,14 @@ FRAMEGEN_FILES = (
     'sl.pcl.dll', 'sl.reflex.dll', 'nvngx_dlssg.dll', 'dlssg-NOTICE.txt',
     'streamline-LICENSE.txt', 'nvidia-rtx-sdks-LICENSE.txt',
 )
+FSR_FILES = (
+    'amd_fidelityfx_vk.dll', 'amd_fidelityfx_loader_vk.dll',
+    'amd_fidelityfx_upscaler_vk.dll', 'amd_fidelityfx_framegeneration_vk.dll',
+)
+FSR_NOTICES = {
+    'FidelityFX-SDK-LICENSE.txt': 'ffx_api',
+    'FSR-SDK-LICENSE.txt': 'ffx_sdk',
+}
 
 
 def build_failure_message(returncode, detail=""):
@@ -116,7 +125,7 @@ def stage_stable():
 
 
 def prepare_release_data(source, notify):
-    """Prepare verified prewarm data, button art and the complete Frame Generation set."""
+    """Prepare verified prewarm data, button art and vendor graphics libraries."""
     archive = ROOT / "local/build-tools/NX2navi-app-0.10.1.zip"
     archive.parent.mkdir(parents=True, exist_ok=True)
     def verified(path):
@@ -141,11 +150,14 @@ def prepare_release_data(source, notify):
         framegen = {'bin/dlssg/' + name for name in FRAMEGEN_FILES}
         if not framegen.issubset(package.namelist()):
             raise ValueError("Stable release Frame Generation libraries or notices are missing")
+        fsr = {'bin/' + name for name in FSR_FILES}
+        if not fsr.issubset(package.namelist()):
+            raise ValueError("Stable release AMD FSR libraries are missing")
         selected = [item for item in package.infolist() if not item.is_dir() and (
             item.filename in {"tools/data/pipeline_list.bin", "toolchain.lock.json", "THIRD_PARTY_NOTICES.md"}
-            or item.filename in framegen
+            or item.filename in framegen or item.filename in fsr
             or item.filename.startswith("prompt-art/") and Path(item.filename).suffix.lower() in {".png", ".txt"})]
-        if len(selected) > 1024 or sum(item.file_size for item in selected) > 32 * 1024**2:
+        if len(selected) > 1024 or sum(item.file_size for item in selected) > 128 * 1024**2:
             raise ValueError("Stable release data exceeds its limits")
         if not any(item.filename == "tools/data/pipeline_list.bin" for item in selected):
             raise ValueError("Stable release pipeline list is missing")
@@ -158,19 +170,52 @@ def prepare_release_data(source, notify):
             target.parent.mkdir(parents=True, exist_ok=True)
             if not target.is_file() or target.read_bytes() != data:
                 target.write_bytes(data)
-    notify("log", "Stable release pipeline list, controller art and NVIDIA Frame Generation files are ready\n")
+    notify("log", "Stable release pipeline list, controller art, AMD FSR and NVIDIA Frame Generation files are ready\n")
 
 
 def verify_framegen_runtime(source, output):
     """A successful build must deliver the complete verified set beside its executable."""
-    for name in FRAMEGEN_FILES:
-        original, placed = source/'bin/dlssg'/name, output/name
+    verify_runtime_files(source/'bin/dlssg', output, FRAMEGEN_FILES, 'Frame Generation')
+
+
+def verify_runtime_files(staged, output, names, component):
+    for name in names:
+        original, placed = staged/name, output/name
         if (not original.is_file() or not placed.is_file() or placed.is_symlink()
                 or placed.stat().st_size != original.stat().st_size):
-            raise ValueError('Frame Generation runtime is incomplete: ' + name)
+            raise ValueError(component + ' runtime is incomplete: ' + name)
         with original.open('rb') as expected, placed.open('rb') as actual:
             if hashlib.file_digest(expected, 'sha256').digest() != hashlib.file_digest(actual, 'sha256').digest():
-                raise ValueError('Frame Generation runtime verification failed: ' + name)
+                raise ValueError(component + ' runtime verification failed: ' + name)
+
+
+def place_fsr_runtime(source, output):
+    """Install the verified files even when the native compile step was reused."""
+    files = {name: source/'bin'/name for name in FSR_FILES}
+    files.update({name: source/'runtime/third_party'/directory/'LICENSE.txt'
+                  for name, directory in FSR_NOTICES.items()})
+    for name, original in files.items():
+        target = output/name
+        if target.is_symlink():
+            raise ValueError('Unsafe AMD FSR runtime path: ' + name)
+        if target.is_file():
+            if name in FSR_NOTICES:
+                if target.read_bytes() == original.read_bytes():
+                    continue
+            else:
+                try:
+                    verify_runtime_files(original.parent, output, (name,), 'AMD FSR')
+                    continue
+                except ValueError:
+                    pass
+        with tempfile.NamedTemporaryFile(dir=output, prefix='.fsr-', delete=False) as temp:
+            temporary = Path(temp.name)
+        try:
+            shutil.copyfile(original, temporary)
+            temporary.replace(target)
+        finally:
+            temporary.unlink(missing_ok=True)
+    verify_runtime_files(source/'bin', output, FSR_FILES, 'AMD FSR')
 
 
 def prepare_dlss(source, notify):
@@ -366,7 +411,8 @@ def build_stable(filename, notify, destination):
     if not exe.is_file():
         raise RuntimeError("Stable build did not produce its executable")
     verify_framegen_runtime(source, output)
-    notify('log', 'Verified NVIDIA Frame Generation libraries and notices beside the game\n')
+    place_fsr_runtime(source, output)
+    notify('log', 'Verified NVIDIA Frame Generation and AMD FSR libraries and notices beside the game\n')
     from . import __version__
     with exe.open("rb") as binary:
         runtime_hash = hashlib.file_digest(binary,"sha256").hexdigest()

@@ -16,6 +16,18 @@ from dekuforge.ui import Launcher
 
 @unittest.skipUnless(os.name == "nt", "Windows desktop integration")
 class LauncherWorkflowTests(unittest.TestCase):
+    def test_source_only_preview_does_not_block_automatic_stable_update(self):
+        self.app.preferences.update(update_channel="preview", auto_update=True)
+        self.app.events.put(("release", ("preview", [
+            {"version": "v0.4.0-preview.1", "installable": False},
+            {"version": "v0.3.0", "installable": True},
+        ])))
+        with (patch("dekuforge.ui.__version__", "0.2.1"),
+              patch.object(self.app, "install_selected_release") as install):
+            self.app.tick()
+        install.assert_called_once_with(automatic=True)
+        self.assertEqual(self.app.selected_release, "v0.3.0")
+
     def wait_for_mods(self):
         deadline = time.monotonic() + 5
         while self.app.mods_busy and time.monotonic() < deadline:
