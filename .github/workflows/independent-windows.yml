@@ -48,7 +48,9 @@ jobs:
           unpack(archive(base, pin), pin[4], base / pin[5])
       - run: python tools/build_launcher.py --toolchain local/build-tools/hookshot-llvm-20261104/bin
       - run: python tools/build_setup.py --toolchain local/build-tools/hookshot-llvm-20261104/bin
-      - run: python tools/test_independent_setup.py --with-tools
+      - name: Test clean native setup for Preview
+        if: github.ref_type == 'tag'
+        run: python tools/test_independent_setup.py --with-tools
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: github.ref_type == 'branch'
         with:

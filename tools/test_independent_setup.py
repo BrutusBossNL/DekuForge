@@ -31,6 +31,9 @@ def main():
         for log in logs:
             if log.stat().st_mtime >= started - 1:
                 print(log.read_text(encoding="utf-8", errors="replace"), file=sys.stderr, flush=True)
+                runtime_log = log.parent / "application/local/runtime-bootstrap.log"
+                if runtime_log.is_file():
+                    print(runtime_log.read_text(encoding="utf-8-sig", errors="replace"), file=sys.stderr, flush=True)
         raise
     meta = json.loads((target/"local/setup-result.json").read_text(encoding="utf-8"))
     assert meta["success"] and meta["components"] == COMPONENTS and meta["tools_prepared"] == args.with_tools
