@@ -92,3 +92,25 @@ class ReportTests(unittest.TestCase):
             incident=reports.record_exit(root,3221225477)
             self.assertEqual(incident["exit_code"],3221225477)
             self.assertEqual(reports.previous_incident(root)["exit_code"],3221225477)
+
+    def test_fast_fail_reports_recent_vulkan_import_errors(self):
+        import os
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            logs = root/"game"
+            logs.mkdir()
+            executable = logs/"DekuForgeGame.exe"
+            log = logs/"nx2navi.log"
+            log.write_text("vk: pool 0x1000: host memory import failed (-1000072003)\n", encoding="utf-8")
+            os.utime(log, (1000, 1000))
+            reports.record_run(root, Mock(pid=123), executable)
+            self.assertNotIn("gpu_memory_import_errors", reports.record_exit(root, 3221226505))
+
+            reports.record_run(root, Mock(pid=124), executable)
+            log.write_text("vk: pool 0x1000: not imported (VkResult -1000072003)\n", encoding="utf-8")
+            started = log.stat().st_mtime + 2
+            os.utime(log, (started, started))
+            incident = reports.record_exit(root, -1073740791)
+            self.assertEqual(incident["windows_status"], "0xC0000409")
+            self.assertEqual(incident["gpu_memory_import_errors"], 1)
+            self.assertEqual(reports.previous_incident(root), incident)

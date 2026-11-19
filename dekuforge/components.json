@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "launcher": {
-    "version": "0.3.0-independent.9",
-    "stage": "development",
+    "version": "0.4.0-preview.1",
+    "stage": "preview",
     "bug_reports": true,
     "uninstaller": true,
     "updates": false
@@ -14,7 +14,7 @@
     "playable": false
   },
   "buildkit": {
-    "version": "0.3.0-independent.13"
+    "version": "0.3.0-independent.14"
   },
   "python": {
     "version": "3.14.10",

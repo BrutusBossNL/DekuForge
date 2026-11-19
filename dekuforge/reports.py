@@ -104,7 +104,7 @@ def collect(root, executable="", incident=None):
             config=folder/'hookshot_options.ini'
         if config.is_file():
             with config.open("rb") as stream:ini=stream.read(65536).decode("utf-8",errors="replace")
-            names={"game_res","dlss","dlaa","framegen","fps_limit","hdr","fullscreen","ocarina_realtime","prewarm_full","lib_warm",
+            names={"game_res","dlss","dlaa","framegen","fps_limit","hdr","fullscreen","shadow","taa","fsr4","fsr4_fg","ocarina_realtime","prewarm_full","lib_warm",
                    "quality_preset","output_res","resolution","frame_generation","frame_generation_by","frame_pacing","frame_rate_cap","vsync","upscaling","sharpness"}
             metadata["graphics_settings"]={match[1]:sanitize(match[2]) for match in re.finditer(r"(?m)^\s*([a-z_]+)\s*=([^\r\n]*)",ini) if match[1] in names}
         for directory in (folder/"logs",):
@@ -190,20 +190,45 @@ def record_run(root, process, executable):
         "started_utc":datetime.now(timezone.utc).isoformat(),"exit_code":None})
 
 
+def _game_incident(state):
+    incident = {"kind": "game_exit", "exit_code": state["exit_code"],
+                "time": state.get("ended_utc", "")}
+    for key in ("gpu_memory_import_errors", "copied_gpu_buffers"):
+        if state.get(key):
+            incident[key] = state[key]
+    if state["exit_code"] & 0xffffffff == 0xc0000409:
+        incident["windows_status"] = "0xC0000409"
+    return incident
+
+
 def record_exit(root, code):
     path=root/"local/last-game-run.json"
     try:state=json.loads(path.read_text(encoding="utf-8"))
     except (OSError,ValueError):state={}
     state.update(exit_code=int(code),ended_utc=datetime.now(timezone.utc).isoformat())
+    if code and state.get("executable") and state.get("started_utc"):
+        folder = Path(state["executable"]).parent
+        for name in ("nx2navi.log", "DekuForge.log", "hookshot_log.txt"):
+            log = folder/name
+            try:
+                if log.is_symlink() or log.stat().st_mtime < datetime.fromisoformat(state["started_utc"]).timestamp():
+                    continue
+                count = len(re.findall(r"(?:host memory import failed \(|not imported \(VkResult )-1000072003\)",
+                                       read_log(log)))
+                if count:
+                    state["gpu_memory_import_errors"] = count
+                    break
+            except (OSError, ValueError):
+                continue
     atomic_json(path,state)
-    return {"kind":"game_exit","exit_code":int(code),"time":state["ended_utc"]} if code else None
+    return _game_incident(state) if code else None
 
 
 def previous_incident(root):
     try:state=json.loads((root/"local/last-game-run.json").read_text(encoding="utf-8"))
     except (OSError,ValueError):state={}
     if state.get("exit_code"):
-        return {"kind":"game_exit","exit_code":state["exit_code"],"time":state.get("ended_utc","")}
+        return _game_incident(state)
     log=root/"local/launcher-crash.log"
     if log.is_file():return {"kind":"launcher_error_log","time":str(log.stat().st_mtime_ns)}
     return None

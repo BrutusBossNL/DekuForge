@@ -13,6 +13,9 @@ Windows build remains on [main](https://github.com/BrutusBossNL/DekuForge/tree/m
 
 This branch starts the replacement of the NX2navi-dependent build path with an
 original implementation and explicitly approved, redistributable components.
+The engine replacement is planned so future releases can use engine components
+with clear open-source and redistribution rights. This preview is a source
+release for testing the migration.
 **A source-built experimental Windows game runs locally. The complete NUP build
 route is available with explicit developer opt-in; standalone installer support
 and parity with main are not established.**
@@ -40,6 +43,8 @@ and parity with main are not established.**
   [experimental Windows build guide](docs/OPEN_ENGINE_EVALUATION.md) covers
   pinned generic tools, source compilation and explicit launcher opt-in.
 - No automatic fallback to the old experimental 0.3.10 or stable 0.10.1 renderer.
+- FSR 3.1 is native to the preview renderer. FSR 4 requires AMD's separate
+  runtime and a supported GPU. The Windows build guide explains the opt-in.
 - NX2navi runtime/tool downloads, main-channel app updates and installer packaging
   are disabled. The experimental provisioner downloads verified generic tools;
   the selected GPL engine and AV1 decoder are compiled from source.

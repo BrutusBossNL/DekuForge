@@ -81,10 +81,13 @@ def build(filename, notify, destination, *, config=None, romfs=None, exefs=None,
             ('HOS_', 'RX_', 'HOOKSHOT_', 'OOT_', 'TOTK_', 'NX2NAVI_', 'DEKUFORGE_', 'DKB_'))}
         env.update(DEKUFORGE_OPEN_SOURCE=str(source), DEKUFORGE_OPEN_WORK=str(work), DEKUFORGE_OPEN_OUTPUT=str(output),
                    HOOKSHOT_MINGW=str(compiler), RX_CPM=str(deps), WGPU_NATIVE=str(work/'unused-webgpu'),
+                   HOOKSHOT_FFX_SDK=str(work/'ffx-sdk'),
                    HOOKSHOT_VERSION=COMPONENTS['engine']['version'], HOS_DISCORD='0',
                    PATH=str(compiler/'bin')+os.pathsep+env.get('PATH', ''))
         command = [sys.executable, '-B', '-u', str(ROOT/'tools/open_provider_entry.py'),
-                   str(source/'nx2/make_game.py'), *inputs, '--out', str(output), '--work', str(work), '--jobs', str(jobs), '--prepare']
+                   str(source/'nx2/make_game.py'), *inputs, '--out', str(output), '--work', str(work), '--jobs', str(jobs), '--prepare', '--fsr']
+        if config.get('amd_fsr4_license_accepted') is True:
+            command += ['--fetch-fsr-runtime', '--accept-amd-license']
         if not prepare_gpu:
             command += ['--no-prepare-shaders']
         phase = 'checking'

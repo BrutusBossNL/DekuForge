@@ -61,6 +61,12 @@ game shader cache is used. `--source build/<verified-source>` reuses an existing
 verified checkout. `--configure-launcher` explicitly enables the experimental
 Build game wizard; without it the default backend stays gated.
 
+The renderer builds FSR 3.1 from source, and the Windows preview builder also
+compiles FSR 4 support. Read [AMD's FSR SDK license](https://github.com/GPUOpen-LibrariesAndSDKs/FidelityFX-SDK/blob/7539ae8b6568ad29ed78a753404351daf3b5cca7/Kits/FidelityFX/docs/license.md).
+If you accept it, set `"amd_fsr4_license_accepted": true` in
+`local/open-engine-builder.json` before building. The pinned provider verifies
+and installs AMD's SDK DLLs locally. FSR 4 availability depends on the GPU.
+
 The output contains `DekuForgeGame.exe`, its own image/RomFS, libraries, notices,
 runtime metadata and `user/save`. Keep every output under this worktree's
 `build/`; the original NUP must remain outside the output. Work, source and
