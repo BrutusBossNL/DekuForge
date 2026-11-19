@@ -38,7 +38,9 @@ jobs:
       - name: Prepare verified Windows compiler
         shell: python
         run: |
+          import sys
           from pathlib import Path
+          sys.path.insert(0, str(Path.cwd()))
           from tools.provision_open_tools import PINS, archive, unpack
           base = Path('local/build-tools').resolve()
           base.mkdir(parents=True, exist_ok=True)
