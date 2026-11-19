@@ -52,6 +52,11 @@ only when GPU source, translator and shader seed inputs still match.
 
 ## Updating without uninstalling
 
+GitHub retains the newest 10 published stable releases and 15 published
+previews. The retention workflow leaves drafts and Git tags in place.
+Independent Experimental builds use expiring Actions artifacts outside the
+GitHub Releases list.
+
 Preview 1 had an update-health protocol mismatch: 0.2.0's frozen helper restored
 0.2.0 because the new report contained 45 rather than 40 legacy entries. Preview
 2 preserves the 40-view legacy field and records the five additional Mods views
