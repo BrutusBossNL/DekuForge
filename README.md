@@ -17,7 +17,8 @@ their work on the engine.
 Windows is the current release platform. The **Stable** channel now ships
 the independent launcher, build tools and source-based engine path. Preview
 and Experimental are for testing. Gameplay parity with the retired engine and
-full coverage on AMD hardware are still under evaluation.
+full coverage on AMD hardware are still under evaluation. Controller and audio
+validation continues. Linux and iOS gameplay are listed on the [roadmap](roadmap.md).
 
 The last NX2navi-based release is [DekuForge 0.3.0 Legacy](https://github.com/BrutusBossNL/DekuForge/releases/tag/v0.3.0).
 It is retained for existing users as a frozen release. All new development
@@ -60,6 +61,47 @@ independent capabilities; `--prepare` prepares modules only and is not a game.
 With the experimental builder configured, **Updates → Rebuild for current
 version** starts a local game build and opens its progress and log view.
 
+### Controls
+
+The Windows game supports SDL gamepads and locally built Switch, Xbox, PS4 and
+PS5 prompts. In **Controls**, use **PlayStation / Xbox** for bottom-button
+confirm (Cross or A), or **Nintendo** for right-button confirm. Hold the left
+stick click (L3) while moving to sprint. The **Cheat Manager** includes sprint
+speed and the engine's player, inventory and travel cheats. **Controls → L3
+sprint** offers **Hold L3** or **Click to toggle**. A second click or stopping
+movement ends a toggled sprint. Sprint speed includes the original 2×, 3.5×
+and 5× settings.
+
+### Cheat Manager
+
+The Cheat Manager is grouped into **Link**, **Equipment**, **World**,
+**Inventory**, **Ammunition**, and **Timers & minigames**. Link holds sprint,
+jumps, heart, wallet and magic refills. Inventory holds the individual edits
+for unlocked bottles, magic beans and Scrub seeds. Timers & minigames contains
+the shared countdown freeze and **Instant fish catch**, which skips reeling
+once you hook a fish at the fishing pond.
+Bottle edits apply once and can be kept with an in-game save. Equipment
+options cover charged spin range, magic spin charge and bomb arrows. Bomb
+arrows require adult Link's bow. The separate explosive Deku seed option
+requires young Link's slingshot. Both require an unlocked bomb bag and
+use one bomb per explosive impact.
+Both explosive projectiles have a black aura while held ready or in flight.
+**Cheat Manager → World** controls Gold Skulltulas, heart pieces, grottos,
+chests, bean plots, Great Fairies and upgrades separately. The markers follow
+Link's current age. Night-only Skulltulas carry a crescent, and markers with
+known completion data show their collected state. Rebuild to generate the map
+assets from your own game files. A mod replacing the same map resources takes
+priority over these markers.
+
+DekuForge's heart-refill option is the only health cheat shown. The existing
+engine tools for flight, teleporting, time, age and inventory remain available.
+
+### Language
+
+**Gameplay → Game language → System language** follows the system UI language
+on restart, falling back to English. New builds select it by default. Explicit
+game and overlay language choices are kept.
+
 ## Install or update on Windows
 
 Download `DekuForge-Setup.exe` from [Releases](https://github.com/BrutusBossNL/DekuForge/releases)
@@ -89,54 +131,23 @@ the compiler, tool provisioning, and local build. Build outputs and caches stay
 in ignored directories. Run `python tools/check_source.py --tracked` and the
 source tests before contributing.
 
-## Known issues
-
-The legacy reports for Hyrule Town and Lon Lon Ranch document a Radeon
-RX 9070 XT configuration. The independent engine validates Vulkan imports and
-reclaims cached textures earlier under Windows memory pressure. The original
-reports still need confirmation on that AMD setup. Report new issues through
-the launcher, including from its crash prompt.
+## Windows performance
 
 The Windows game builder saves the Vulkan pipeline cache beside the game during
 its final validation step. With that cache and a warm NVIDIA driver cache, two
 starts on the tested RTX 2080 reached the menu in about 30 seconds and averaged
 about 48 fps at native 1080p on Death Mountain Trail. Driver changes and cold
 caches can take longer. See [the test evidence](docs/INDEPENDENT_EVIDENCE.md).
-The Windows game supports SDL gamepads and locally built Switch, Xbox, PS4 and
-PS5 prompts. In **Controls**, use **PlayStation / Xbox** for bottom-button
-confirm (Cross or A), or **Nintendo** for right-button confirm. Hold the left
-stick click (L3) while moving to sprint. The **Cheat Manager** includes sprint
-speed and the engine's player, inventory and travel cheats. **Controls → L3
-sprint** offers **Hold L3** or **Click to toggle**. A second click or stopping
-movement ends a toggled sprint. Sprint speed includes the original 2×, 3.5×
-and 5× settings.
 
-The Cheat Manager is grouped into **Link**, **Equipment**, **World**,
-**Inventory**, **Ammunition**, and **Timers & minigames**. Link holds sprint,
-jumps, heart, wallet and magic refills. Inventory holds the individual edits
-for unlocked bottles, magic beans and Scrub seeds. Timers & minigames contains
-the shared countdown freeze and **Instant fish catch**, which skips reeling
-once you hook a fish at the fishing pond.
-Bottle edits apply once and can be kept with an in-game save. Equipment
-options cover charged spin range, magic spin charge and bomb arrows. Bomb
-arrows require adult Link's bow. The separate explosive Deku seed option
-requires young Link's slingshot. Both require an unlocked bomb bag and
-use one bomb per explosive impact.
-Both explosive projectiles have a black aura while held ready or in flight.
-**Cheat Manager → World** controls Gold Skulltulas, heart pieces, grottos,
-chests, bean plots, Great Fairies and upgrades separately. The markers follow
-Link's current age. Night-only Skulltulas carry a crescent, and markers with
-known completion data show their collected state. Rebuild to generate the map
-assets from your own game files. A mod replacing the same map resources takes
-priority over these markers.
+## Known issues
 
-DekuForge's heart-refill option is the only health cheat shown. The existing
-engine tools for flight, teleporting, time, age and inventory remain available.
+The independent engine validates Vulkan memory imports and reclaims cached
+textures earlier under Windows memory pressure. The reported crashes still
+need a retest on the Radeon RX 9070 XT configuration.
+[Hyrule Town crash (#5)](https://github.com/BrutusBossNL/DekuForge/issues/5),
+[Lon Lon Ranch reload crash (#7)](https://github.com/BrutusBossNL/DekuForge/issues/7).
 
-**Gameplay → Game language → System language** follows the system UI language
-on restart, falling back to English. New builds select it by default. Explicit
-game and overlay language choices are kept. Broad controller/audio validation
-and Linux/iOS gameplay remain open.
+Report new issues through the launcher, including from its crash prompt.
 
 ## Reuse and contributions
 
