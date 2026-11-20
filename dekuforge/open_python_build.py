@@ -9,7 +9,8 @@ from .core import ROOT
 from . import COMPONENTS
 
 PACKAGES = {'numpy': '2.5.4', 'lz4': '4.4.5', 'fonttools': '4.68.0', 'zstandard': '0.25.0',
-            'astc-encoder-py': '0.1.12', 'texture2ddecoder': '1.0.6', 'archspec': '0.2.7'}
+            'astc-encoder-py': '0.1.12', 'texture2ddecoder': '1.0.6', 'archspec': '0.2.7',
+            'capstone': '5.0.9'}
 
 
 def provision(notify=print):
