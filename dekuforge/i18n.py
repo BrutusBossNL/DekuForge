@@ -137,18 +137,18 @@ _UPDATE_MESSAGES = {'en': {'update_pending': 'Updates verify downloads, preserve
         'rebuild_update': 'Herbouwen voor geinstalleerde release',
         'update_rebuild_wait': 'Sluit de game en kies je gamearchief om de engine-update af te ronden.',
         'update_game_ready': 'Bijgewerkte game gereed. De vorige build blijft beschikbaar.'},
- 'de': {'update_pending': 'Updates pruefen Downloads, behalten Spielstaende und erhalten das laufende Spiel '
+ 'de': {'update_pending': 'Updates prüfen Downloads, behalten Spielstände und erhalten das laufende Spiel '
                           'bis zum erfolgreichen Neubau.',
         'release_incompatible': 'Diese Version hat kein kompatibles Updatepaket.',
-        'update_confirm': '{version} installieren? Der Launcher startet neu. Geaenderter Engine-Code wird '
-                          'lokal aus Ihrem Spielarchiv gebaut. Spiel und Spielstaende bleiben erhalten.',
-        'update_downloading': 'Version wird geladen und geprueft...',
-        'update_download_progress': 'Laden und pruefen: {percent}%',
+        'update_confirm': '{version} installieren? Der Launcher startet neu. Geänderter Engine-Code wird '
+                          'lokal aus Ihrem Spielarchiv gebaut. Spiel und Spielstände bleiben erhalten.',
+        'update_downloading': 'Version wird geladen und geprüft...',
+        'update_download_progress': 'Laden und prüfen: {percent}%',
         'update_error': 'Update gestoppt; die vorherige Installation bleibt erhalten. {error}',
-        'rebuild_update': 'Spiel fuer installierte Version neu bauen',
-        'update_rebuild_wait': 'Spiel schliessen und eigenes Spielarchiv waehlen, um das Update '
+        'rebuild_update': 'Spiel für installierte Version neu bauen',
+        'update_rebuild_wait': 'Spiel schliessen und eigenes Spielarchiv wählen, um das Update '
                                'abzuschliessen.',
-        'update_game_ready': 'Aktualisiertes Spiel bereit. Der vorherige Build bleibt verfuegbar.'},
+        'update_game_ready': 'Aktualisiertes Spiel bereit. Der vorherige Build bleibt verfügbar.'},
  'es': {'update_pending': 'Las actualizaciones verifican descargas y conservan las partidas y el juego '
                           'anterior hasta completar la compilacion.',
         'release_incompatible': 'Esta version no tiene un paquete de actualizacion compatible.',
@@ -223,26 +223,26 @@ _REPORT_MESSAGES = {'en': {'report': 'Report a problem',
         'report_previous': 'Een eerdere crash of launcherfout is beschikbaar om te melden.',
         'report_unknown': 'Onbekend'},
  'de': {'report': 'Problem melden',
-        'report_help': 'Hardware, Versionen und Logauszuege vor dem Senden pruefen. Keine Spieldateien oder '
-                       'Spielstaende werden beigefuegt.',
+        'report_help': 'Hardware, Versionen und Logauszüge vor dem Senden prüfen. Keine Spieldateien oder '
+                       'Spielstände werden beigefügt.',
         'report_title': 'Kurzer Titel',
         'report_details': 'Was ist passiert? Schritte zur Wiederholung angeben.',
         'report_expected': 'Was wurde erwartet?',
-        'report_logs': 'Aktuelle Textlogs beifuegen (Pfade und Tokens gefiltert)',
-        'report_preview': 'Meldung pruefen',
+        'report_logs': 'Aktuelle Textlogs beifügen (Pfade und Tokens gefiltert)',
+        'report_preview': 'Meldung prüfen',
         'report_direct': 'An GitHub senden',
-        'report_browser': 'Browser oeffnen',
+        'report_browser': 'Browser öffnen',
         'report_export': 'Meldung speichern',
         'report_auth': 'Im Browser wird Ihr GitHub-Konto mit kurzem Logauszug verwendet. Direktes Senden '
                        'nutzt eine bestehende GitHub-CLI-Anmeldung oder GH_TOKEN. DekuForge speichert kein '
                        'Token.',
         'report_sent': 'Meldung gesendet: {url}',
-        'report_send_error': 'Senden nicht bestaetigt: {error}. Vor einem weiteren Versuch GitHub auf '
-                             'Duplikate pruefen.',
+        'report_send_error': 'Senden nicht bestätigt: {error}. Vor einem weiteren Versuch GitHub auf '
+                             'Duplikate prüfen.',
         'report_required': 'Titel und Problembeschreibung eingeben.',
         'report_signin': 'Mit GitHub CLI anmelden oder den Browser verwenden.',
-        'report_crash': 'Spiel unerwartet beendet (Code {code}). Meldung unten pruefen.',
-        'report_previous': 'Ein frueherer Absturz oder Launcherfehler kann gemeldet werden.',
+        'report_crash': 'Spiel unerwartet beendet (Code {code}). Meldung unten prüfen.',
+        'report_previous': 'Ein früherer Absturz oder Launcherfehler kann gemeldet werden.',
         'report_unknown': 'Unbekannt'},
  'es': {'report': 'Informar problema',
         'report_help': 'Revisa hardware, versiones y extractos antes de enviar. No se incluyen archivos del '
@@ -319,9 +319,9 @@ _UPDATE_RESULTS = {
     'release_status_column': ('Status', 'Status', 'Status', 'Estado', 'Statut'),
     'release_current': ('Installed', 'Geinstalleerd', 'Installiert', 'Instalada', 'Installee'),
     'release_notes': ('Release notes', 'Releasenotes', 'Versionshinweise', 'Notas de la version', 'Notes de version'),
-    'release_notes_empty': ('No GitHub release notes are available for this version in the selected channel.', 'Voor deze versie zijn geen GitHub-releasenotes beschikbaar in het gekozen kanaal.', 'Fuer diese Version sind in diesem Kanal keine GitHub-Versionshinweise verfuegbar.', 'No hay notas de GitHub para esta version en el canal seleccionado.', 'Aucune note GitHub disponible pour cette version dans le canal choisi.'),
+    'release_notes_empty': ('No GitHub release notes are available for this version in the selected channel.', 'Voor deze versie zijn geen GitHub-releasenotes beschikbaar in het gekozen kanaal.', 'Für diese Version sind in diesem Kanal keine GitHub-Versionshinweise verfügbar.', 'No hay notas de GitHub para esta version en el canal seleccionado.', 'Aucune note GitHub disponible pour cette version dans le canal choisi.'),
     'release_action_update': ('Install update', 'Update installeren', 'Update installieren', 'Instalar actualizacion', 'Installer la mise a jour'),
-    'release_action_downgrade': ('Downgrade', 'Downgraden', 'Aeltere Version installieren', 'Instalar version anterior', 'Installer une version anterieure'),
+    'release_action_downgrade': ('Downgrade', 'Downgraden', 'Ältere Version installieren', 'Instalar version anterior', 'Installer une version anterieure'),
     'release_action_switch_channel': ('Switch channel', 'Van kanaal wisselen', 'Kanal wechseln', 'Cambiar de canal', 'Changer de canal'),
     'release_action_rebuild': ('Rebuild for current version', 'Rebuild voor huidige versie', 'Aktuelle Version neu bauen', 'Reconstruir la version actual', 'Reconstruire la version actuelle'),
     'rebuild_close_game': ('Close the game before rebuilding.', 'Sluit het spel voordat je opnieuw bouwt.', 'Schließe das Spiel vor dem Neubau.', 'Cierra el juego antes de volver a compilarlo.', 'Fermez le jeu avant de le recompiler.'),
@@ -332,8 +332,8 @@ _UPDATE_RESULTS = {
     'update_report_issue': ('Report this update failure', 'Deze updatefout melden', 'Updatefehler melden', 'Informar de este error', 'Signaler cet echec'),
     'update_result_continue': ('Continue', 'Verder', 'Weiter', 'Continuar', 'Continuer'),
     'update_issue_title': ('Launcher update to {version} failed', 'Launcherupdate naar {version} mislukt', 'Launcher-Update auf {version} fehlgeschlagen', 'Fallo al actualizar el lanzador a {version}', 'Echec de la mise a jour du lanceur vers {version}'),
-    'update_issue_details': ('I selected {version} in Updates. The update failed. Current launcher: {current}.\n\nError: {error}', 'Ik koos {version} bij Updates. De update is mislukt. Huidige launcher: {current}.\n\nFout: {error}', 'Ich habe {version} unter Updates ausgewaehlt. Das Update ist fehlgeschlagen. Aktueller Launcher: {current}.\n\nFehler: {error}', 'Seleccione {version} en Actualizaciones. La actualizacion fallo. Lanzador actual: {current}.\n\nError: {error}', 'J\'ai choisi {version} dans Mises a jour. La mise a jour a echoue. Lanceur actuel : {current}.\n\nErreur : {error}'),
-    'update_issue_expected': ('Install {version}, restart and confirm the installed launcher version.', '{version} installeren, herstarten en de geinstalleerde launcherversie bevestigen.', '{version} installieren, neu starten und die installierte Version bestaetigen.', 'Instalar {version}, reiniciar y confirmar la version instalada.', 'Installer {version}, redemarrer et confirmer la version installee.'),
+    'update_issue_details': ('I selected {version} in Updates. The update failed. Current launcher: {current}.\n\nError: {error}', 'Ik koos {version} bij Updates. De update is mislukt. Huidige launcher: {current}.\n\nFout: {error}', 'Ich habe {version} unter Updates ausgewählt. Das Update ist fehlgeschlagen. Aktueller Launcher: {current}.\n\nFehler: {error}', 'Seleccione {version} en Actualizaciones. La actualizacion fallo. Lanzador actual: {current}.\n\nError: {error}', 'J\'ai choisi {version} dans Mises a jour. La mise a jour a echoue. Lanceur actuel : {current}.\n\nErreur : {error}'),
+    'update_issue_expected': ('Install {version}, restart and confirm the installed launcher version.', '{version} installeren, herstarten en de geinstalleerde launcherversie bevestigen.', '{version} installieren, neu starten und die installierte Version bestätigen.', 'Instalar {version}, reiniciar y confirmar la version instalada.', 'Installer {version}, redemarrer et confirmer la version installee.'),
 }
 for _key, _values in _UPDATE_RESULTS.items():
     for _language, _text in zip(('en', 'nl', 'de', 'es', 'fr'), _values):
