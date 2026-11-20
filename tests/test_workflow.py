@@ -77,8 +77,9 @@ class WorkflowTests(unittest.TestCase):
         progress.update({"eta": 500}, now=151)
         progress.update({"overall": 0.5}, now=152)
         self.assertEqual((progress.phase, progress.done, progress.total), ("generating", 10, 100))
+        self.assertEqual(progress.fraction(), 0.1)       # a stage's own progress wins, as it did before
         progress.update({"overall": 0.4}, now=153)
-        self.assertEqual(progress.fraction(), 0.5)       # the bar never moves backwards
+        self.assertEqual(progress.overall, 0.5)          # the whole-build fraction never moves backwards
         for bad in ({"eta": float("nan")}, {"eta": -1}, {"eta": float("inf")}, {"eta": "soon"},
                     {"overall": 2}, {"overall": float("nan")}, {"overall": None}):
             progress.update(bad, now=154)

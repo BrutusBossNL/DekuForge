@@ -119,10 +119,11 @@ class Progress:
         return max(0, end - self.started)
 
     def fraction(self):
-        """How far the build is for the progress bar: the provider's whole-build fraction, else the current stage's."""
-        if self.overall:
-            return self.overall
-        return self.done / self.total if self.total and self.done else 0
+        """The progress bar's value: the current stage's own progress when it reports one (as before), otherwise the
+        whole build as the provider reports it, so the bar also moves during stages that only report that."""
+        if self.total and self.done:
+            return self.done / self.total
+        return self.overall
 
     def remaining(self, now=None):
         # This estimates only a measured step. Unknown work is never presented
