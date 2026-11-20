@@ -1,7 +1,7 @@
 name: Independent Windows packages
 on:
   push:
-    branches: [independent]
+    branches: [main]
     tags: ['v*']
 permissions:
   contents: read

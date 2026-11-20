@@ -112,7 +112,7 @@ progress from a previous installation.
 
 - **Stable** installs tagged independent Windows releases.
 - **Preview** also lists tagged prereleases.
-- **Experimental** offers checked commits from the `independent` branch via
+- **Experimental** offers checked commits from `main` via
   GitHub Actions for 14 days. Downloads require a GitHub CLI sign-in or a token
   with Actions read access. A Preview and an Experimental build from the same
   commit carry the same engine changes.
@@ -120,6 +120,8 @@ progress from a previous installation.
 Switches into or out of Experimental need confirmation. A launcher-only
 update skips the game build, and an engine update reuses compatible local
 build caches. Windows SmartScreen can prompt about the unsigned installer.
+On launcher versions before 0.4.1, switch to Stable and install 0.4.1 or newer
+before returning to Experimental.
 To uninstall, open **Installed apps** in Windows or run
 `DekuForge-Uninstall.exe` from the installation folder. The uninstaller offers to keep
 a backup of your saves. Your input game archive stays in place.

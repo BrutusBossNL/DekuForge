@@ -6,8 +6,8 @@ The project's original source is open source under the root MIT license.
 
 ## Engine and branches
 
-The independent builder is the release backend on `main`. The `independent`
-branch publishes Experimental commit packages. Stable and Preview release
+The independent builder is the release backend on `main`. Pushes to `main`
+publish Experimental commit packages. Stable and Preview release
 packages are tagged from the independent source and carry its component IDs.
 Protect `v0.3.0` as the final NX2navi-based Legacy release.
 

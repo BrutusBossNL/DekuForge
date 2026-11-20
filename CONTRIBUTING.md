@@ -2,7 +2,7 @@
 
 Develop against the independent engine on `main`. Use
 [the Windows source-build guide](docs/OPEN_ENGINE_EVALUATION.md) and
-[distribution guide](docs/DISTRIBUTION.md). The `independent` branch supplies
+[distribution guide](docs/DISTRIBUTION.md). Builds from `main` supply
 Experimental commit packages. DekuForge 0.3.0 is the frozen NX2navi-based Legacy
 release.
 

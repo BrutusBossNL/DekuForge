@@ -5,7 +5,7 @@ Stable and Preview. The frozen NX2navi-based 0.3.0 Legacy release is a separate
 installation. The launcher identifies compatible Windows packages with
 `DekuForge-independent-release.json`.
 
-Experimental selects Windows artifacts of successful pushes to `independent`,
+Experimental selects Windows artifacts of successful pushes to `main`,
 using the GitHub Actions digest and the embedded commit identity. Expired
 artifacts drop out of the list. GitHub CLI sign-in or a token with Actions read
 permission is required. Tag Stable and Preview from the same source commit

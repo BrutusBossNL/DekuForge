@@ -1,7 +1,7 @@
 name: Source checks
 on:
   push:
-    branches: [main, independent]
+    branches: [main]
   pull_request:
   workflow_dispatch:
   workflow_call:

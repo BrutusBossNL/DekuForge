@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "launcher": {
-    "version": "0.4.0",
+    "version": "0.4.1",
     "stage": "stable",
     "bug_reports": true,
     "uninstaller": true,

@@ -38,15 +38,16 @@ def fixture_package(path, text="new", extra=None):
 class UpdateTests(unittest.TestCase):
     def test_experimental_channel_uses_only_successful_first_party_commit_artifacts(self):
         sha = 'a' * 40
-        run = {"id": 17, "head_branch": "independent", "head_sha": sha, "conclusion": "success",
+        run = {"id": 17, "head_branch": "main", "head_sha": sha, "conclusion": "success",
                "head_repository": {"full_name": "BrutusBossNL/DekuForge"}}
         assets = [{"id": 11, "name": "dekuforge-windows-0.4.0-experimental.2.1-" + sha,
                    "size_in_bytes": 123, "digest": "sha256:" + "b" * 64}]
         with (patch('dekuforge.experimental_updates.github_token', return_value='test'),
               patch('dekuforge.experimental_updates.read_response', side_effect=[
-                  {"workflow_runs": [dict(run, conclusion="failure"), run]},
-                  {"artifacts": [dict(assets[0], expired=True), *assets]}])):
+                  {"workflow_runs": [dict(run, conclusion="failure"), dict(run, head_branch="independent"), run]},
+                  {"artifacts": [dict(assets[0], expired=True), *assets]}]) as response):
             rows = list_builds()
+        self.assertIn('?branch=main&', response.call_args_list[0].args[0])
         self.assertEqual(len(rows), 1)
         self.assertEqual(rows[0]['commit'], sha)
         self.assertEqual(rows[0]['artifact']['url'], f'{API}/actions/artifacts/11/zip')

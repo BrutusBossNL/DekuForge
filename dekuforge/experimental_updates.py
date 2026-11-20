@@ -1,4 +1,4 @@
-"""Update from checked builds on the first-party independent branch."""
+"""Update from checked builds on the first-party main branch."""
 import json
 import re
 import shutil
@@ -12,6 +12,7 @@ from .update_service import download_asset, github_request, github_token, prepar
 
 
 API = f"https://api.github.com/repos/{REPOSITORY}"
+BRANCH = "main"
 ARTIFACT = re.compile(r"dekuforge-windows-([0-9]+\.[0-9]+\.[0-9]+-experimental\.[0-9]+\.[0-9]+)-([a-f0-9]{40})")
 
 
@@ -27,10 +28,10 @@ def list_builds():
     if not github_token():
         raise ValueError("experimental_sign_in")
     runs = read_response(f"{API}/actions/workflows/independent-windows.yml/runs"
-                         "?branch=independent&event=push&status=success&per_page=20")["workflow_runs"]
+                         f"?branch={BRANCH}&event=push&status=success&per_page=20")["workflow_runs"]
     rows = {}
     for run in runs:
-        if (run.get("head_branch") != "independent" or run.get("conclusion") != "success"
+        if (run.get("head_branch") != BRANCH or run.get("conclusion") != "success"
                 or (run.get("head_repository") or {}).get("full_name", "").casefold() != REPOSITORY.casefold()
                 or type(run.get("id")) is not int):
             continue
