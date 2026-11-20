@@ -892,6 +892,8 @@ class Launcher(ModsUI, ReleaseListUI):
         threading.Thread(target=worker, daemon=False).start()
 
     def render_progress(self):
+        if self.page_panel is not None:
+            self.page_panel.set_stretch()   # the log view takes the height the window has left
         self.label(self.content, self.t("build_title"), 20).pack(anchor="w", pady=(0, 12))
         summary = self.card(self.content, padding=16)
         self.label(summary, Path(self.source).name, 12).pack(anchor="w")
@@ -1090,8 +1092,9 @@ class Launcher(ModsUI, ReleaseListUI):
             try:
                 with self.log_path.open("a", encoding="utf-8") as output:
                     def logged(kind, value):
-                        output.write(f"[{kind}] {value}\n")
-                        output.flush()
+                        if kind != "progress":   # the provider's own progress lines are already logged as "log"
+                            output.write(f"[{kind}] {value}\n")
+                            output.flush()
                         notify(kind, value)
                     executable = build_independent(request.source, logged, destination=request.destination)
                     if executable is None or not Path(executable).is_file():
@@ -1122,9 +1125,10 @@ class Launcher(ModsUI, ReleaseListUI):
         self.phase_label.configure(text=self.t(key) + (" · " + stage if self.progress.active else ""))
         if self.result:
             self.progressbar.configure(mode="determinate", value=100)
-        if self.progress.total and self.progress.done and self.progress.active:
+        fraction = self.progress.fraction()
+        if fraction and self.progress.active:
             self.progressbar.stop()
-            self.progressbar.configure(mode="determinate", value=100 * self.progress.done / self.progress.total)
+            self.progressbar.configure(mode="determinate", value=100 * fraction)
         elif self.progress.active and self.progressbar.cget("mode") != "indeterminate":
             self.progressbar.configure(mode="indeterminate")
             self.progressbar.start(18)

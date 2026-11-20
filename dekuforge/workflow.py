@@ -75,17 +75,30 @@ class Progress:
     total: float = 0
     active: bool = False
     ended: float = 0
+    overall: float = 0          # how far the whole build is, as the provider reports it (0..1)
+    eta: float | None = None    # the provider's measured time left for its current long step, in seconds
+    eta_at: float = 0           # when that estimate was received
 
     def begin(self, now=None):
         self.started = self.phase_started = time.monotonic() if now is None else now
         self.phase = "checking"
-        self.done = self.total = self.ended = 0
+        self.done = self.total = self.ended = self.overall = self.eta_at = 0
+        self.eta = None
         self.active = True
 
     def update(self, event, now=None):
         if not isinstance(event, dict):
             return
         now = time.monotonic() if now is None else now
+        if "overall" in event or "eta" in event:
+            # Standalone events from the provider's own progress and estimate lines: they belong to no single stage
+            # and must not reset the stage's done/total.
+            overall, eta = event.get("overall"), event.get("eta")
+            if isinstance(overall, (int, float)) and math.isfinite(overall) and 0 <= overall <= 1:
+                self.overall = max(self.overall, overall)
+            if isinstance(eta, (int, float)) and math.isfinite(eta) and 0 <= eta <= 7 * 86400:
+                self.eta, self.eta_at = eta, now
+            return
         phase = event.get("phase", event.get("stage", self.phase))
         if phase != self.phase:
             self.phase, self.phase_started = phase, now
@@ -105,12 +118,27 @@ class Progress:
         end = (time.monotonic() if now is None else now) if self.active else self.ended
         return max(0, end - self.started)
 
+    def fraction(self):
+        """How far the build is for the progress bar: the provider's whole-build fraction, else the current stage's."""
+        if self.overall:
+            return self.overall
+        return self.done / self.total if self.total and self.done else 0
+
     def remaining(self, now=None):
-        # This estimates only the current measured stage. Unknown work is never
-        # presented as a made-up overall build duration.
-        if not self.active or not self.total or not self.done:
+        # This estimates only a measured step. Unknown work is never presented
+        # as a made-up overall build duration: the provider's own estimate of
+        # its long compile step counts down between its updates, and a stage
+        # that reports done/total is extrapolated from its own pace.
+        if not self.active:
             return None
-        age = (time.monotonic() if now is None else now) - self.phase_started
+        now = time.monotonic() if now is None else now
+        if self.eta is not None:
+            left = self.eta - (now - self.eta_at)
+            if left > 0:
+                return left
+        if not self.total or not self.done:
+            return None
+        age = now - self.phase_started
         if age < 2:
             return None
         return max(0, age * (self.total - self.done) / self.done)

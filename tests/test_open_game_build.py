@@ -4,7 +4,24 @@ import tempfile
 import unittest
 from unittest.mock import patch, Mock
 
-from dekuforge.open_game_build import claim, owned
+from dekuforge.open_game_build import claim, owned, provider_events
+
+
+class ProviderProgressTests(unittest.TestCase):
+    def test_both_provider_dialects_and_the_compile_estimate_are_read(self):
+        self.assertEqual(provider_events('progress 0.250 Compiling\n', 'checking'),
+                         ('checking', [('progress', {'overall': 0.25})]))
+        self.assertEqual(provider_events('@@eta 1472\n', 'compile'), ('compile', [('progress', {'eta': 1472.0})]))
+        self.assertEqual(provider_events('@@stage lift Translating the game\n', 'checking'),
+                         ('lift', [('phase', {'phase': 'lift', 'done': 0, 'total': 0})]))
+        self.assertEqual(provider_events('@@progress 0.5\n', 'lift'),
+                         ('lift', [('progress', {'phase': 'lift', 'done': 0.5, 'total': 1})]))
+
+    def test_other_output_carries_no_events(self):
+        for line in ('progress\n', 'progress soon\n', 'progress 1.5 over\n', 'progress nan x\n', '@@eta\n', '@@eta many\n',
+                     '@@stage\n', '@@progress 2\n', '@@file code_1.c 51.1 new\n', '@@plan 696 696\n',
+                     '[log] progress 0.1 x\n', '  9909.7 MiB written (102595 files completed)\n', '\n'):
+            self.assertEqual(provider_events(line, 'compile'), ('compile', []), line)
 
 
 class OpenGameOwnershipTests(unittest.TestCase):

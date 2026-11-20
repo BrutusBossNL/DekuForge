@@ -84,3 +84,47 @@ class ScrollingArtworkTests(unittest.TestCase):
         self.surface._fitted = None
         self.surface._redraw()
         self.assert_visible_artwork()
+
+
+@unittest.skipUnless(os.name == 'nt', 'Windows desktop integration')
+class StretchedPanelTests(unittest.TestCase):
+    """The build page's log view takes the height the window has left; taller content still scrolls."""
+    def setUp(self):
+        prepare_tk()
+        self.root = tk.Tk()
+        self.addCleanup(self.root.destroy)
+        self.root.geometry('740x620')
+        self.surface = BackgroundCanvas(self.root)
+        self.surface.pack(fill='both', expand=True)
+        host = tk.Frame(self.surface)
+        host.place(x=35, y=30, width=650, height=560)
+        self.panel = PagePanel(host, self.surface)
+        self.panel.pack(fill='both', expand=True)
+        tk.Label(self.panel.body, text='Title').pack(anchor='w')
+        self.log = tk.Text(self.panel.body, height=7)
+        self.log.pack(fill='both', expand=True)
+        tk.Button(self.panel.body, text='Go').pack(anchor='e')
+        self.root.update()
+
+    def inner_height(self):
+        return self.panel.viewport.winfo_height() - 2 * self.panel.padding
+
+    def test_without_stretch_the_log_keeps_its_requested_height(self):
+        self.assertEqual(self.log.winfo_height(), self.log.winfo_reqheight())
+        self.assertLess(self.panel.body.winfo_height(), self.inner_height())
+
+    def test_stretch_gives_the_free_height_to_the_expanding_log(self):
+        before = self.log.winfo_height()
+        self.panel.set_stretch()
+        self.root.update()
+        self.assertGreater(self.log.winfo_height(), before + 50)
+        self.assertEqual(self.panel.body.winfo_height(), self.inner_height())
+
+    def test_content_taller_than_the_window_still_scrolls(self):
+        self.log.configure(height=60)
+        self.panel.set_stretch()
+        self.root.update()
+        self.assertGreater(self.panel.body.winfo_reqheight(), self.inner_height())
+        self.assertEqual(self.panel.body.winfo_height(), self.panel.body.winfo_reqheight())
+        scrollregion = [int(part) for part in str(self.panel.viewport.cget('scrollregion')).split()]
+        self.assertEqual(scrollregion[3], self.panel.body.winfo_reqheight() + 2 * self.panel.padding)

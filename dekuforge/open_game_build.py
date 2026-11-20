@@ -36,6 +36,33 @@ def claim(path, name, identity):
         marker.write_text(json.dumps(identity, indent=2)+'\n')
 
 
+def provider_events(line, phase):
+    """The launcher events one provider output line carries, and the stage the build is in after it.
+
+    The provider prints two dialects. The builder app's `@@stage <id> <text>` and `@@progress <0..1>` (one stage's own
+    progress), and, in the `--prepare` mode this launcher runs it in, `progress <0..1> <text>` for the whole build. Its
+    `@@eta <seconds>` (the compile's time left, measured on earlier builds on this PC) comes in both."""
+    words = line.split()
+    events = []
+    try:
+        if line.startswith('@@stage ') and len(words) > 1:
+            phase = words[1]
+            events.append(('phase', {'phase': phase, 'done': 0, 'total': 0}))
+        elif line.startswith('@@progress '):
+            value = float(words[1])
+            if 0 <= value <= 1:
+                events.append(('progress', {'phase': phase, 'done': value, 'total': 1}))
+        elif line.startswith('@@eta '):
+            events.append(('progress', {'eta': float(words[1])}))
+        elif line.startswith('progress '):
+            value = float(words[1])
+            if 0 <= value <= 1:
+                events.append(('progress', {'overall': value}))
+    except (ValueError, IndexError):
+        pass
+    return phase, events
+
+
 def build(filename, notify, destination, *, config=None, romfs=None, exefs=None, prepare_gpu=True):
     config = json.loads(CONFIG.read_text(encoding='utf-8')) if config is None else config
     source = owned(config['source'], ROOT/'build')
@@ -95,16 +122,9 @@ def build(filename, notify, destination, *, config=None, romfs=None, exefs=None,
                               text=True, encoding='utf-8', errors='replace', creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0)) as process:
             for line in process.stdout:
                 notify('log', line)
-                if line.startswith('@@stage '):
-                    phase = line.split(' ', 2)[1]
-                    notify('phase', {'phase': phase, 'done': 0, 'total': 0})
-                elif line.startswith('@@progress '):
-                    try:
-                        value = float(line.split()[1])
-                        if 0 <= value <= 1:
-                            notify('progress', {'phase': phase, 'done': value, 'total': 1})
-                    except (ValueError, IndexError):
-                        pass
+                phase, events = provider_events(line, phase)
+                for kind, value in events:
+                    notify(kind, value)
             if process.wait():
                 raise RuntimeError('Experimental source build failed; inspect the build log')
         original = output/'hookshot.exe'
