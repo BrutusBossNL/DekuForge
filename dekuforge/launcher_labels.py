@@ -13,6 +13,7 @@ ROWS = {
     "action_update": ("Update", "Updaten", "Aktualisieren", "Actualizar", "Mettre à jour"),
     "action_build": ("(Re)build", "(Her)bouwen", "(Neu) bauen", "(Re)compilar", "(Re)compiler"),
     "game_version": ("Game version: {version}", "Spelversie: {version}", "Spielversion: {version}", "Versión del juego: {version}", "Version du jeu : {version}"),
+    "engine_version": ("Engine version: {version}", "Engineversie: {version}", "Engine-Version: {version}", "Versión del motor: {version}", "Version du moteur : {version}"),
     "version_unknown": ("Unknown version", "Versie onbekend", "Version unbekannt", "Versión desconocida", "Version inconnue"),
     "no_dump": ("No game dump selected", "Geen gamedump gekozen", "Kein Spiel-Dump gewählt", "Sin volcado seleccionado", "Aucun dump sélectionné"),
     "release_choice": ("Release to update / downgrade to", "Release voor update / downgrade", "Zielversion für Update / Downgrade", "Versión para actualizar / retroceder", "Version pour mise à jour / retour"),

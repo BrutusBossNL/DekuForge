@@ -346,6 +346,16 @@ ui.main()
         colors = [logo.get(x, y) for x in range(0, logo.width(), 5) for y in range(0, logo.height(), 5)]
         self.assertTrue(any(r > 150 and g > 100 and b < 130 for r, g, b in colors))
 
+    def test_play_card_lists_versions_on_separate_lines(self):
+        self.assertEqual(self.app.home_cards[0].detail, "Custom game")
+        self.app.library.register(self.game, version="0.1.0-test / 1.1.1")
+        self.app.set_language("nl")
+        self.assertEqual(self.app.home_cards[0].detail, "Engineversie: 0.1.0-test\nSpelversie: 1.1.1")
+        (self.game.parent / "dekuforge-build-info.json").write_text(
+            json.dumps({"engine_version": "0.1.0-current", "game_version": "1.1.1"}), encoding="utf-8")
+        self.app.navigate("home")
+        self.assertEqual(self.app.home_cards[0].detail, "Engineversie: 0.1.0-current\nSpelversie: 1.1.1")
+
     def test_action_cards_pointer_keyboard_and_disabled_play(self):
         from dekuforge.theme import GOLD, BORDER
         self.root.deiconify()

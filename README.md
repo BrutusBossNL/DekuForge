@@ -123,7 +123,7 @@ build caches. Windows SmartScreen can prompt about the unsigned installer.
 On launcher versions before 0.4.1, switch to Stable and install 0.4.1 or newer
 before returning to Experimental.
 The in-game startup screen shows the launcher version when started from
-**Play**. The engine and game versions are available in the build details.
+**Play**. The Play card lists the engine and game versions on separate lines.
 To uninstall, open **Installed apps** in Windows or run
 `DekuForge-Uninstall.exe` from the installation folder. The uninstaller offers to keep
 a backup of your saves. Your input game archive stays in place.

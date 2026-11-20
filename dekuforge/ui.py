@@ -249,6 +249,22 @@ class Launcher(ModsUI, ReleaseListUI):
             entry = next((e for e in self.build_entries() if e["executable"] == self.executable), {})
         return entry.get("version") or self.t("custom_game")
 
+    def play_build_details(self):
+        from .update_status import read_record
+
+        info = read_record(Path(self.executable).parent / "dekuforge-build-info.json")
+        engine, game = (info.get(key) for key in ("engine_version", "game_version"))
+        if not engine and not game:
+            version = self.build_version()
+            if version == self.t("custom_game"):
+                return version
+            engine, separator, game = version.partition(" / ")
+            if not separator:
+                engine, game = "", engine
+        unknown = self.t("version_unknown")
+        return "\n".join((self.t("engine_version", version=engine or unknown),
+                          self.t("game_version", version=game or unknown)))
+
     def render_home(self):
         selected = bool(self.executable and Path(self.executable).is_file())
         running = self.process is not None and self.process.poll() is None
@@ -257,8 +273,7 @@ class Launcher(ModsUI, ReleaseListUI):
         release = (self.releases[0]["version"] if self.releases and
                    self.checked_channel == self.preferences["update_channel"] else
                    self.t("no_release" if self.checked_channel == self.preferences["update_channel"] else "release_unchecked"))
-        version = self.build_version()
-        details = ((version if version == self.t("custom_game") else self.t("game_version", version=version)) if selected else self.t("no_install"),
+        details = (self.play_build_details() if selected else self.t("no_install"),
                    self.t("release_found", version=release),
                    self.source or self.t("no_dump"))
         actions = (("play", self.t('mods_working') if self.mods_busy else self.t("playing") if running else self.t("play"), self.play,
