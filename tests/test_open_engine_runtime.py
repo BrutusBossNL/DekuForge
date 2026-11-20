@@ -4,6 +4,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
+from dekuforge import __version__
 from dekuforge.core import launch
 from dekuforge.open_engine_runtime import MANIFEST, game_language, launch_options
 
@@ -33,11 +34,13 @@ class IndependentRuntimeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix='deku test ') as folder:
             root = Path(folder).resolve()
             exe, record = self.fixture(root)
-            with patch.dict('os.environ', {'HOS_CONTROL_MEM': '1', 'RX_BACKEND': 'legacy', 'KEEP_ME': 'yes'}):
+            with patch.dict('os.environ', {'HOS_CONTROL_MEM': '1', 'RX_BACKEND': 'legacy', 'KEEP_ME': 'yes',
+                                          'DEKUFORGE_LAUNCHER_VERSION': 'stale'}):
                 options = launch_options(exe, root)
             self.assertEqual(options['args'], [str(exe), record['image'], '--romfs', record['romfs'], '--user', record['user']])
             self.assertEqual(options['env']['RX_BACKEND'], 'vulkan')
             self.assertEqual(options['env']['RX_VK_LOAD'], 'start')
+            self.assertEqual(options['env']['DEKUFORGE_LAUNCHER_VERSION'], __version__)
             self.assertNotIn('HOS_CONTROL_MEM', options['env'])
             self.assertEqual(options['env']['KEEP_ME'], 'yes')
             with (patch('dekuforge.open_engine_runtime.launch_options', return_value=options),

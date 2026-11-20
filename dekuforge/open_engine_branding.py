@@ -86,6 +86,12 @@ def prepare(source, output):
     menu = _replace(menu, '#include "vk_ui.h"', '#include "' + (output / 'vk_ui.h').as_posix() + '"')
     menu = _replace(menu, 'std::string("Hookshot ")', 'std::string("DekuForge ")')
     menu = _replace(menu,
+        '    if (v.version.empty()) v.version = version_text(HOOKSHOT_VERSION);   // ("v2.0.5"; "v2.0.5 dev" between releases)',
+        '''    if (const char* release = getenv("DEKUFORGE_LAUNCHER_VERSION"); release && *release)
+        v.version = std::string("DekuForge ") + release;
+    else if (v.version.empty())
+        v.version = "Engine " + version_text(HOOKSHOT_VERSION);''')
+    menu = _replace(menu,
         'ui::spaced(c, c.f.heading, 42 * k, ImVec2(cx, y), ui::rgba(246, 232, 204), "HOOKSHOT", 6 * k);',
         'ui::text_centre(c, c.f.body, 20 * k, ImVec2(cx, y + 12 * k), ui::kAccent, "Reforging a legend.");')
     menu = _replace(menu, 'ui::rgba(14, 10, 6)', 'ui::rgba(7, 21, 13)')
