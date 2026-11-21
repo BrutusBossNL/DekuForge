@@ -216,6 +216,7 @@ class PagePanel(tk.Frame):
     def __init__(self, parent, surface, padding=28):
         super().__init__(parent, bg=BORDER, highlightthickness=0, borderwidth=0)
         self.padding = padding
+        self.stretch = False
         self._scroll_job = None
         self.viewport = BackgroundCanvas(self, surface=surface, opacity=.15)
         self.viewport.pack(side="left", fill="both", expand=True, padx=1, pady=1)
@@ -240,9 +241,25 @@ class PagePanel(tk.Frame):
         self.viewport.itemconfigure(self._window, width=max(1, event.width-2*self.padding))
         self._body_changed()
 
+    def set_stretch(self, value=True):
+        """Let the body fill the visible height, so an expanding child (a log view) can use the free space.
+
+        The body otherwise keeps its natural height and the canvas only scrolls when that exceeds the window, which leaves
+        `pack(expand=True)` children nothing to grow into. Content taller than the window still scrolls."""
+        self.stretch = bool(value)
+        self._body_changed()
+
+    def _body_height(self):
+        height = self.body.winfo_reqheight()
+        if self.stretch:
+            height = max(height, self.viewport.winfo_height()-2*self.padding)
+        return height
+
     def _body_changed(self, _event=None):
-        self.viewport.configure(scrollregion=(0, 0, self.viewport.winfo_width(),
-                                              self.body.winfo_reqheight()+2*self.padding))
+        height = self._body_height()
+        if self.stretch:
+            self.viewport.itemconfigure(self._window, height=height)
+        self.viewport.configure(scrollregion=(0, 0, self.viewport.winfo_width(), height+2*self.padding))
 
     def _scrolled(self, first, last):
         self.scroll.set(first, last)
@@ -278,7 +295,7 @@ class PagePanel(tk.Frame):
         height = self.viewport.winfo_height()
         shift = top-12 if top < 12 else bottom-height+12 if bottom > height-12 else 0
         if shift:
-            total = self.body.winfo_reqheight()+2*self.padding
+            total = self._body_height()+2*self.padding
             self.viewport.yview_moveto((self.viewport.canvasy(0)+shift)/max(1,total))
 
     def _focus_changed(self, event):
