@@ -3,12 +3,19 @@ on:
   push:
     branches: [main]
     tags: ['v*']
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
 permissions:
   contents: read
+concurrency:
+  group: independent-windows-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   checks:
     uses: ./.github/workflows/checks.yml
   package:
+    if: github.event_name != 'pull_request' || !github.event.pull_request.draft
     needs: checks
     runs-on: windows-latest
     timeout-minutes: 30
@@ -55,19 +62,19 @@ jobs:
           unpack(archive(base, pin), pin[4], base / pin[5])
       - run: python tools/build_launcher.py --toolchain local/build-tools/hookshot-llvm-20261104/bin
       - run: python tools/build_setup.py --toolchain local/build-tools/hookshot-llvm-20261104/bin
-      - name: Test clean native setup for tagged releases
-        if: github.ref_type == 'tag'
+      - name: Test clean native setup and build dependencies
         run: python tools/test_independent_setup.py --with-tools
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: github.ref_type == 'branch'
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: github.event_name == 'push' && github.ref_type == 'branch'
         with:
           name: dekuforge-windows-${{ env.FORGE_VERSION }}-${{ github.sha }}
           path: build/releases/DekuForge-launcher-${{ env.FORGE_VERSION }}-windows.zip
           if-no-files-found: error
+          archive: true
           retention-days: 14
           compression-level: 0
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        if: github.ref_type == 'tag'
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: github.event_name == 'push' && github.ref_type == 'tag'
         with:
           name: DekuForge-independent-release
           path: |
@@ -75,3 +82,4 @@ jobs:
             build/releases/DekuForge-independent-release.json
             build/releases/DekuForge-launcher-*-windows.zip
           if-no-files-found: error
+          archive: true

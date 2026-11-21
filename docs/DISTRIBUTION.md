@@ -10,8 +10,10 @@ using the GitHub Actions digest and the embedded commit identity. Expired
 artifacts drop out of the list. GitHub CLI sign-in or a token with Actions read
 permission is required. Tag Stable and Preview from the same source commit
 when promoting the same changes. Each package embeds its own version and the
-same commit identity as the corresponding Experimental artifact. The tagged
-Windows jobs validate a clean install before publication.
+same commit identity as the corresponding Experimental artifact. Ready pull
+requests, pushes to `main` and version tags use the same source checks and
+clean Windows setup test. A pull request never publishes an update artifact.
+Pushes publish the appropriate artifact only after their checks pass.
 
 Changes limited to the launcher skip the game build. Engine inputs and build
 tool changes queue a local rebuild. A compatible installed build keeps its

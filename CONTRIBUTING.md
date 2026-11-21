@@ -77,8 +77,10 @@ running game or overwrite their working installation to run an experiment.
 
 ## Review and release
 
-Maintainers review contributions before merging. The project stays private until
-Windows installation/update acceptance passes and component distribution terms
-are resolved. Publishing a setup must include
+Maintainers review contributions before merging. Check that the Windows and
+Linux source checks and the Windows packaging job are green before merging a
+ready pull request. The packaging job installs into a fresh directory, checks
+the launcher and provisions the pinned build dependencies. Fork runs may need
+maintainer approval in GitHub Actions. Publishing a setup must include
 only the launcher and tooling, with appropriate notices. Every player builds
 locally from their own input. Do not publish generated game artifacts to CI.
