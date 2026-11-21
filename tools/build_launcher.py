@@ -5,8 +5,11 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from tools.native_resources import RUNTIME_SOURCES, runtime_pin_header, write_resources
 
 
 def main():
@@ -30,43 +33,18 @@ def main():
     output = ROOT / "build" / "launcher"
     output.mkdir(parents=True, exist_ok=True)
     pins=json.loads((ROOT/"dekuforge/components.json").read_text(encoding="utf-8"))
-    runtime_id=pins["python"]["id"]
-    if not all(c.isalnum() or c in ".-" for c in runtime_id):
-        raise ValueError("Invalid runtime component identity")
-    (output/"runtime_pin.h").write_text('#define DEKU_PYTHON_ID L"'+runtime_id+'"\n',encoding="ascii")
-    resource = output / "brand.rc"
-    version=pins["launcher"]["version"]
-    numeric=",".join(version.split("-")[0].split(".")+["0"])
-    resource.write_text(('101 ICON "' + icon.as_posix() + '"\n' + '''
-1 VERSIONINFO
-FILEVERSION 0,1,0,0
-PRODUCTVERSION 0,1,0,0
-FILEOS 0x40004
-FILETYPE 0x1
-BEGIN
- BLOCK "StringFileInfo"
- BEGIN
-  BLOCK "040904b0"
-  BEGIN
-   VALUE "FileDescription", "DekuForge launcher\\0"
-   VALUE "ProductName", "DekuForge\\0"
-   VALUE "FileVersion", "0.1.0-dev\\0"
-   VALUE "OriginalFilename", "DekuForge.exe\\0"
-  END
- END
- BLOCK "VarFileInfo"
- BEGIN
-  VALUE "Translation", 0x409, 1200
- END
-END
-''').replace("0,1,0,0",numeric).replace("0.1.0-dev",version), encoding="utf-8")
+    (output/"runtime_pin.h").write_text(runtime_pin_header(pins),encoding="ascii")
+    resource = write_resources(output, "brand", description="DekuForge launcher", filename="DekuForge.exe",
+                               version=pins["launcher"]["version"], icon=icon)
     obj = output / "brand.o"
     environment = os.environ.copy()
     environment["PATH"] = str(args.toolchain.resolve()) + os.pathsep + environment.get("PATH", "")
     subprocess.run([str(args.toolchain / "windres.exe"), "-i", str(resource), "-o", str(obj)], check=True, env=environment)
     executable = ROOT / "DekuForge.exe"
     subprocess.run([str(args.toolchain / "clang.exe"), "-O2", "-Wall", "-Wextra", "-Werror", "-municode", "-mwindows",
-                    "-I",str(output),str(ROOT / "launcher" / "main.c"), str(obj), "-o", str(executable)], check=True, env=environment)
+                    "-I",str(output),"-I",str(ROOT/"launcher"),str(ROOT / "launcher" / "main.c"),
+                    *map(str,RUNTIME_SOURCES), str(obj), "-lwinhttp", "-lbcrypt", "-o", str(executable)],
+                   check=True, env=environment)
     print("Built:", executable)
 
 

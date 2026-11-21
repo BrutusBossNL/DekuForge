@@ -13,7 +13,8 @@ This roadmap records planned work and has no fixed delivery dates.
   folder, own runtime, verified tool downloads, first local build and Play.
 - Establish trusted Windows publisher signing and integrate signing/timestamping
   before final release hashes. Until then, document unsigned-release SmartScreen
-  prompts; signing itself does not guarantee immediate SmartScreen reputation.
+  prompts and heuristic antivirus detections; signing itself does not guarantee
+  immediate SmartScreen or antivirus reputation.
 - Test Stable/Preview updates, downgrade, interruption recovery and failed-build
   rollback without losing settings, profiles or the previous working game.
 - Complete Cheat Manager acceptance, additional scene/performance tests,

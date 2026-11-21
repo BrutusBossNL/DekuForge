@@ -1,7 +1,8 @@
-"""Install a verified launcher package, provision tools and register a Start Menu shortcut."""
+"""Install a verified launcher package and provision tools.
+
+The native setup creates the Start Menu shortcut and Installed apps entry afterwards."""
 import argparse
 import json
-import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -18,7 +19,6 @@ def main():
     parser.add_argument("--root",type=Path,required=True)
     parser.add_argument("--skip-tools",action="store_true")
     parser.add_argument("--no-launch",action="store_true")
-    parser.add_argument("--no-shortcut",action="store_true")
     args=parser.parse_args();root=args.root.absolute()
     settings=root/"local/settings.json"
     previous=json.loads(settings.read_text(encoding="utf-8")) if settings.is_file() else {}
@@ -50,10 +50,6 @@ def main():
         if has_game and result["requires_rebuild"]:
             atomic_json(root/"local/pending-game-update.json",{**result,"status":"pending",
                 "release":"v"+result["components"]["launcher"]["version"]})
-        # The native launcher, not an interpreter or command file, is the shortcut target.
-        if os.name=="nt" and not args.no_shortcut:
-            script=SOURCE/"installer/shortcut.ps1"
-            subprocess.run(["powershell.exe","-NoProfile","-NonInteractive","-ExecutionPolicy","Bypass","-File",str(script),"-Root",str(root)],check=True)
     except Exception:
         rollback(root,result["backup"])
         raise

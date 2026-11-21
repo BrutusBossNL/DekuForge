@@ -1,4 +1,6 @@
-"""Embed the launcher-only package in a standalone native Windows setup executable."""
+"""Embed the launcher-only package in a standalone native Windows setup executable.
+
+The setup verifies, unpacks and installs that package natively; it starts no script host."""
 import argparse
 import hashlib
 import json
@@ -12,6 +14,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
 from tools.package_launcher import package
 from dekuforge import COMPONENTS
+from tools.native_resources import NATIVE_SOURCES, RUNTIME_SOURCES, digest_header, packaged_sha256, runtime_pin_header, write_resources
 
 
 def main():
@@ -23,25 +26,28 @@ def main():
         raise ValueError("Release tag must match the launcher component version")
     out=ROOT/"build/setup";out.mkdir(parents=True,exist_ok=True)
     env=os.environ.copy();env["PATH"]=str(args.toolchain.resolve())+os.pathsep+env.get("PATH","")
-    uninstall_resource=out/"uninstall.rc"
-    uninstall_resource.write_text('101 ICON "'+(ROOT/"assets/branding/launcher.ico").as_posix()+'"\n103 RCDATA "'+(ROOT/"installer/uninstall.ps1").as_posix()+'"\n',encoding="utf-8")
+    icon=ROOT/"assets/branding/launcher.ico"
+    version=COMPONENTS["launcher"]["version"]
+    compile_flags=["-O2","-Wall","-Wextra","-Werror","-municode","-mwindows","-I",str(out),"-I",str(ROOT/"launcher")]
+    (out/"runtime_pin.h").write_text(runtime_pin_header(COMPONENTS),encoding="ascii")
+    # The uninstaller runs the installed helper only when it matches this packaged digest.
+    (out/"uninstall_script.h").write_text(digest_header("DEKU_UNINSTALL_SCRIPT_SHA256",
+        packaged_sha256(ROOT/"installer/uninstall.ps1")),encoding="ascii")
+    uninstall_resource=write_resources(out,"uninstall",description="DekuForge uninstaller",
+        filename="DekuForge-Uninstall.exe",version=version,icon=icon)
     subprocess.run([str(args.toolchain/"windres.exe"),str(uninstall_resource),"-o",str(out/"uninstall.o")],env=env,check=True)
-    subprocess.run([str(args.toolchain/"clang.exe"),"-O2","-Wall","-Wextra","-Werror","-municode","-mwindows",
-        str(ROOT/"installer/uninstall.c"),str(out/"uninstall.o"),"-o",str(ROOT/"DekuForge-Uninstall.exe")],env=env,check=True)
+    subprocess.run([str(args.toolchain/"clang.exe"),*compile_flags,str(ROOT/"installer/uninstall.c"),*map(str,NATIVE_SOURCES),
+        str(out/"uninstall.o"),"-lbcrypt","-o",str(ROOT/"DekuForge-Uninstall.exe")],env=env,check=True)
     archive=package()
-    script=(ROOT/"installer/install.ps1").read_text(encoding="utf-8")
     digest=hashlib.sha256(archive.read_bytes()).hexdigest()
-    script=script.replace("$ProgressPreference = 'SilentlyContinue'","$ProgressPreference = 'SilentlyContinue'\n"
-        +"if ((File-Sha256 $Payload) -ne '"+digest+"') { throw 'Installer payload checksum mismatch' }")
-    (out/"install.ps1").write_text(script,encoding="utf-8")
-    resource=out/"setup.rc"
-    resource.write_text('101 ICON "'+(ROOT/"assets/branding/launcher.ico").as_posix()+'"\n'
-        +'102 RCDATA "'+archive.as_posix()+'"\n103 RCDATA "'+(out/"install.ps1").as_posix()+'"\n',encoding="utf-8")
-    env=os.environ.copy();env["PATH"]=str(args.toolchain.resolve())+os.pathsep+env.get("PATH","")
+    (out/"setup_payload.h").write_text(digest_header("DEKU_SETUP_PAYLOAD_SHA256",digest),encoding="ascii")
+    resource=write_resources(out,"setup",description="DekuForge setup",filename="DekuForge-Setup.exe",
+        version=version,icon=icon,extra=['102 RCDATA "'+archive.resolve().as_posix()+'"'])
     subprocess.run([str(args.toolchain/"windres.exe"),str(resource),"-o",str(out/"setup.o")],env=env,check=True)
     executable=ROOT/"build/releases/DekuForge-Setup.exe"
-    subprocess.run([str(args.toolchain/"clang.exe"),"-O2","-Wall","-Wextra","-Werror","-municode","-mwindows",
-        str(ROOT/"installer/setup.c"),str(out/"setup.o"),"-lshell32","-lole32","-lgdi32","-o",str(executable)],env=env,check=True)
+    subprocess.run([str(args.toolchain/"clang.exe"),*compile_flags,str(ROOT/"installer/setup.c"),*map(str,RUNTIME_SOURCES),
+        str(out/"setup.o"),"-lshell32","-lole32","-luuid","-lgdi32","-ladvapi32","-lwinhttp","-lbcrypt",
+        "-o",str(executable)],env=env,check=True)
     with zipfile.ZipFile(archive) as content:
         manifest=json.loads(content.read("launcher-package.json"))
     release={"schema":1,"tag":args.tag,"components":manifest["components"],"contains_game_files":False,

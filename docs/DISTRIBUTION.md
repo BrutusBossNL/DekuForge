@@ -59,6 +59,9 @@ the native launcher, interface/source modules, build scripts, branding and the
 uninstaller. A helper waits for the launcher to exit, installs the verified
 package, prepares the selected Python runtime, runs the invisible health check
 and restarts the launcher. Failed application updates retain recovery copies.
+From launcher 0.4.4 the helper prepares the runtime with
+`DekuForge.exe --prepare-runtime`. Helpers frozen by older launchers still run
+`tools/bootstrap_runtime.ps1` from the new package, so the package keeps it.
 
 Build-tool installation is demand-driven: changing the distributed buildkit does
 not eagerly download every compiler during an application update. The next local
@@ -122,6 +125,39 @@ running that script would be overwritten. Configure signing credentials outside
 the repository, with restricted CI permissions; never commit private keys or
 tokens. No certificate has been purchased or signing account configured.
 
+### Antivirus heuristics
+
+On 2026-11-20 Avira reported `DekuForge-Setup.exe` as
+`Drop.Win64.FakeProgSelfRun` (upstream issue #12). A source review found no
+malicious behavior. The earlier setup did match common dropper heuristics: an
+unsigned EXE extracted an embedded ZIP and `install.ps1` into `%TEMP%`, ran them
+through a hidden `powershell.exe -ExecutionPolicy Bypass` and then downloaded and
+started more executables. Its uninstaller extracted a script into `%TEMP%` the
+same way, and the setup and uninstaller had no version information.
+
+Launcher 0.4.4 changes the shipped executables:
+
+- `DekuForge-Setup.exe` starts no script host and writes nothing to `%TEMP%`. It
+  checks the embedded package against a SHA-256 compiled into the setup, then
+  unpacks it with Windows `tar.exe` into `local\setup-*` inside the chosen
+  folder after checking the archive listing. It prepares the runtime natively,
+  runs `tools/install_package.py` with that runtime and creates the Start Menu
+  shortcut and Installed apps entry through Windows APIs. It removes its
+  workspace afterwards and logs to `local\setup.log`.
+- `DekuForge.exe` prepares a missing runtime natively instead of through
+  `tools/bootstrap_runtime.ps1`.
+- `DekuForge-Uninstall.exe` runs the installed `installer/uninstall.ps1` only
+  when its SHA-256 matches the digest compiled into the uninstaller. It still
+  starts PowerShell, because a separate process must remove the uninstaller
+  itself, but no script is written to `%TEMP%`.
+- All three executables carry complete version information (company, product,
+  copyright and original file name) and an `asInvoker` manifest.
+
+These changes remove known heuristic triggers, but nobody has checked whether
+any antivirus product now accepts the files. Unsigned new files can still be
+flagged. Report false positives to the vendor, and rely on publisher signing
+(above) for a lasting fix.
+
 Sign only the project's distributed launcher/tooling artifacts. The locally
 generated game is not a release asset and is not uploaded for signing.
 According to Microsoft's
@@ -133,10 +169,17 @@ automatic SmartScreen bypass. Never promise a warning-free first installation.
 ## Bootstrap and cache
 
 The native launcher looks for its pinned runtime in `python/<component-id>`.
-When absent it invokes `tools/bootstrap_runtime.ps1`, downloads the specified
-archive, verifies its size and SHA-256, validates archive members and installs it
-through an isolated staging directory. Different runtime identities use separate
-directories. Verified existing archives and installed versions are reused.
+When absent it prepares the runtime natively (`launcher/runtime.c`). The pins
+from `dekuforge/components.json` are compiled into the executable. It downloads
+the CPython archive and Pillow wheel with WinHTTP and verifies their size and
+SHA-256 with Windows CNG. Windows `tar.exe` (Windows 10 version 1803 or newer)
+lists each archive. Members are rejected for traversal, absolute or reserved
+names, links, special files, case collisions or the expansion limit before
+`tar.exe` extracts them into an isolated staging directory. A Python/Tk/Pillow
+import check runs before the runtime is moved into place. Different runtime
+identities use separate directories. Verified existing archives and installed
+versions are reused. `tools/bootstrap_runtime.ps1` stays as the developer
+bootstrap for a checkout without `DekuForge.exe`, and for older update helpers.
 
 The game builder separately prepares the pinned native toolchain, shader tools,
 .NET SDK and decompression dependency under `local/build-tools` and `pydeps`.
@@ -202,6 +245,7 @@ preview before sending. Direct API submission is covered by mocked tests, not
 an automatically posted live test issue.
 
 Installed copies include a native uninstaller and Windows Installed apps entry.
+The uninstaller starts the installed, digest-checked `installer/uninstall.ps1`.
 Managed directories require ownership markers; external installations are not
 removed. Save retention is selected by default and verifies a separate backup
 before removal. Original configured ROM/NUP paths and recognized game archives

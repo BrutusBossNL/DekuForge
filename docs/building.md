@@ -36,6 +36,9 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/bootstrap_runtime.ps1 
 
 Read `local/python-path.txt` to locate the installed Python executable. Use that
 interpreter for the commands below (shown as `python` for readability).
+This script is the developer bootstrap. A built `DekuForge.exe` and the setup
+prepare the same pinned runtime natively without PowerShell
+(`DekuForge.exe --prepare-runtime`).
 
 ```text
 python tools/prepare_installation.py

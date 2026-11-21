@@ -1,4 +1,5 @@
 // DekuForge desktop bootstrap. The application icon is embedded at build time.
+// The pinned runtime is prepared natively (see runtime.c); no script host runs.
 #ifndef UNICODE
 #define UNICODE 1
 #endif
@@ -10,6 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "runtime_pin.h"
+#include "runtime.h"
 
 static int regular_file(const wchar_t *path) {
     DWORD attributes = GetFileAttributesW(path);
@@ -61,30 +63,32 @@ static LRESULT CALLBACK setup_window(HWND window, UINT message, WPARAM wp, LPARA
     return DefWindowProcW(window,message,wp,lp);
 }
 
+static DWORD WINAPI prepare_worker(LPVOID root) {
+    return deku_prepare_runtime((const wchar_t *)root) ? 0 : 1;
+}
+
+// A progress window is shown only while a missing runtime is downloaded.
 static int prepare_runtime(const wchar_t *root, HINSTANCE instance) {
-    wchar_t shell[32768], script[32768], command[32768];
-    UINT n = GetSystemDirectoryW(shell,32768);
-    if (!n || n > 32000) return 0;
-    wcscat(shell,L"\\WindowsPowerShell\\v1.0\\powershell.exe");
-    swprintf(script,32768,L"%ls\\tools\\bootstrap_runtime.ps1",root);
-    if (!regular_file(script)) return 0;
-    swprintf(command,32768,L"\"%ls\" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File \"%ls\" -Root \"%ls\"",shell,script,root);
-    STARTUPINFOW startup={0}; startup.cb=sizeof startup; PROCESS_INFORMATION child={0};
-    if (!CreateProcessW(shell,command,NULL,NULL,FALSE,CREATE_NO_WINDOW,NULL,root,&startup,&child)) return 0;
+    if (deku_runtime_status(root) != DEKU_RUNTIME_MISSING) return deku_prepare_runtime(root);
+    HANDLE worker = CreateThread(NULL, 1 << 20, prepare_worker, (LPVOID)root, 0, NULL);
+    if (!worker) return 0;
     WNDCLASSW wc={0}; wc.lpfnWndProc=setup_window; wc.hInstance=instance; wc.lpszClassName=L"DekuForgeRuntimeSetup";
     wc.hCursor=LoadCursorW(NULL,IDC_ARROW); wc.hIcon=LoadIconW(instance,MAKEINTRESOURCEW(101)); RegisterClassW(&wc);
     HWND window=CreateWindowW(wc.lpszClassName,L"DekuForge",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU,
         (GetSystemMetrics(SM_CXSCREEN)-480)/2,(GetSystemMetrics(SM_CYSCREEN)-205)/2,480,205,NULL,NULL,instance,NULL);
     ShowWindow(window,SW_SHOW); SetTimer(window,1,80,NULL);
-    while (WaitForSingleObject(child.hProcess,20)==WAIT_TIMEOUT) {
+    int cancelled = 0;
+    while (WaitForSingleObject(worker,20)==WAIT_TIMEOUT) {
         MSG event;
         while(PeekMessageW(&event,NULL,0,0,PM_REMOVE)) { TranslateMessage(&event); DispatchMessageW(&event); }
-        if (!IsWindow(window)) { TerminateProcess(child.hProcess,1); break; }
+        // Closing the window ends this process; the next start resumes from verified downloads.
+        if (!IsWindow(window)) { cancelled = 1; break; }
     }
-    DWORD code=1; GetExitCodeProcess(child.hProcess,&code);
+    DWORD code=1;
+    if (!cancelled) GetExitCodeThread(worker,&code);
     if(IsWindow(window)) DestroyWindow(window);
-    CloseHandle(child.hThread); CloseHandle(child.hProcess);
-    return code==0;
+    CloseHandle(worker);
+    return !cancelled && code==0;
 }
 
 int WINAPI wWinMain(HINSTANCE instance, HINSTANCE previous, PWSTR args, int show) {
@@ -98,6 +102,10 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE previous, PWSTR args, int show
     wchar_t owned[32768];
     swprintf(owned,32768,L"%ls\\python\\%ls\\pythonw.exe",root,DEKU_PYTHON_ID);
     wcscpy(python,owned);
+    if (!wcscmp(args,L"--prepare-runtime")) {
+        // Used by the update helper after it installs a package with a new runtime pin.
+        return prepare_runtime(root,instance) && regular_file(owned) ? 0 : 1;
+    }
     int developer = development_python(root,python);
     if (!regular_file(python) && !wcscmp(DEKU_PYTHON_ID,L"development-interpreter")) {
         MessageBoxW(NULL,L"This development launcher needs Python with Tk and Pillow. Set its absolute python.exe path in local\\python-path.txt.",

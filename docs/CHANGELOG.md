@@ -2,6 +2,29 @@
 
 Component versions are independent. Published releases are not replaced in place.
 
+## Launcher 0.4.4 - native setup without script dropping
+
+Launcher `0.4.4`; engine and buildkit unchanged. Response to an Avira
+`Drop.Win64.FakeProgSelfRun` report against `DekuForge-Setup.exe`.
+
+- The setup no longer extracts `install.ps1` to `%TEMP%` or starts PowerShell. It
+  verifies the embedded package against a compiled-in SHA-256, unpacks it inside
+  the chosen folder and creates the shortcut and Installed apps entry natively.
+  Setup logs move to `local/setup.log` in the installation folder.
+- `DekuForge.exe` and the update helper prepare the pinned Python runtime natively
+  (`DekuForge.exe --prepare-runtime`) with WinHTTP, Windows CNG and `tar.exe`, after
+  checking archive listings.
+- The uninstaller runs the installed, digest-checked helper script instead of a
+  copy written to `%TEMP%`.
+- Setup, launcher and uninstaller carry full version information and an
+  `asInvoker` manifest.
+
+Cross-compiled on Linux with the Linux-hosted build of the pinned llvm-mingw
+20261104 release (`-Werror`). The archive checks were unit-tested and run against
+the real pinned runtime archives and launcher package. The Windows setup
+acceptance test (`tools/test_independent_setup.py`) and antivirus rescans are
+still open. See [DISTRIBUTION.md](DISTRIBUTION.md#antivirus-heuristics).
+
 ## Independent engine 0.1.0-independent.3 - memory addressing
 
 Launcher `0.3.0-independent.2`, engine `0.1.0-independent.3`; buildkit unchanged.
