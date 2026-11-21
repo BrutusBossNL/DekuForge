@@ -28,9 +28,8 @@ def main():
     result = None
     try:
         result = install(Path(job["archive"]), root, log=lambda line: print(line, flush=True))
-        subprocess.run(["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File",
-            str(root / "tools/bootstrap_runtime.ps1"), "-Root", str(root)], check=True, timeout=600,
-            creationflags=subprocess.CREATE_NO_WINDOW)
+        # The installed native launcher prepares its own pinned runtime; no script host is started.
+        subprocess.run([str(root / "DekuForge.exe"), "--prepare-runtime"], cwd=root, check=True, timeout=600)
         pin = result["components"]["python"]["id"]
         python = root / "python" / pin / "python.exe"
         report = root / "local/launcher-selftest.json"

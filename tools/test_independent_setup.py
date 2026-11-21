@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 import subprocess
 import sys
-import tempfile
 import time
 import uuid
 
@@ -27,14 +26,12 @@ def main():
         subprocess.run([str(setup), "/SILENT", "/NOLAUNCH", "/NOSHORTCUT", f"/DIR={target}", *flags],
                        check=True, timeout=1800 if args.with_tools else 600)
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
-        logs = Path(tempfile.gettempdir()).glob("DekuForge-setup-*/setup.log")
-        for log in logs:
-            if log.stat().st_mtime >= started - 1:
-                print(log.read_text(encoding="utf-8", errors="replace"), file=sys.stderr, flush=True)
-                runtime_log = log.parent / "application/local/runtime-bootstrap.log"
-                if runtime_log.is_file():
-                    print(runtime_log.read_text(encoding="utf-8-sig", errors="replace"), file=sys.stderr, flush=True)
+        # The native setup logs inside the chosen folder, never in the temp folder.
+        for log in (target/"local/setup.log", target/"local/runtime-bootstrap.log"):
+            if log.is_file() and log.stat().st_mtime >= started - 1:
+                print(log.read_text(encoding="utf-8-sig", errors="replace"), file=sys.stderr, flush=True)
         raise
+    assert not list(target.glob("local/setup-*")), "Setup left its workspace behind"
     meta = json.loads((target/"local/setup-result.json").read_text(encoding="utf-8"))
     assert meta["success"] and meta["components"] == COMPONENTS and meta["tools_prepared"] == args.with_tools
     proof = json.loads((target/"local/launcher-selftest.json").read_text(encoding="utf-8"))

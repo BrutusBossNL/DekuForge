@@ -119,7 +119,10 @@ progress from a previous installation.
 
 Switches into or out of Experimental need confirmation. A launcher-only
 update skips the game build, and an engine update reuses compatible local
-build caches. Windows SmartScreen can prompt about the unsigned installer.
+build caches. Windows SmartScreen can prompt about the unsigned installer, and
+some antivirus products flag new unsigned installers heuristically. Setup 0.4.4
+avoids the script-dropper pattern behind one such report; see
+[distribution](docs/DISTRIBUTION.md#antivirus-heuristics).
 On launcher versions before 0.4.1, switch to Stable and install 0.4.1 or newer
 before returning to Experimental.
 The in-game startup screen shows the launcher version when started from
