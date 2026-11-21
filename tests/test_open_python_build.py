@@ -39,3 +39,20 @@ class OwnedPythonDependenciesTests(unittest.TestCase):
                 self.assertEqual(arguments[0],str(own))
                 self.assertIn('--require-hashes',arguments)
                 self.assertIn('--only-binary=:all:',arguments)
+
+
+class RequirementsMatchPackagesTests(unittest.TestCase):
+    def test_every_provisioned_package_is_hash_pinned_to_the_checked_version(self):
+        text = (Path(__file__).resolve().parents[1]/'requirements-open-engine.txt').read_text(encoding='utf-8')
+        pins = {}
+        for line in text.splitlines():
+            if line.strip() and not line.startswith('#'):
+                spec, *options = line.split()
+                name, version = spec.split('==')
+                self.assertTrue(any(option.startswith('--hash=sha256:') for option in options), name)
+                pins[name.lower()] = version
+        self.assertEqual(pins, {name.lower(): version for name, version in PACKAGES.items()})
+
+    def test_instruction_lifter_disassembler_is_provisioned(self):
+        # nx2/lift.py imports capstone at module load; without it the translation step fails at once.
+        self.assertEqual(PACKAGES['capstone'], '5.0.9')

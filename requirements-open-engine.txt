@@ -6,3 +6,4 @@ zstandard==0.25.0 --hash=sha256:c19bcdd826e95671065f8692b5a4aa95c52dc7a02a4c5a0c
 astc-encoder-py==0.1.12 --hash=sha256:a45d375fc6b0ff2cd3d772aab3eef19a6b7f3e067306e11fab37820ea9576121
 texture2ddecoder==1.0.6 --hash=sha256:1bad8209d9dfbfc7daf13ea2e545236ea2bbc1e423b2992b6e7563909975a47b
 archspec==0.2.7 --hash=sha256:b6d97c2d840d8538d3f63b70c7c45ace2d26b3d9591d7c93d5fb33e50b1bc592
+capstone==5.0.9 --hash=sha256:732cedbbb56d42e723f14d7af6387f1454194a820b4b96b56d1e53f865ef85d0
