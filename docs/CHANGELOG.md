@@ -21,9 +21,10 @@ Launcher `0.4.4`; engine and buildkit unchanged. Response to an Avira
 
 Cross-compiled on Linux with the Linux-hosted build of the pinned llvm-mingw
 20261104 release (`-Werror`). The archive checks were unit-tested and run against
-the real pinned runtime archives and launcher package. The Windows setup
-acceptance test (`tools/test_independent_setup.py`) and antivirus rescans are
-still open. See [DISTRIBUTION.md](DISTRIBUTION.md#antivirus-heuristics).
+the real pinned runtime archives and launcher package. Tagged Windows builds
+run the clean setup acceptance test, including workspace cleanup, tool
+provisioning, and zlib and Capstone checks in the bundled Python. Antivirus
+rescans are still pending. See [DISTRIBUTION.md](DISTRIBUTION.md#antivirus-heuristics).
 
 ## Independent engine 0.1.0-independent.3 - memory addressing
 

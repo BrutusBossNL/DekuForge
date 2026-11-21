@@ -10,6 +10,21 @@ import uuid
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+BUILD_PYTHON_CHECK = """
+import sys
+import zlib
+
+sys.path.insert(0, sys.argv[1])
+from dekuforge.open_python_build import provision
+
+provision()
+from capstone import CS_ARCH_ARM64, CS_MODE_LITTLE_ENDIAN, Cs
+
+assert zlib.decompress(zlib.compress(b"DekuForge")) == b"DekuForge"
+arm64 = Cs(CS_ARCH_ARM64, CS_MODE_LITTLE_ENDIAN)
+assert [insn.mnemonic for insn in arm64.disasm(bytes.fromhex("1f2003d5"), 0)] == ["nop"]
+"""
+
 
 def main():
     from dekuforge import COMPONENTS
@@ -31,7 +46,8 @@ def main():
             if log.is_file() and log.stat().st_mtime >= started - 1:
                 print(log.read_text(encoding="utf-8-sig", errors="replace"), file=sys.stderr, flush=True)
         raise
-    assert not list(target.glob("local/setup-*")), "Setup left its workspace behind"
+    workspaces = list(target.glob("local/setup-[0-9]*"))
+    assert not workspaces, f"Setup left its workspace behind: {workspaces}"
     meta = json.loads((target/"local/setup-result.json").read_text(encoding="utf-8"))
     assert meta["success"] and meta["components"] == COMPONENTS and meta["tools_prepared"] == args.with_tools
     proof = json.loads((target/"local/launcher-selftest.json").read_text(encoding="utf-8"))
@@ -42,6 +58,8 @@ def main():
     if args.with_tools:
         config = json.loads((target/"local/open-engine-builder.json").read_text(encoding="utf-8"))
         assert config["enable_launcher_build"] and Path(config["toolchain"]).is_relative_to(target)
+        python = target/"python"/COMPONENTS["python"]["id"]/"python.exe"
+        subprocess.run([str(python), "-I", "-c", BUILD_PYTHON_CHECK, str(target)], check=True, timeout=300)
     print("Independent native setup accepted:", target, flush=True)
 
 
