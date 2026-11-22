@@ -166,6 +166,10 @@ remove upstream terms. Original project code remains MIT licensed. The inherited
 legacy patches are recorded in Git history for provenance review. The repository also inherits Git history;
 it is not presented as a clean-room or fully cleared codebase.
 
+Thank you to everyone who contributes to DekuForge. Your code, testing, bug
+reports, documentation and ideas make it possible to build a better project
+together. All help is welcome.
+
 We welcome issues and pull requests and aim to respond or review within 48 hours,
 subject to volunteer availability. See [CONTRIBUTING.md](CONTRIBUTING.md) and the
 [roadmap](roadmap.md) for Linux, iOS and VR plans. Linux and iOS build and
