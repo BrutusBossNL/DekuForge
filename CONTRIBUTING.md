@@ -57,6 +57,14 @@ all five languages. Add tests for meaningful behavior and failure paths, with
 synthetic fixtures only. Never change the immutable historical `engine/` import;
 compose current extensions through the pinned stable-source layer.
 
+Update [CHANGELOG.md](https://github.com/BrutusBossNL/DekuForge/blob/main/CHANGELOG.md)
+under **Unreleased (Experimental)** in the same pull request for changes that
+affect users, builds, tooling, CI or project documentation. List new behavior
+under **New** and corrections under **Patches (fixes)**. Record validation in
+**Preview-to-Stable (tested)** with any limits. In **Thank you**, link the
+relevant pull requests and issues and credit their contributors, reporters or
+testers by GitHub handle.
+
 Before committing, run:
 
 ```text
@@ -84,3 +92,7 @@ the launcher and provisions the pinned build dependencies. Fork runs may need
 maintainer approval in GitHub Actions. Publishing a setup must include
 only the launcher and tooling, with appropriate notices. Every player builds
 locally from their own input. Do not publish generated game artifacts to CI.
+
+Release notes use the full change range since the previous published release
+on that channel. For Stable, record which Preview changes were promoted and
+the validation that supports them. See [the release guide](docs/DISTRIBUTION.md#changelog-and-release-notes).

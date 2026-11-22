@@ -1,5 +1,9 @@
 # Release history
 
+The [root project changelog](https://github.com/BrutusBossNL/DekuForge/blob/main/CHANGELOG.md)
+tracks releases, validation and contributor credits. This page preserves older
+component notes.
+
 Component versions are independent. Published releases are not replaced in place.
 
 ## Launcher 0.4.5 / buildkit 0.3.0-independent.18

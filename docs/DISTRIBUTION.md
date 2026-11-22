@@ -36,6 +36,32 @@ compiled game executables, generated shaders or pipeline caches. Each user must
 supply their own supported game dump. These restrictions also apply to issues,
 pull requests and attached diagnostic files.
 
+## Changelog and release notes
+
+Keep [CHANGELOG.md](https://github.com/BrutusBossNL/DekuForge/blob/main/CHANGELOG.md)
+current under **Unreleased (Experimental)**. Before publishing, identify the
+previous published tag of the same channel and audit the candidate commit
+against it:
+
+```text
+git fetch --tags
+git log --oneline PREVIOUS_TAG..CANDIDATE
+git diff --stat PREVIOUS_TAG CANDIDATE
+git diff PREVIOUS_TAG CANDIDATE
+```
+
+Use the full tag-to-tag diff and logs to catch changes that arrived through
+Experimental or were omitted from earlier notes. If the tags diverge, check
+both sides and document the net changes users will receive. An unpublished
+tag does not reset the comparison baseline.
+
+Use **New**, **Patches (fixes)**, **Preview-to-Stable (tested)** and **Thank
+you** in the changelog entry and the GitHub release notes. Link the tag
+comparison and credit the people behind the relevant PRs and issues. For
+Stable, also compare the candidate with the tested Preview. Record what was
+promoted, what changed since that Preview, and the scope and limits of testing.
+Keep later Experimental work under Unreleased.
+
 ## Component versions
 
 `dekuforge/components.json` records independent identities:

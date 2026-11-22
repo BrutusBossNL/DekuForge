@@ -160,6 +160,10 @@ report and a link to the issue.
 
 ## Reuse and contributions
 
+See the [project changelog](https://github.com/BrutusBossNL/DekuForge/blob/main/CHANGELOG.md)
+for changes, validation and contributor credits across Stable, Preview and
+Experimental.
+
 Reuse only components with an identified open-source license or redistribution
 grant, preserving all applicable notices. Changing names or structure does not
 remove upstream terms. Original project code remains MIT licensed. The inherited

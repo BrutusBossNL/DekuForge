@@ -94,6 +94,20 @@ for UI, executable packaging and release tags; avoid duplicate workflow defaults
 
 ## Documentation accuracy
 
+Update the root `CHANGELOG.md` with every release-relevant change in the same
+commit or PR, including work delivered only through Experimental. Use the
+Unreleased sections **New**, **Patches (fixes)**, **Preview-to-Stable (tested)**
+and **Thank you**. Record what changed, link its related PRs and issues, and
+name the contributors, reporters and testers who helped with those changes.
+Record actual validation with its scope and link the evidence when available.
+
+When preparing release notes, audit the candidate against the previous
+published tag of the same channel. Review both the tag-to-tag diff and the
+commit log, including changes that landed through Experimental. For Stable,
+also compare with the tested Preview and record what carried over, tests that
+passed, and any remaining validation gaps. Keep the root changelog and GitHub
+release notes aligned.
+
 Every behavior, dependency, packaging or support-status change must update all
 affected Markdown documentation in the same change. Review README, roadmap,
 contribution instructions, build/distribution guides and third-party notices;
