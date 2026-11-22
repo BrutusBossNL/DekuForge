@@ -4,6 +4,7 @@ from pathlib import Path
 import stat
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 
 spec = importlib.util.spec_from_file_location('av1_builder', Path(__file__).resolve().parents[1] / 'tools/build_av1_decoder.py')
@@ -12,6 +13,17 @@ spec.loader.exec_module(av1)
 
 
 class DecoderToolTests(unittest.TestCase):
+    def test_meson_cache_changes_with_installation_path(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            with patch.object(av1, 'ROOT', root):
+                base = root / 'local/build-tools/dav1d-dev'
+                previous = av1.meson_build_path(base, base / 'previous', 'config')
+                current = av1.meson_build_path(base, base / 'current', 'config')
+                self.assertNotEqual(previous, current)
+                self.assertNotEqual(current, base / 'build')
+                self.assertEqual(current, av1.meson_build_path(base, base / 'current', 'config'))
+
     def test_archive_traversal_aliases_and_links_are_rejected(self):
         for names in (['../escape'], ['/absolute'], ['drive:name'], ['A', 'a'], ['linked']):
             stream = io.BytesIO()

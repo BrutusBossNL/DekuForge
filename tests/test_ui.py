@@ -338,6 +338,37 @@ ui.main()
             self.assertIsNone(self.app.process)
             submit.assert_not_called()
 
+    def test_sent_report_shows_read_only_receipt_and_requires_a_new_draft(self):
+        def descendants(widget):
+            for child in widget.winfo_children():
+                yield child
+                yield from descendants(child)
+
+        self.app.report_context = {"metadata": {}, "logs": []}
+        self.app.navigate("report")
+        receipt = {"title": "Published title", "body": "Published diagnostic text",
+                   "url": "https://github.com/BrutusBossNL/DekuForge/issues/123"}
+        self.app.events.put(("report_sent", receipt))
+        self.app.tick()
+        self.app.navigate("home")
+        self.app.navigate("report")
+        widgets = list(descendants(self.app.content))
+        buttons = {widget.cget("text"): widget for widget in widgets if isinstance(widget, tk.Button)}
+        self.assertEqual(set(buttons), {self.app.t("report_view_issue"), self.app.t("report_new")})
+        summary, = [widget for widget in widgets if isinstance(widget, tk.Text)]
+        self.assertEqual(summary.cget("state"), "disabled")
+        self.assertEqual(summary.get("1.0", "end-1c"), receipt["body"])
+        with patch("dekuforge.ui.webbrowser.open") as browser, patch("dekuforge.ui.reports.submit") as submit:
+            buttons[self.app.t("report_view_issue")].invoke()
+            browser.assert_called_once_with(receipt["url"])
+            self.app.submit_report()
+            submit.assert_not_called()
+        with patch.object(self.app, "prepare_report"):
+            buttons[self.app.t("report_new")].invoke()
+        self.assertIsNone(self.app.report_receipt)
+        self.assertEqual(self.app.report_draft["title"], "")
+        self.assertEqual(self.app.report_draft["details"], "")
+
     def test_rendered_logo_contains_project_gold_and_preserves_wide_shape(self):
         images = [child.image for child in self.app.sidebar.winfo_children() if hasattr(child, "image")]
         self.assertEqual(len(images), 1)

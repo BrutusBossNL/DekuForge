@@ -65,7 +65,7 @@ class Launcher(ModsUI, ReleaseListUI):
         self.report_status = ""
         self.report_incident = None
         self.report_draft = {"title":"", "details":"", "expected":"", "include_logs":True}
-        self.report_submitted_url = ""
+        self.report_receipt = None
         self.report_preview = None
         self.update_busy = False
         self.update_job = None
@@ -445,6 +445,9 @@ class Launcher(ModsUI, ReleaseListUI):
     def report_update_failure(self):
         if not self.update_notice or self.update_notice['success'] or self.report_busy:
             return
+        if self.report_receipt is not None:
+            self.navigate('report')
+            return
         value = self.update_notice
         self.report_incident = {**value, 'kind': 'application_update', 'current_version': __version__}
         self.report_draft = {'title': self.t('update_issue_title', version=value['release']),
@@ -452,7 +455,6 @@ class Launcher(ModsUI, ReleaseListUI):
             'expected': self.t('update_issue_expected', version=value['release']), 'include_logs': True}
         self.report_context = None
         self.report_load_failed = False
-        self.report_submitted_url = ''
         self.navigate('report')
 
     def install_selected_release(self, automatic=False):
@@ -594,6 +596,9 @@ class Launcher(ModsUI, ReleaseListUI):
         threading.Thread(target=work,daemon=True).start()
 
     def render_report(self):
+        if self.report_receipt is not None:
+            self.render_report_receipt()
+            return
         self.prepare_report()
         self.label(self.content,self.report_status or self.t("report_help"),10,MUTED,wraplength=640).pack(anchor="w",pady=(0,8))
         card=self.card(self.content,padding=12)
@@ -608,7 +613,7 @@ class Launcher(ModsUI, ReleaseListUI):
         entry=tk.Entry(card,textvariable=title,bg=PANEL,fg=TEXT,insertbackground=GOLD,relief="flat",font=("Segoe UI",11))
         entry.pack(fill="x",pady=(3,6))
         def title_changed(*_):
-            self.report_draft["title"]=title.get();self.report_submitted_url="";self.refresh_report_preview()
+            self.report_draft["title"]=title.get();self.refresh_report_preview()
         title.trace_add("write",title_changed)
         for key,label,height in (("details","report_details",3),("expected","report_expected",1)):
             self.label(card,self.t(label),10).pack(anchor="w")
@@ -618,10 +623,10 @@ class Launcher(ModsUI, ReleaseListUI):
             def changed(_event=None,field=key,control=widget):
                 try:self.report_draft[field]=control.get("1.0","end-1c")
                 except tk.TclError:return
-                self.report_submitted_url="";self.refresh_report_preview()
+                self.refresh_report_preview()
             widget.bind("<KeyRelease>",changed);widget.bind("<FocusOut>",changed)
         include=tk.BooleanVar(value=self.report_draft["include_logs"])
-        def toggle():self.report_draft["include_logs"]=include.get();self.report_submitted_url="";self.refresh_report_preview()
+        def toggle():self.report_draft["include_logs"]=include.get();self.refresh_report_preview()
         tk.Checkbutton(card,text=self.t("report_logs"),variable=include,command=toggle,bg=PANEL,fg=TEXT,
             activebackground=PANEL,activeforeground=GOLD,selectcolor=BG,relief="flat").pack(anchor="w")
         self.label(card,self.t("report_preview"),10).pack(anchor="w",pady=(6,3))
@@ -632,7 +637,7 @@ class Launcher(ModsUI, ReleaseListUI):
         buttons.pack(fill="x")
         ready=self.report_context is not None and not self.report_busy
         self.button(buttons,self.t("report_direct"),self.submit_report,primary=True,pady=6,
-            state="normal" if ready and self.report_authenticated and not self.report_submitted_url else "disabled").pack(side="left",padx=(0,6))
+            state="normal" if ready and self.report_authenticated else "disabled").pack(side="left",padx=(0,6))
         self.button(buttons,self.t("report_browser"),self.open_report_browser,pady=6,state="normal" if ready else "disabled").pack(side="left",padx=(0,6))
         self.button(buttons,self.t("report_export"),self.export_report,pady=6,state="normal" if ready else "disabled").pack(side="left")
         self.label(self.content,self.t("report_auth"),9,MUTED,wraplength=640).pack(anchor="w",pady=(8,0))
@@ -641,6 +646,31 @@ class Launcher(ModsUI, ReleaseListUI):
         if self.report_incident:
             from .update_package import atomic_json
             atomic_json(ROOT/"local/report-seen.json",self.report_incident)
+
+    def render_report_receipt(self):
+        receipt = self.report_receipt
+        card = self.card(self.content, padding=12)
+        self.label(card, self.t("report_sent", url=receipt["url"]), 11, GOLD, wraplength=640).pack(anchor="w")
+        self.label(card, receipt["title"], 14, wraplength=640).pack(anchor="w", pady=(12, 6))
+        summary = ScrolledText(card, height=12, wrap="word", font=("Consolas", 9), bg=BG, fg=TEXT, relief="flat")
+        summary.insert("1.0", receipt["body"])
+        summary.configure(state="disabled")
+        summary.pack(fill="x")
+        buttons = BackgroundCanvas(self.content, surface=self.backdrop)
+        buttons.pack(fill="x")
+        self.button(buttons, self.t("report_view_issue"), lambda: webbrowser.open(receipt["url"]),
+                    primary=True, pady=6).pack(side="left", padx=(0, 6))
+        self.button(buttons, self.t("report_new"), self.new_report, pady=6).pack(side="left")
+
+    def new_report(self):
+        self.report_receipt = None
+        self.report_incident = None
+        self.report_context = None
+        self.report_authenticated = False
+        self.report_load_failed = False
+        self.report_status = ""
+        self.report_draft = {"title": "", "details": "", "expected": "", "include_logs": True}
+        self.render()
 
     def retry_report(self):
         self.report_load_failed=False;self.report_context=None;self.report_status="";self.render()
@@ -666,7 +696,7 @@ class Launcher(ModsUI, ReleaseListUI):
         if filename:Path(filename).write_text(text,encoding="utf-8")
 
     def submit_report(self):
-        if self.report_busy:return
+        if self.report_busy or self.report_receipt is not None:return
         try:reports.body(self.report_draft,self.report_context)
         except ValueError as error:self.show_error(error);return
         self.report_busy=True
@@ -1192,8 +1222,8 @@ class Launcher(ModsUI, ReleaseListUI):
                 continue
             if kind == "report_sent":
                 self.report_busy = False
-                self.report_submitted_url = value
-                self.report_status = self.t("report_sent",url=value)
+                self.report_receipt = value
+                self.report_status = ""
                 changed = self.page == "report" or changed
                 continue
             if kind == "update_progress":

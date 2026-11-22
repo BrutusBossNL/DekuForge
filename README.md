@@ -155,6 +155,8 @@ need a retest on the Radeon RX 9070 XT configuration.
 [Lon Lon Ranch reload crash (#7)](https://github.com/BrutusBossNL/DekuForge/issues/7).
 
 Report new issues through the launcher, including from its crash prompt.
+After a direct GitHub submission, the launcher shows a read-only copy of the
+report and a link to the issue.
 
 ## Reuse and contributions
 

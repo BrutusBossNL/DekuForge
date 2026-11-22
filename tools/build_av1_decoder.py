@@ -84,6 +84,13 @@ def unpack_zip(data, output):
             put(output, member.filename, archive.read(member))
 
 
+def meson_build_path(base, output, cross_config):
+    # Meson embeds absolute source, interpreter, compiler and install paths.
+    identity = hashlib.sha256(os.fsencode(output) + b'\0' + os.fsencode(sys.executable)
+                              + b'\0' + cross_config.encode('utf-8')).hexdigest()[:16]
+    return checked_path(base / f'build-{identity}')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--compiler', required=True, type=Path)
@@ -130,16 +137,19 @@ def main():
     cross = base / 'cross.txt'
     binaries = {'c': llvm/'clang.exe', 'ar': llvm/'llvm-ar.exe', 'strip': llvm/'llvm-strip.exe',
                 'windres': llvm/'x86_64-w64-mingw32-windres.exe', 'nasm': nasm/'nasm.exe'}
-    cross.write_text('[binaries]\n'+''.join(f"{key} = '{path.as_posix()}'\n" for key, path in binaries.items())+
-                     "[built-in options]\nc_args = ['-mno-incremental-linker-compatible']\n[host_machine]\nsystem = 'windows'\ncpu_family = 'x86_64'\ncpu = 'x86_64'\nendian = 'little'\n", encoding='utf-8')
+    cross_config = '[binaries]\n'+''.join(f"{key} = '{path.as_posix()}'\n" for key, path in binaries.items())+(
+        "[built-in options]\nc_args = ['-mno-incremental-linker-compatible']\n[host_machine]\nsystem = 'windows'\n"
+        "cpu_family = 'x86_64'\ncpu = 'x86_64'\nendian = 'little'\n")
+    cross.write_text(cross_config, encoding='utf-8')
+    build = meson_build_path(base, output, cross_config)
     env = {**os.environ, 'PATH': os.pathsep.join((str(llvm), str(nasm), str(ninja.parent), os.environ.get('PATH', '')))}
-    setup = [sys.executable, '-B', str(wrapper), 'setup', str(base/'build'), str(base/'source'),
+    setup = [sys.executable, '-B', str(wrapper), 'setup', str(build), str(base/'source'),
              '--cross-file', str(cross), '--prefix', str(output), '--libdir=lib', '--buildtype=release',
              '--default-library=static', '-Denable_tools=false', '-Denable_tests=false', '-Denable_examples=false', '-Db_ndebug=true']
-    if (base / 'build/meson-private/coredata.dat').exists():
+    if (build / 'meson-private/coredata.dat').exists():
         setup += ['--reconfigure']
-    for command in (setup, [str(ninja), '-C', str(base/'build'), '-j'+str(args.jobs)],
-                    [sys.executable, '-B', str(wrapper), 'install', '-C', str(base/'build'), '--no-rebuild']):
+    for command in (setup, [str(ninja), '-C', str(build), '-j'+str(args.jobs)],
+                    [sys.executable, '-B', str(wrapper), 'install', '-C', str(build), '--no-rebuild']):
         subprocess.run(command, env=env, check=True)
     shutil.copyfile(base/'source/COPYING', output/'COPYING')
     library = output/'lib/libdav1d.a'

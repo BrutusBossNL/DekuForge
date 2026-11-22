@@ -42,7 +42,8 @@ def main():
         validate_launcher_health(proof, result['components'])
         if result.get("prepare_tools"):
             subprocess.run([str(python), "-B", str(root/"tools/prepare_installation.py")],
-                           cwd=root, check=True, timeout=1800, creationflags=subprocess.CREATE_NO_WINDOW)
+                           cwd=root, check=True, timeout=1800, creationflags=subprocess.CREATE_NO_WINDOW,
+                           stdout=sys.stdout, stderr=subprocess.STDOUT)
         pending = root / "local/pending-game-update.json"
         previous = json.loads(pending.read_text(encoding="utf-8")) if pending.is_file() and pending.stat().st_size <= 65536 else {}
         needs_game = result["requires_rebuild"] or (result["components"]["engine"].get("backend") == "independent"

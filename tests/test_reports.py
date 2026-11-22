@@ -67,7 +67,7 @@ class ReportTests(unittest.TestCase):
         response.read.return_value=json.dumps({"html_url":"https://github.com/BrutusBossNL/DekuForge/issues/123"}).encode()
         with patch.object(reports,"github_token",return_value="test-token"),patch.object(reports,"build_opener") as opener:
             opener.return_value.open.return_value=response
-            url=reports.submit(draft,self.context())
+            receipt=reports.submit(draft,self.context())
             request=opener.return_value.open.call_args.args[0]
             self.assertEqual(request.method,"POST")
             self.assertEqual(request.full_url,"https://api.github.com/repos/BrutusBossNL/DekuForge/issues")
@@ -75,7 +75,12 @@ class ReportTests(unittest.TestCase):
             self.assertIn("Test CPU",posted["body"])
             self.assertIn("FATAL",posted["body"])
             self.assertNotIn("test-token",posted["body"])
-            self.assertEqual(url,"https://github.com/BrutusBossNL/DekuForge/issues/123")
+            self.assertEqual(receipt, {**posted, "url": "https://github.com/BrutusBossNL/DekuForge/issues/123"})
+
+    def test_quoted_windows_paths_keep_the_subprocess_exit_status(self):
+        raw = r"Command '['C:\\Users\\Tester\\python.exe', '-B', 'C:\\Users\\Tester\\worker.py']' returned non-zero exit status 1."
+        self.assertEqual(reports.sanitize(raw),
+                         "Command '['[LOCAL PATH]', '-B', '[LOCAL PATH]']' returned non-zero exit status 1.")
 
     def test_submission_requires_description_and_existing_authentication(self):
         with self.assertRaisesRegex(ValueError,"report_required"):reports.body({"title":"","details":""},self.context())

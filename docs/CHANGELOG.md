@@ -2,6 +2,14 @@
 
 Component versions are independent. Published releases are not replaced in place.
 
+## Launcher 0.4.5 / buildkit 0.3.0-independent.18
+
+- Direct GitHub submissions show the exact title and report text in a read-only
+  receipt. Open the existing issue or start a new draft from that screen.
+- Updates can prepare the AV1 decoder after a Windows installation is moved.
+  Meson uses a build directory keyed to the current paths and the update worker
+  keeps tool preparation output in its diagnostic log.
+
 ## Launcher 0.4.4 - native setup without script dropping
 
 Launcher `0.4.4`; engine and buildkit unchanged. Response to an Avira

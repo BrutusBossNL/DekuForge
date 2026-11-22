@@ -193,6 +193,8 @@ _REPORT_MESSAGES = {'en': {'report': 'Report a problem',
                        'sending uses an existing GitHub CLI sign-in or GH_TOKEN. DekuForge does not store '
                        'your token.',
         'report_sent': 'Report submitted: {url}',
+        'report_view_issue': 'View on GitHub',
+        'report_new': 'New report',
         'report_send_error': 'Could not confirm submission: {error}. Check GitHub before retrying to avoid '
                              'duplicates.',
         'report_required': 'Enter a title and describe what happened.',
@@ -215,6 +217,8 @@ _REPORT_MESSAGES = {'en': {'report': 'Report a problem',
                        'versturen gebruikt een bestaande GitHub CLI-aanmelding of GH_TOKEN. DekuForge '
                        'bewaart je token niet.',
         'report_sent': 'Melding verstuurd: {url}',
+        'report_view_issue': 'Bekijk op GitHub',
+        'report_new': 'Nieuw rapport',
         'report_send_error': 'Verzending niet bevestigd: {error}. Controleer GitHub voor je opnieuw '
                              'verstuurt.',
         'report_required': 'Vul een titel in en beschrijf wat er gebeurde.',
@@ -237,6 +241,8 @@ _REPORT_MESSAGES = {'en': {'report': 'Report a problem',
                        'nutzt eine bestehende GitHub-CLI-Anmeldung oder GH_TOKEN. DekuForge speichert kein '
                        'Token.',
         'report_sent': 'Meldung gesendet: {url}',
+        'report_view_issue': 'Auf GitHub ansehen',
+        'report_new': 'Neue Meldung',
         'report_send_error': 'Senden nicht bestätigt: {error}. Vor einem weiteren Versuch GitHub auf '
                              'Duplikate prüfen.',
         'report_required': 'Titel und Problembeschreibung eingeben.',
@@ -258,6 +264,8 @@ _REPORT_MESSAGES = {'en': {'report': 'Report a problem',
         'report_auth': 'El navegador usa tu cuenta de GitHub y un extracto mas corto. El envio directo usa '
                        'GitHub CLI o GH_TOKEN existentes. DekuForge no guarda tu token.',
         'report_sent': 'Informe enviado: {url}',
+        'report_view_issue': 'Ver en GitHub',
+        'report_new': 'Nuevo informe',
         'report_send_error': 'No se confirmo el envio: {error}. Comprueba GitHub antes de reintentar para '
                              'evitar duplicados.',
         'report_required': 'Introduce un titulo y describe el problema.',
@@ -280,6 +288,8 @@ _REPORT_MESSAGES = {'en': {'report': 'Report a problem',
                        'avec une connexion GitHub CLI ou GH_TOKEN existante. DekuForge ne conserve pas votre '
                        'jeton.',
         'report_sent': 'Rapport envoye : {url}',
+        'report_view_issue': 'Voir sur GitHub',
+        'report_new': 'Nouveau rapport',
         'report_send_error': 'Envoi non confirme : {error}. Verifiez GitHub avant de reessayer pour eviter '
                              'un doublon.',
         'report_required': 'Saisissez un titre et decrivez le probleme.',

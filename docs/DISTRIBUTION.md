@@ -65,10 +65,11 @@ From launcher 0.4.4 the helper prepares the runtime with
 `DekuForge.exe --prepare-runtime`. Helpers frozen by older launchers still run
 `tools/bootstrap_runtime.ps1` from the new package, so the package keeps it.
 
-Build-tool installation is demand-driven: changing the distributed buildkit does
-not eagerly download every compiler during an application update. The next local
-build verifies/provisions the pinned tool dependencies and reuses matching tools
-and build products. Game rebuilding is determined by relevant source/build-input
+The updater prepares Windows build tools when configuration is missing or tool
+inputs change. A moved installation configures the AV1 decoder in a cache keyed
+to its current paths. Tool preparation output is recorded in the update log.
+The local build verifies pinned dependencies and reuses matching tools and
+build products. Game rebuilding is determined by relevant source/build-input
 hashes, not just a higher launcher version. Existing builds, saves, settings and
 the original NUP are retained. A game update builds into a separate destination
 and activates it only after success; the local full-rebuild acceptance limits
@@ -239,7 +240,9 @@ limits. This is folder/transaction validation, not a new in-game save-load resul
 
 The launcher has a user-reviewed issue form with hardware/version information and
 bounded, filtered text logs. It offers a prefilled GitHub browser page or direct
-submission using the user's existing GitHub CLI/token. It does not include an
+submission using the user's existing GitHub CLI/token. Confirmed direct
+submissions show a read-only copy of the title and body with **View on GitHub**
+and **New report**. It does not include an
 embedded maintainer token or submit automatically. Nonzero game exit codes and
 recorded launcher errors can offer a report; this is not a full crash-dump service
 and does not detect every possible failure. Redaction is best effort: review the

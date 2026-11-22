@@ -22,6 +22,7 @@ def sanitize(text):
     text=re.sub(r"(?im)((?:authorization|access_token|refresh_token|password|secret)\s*[:=]\s*)([^\r\n]+)",r"\1[REDACTED]",text)
     text=re.sub(r"(?i)\bBearer\s+[A-Za-z0-9._~+/-]+","Bearer [REDACTED]",text)
     text=re.sub(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}","[REDACTED EMAIL]",text)
+    text=re.sub(r"(?<=')[A-Za-z]:[\\/][^'\r\n\"<>|]+(?=')","[LOCAL PATH]",text)
     text=re.sub(r"(?<![A-Za-z0-9])[A-Za-z]:[\\/][^\r\n\"<>|]+","[LOCAL PATH]",text)
     text=re.sub(r"\\\\[^\\\s]+\\[^\r\n\"<>|]+","[NETWORK PATH]",text)
     text=re.sub(r"(?:/home/|/Users/|/tmp/)[^\r\n\"<>]+","[LOCAL PATH]",text)
@@ -171,9 +172,9 @@ def browser_url(draft, context):
 def submit(draft, context):
     token=github_token()
     if not token:raise ValueError("report_signin")
-    content=body(draft,context)
+    payload = {"title": sanitize(draft["title"].strip())[:180], "body": body(draft, context)}
     request=Request(f"https://api.github.com/repos/{REPOSITORY}/issues",
-        data=json.dumps({"title":sanitize(draft["title"].strip())[:180],"body":content}).encode("utf-8"),method="POST",
+        data=json.dumps(payload).encode("utf-8"),method="POST",
         headers={"Authorization":"Bearer "+token,"Accept":"application/vnd.github+json",
                  "Content-Type":"application/json","User-Agent":"DekuForge","X-GitHub-Api-Version":"2022-11-28"})
     with build_opener(AssetRedirect()).open(request,timeout=30) as response:
@@ -181,7 +182,7 @@ def submit(draft, context):
     url=data.get("html_url","")
     if not re.fullmatch(r"https://github\.com/BrutusBossNL/DekuForge/issues/\d+",url):
         raise ValueError("Unexpected GitHub issue response")
-    return url
+    return {**payload, "url": url}
 
 
 def record_run(root, process, executable):
