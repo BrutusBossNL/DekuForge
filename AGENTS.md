@@ -142,8 +142,9 @@ Changes to future instruction lifting need differential tests against an
 independent ARM64 implementation. Changes to runtime memory or rendering need
 isolated in-game validation and measurements from repeatable scenes.
 
-`python run_launcher.py --self-test` renders 40 legacy core views, five mod views
-and five report forms across the five languages. The legacy `screens=40` result
+`python run_launcher.py --self-test` renders 40 legacy core views, five mod views,
+five adventure fallback views and five report forms across the five languages.
+The legacy `screens=40` result
 is an updater compatibility protocol; added views have separate counters. It runs
 without starting a game or changing preferences. `tools/check_launcher.py` checks
 that this health check never maps a visible window: setup/update checks must not

@@ -5,6 +5,13 @@
 > MIT license. See the provider notice below for the GPL runtime boundary.
 > The old NX2navi 0.10.1 path is frozen with the 0.3.0 Legacy release.
 
+The adventure recap uses an original read-only parser. The
+[OOT SW2SE save-time notes](https://github.com/Traiver/OOT-SW2SE#save-time-newest-slot-and-zip-timestamps)
+and [Boomerang Tracker save format and mapping notes](https://github.com/LucieTheFool/boomerang-tracker/blob/main/docs/save-mapping.md)
+were consulted for field names and behavior. No external tracker, save files,
+translated game text or object placements are bundled. Location names and
+placements are read from the player's local build.
+
 The independent integer/control-flow/scalar, register-offset and paired-memory
 generator, bounded native
 runner, guest-memory/MOD0/ELF pointer-linking model and read-only analyzer are original

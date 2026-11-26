@@ -129,6 +129,7 @@ ui.main()
         self.assertEqual(len(proof["screens"]), 40)
         self.assertEqual(len(proof["mod_screens"]), 5)
         self.assertEqual(len(proof["report_screens"]), 5)
+        self.assertEqual(len(proof["adventure_screens"]), 5)
 
     def setUp(self):
         prepare_tk()

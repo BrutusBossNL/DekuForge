@@ -1,6 +1,7 @@
 """One-window desktop navigation with a persistent three-step build workflow."""
 
 from datetime import datetime, timezone
+from io import BytesIO
 import json
 import os
 from pathlib import Path
@@ -14,6 +15,7 @@ from uuid import uuid4
 
 from . import __version__, COMPONENTS
 from . import reports
+from .adventure import load_adventure
 import webbrowser
 from .core import ROOT, launch, load_settings, save_installation, update_settings
 from .engine import build_independent
@@ -85,6 +87,10 @@ class Launcher(ModsUI, ReleaseListUI):
         self.save_folder = settings.get("save_folder", "")
         self.save_sources = []
         self.save_source = ""
+        self.adventure = None
+        self.adventure_request = None
+        self.adventure_details = set()
+        self.adventure_spoilers = False
         self.executable = settings.get("executable", "")
         self.source = settings.get("nup", "")
         self.destination = settings.get("build_destination", str(ROOT / "build" / "game"))
@@ -186,7 +192,7 @@ class Launcher(ModsUI, ReleaseListUI):
             self.label(self.sidebar, "DekuForge", 22, GOLD).pack(padx=20, pady=30)
         self.label(self.sidebar, self.t("tagline"), 10, MUTED).pack(padx=22, pady=(0, 32))
         for name in ("home", "updates", "saves", "mods", "build", "settings", "report"):
-            selected = self.page == name
+            selected = self.page == name or (name == "home" and self.page == "adventure")
             self.button(self.sidebar, self.t(name), lambda value=name: self.navigate(value),
                         primary=selected, anchor="w").pack(fill="x", padx=16, pady=5)
         stage = {"early-access": "early_access", "preview": "preview_release", "stable": "stable",
@@ -227,6 +233,8 @@ class Launcher(ModsUI, ReleaseListUI):
             self.render_updates()
         elif self.page == "saves":
             self.render_saves()
+        elif self.page == "adventure":
+            self.render_adventure()
         elif self.page == "report":
             self.render_report()
         elif self.page == "mods":
@@ -277,7 +285,7 @@ class Launcher(ModsUI, ReleaseListUI):
         details = (self.play_build_details() if selected else self.t("no_install"),
                    self.t("release_found", version=release),
                    self.source or self.t("no_dump"))
-        actions = (("play", self.t('mods_working') if self.mods_busy else self.t("playing") if running else self.t("play"), self.play,
+        actions = (("play", self.t('mods_working') if self.mods_busy else self.t("playing") if running else self.t("play"), self.open_adventure,
                     selected and not self.management_busy()),
                    ("update", self.t("action_update"), lambda: self.navigate("updates"), True),
                    ("build", self.t("action_build"), self.open_wizard, True))
@@ -1028,6 +1036,143 @@ class Launcher(ModsUI, ReleaseListUI):
         self.step = step
         self.render()
 
+    def open_adventure(self):
+        if self.management_busy() or not self.executable:
+            return
+        executable, language = self.executable, self.language
+        request = (uuid4(), executable, language)
+        self.adventure = None
+        self.adventure_request = request
+        self.adventure_details.clear()
+        self.adventure_spoilers = False
+        self.navigate("adventure")
+
+        def worker():
+            try:
+                adventure = load_adventure(executable, language)
+            except (OSError, ValueError, TypeError, RuntimeError):
+                adventure = None
+            self.events.put(("adventure_loaded", (request, adventure)))
+
+        try:
+            threading.Thread(target=worker, daemon=True).start()
+        except RuntimeError:
+            self.adventure_request = None
+            self.render()
+
+    def toggle_adventure(self, section):
+        if section in self.adventure_details:
+            self.adventure_details.remove(section)
+        else:
+            self.adventure_details.add(section)
+        self.redraw_adventure()
+
+    def redraw_adventure(self):
+        offset = self.page_panel.viewport.canvasy(0)
+        self.render()
+        self.page_panel.update_idletasks()
+        height = self.content.winfo_reqheight() + 2 * self.page_panel.padding
+        self.page_panel.viewport.yview_moveto(offset / max(1, height))
+
+    def render_adventure(self):
+        top = tk.Frame(self.content, bg=PANEL)
+        top.pack(fill="x", pady=(0, 12))
+        self.button(top, self.t("back"), lambda: self.navigate("home")).pack(side="left")
+        proceed = self.button(top, self.t("recap_continue"), self.play, primary=True)
+        proceed.pack(side="right")
+        if self.management_busy():
+            proceed.configure(state="disabled")
+        self.label(self.content, self.t("recap_title"), 19, GOLD).pack(anchor="w")
+        adventure = self.adventure
+        if adventure is None:
+            key = "recap_loading" if self.adventure_request else "recap_unavailable"
+            self.label(self.content, self.t(key), color=MUTED).pack(anchor="w", pady=(8, 0))
+            return
+
+        slot = adventure.slot
+        if slot.thumbnail:
+            from PIL import Image, ImageTk
+            try:
+                with Image.open(BytesIO(slot.thumbnail), formats=["JPEG"]) as image:
+                    if 0 < image.width <= 1024 and 0 < image.height <= 1024:
+                        image.thumbnail((320, 180))
+                        photo = ImageTk.PhotoImage(image, master=self.root)
+                        preview = tk.Label(self.content, image=photo, bg=PANEL, bd=0)
+                        preview.image = photo
+                        preview.pack(anchor="w", pady=(10, 0))
+            except (OSError, ValueError, Image.DecompressionBombError):
+                pass
+        if adventure.location:
+            self.label(self.content, adventure.location, 15).pack(anchor="w", pady=(10, 0))
+        saved = slot.saved.strftime(self.t("recap_date")) if slot.saved else self.t("recap_unknown")
+        slot_type = self.t({True: "recap_auto", False: "recap_manual", None: "recap_unknown"}[slot.auto])
+        self.label(self.content, self.t("recap_slot", slot=int(slot.name[-2:]) + 1, date=saved, kind=slot_type),
+                   color=MUTED).pack(anchor="w", pady=(3, 8))
+        if adventure.max_hearts is not None:
+            self.label(self.content, self.t("recap_capacity", count=adventure.max_hearts), color=MUTED).pack(anchor="w")
+        if adventure.loose_pieces is not None:
+            self.label(self.content, self.t("recap_loose", count=adventure.loose_pieces), color=MUTED).pack(anchor="w")
+
+        story = adventure.groups[0]
+        self.label(self.content, self.t("recap_summary", done=sum(row.done for row in story),
+                                        total=len(story))).pack(anchor="w", pady=(12, 2))
+        objectives = tuple(row for group in adventure.groups for row in group)
+        done, total = sum(row.done for row in objectives), sum(row.total for row in objectives)
+        unknown = sum(row.unknown for row in objectives)
+        self.label(self.content, self.t("recap_completion", percent=done * 100 // total, done=done, total=total),
+                   color=GOLD).pack(anchor="w", pady=(3, 0))
+        if unknown:
+            self.label(self.content, self.t("recap_unverified", count=unknown), color=MUTED).pack(anchor="w")
+
+        for key, group in zip(("recap_story", "recap_side", "recap_collectibles"), adventure.groups):
+            expanded = key in self.adventure_details
+            heading = self.t("recap_section", name=self.t(key), done=sum(row.done for row in group),
+                             total=sum(row.total for row in group))
+            self.button(self.content, f"{'−' if expanded else '+'}  {heading}",
+                        lambda name=key: self.toggle_adventure(name), anchor="w").pack(fill="x", pady=(10, 0))
+            if not expanded:
+                continue
+            if key == "recap_story":
+                self.button(self.content, self.t("recap_hide_spoilers" if self.adventure_spoilers else
+                                                 "recap_show_spoilers"), self.toggle_adventure_spoilers).pack(anchor="w")
+                if self.adventure_spoilers:
+                    next_goal = next((row for row in group if not row.done and not row.unknown), None)
+                    if next_goal:
+                        self.label(self.content, self.t("recap_next", name=self.t(next_goal.label)),
+                                   color=MUTED).pack(anchor="w")
+            for row in group:
+                label = self.t(row.label)
+                if key == "recap_story" and not self.adventure_spoilers and not row.done:
+                    label = self.t("recap_hidden")
+                if row.total == 1:
+                    status = self.t("recap_unknown" if row.unknown else "recap_done" if row.done else
+                                    "recap_started" if row.started else "recap_open")
+                else:
+                    status = self.t("recap_count", done=row.done, total=row.total)
+                    if row.unknown:
+                        status += f" · {self.t('recap_unverified', count=row.unknown)}"
+                self.label(self.content, f"{label}  ·  {status}", color=TEXT if row.done else MUTED).pack(
+                    anchor="w", padx=12, pady=2)
+            if key == "recap_collectibles":
+                for area_key, areas in (("recap_skull_areas", adventure.skull_areas),
+                                        ("recap_heart_areas", adventure.heart_areas)):
+                    if not areas:
+                        continue
+                    expanded = area_key in self.adventure_details
+                    self.button(self.content, f"{'−' if expanded else '+'}  {self.t(area_key)}",
+                                lambda name=area_key: self.toggle_adventure(name)).pack(anchor="w", padx=12, pady=4)
+                    if expanded:
+                        for area in areas:
+                            name = area.label or self.t("recap_other_areas")
+                            status = self.t("recap_count", done=area.done, total=area.total)
+                            if area.unknown:
+                                status += f" · {self.t('recap_unverified', count=area.unknown)}"
+                            self.label(self.content, f"{name}  ·  {status}", color=MUTED).pack(anchor="w", padx=24)
+
+    def toggle_adventure_spoilers(self):
+        self.adventure_spoilers = not self.adventure_spoilers
+        self.redraw_adventure()
+
     def play(self):
         if self.management_busy():
             return
@@ -1191,6 +1336,14 @@ class Launcher(ModsUI, ReleaseListUI):
                 kind, value = self.events.get_nowait()
             except Empty:
                 break
+            if kind == "adventure_loaded":
+                request, adventure = value
+                if request == self.adventure_request:
+                    self.adventure_request = None
+                    if request[1:] == (self.executable, self.language) and self.page == "adventure":
+                        self.adventure = adventure
+                        changed = True
+                continue
             if kind == 'mods_log':
                 self.mods_log = (self.mods_log + [value])[-200:]
                 if self.mods_log_widget is not None:
@@ -1316,7 +1469,11 @@ class Launcher(ModsUI, ReleaseListUI):
                 self.process, executable = value
                 reports.record_run(ROOT, self.process, executable)
                 self.activity = self.t("playing")
-                self.render()
+                if self.page == "adventure":
+                    self.adventure = self.adventure_request = None
+                    self.navigate("home")
+                else:
+                    self.render()
                 if self.hide_playing:
                     self.root.withdraw()
                 continue
@@ -1437,6 +1594,7 @@ def main():
             checked = []
             checked_mods = []
             checked_reports = []
+            checked_adventures = []
             try:
                 for language in LANGUAGES:
                     application.language = language
@@ -1455,9 +1613,13 @@ def main():
                     root.update_idletasks()
                     checked.append(f"{language}/build/library")
                     application.library_view = False
+                    application.navigate("adventure")
+                    root.update_idletasks()
+                    checked_adventures.append(f"{language}/adventure")
                     application.navigate("report");root.update_idletasks()
                     checked_reports.append(f"{language}/report")
                 report = {"screens": checked, "mod_screens": checked_mods, "report_screens":checked_reports,
+                          "adventure_screens": checked_adventures,
                           "launcher_version": __version__, "logo_loaded": root._brand_icon.width() > 0,
                           "native_icon_verified": getattr(root, "_native_icon_verified", os.name != "nt"),
                           "top_level_windows": 1 + sum(isinstance(child, tk.Toplevel) for child in root.winfo_children()),

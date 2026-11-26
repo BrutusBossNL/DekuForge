@@ -84,6 +84,14 @@ and 5× settings.
 Starting with Preview 0.4.7-preview.1, L3 starts a sprint without rolling or
 dodging first. The game's regular dodge button keeps its usual behavior.
 
+### Adventure recap (Experimental)
+
+**Play** opens a read-only recap of the latest supported save from the active
+build. It follows the launcher language and shows story milestones, side quests,
+and the DekuForge completion checklist. Choose **Continue to game** to start the
+game. Upcoming story names are hidden by default. See
+[save handling and checklist scope](docs/saves.md#adventure-recap).
+
 ### Cheat Manager
 
 The Cheat Manager is grouped into **Link**, **Equipment**, **World**,

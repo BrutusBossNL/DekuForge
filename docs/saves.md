@@ -4,7 +4,8 @@
 
 1. Select your built DekuForge game. Start it once and close it so its user profile
    exists. Open **Saves** in the launcher.
-2. The destination is detected from that selected game's `profile/save/<user-id>`.
+2. The destination is detected from the selected game's `user/save/<user-id>`
+   for independent builds, or `profile/save/<user-id>` for Legacy.
    If it has multiple user profiles, choose the destination profile explicitly.
 3. Choose **Choose NX2navi / save folder** and select your old NX2navi folder,
    its `Play` folder, or the save folder itself. There is no need to find the
@@ -51,3 +52,32 @@ export (`account.sav`, `slot_00/progress.sav`, etc.). Other exporters' wrapped Z
 layouts are not automatically converted; use their existing save folder with the
 folder search instead. **Export ZIP** and **Open current game's save folder**
 operate on the detected destination profile.
+
+## Adventure recap
+
+In Experimental, **Play** opens the recap inside the launcher. **Continue to
+game** starts the selected game through the standard launch path, including
+enabled mods. The recap reads game version 1.1.1 saves from the account the
+independent Windows build uses. Imported saves work after they are copied into
+that profile. The launcher ranks compatible slots by the date stored in
+`caption.sav`, with the modification time as a fallback when none of the
+compatible slots has a readable game timestamp.
+
+The recap shows the saved location, thumbnail, heart capacity, and the recorded
+story, side-quest and collection state. It uses the launcher's language,
+including its system-language setting. Location names and collectible
+placements come from the selected build's local game files. The area breakdown
+of Skulltulas is shown when the placement checks agree with the saved token
+total. Loose heart pieces are shown separately from total collected pieces.
+
+The percentage is the share of the DekuForge checklist completed. Each token
+or other collectible counts as one objective. Claiming a quest reward can also
+complete its own objective. The checklist covers major bosses, selected side
+quests and one-time rewards, tokens, heart pieces, stones and medallions,
+songs, bottles, equipment, capacity upgrades and Great Fairy gifts. It does
+not count every optional interaction in the game. Unknown objectives remain in
+the total and do not count as completed. The game records a snapshot of progress,
+so this recap does not reconstruct the order in which milestones happened.
+
+The recap reads files locally and leaves the saves untouched. If the selected
+build or save is unsupported, **Continue to game** still works.
