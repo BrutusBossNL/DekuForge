@@ -81,5 +81,7 @@ jobs:
             build/releases/DekuForge-Setup.exe
             build/releases/DekuForge-independent-release.json
             build/releases/DekuForge-launcher-*-windows.zip
+            build/releases/DekuForge-*-windows-x64.zip
+            build/releases/recomplauncher.json
           if-no-files-found: error
           archive: true

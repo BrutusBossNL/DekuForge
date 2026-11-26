@@ -8,8 +8,9 @@ installation. The launcher identifies compatible Windows packages with
 Experimental selects Windows artifacts of successful pushes to `main`,
 using the GitHub Actions digest and the embedded commit identity. Expired
 artifacts drop out of the list. GitHub CLI sign-in or a token with Actions read
-permission is required. Tag Stable and Preview from the same source commit
-when promoting the same changes. Each package embeds its own version and the
+permission is required. Keep Preview at the same source as Stable or ahead of
+it. For paired releases, tag both from the same commit, verify both packages
+and publish Preview first. Each package embeds its own version and the
 same commit identity as the corresponding Experimental artifact. Ready pull
 requests, pushes to `main` and version tags use the same source checks and
 clean Windows setup test. A pull request never publishes an update artifact.
@@ -37,6 +38,17 @@ supply their own supported game dump. These restrictions also apply to issues,
 pull requests and attached diagnostic files.
 
 ## Changelog and release notes
+
+For RecompLauncher, every tagged release includes a Windows x64 portable ZIP
+with `recomplauncher.json` next to `DekuForge.exe` and the same manifest as a
+standalone asset for the catalog checker. Publish the portable ZIP, the
+standalone manifest and the regular DekuForge setup/update assets together.
+The portable ZIP runs a windowless setup from the player's NUP and uses the
+same executable to start the generated game. RecompLauncher manages updates
+for that installation. Saves and the editable settings file live in
+`recompdata/`. Generated game files, tools and build caches remain local to
+the installed folder. Use the [RecompLauncher SDK](https://github.com/elripalda/RecompLauncher/blob/main/docs/ADD-SUPPORT.md)
+when changing the manifest.
 
 Keep [CHANGELOG.md](https://github.com/BrutusBossNL/DekuForge/blob/main/CHANGELOG.md)
 current under **Unreleased (Experimental)**. Before publishing, identify the

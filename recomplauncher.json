@@ -1,0 +1,166 @@
+{
+  "$schema": "https://recomplauncher.com/schema/recomplauncher.json",
+  "format": 1,
+  "name": "DekuForge",
+  "repo": "BrutusBossNL/DekuForge",
+  "inputs": [
+    {
+      "id": "game",
+      "role": "game",
+      "label": "Your own unencrypted Ocarina of Time Switch NUP with the 1.1.1 update",
+      "formats": [
+        {
+          "type": "file",
+          "extensions": [
+            "nup"
+          ]
+        }
+      ],
+      "check": {
+        "nup_build_id": "e0f3ccfaf50065ae4ea01eb5aeb13b1a"
+      }
+    }
+  ],
+  "start": {
+    "program": [
+      "DekuForge.exe"
+    ],
+    "args": [
+      "--recomp-play"
+    ]
+  },
+  "prepare": {
+    "program": [
+      "DekuForge.exe"
+    ],
+    "args": [
+      "--recomp-prepare",
+      "--game={input:game}"
+    ],
+    "label": "Verify tools and build DekuForge locally",
+    "done": [
+      "{data}/dekuforge-ready.json"
+    ]
+  },
+  "saves": [
+    "{data}/user/save",
+    "{data}/hookshot_options.ini"
+  ],
+  "folders": {
+    "game": [
+      {
+        "path": "{install}/build/recomplauncher"
+      }
+    ],
+    "logs": [
+      {
+        "path": "{data}/logs"
+      }
+    ]
+  },
+  "system": {
+    "windows": {
+      "version": "10",
+      "graphics": {
+        "vulkan": "1.3"
+      }
+    }
+  },
+  "config": [
+    {
+      "id": "main",
+      "format": "ini",
+      "file": [
+        {
+          "path": "{data}/hookshot_options.ini"
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "id": "fullscreen",
+      "label": "Display mode",
+      "group": "Video",
+      "choices": [
+        {
+          "label": "Windowed",
+          "set": {
+            "fullscreen": "0"
+          }
+        },
+        {
+          "label": "Borderless fullscreen",
+          "set": {
+            "fullscreen": "1"
+          }
+        }
+      ],
+      "defaults": {
+        "fullscreen": "0"
+      }
+    },
+    {
+      "id": "fps",
+      "label": "Frame-rate limit",
+      "group": "Video",
+      "choices": [
+        {
+          "label": "30 FPS",
+          "set": {
+            "frame_rate_cap": "7"
+          }
+        },
+        {
+          "label": "60 FPS",
+          "set": {
+            "frame_rate_cap": "0"
+          }
+        },
+        {
+          "label": "120 FPS",
+          "set": {
+            "frame_rate_cap": "2"
+          }
+        },
+        {
+          "label": "Unlimited",
+          "set": {
+            "frame_rate_cap": "6"
+          }
+        }
+      ],
+      "defaults": {
+        "frame_rate_cap": "0"
+      }
+    },
+    {
+      "id": "vsync",
+      "label": "V-Sync",
+      "group": "Video",
+      "choices": [
+        {
+          "label": "Auto",
+          "set": {
+            "vsync": "0"
+          }
+        },
+        {
+          "label": "On",
+          "set": {
+            "vsync": "1"
+          }
+        },
+        {
+          "label": "Off",
+          "set": {
+            "vsync": "2"
+          }
+        }
+      ],
+      "defaults": {
+        "vsync": "0"
+      }
+    }
+  ]
+}

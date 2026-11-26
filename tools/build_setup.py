@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import zipfile
@@ -15,6 +16,20 @@ sys.path.insert(0,str(ROOT))
 from tools.package_launcher import package
 from dekuforge import COMPONENTS
 from tools.native_resources import NATIVE_SOURCES, RUNTIME_SOURCES, digest_header, packaged_sha256, runtime_pin_header, write_resources
+
+
+def package_recomplauncher(archive, version):
+    # The in-app updater still uses its existing, checksummed package format.
+    manifest = ROOT / "recomplauncher.json"
+    shutil.copyfile(manifest, archive.parent / manifest.name)
+    portable = archive.parent / f"DekuForge-{version}-windows-x64.zip"
+    temporary = portable.with_suffix(".zip.part")
+    with zipfile.ZipFile(archive) as source, zipfile.ZipFile(temporary, "w", zipfile.ZIP_DEFLATED) as target:
+        for name in source.namelist():
+            if name not in {"launcher-package.json", "DekuForge-Uninstall.exe"}:
+                target.writestr(name, source.read(name))
+        target.write(manifest, manifest.name)
+    temporary.replace(portable)
 
 
 def main():
@@ -54,6 +69,7 @@ def main():
         "package":{"name":archive.name,"size":archive.stat().st_size,"sha256":digest},
         "installer":{"name":executable.name,"size":executable.stat().st_size,"sha256":hashlib.sha256(executable.read_bytes()).hexdigest()}}
     (ROOT/"build/releases/DekuForge-independent-release.json").write_text(json.dumps(release,indent=2)+'\n',encoding="utf-8")
+    package_recomplauncher(archive, version)
     print("Built standalone setup:",executable,flush=True)
 
 

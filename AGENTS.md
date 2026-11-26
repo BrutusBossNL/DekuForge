@@ -84,6 +84,8 @@ user saves in local ignored paths. Ship only the verified packaging allowlist.
 Before distributing changed launcher behavior, increment the launcher version
 in `dekuforge/components.json` (including the preview sequence). Increment the
 buildkit for build-orchestration changes and the engine for game/runtime changes.
+Keep Preview at the same source as Stable or ahead of it. For a paired release,
+verify both packages and publish the Preview before Stable.
 Do not reuse an installed preview identity for different delivered application
 code. Never replace assets of a published release: publish a new version instead.
 Draft assets may be prepared before release, but draft releases are deliberately

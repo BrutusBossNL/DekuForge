@@ -2,6 +2,8 @@
 
 # DekuForge
 
+<a href="https://recomplauncher.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://recomplauncher.com/assets/press/launcher/badge-light.svg"><img alt="Get it on RecompLauncher" src="https://recomplauncher.com/assets/press/launcher/badge-dark.svg" height="48"></picture></a>
+
 **Reforging a legend.** DekuForge builds a local Windows game from your own
 game archive. Main uses the independent build path with the pinned GPL Hookshot
 engine and DekuForge's launcher and runtime adaptations. Thanks to the NX2navi
@@ -13,6 +15,13 @@ their work on the engine.
 > Use your own legally obtained game dump. Do not share game-derived outputs.
 
 ## Current status
+
+On Windows, install DekuForge through RecompLauncher and choose **Set Up**.
+Select your own unencrypted Ocarina of Time Switch `.nup` with the 1.1.1
+update. Setup verifies the copy, prepares the tools and builds the game on your
+PC. Press **Play** when it finishes. The standalone **DekuForge-Setup.exe**
+remains available and opens the DekuForge launcher, where **Build game** asks
+for the same NUP.
 
 Windows is the current release platform. The **Stable** channel now ships
 the independent launcher, build tools and source-based engine path. Preview

@@ -31,6 +31,41 @@ also check the tested Preview commit and record exactly what carried over.
 
 - No additional PR or issue credits in this interval.
 
+## v0.4.6 Stable and v0.4.6-preview.1
+
+Both tags use the same source.
+[Stable changes since v0.4.1](https://github.com/BrutusBossNL/DekuForge/compare/v0.4.1...v0.4.6) ·
+[Preview changes since v0.4.5-preview.1](https://github.com/BrutusBossNL/DekuForge/compare/v0.4.5-preview.1...v0.4.6-preview.1)
+
+### New
+
+- Add RecompLauncher Set Up and Play for Windows x64 with a supported player
+  NUP, on-page display and frame pacing settings, and save backup paths.
+- Ship a portable Windows package and release metadata alongside the existing
+  standalone setup and in-app update files.
+- Stable receives the native installer, clearer version labels and read-only
+  GitHub report receipts already present in Preview.
+
+### Patches (fixes)
+
+- Reuse a completed local game build when the dump and build components match.
+- Stable also receives the build progress, Capstone, German spelling and update
+  fixes listed under v0.4.4-preview.2 and v0.4.5-preview.1, plus the CI checks
+  introduced between those releases.
+
+### Preview-to-Stable (tested)
+
+- Promote the v0.4.5-preview.1 changes together with the RecompLauncher support.
+  Both new tags require the same clean Windows installer and source checks.
+
+### Thank you
+
+- [sirtheta] submitted [#9], [#10], [#11] and [#13]. [Exposed77] and [EtaYorius]
+  reported the build and installer problems ([#8], [#12]). [BrutusBossNL]
+  reported the moved-installation update failure ([#14]).
+- Thanks to [elripalda and the RecompLauncher contributors](https://github.com/elripalda/RecompLauncher/graphs/contributors)
+  for the SDK and its documentation.
+
 ## v0.4.5-preview.1 · 2026-11-22
 
 [Changes since v0.4.4-preview.2](https://github.com/BrutusBossNL/DekuForge/compare/v0.4.4-preview.2...v0.4.5-preview.1) · [Release](https://github.com/BrutusBossNL/DekuForge/releases/tag/v0.4.5-preview.1)
