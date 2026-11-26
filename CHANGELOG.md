@@ -18,6 +18,8 @@ also check the tested Preview commit and record exactly what carried over.
 - Show a localized adventure recap before launching the active Windows build.
   Read the newest compatible save, show story milestones, side quests and
   collectible totals, and let players continue through the normal launch path.
+- Copy a localized completion message and the RecompLauncher link from the
+  adventure recap for sharing on social media.
 
 - Maintain a project changelog with release comparisons, validation and named
   credits. The contribution guide and PR template explain how to keep it current.

@@ -1,6 +1,15 @@
 """Localized launcher management screens (English, Dutch, German, Spanish, French)."""
 ROWS = {
     "recap_title": ("Your adventure", "Je avontuur", "Dein Abenteuer", "Tu aventura", "Votre aventure"),
+    "recap_share": ("Share", "Delen", "Teilen", "Compartir", "Partager"),
+    "recap_share_copied": ("Message copied. Paste it into your post.", "Bericht gekopieerd. Plak het in je post.", "Text kopiert. Füge ihn in deinen Beitrag ein.", "Mensaje copiado. Pégalo en tu publicación.", "Message copié. Collez-le dans votre publication."),
+    "recap_share_failed": ("Could not copy the message.", "Het bericht kon niet worden gekopieerd.", "Der Text konnte nicht kopiert werden.", "No se pudo copiar el mensaje.", "Impossible de copier le message."),
+    "recap_share_message": (
+        "I completed {percent}% of The Legend of Zelda: Ocarina of Time Remake on PC using DekuForge.",
+        "Ik heb {percent}% van The Legend of Zelda: Ocarina of Time Remake op pc voltooid met DekuForge.",
+        "Ich habe {percent} % von The Legend of Zelda: Ocarina of Time Remake mit DekuForge auf dem PC abgeschlossen.",
+        "He completado el {percent} % de The Legend of Zelda: Ocarina of Time Remake en PC con DekuForge.",
+        "J’ai terminé {percent} % de The Legend of Zelda: Ocarina of Time Remake sur PC avec DekuForge."),
     "recap_continue": ("Continue to game", "Verder spelen", "Weiterspielen", "Seguir jugando", "Reprendre le jeu"),
     "recap_loading": ("Reading your latest save…", "Je nieuwste save wordt gelezen…", "Spielstand wird gelesen…", "Leyendo tu última partida…", "Lecture de votre dernière sauvegarde…"),
     "recap_unavailable": ("No supported save could be read for this build. You can still play.", "Voor deze build is geen ondersteunde save gevonden. Je kunt wel spelen.", "Für diesen Build konnte kein unterstützter Spielstand gelesen werden. Du kannst trotzdem spielen.", "No se pudo leer una partida compatible con esta compilación. Puedes jugar igualmente.", "Aucune sauvegarde compatible n’a pu être lue pour cette compilation. Vous pouvez quand même jouer."),

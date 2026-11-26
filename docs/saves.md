@@ -81,3 +81,7 @@ so this recap does not reconstruct the order in which milestones happened.
 
 The recap reads files locally and leaves the saves untouched. If the selected
 build or save is unsupported, **Continue to game** still works.
+
+**Share** copies the displayed checklist percentage and the DekuForge
+RecompLauncher link in the launcher language. Paste the message into your
+social post.

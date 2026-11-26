@@ -35,6 +35,8 @@ from .mod_ui import ModsUI
 from .mods import ModLibrary
 from .release_ui import ReleaseListUI, release_action
 
+RECOMP_LISTING = "https://recomplauncher.com/game/dekuforge"
+
 
 class Launcher(ModsUI, ReleaseListUI):
     def __init__(self, root):
@@ -1119,10 +1121,17 @@ class Launcher(ModsUI, ReleaseListUI):
         objectives = tuple(row for group in adventure.groups for row in group)
         done, total = sum(row.done for row in objectives), sum(row.total for row in objectives)
         unknown = sum(row.unknown for row in objectives)
-        self.label(self.content, self.t("recap_completion", percent=done * 100 // total, done=done, total=total),
+        percent = done * 100 // total
+        self.label(self.content, self.t("recap_completion", percent=percent, done=done, total=total),
                    color=GOLD).pack(anchor="w", pady=(3, 0))
         if unknown:
             self.label(self.content, self.t("recap_unverified", count=unknown), color=MUTED).pack(anchor="w")
+        share_row = tk.Frame(self.content, bg=PANEL)
+        share_row.pack(anchor="w", pady=(6, 0))
+        share_status = self.label(share_row, "", color=MUTED)
+        self.button(share_row, self.t("recap_share"),
+                    lambda: self.share_adventure(percent, share_status)).pack(side="left")
+        share_status.pack(side="left", padx=(10, 0))
 
         for key, group in zip(("recap_story", "recap_side", "recap_collectibles"), adventure.groups):
             expanded = key in self.adventure_details
@@ -1168,6 +1177,16 @@ class Launcher(ModsUI, ReleaseListUI):
                             if area.unknown:
                                 status += f" · {self.t('recap_unverified', count=area.unknown)}"
                             self.label(self.content, f"{name}  ·  {status}", color=MUTED).pack(anchor="w", padx=24)
+
+    def share_adventure(self, percent, status):
+        message = self.t("recap_share_message", percent=percent)
+        try:
+            self.root.clipboard_clear()
+            self.root.clipboard_append(f"{message}\n{RECOMP_LISTING}")
+        except tk.TclError:
+            status.configure(text=self.t("recap_share_failed"))
+            return
+        status.configure(text=self.t("recap_share_copied"))
 
     def toggle_adventure_spoilers(self):
         self.adventure_spoilers = not self.adventure_spoilers
