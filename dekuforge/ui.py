@@ -134,7 +134,8 @@ class Launcher(ModsUI, ReleaseListUI):
         self.render()
         self.tick_job = root.after(100, self.tick)
         root.bind("<Destroy>", self.on_destroy, add="+")
-        if settings["check_updates"] and COMPONENTS["launcher"].get("updates", True) and "--self-test" not in sys.argv:
+        if (settings["check_updates"] and os.environ.get("RECOMPLAUNCHER") != "1"
+                and COMPONENTS["launcher"].get("updates", True) and "--self-test" not in sys.argv):
             root.after(2500, self.check_updates)
         if "--self-test" not in sys.argv:
             root.after(2500, self.show_update_result)
@@ -458,6 +459,10 @@ class Launcher(ModsUI, ReleaseListUI):
         self.navigate('report')
 
     def install_selected_release(self, automatic=False):
+        if os.environ.get("RECOMPLAUNCHER") == "1":
+            self.release_status = self.t("updates_managed_external")
+            if self.page == 'updates': self.render()
+            return
         if not COMPONENTS['launcher'].get('updates', True):
             self.release_status = self.t('independent_updates_disabled')
             if self.page == 'updates': self.render()
@@ -547,6 +552,10 @@ class Launcher(ModsUI, ReleaseListUI):
             return True
 
     def check_updates(self):
+        if os.environ.get("RECOMPLAUNCHER") == "1":
+            self.release_status = self.t("updates_managed_external")
+            if self.page == 'updates': self.render()
+            return
         if not COMPONENTS['launcher'].get('updates', True):
             self.release_status = self.t('independent_updates_disabled')
             if self.page == 'updates': self.render()

@@ -4,6 +4,7 @@ __pycache__/
 python/
 pydeps/
 local/
+recompdata/
 build/
 generated/
 *.exe

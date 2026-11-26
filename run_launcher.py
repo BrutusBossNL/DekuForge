@@ -30,6 +30,9 @@ def prepare_tk():
 
 
 if __name__ == "__main__":
+    if sys.argv[1:2] in (["--recomp-prepare"], ["--recomp-play"]):
+        from dekuforge.recomplauncher import main
+        raise SystemExit(main())
     try:
         prepare_tk()
         from dekuforge.__main__ import main

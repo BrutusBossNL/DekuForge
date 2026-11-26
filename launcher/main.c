@@ -12,6 +12,7 @@
 #include <string.h>
 #include "runtime_pin.h"
 #include "runtime.h"
+#include "native.h"
 
 static int regular_file(const wchar_t *path) {
     DWORD attributes = GetFileAttributesW(path);
@@ -91,6 +92,26 @@ static int prepare_runtime(const wchar_t *root, HINSTANCE instance) {
     return !cancelled && code==0;
 }
 
+static int run_recomplauncher(const wchar_t *root, const wchar_t *args) {
+    HANDLE output = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (output == INVALID_HANDLE_VALUE) output = NULL;
+    if (!deku_prepare_runtime(root)) {
+        if (output) {
+            const char *error = deku_error();
+            DWORD written;
+            WriteFile(output, error, (DWORD)strlen(error), &written, NULL);
+            WriteFile(output, "\n", 1, &written, NULL);
+        }
+        return 1;
+    }
+    wchar_t python[DEKU_PATH], command[DEKU_PATH];
+    if (swprintf(python, DEKU_PATH, L"%ls\\python\\%ls\\python.exe", root, DEKU_PYTHON_ID) < 0 ||
+        swprintf(command, DEKU_PATH, L"\"%ls\" -B -u \"%ls\\run_launcher.py\" %ls", python, root, args) < 0)
+        return 1;
+    DWORD code;
+    return deku_run(python, command, root, output, &code) ? (int)code : 1;
+}
+
 int WINAPI wWinMain(HINSTANCE instance, HINSTANCE previous, PWSTR args, int show) {
     (void)previous; (void)show;
     wchar_t root[32768], python[32768] = {0}, script[32768], command[32768];
@@ -99,6 +120,9 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE previous, PWSTR args, int show
     wchar_t *slash = wcsrchr(root, L'\\');
     if (!slash) return 1;
     *slash = 0;
+    if (!wcscmp(args, L"--recomp-play") || !wcscmp(args, L"--recomp-prepare") ||
+        !wcsncmp(args, L"--recomp-prepare ", 17))
+        return run_recomplauncher(root, args);
     wchar_t owned[32768];
     swprintf(owned,32768,L"%ls\\python\\%ls\\pythonw.exe",root,DEKU_PYTHON_ID);
     wcscpy(python,owned);
