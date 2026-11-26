@@ -31,6 +31,33 @@ also check the tested Preview commit and record exactly what carried over.
 
 - No additional PR or issue credits in this interval.
 
+## v0.4.7-preview.1
+
+[Changes since v0.4.6-preview.1](https://github.com/BrutusBossNL/DekuForge/compare/v0.4.6-preview.1...v0.4.7-preview.1)
+
+### New
+
+- Document that Stable only takes tested and confirmed fixes when the related
+  issues and pull requests are closed. Unconfirmed fixes stay in Preview or
+  Experimental. Changes without a release request ship through Experimental.
+- Refresh build and release documentation for the public repository and the
+  current independent Windows engine.
+
+### Patches (fixes)
+
+- L3 starts Link's sprint directly in both hold and toggle modes. It no
+  longer sends a roll or dodge press. The regular button is unchanged.
+- Shrink the black aura on bomb arrows and explosive Deku seeds and clear it
+  when Link releases the projectile. Explosive impacts still use one bomb.
+
+### Preview-to-Stable (tested)
+
+- Preview only. Both fixes need gameplay confirmation before promotion.
+
+### Thank you
+
+- [BrutusBossNL] reported the L3 and aura behavior.
+
 ## v0.4.6 Stable and v0.4.6-preview.1
 
 Both tags use the same source.

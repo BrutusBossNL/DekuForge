@@ -81,6 +81,9 @@ sprint** offers **Hold L3** or **Click to toggle**. A second click or stopping
 movement ends a toggled sprint. Sprint speed includes the original 2×, 3.5×
 and 5× settings.
 
+Starting with Preview 0.4.7-preview.1, L3 starts a sprint without rolling or
+dodging first. The game's regular dodge button keeps its usual behavior.
+
 ### Cheat Manager
 
 The Cheat Manager is grouped into **Link**, **Equipment**, **World**,
@@ -94,7 +97,9 @@ options cover charged spin range, magic spin charge and bomb arrows. Bomb
 arrows require adult Link's bow. The separate explosive Deku seed option
 requires young Link's slingshot. Both require an unlocked bomb bag and
 use one bomb per explosive impact.
-Both explosive projectiles have a black aura while held ready or in flight.
+Stable shows a black aura on explosive projectiles while aiming and in flight.
+Starting with Preview 0.4.7-preview.1 the aura is smaller and clears on release.
+The round still explodes on impact.
 **Cheat Manager → World** controls Gold Skulltulas, heart pieces, grottos,
 chests, bean plots, Great Fairies and upgrades separately. The markers follow
 Link's current age. Night-only Skulltulas carry a crescent, and markers with

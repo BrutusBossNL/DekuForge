@@ -55,7 +55,7 @@ Describe the concrete problem, resulting behavior and validation. Keep changes
 focused, use English for code/comments/docs and translate launcher UI strings in
 all five languages. Add tests for meaningful behavior and failure paths, with
 synthetic fixtures only. Never change the immutable historical `engine/` import;
-compose current extensions through the pinned stable-source layer.
+compose current extensions through the pinned Hookshot provider.
 
 Update [CHANGELOG.md](https://github.com/BrutusBossNL/DekuForge/blob/main/CHANGELOG.md)
 under **Unreleased (Experimental)** in the same pull request for changes that
@@ -96,3 +96,8 @@ locally from their own input. Do not publish generated game artifacts to CI.
 Release notes use the full change range since the previous published release
 on that channel. For Stable, record which Preview changes were promoted and
 the validation that supports them. See [the release guide](docs/DISTRIBUTION.md#changelog-and-release-notes).
+
+Stable requires tested, confirmed changes with their associated issues and pull
+requests closed. A merged fix with a linked issue awaiting confirmation can
+ship in Preview or Experimental. Without an explicit release request, the
+commit is delivered through Experimental.

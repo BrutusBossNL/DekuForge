@@ -1,57 +1,34 @@
 # Delivery priorities
 
-> **Independent branch status:** the stable-backend milestones below describe
-> main and remain reference evidence. This branch now runs a separately licensed
-> source-built experimental game with DekuForge UI adaptations. The separate
-> Windows setup has a local provisioning test. Gameplay parity remains open. Current work and measured
-> results are in [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md) and
-> [INDEPENDENT_EVIDENCE.md](INDEPENDENT_EVIDENCE.md). Do not use main's results as
-> acceptance of this different engine.
-
-The independent Windows developer route now composes the complete source-built
-NUP pipeline, pinned generic tools and source-built AV1 movies, with explicit
-launcher opt-in. The build saves its driver pipeline cache before completion.
-Current work covers repeat startup time, gameplay measurements and asset-mod/save
-integration. Official standalone Python/Tk/Pillow
-now boots the launcher locally. Independent setup acceptance, the full
-Cheat Manager feature parity, matched performance and long-session acceptance remain open; see
-[OPEN_ENGINE_EVALUATION.md](OPEN_ENGINE_EVALUATION.md).
-
-The owner has since prioritized DekuForge's in-game UI and Cheat Manager directly
-after the stable Windows baseline, before Linux parity. The 0.11.0 candidate uses
-the stable 0.10.1 renderer with a separate extension layer. Preparing portable tests
-does not make a platform supported. Every game validation result must identify
-the source revision, engine revision, game build ID, hardware and driver.
+Stable and Preview use the independent Windows engine on `main`. Current
+priorities are startup time, gameplay performance, controller and audio
+coverage, and long-session validation. See [the public roadmap](../roadmap.md)
+and [the test evidence](INDEPENDENT_EVIDENCE.md). Each game validation result
+should identify the source revision, engine revision, game build ID, hardware
+and driver.
 
 ## 1. Windows parity
 
 The retired renderer investigation is archived in
-[RENDERER_GAP_ANALYSIS.md](RENDERER_GAP_ANALYSIS.md). Current stable-engine evidence
-and delivery limits are in [STABLE_ENGINE_MIGRATION.md](STABLE_ENGINE_MIGRATION.md)
+[RENDERER_GAP_ANALYSIS.md](RENDERER_GAP_ANALYSIS.md). Current engine evidence
+and delivery limits are in [INDEPENDENT_EVIDENCE.md](INDEPENDENT_EVIDENCE.md)
 and [DISTRIBUTION.md](DISTRIBUTION.md).
 
 The user entry point is `DekuForge.exe`, with the project's embedded icon and no
 console or CMD script. A final distribution includes the launcher dependencies;
 developer interpreter overrides are not an end-user installation workflow.
 
-Deliver a local build from the owner's NUP input using the pinned stable 0.10.1
-source backend and independently provisioned tools. The launcher wizard is now
-connected to the complete extraction, CPU generation, native linking and shader
-preparation pipeline. Its first full isolated build completed; the initial world
-screenshots now show the missing terrain, foliage and sky correctly. The ordinary-start 60-second
-world test measured 54.44 FPS on this machine, with complete captured surfaces
-and a successful launcher Play/hide/return check. See
-[STABLE_ENGINE_MIGRATION.md](STABLE_ENGINE_MIGRATION.md) for the exact evidence,
-test-mode distinction and remaining acceptance checks. An empty-folder setup/tool download passed locally; full fresh-machine game
-build acceptance remains pending.
+The launcher builds locally from a supported NUP using pinned Hookshot
+source and verified tools. CI exercises the clean Windows setup and tool
+downloads. Whole-game acceptance requires a local dump and dedicated tests.
 
 Acceptance requires install, launch, title, save/load, controller mapping, audio,
 rendering and a repeatable play session. Compare Kokiri Forest, Market Square,
 Hyrule Field and a dungeon with the working reference installation on the same
 machine, settings and save snapshot. Record average FPS, frame-time percentiles,
 stalls, peak committed memory and peak VRAM. The owner must be able to continue
-playing with no meaningful regression. An initial reference run and isolated
-development measurements are recorded in `WINDOWS_BUILD.md`; the old experimental measurements do not establish parity for the new backend.
+playing with no meaningful regression. Use [the Legacy measurements](STABLE_ENGINE_MIGRATION.md)
+for historical comparison.
 
 ### Launcher updates and save migration
 
@@ -89,18 +66,17 @@ the native game acceptance gate.
 
 The independent Windows candidate has separate resource cheats, countdown
 freeze, individual bottle contents, L3 sprint modes, spin range and charge,
-bomb arrows and explosive Deku seeds. Both projectiles include a black aura,
-and the World group has separate marker switches with age and completion
-handling. Verify countdown freeze in a minigame and heart refill after a
+bomb arrows and explosive Deku seeds. Preview adds direct L3 sprint and a black
+aura that clears on release. The World group has separate marker switches with
+age and completion handling. Verify countdown freeze in a minigame and heart refill after a
 capacity upgrade. Carry verified cheats and controller fixes to Linux
 and repeat the performance and memory comparisons.
 
 ## 4. Public open-source repository
 
-The owner has authorized making the repository public at this priority, after
-priorities 1–3 pass. Until then, keep it private. Preserve component notices,
-provide source/build instructions, accept issues and pull requests, and enforce
-the game-content boundary in source checks and contribution templates.
+The repository is public. Preserve component notices, keep source/build
+instructions current, accept issues and pull requests, and enforce the
+game-content boundary in source checks and contribution templates.
 
 Never share ROMs, game assets, keys, generated game source or compiled game
 binaries. A launcher package may contain only independently distributable tooling

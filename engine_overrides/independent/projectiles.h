@@ -2,19 +2,27 @@
 
 enum { DF_OPT_EXPLOSIVE_SHOTS = 705, DF_BOMB_ARROW = 1, DF_EXPLOSIVE_SEED = 2 };
 
+// Only the held actor has a stable attachment point for the projected effect.
+enum { DF_SHOT_HELD = 1, DF_SHOT_FIRED = 2 };
+
 #ifdef DF_PROJECTILE_HOST
 enum { DF_TRACKED_SHOTS = 32, DF_BLASTS = 8 };
 typedef struct {
     uint64_t actor;
     uint32_t generation, state;
     int armed;
-    int aura;
     float position[3];
     int64_t seen;
 } DfShot;
 
 static SRWLOCK df_shot_lock = SRWLOCK_INIT;
 static DfShot df_shots[DF_TRACKED_SHOTS];
+static struct {
+    uint64_t component;
+    int mode;
+    float position[3];
+    int64_t seen;
+} df_held_aura;
 static float df_impacts[DF_BLASTS][3];
 static unsigned df_impact_count;
 
@@ -98,21 +106,25 @@ static void df_track_projectile(Ctx *c, uint64_t component, int seed_only) {
         shot = &df_shots[oldest];
         *shot = (DfShot){.actor = actor, .generation = generation};
     }
-    if (state == 2 && shot->state != 2) shot->armed = 1;
-    // The same native world position drives the aura and the eventual impact.
-    const int visualize = (state == 1 || state == 2) && df_bomb_stock(c, 0);
+    if (state == DF_SHOT_FIRED && shot->state != DF_SHOT_FIRED) shot->armed = 1;
+    const int visualize = state == DF_SHOT_HELD && df_bomb_stock(c, 0);
     if (visualize || shot->armed)
         for (unsigned i = 0; i < 3; ++i) {
             const uint32_t raw = recomp_load32(c, actor + 0x31c + 4 * i);
             memcpy(shot->position + i, &raw, 4);
         }
     const int valid = isfinite(shot->position[0]) && isfinite(shot->position[1]) && isfinite(shot->position[2]);
-    shot->aura = visualize && valid;
     static unsigned seen_aura;
-    if (shot->aura) {
+    if (visualize && valid) {
+        df_held_aura.component = component;
+        df_held_aura.mode = seed ? DF_EXPLOSIVE_SEED : DF_BOMB_ARROW;
+        df_held_aura.seen = now;
+        memcpy(df_held_aura.position, shot->position, sizeof(shot->position));
         const unsigned bit = 1u << seed;
         if (!(seen_aura & bit)) hos_log("cheats: %s aura active", seed ? "Deku seed" : "bomb arrow");
         seen_aura |= bit;
+    } else if (df_held_aura.component == component) {
+        df_held_aura.component = 0;
     }
     if ((state == 0 || (seed && state == 4)) && shot->armed) {
         shot->armed = 0;
@@ -130,12 +142,17 @@ static void df_track_projectile(Ctx *c, uint64_t component, int seed_only) {
 __declspec(dllexport)
 #endif
 unsigned df_projectile_aura_points(float (*out)[3], unsigned capacity) {
+    int rx_option(int id, int otherwise);
+    const int modes = rx_option(DF_OPT_EXPLOSIVE_SHOTS, 0);
+    if (!capacity || !modes) return 0;
     unsigned count = 0;
     const int64_t now = hos_now_ns();
     AcquireSRWLockShared(&df_shot_lock);
-    for (unsigned i = 0; i < DF_TRACKED_SHOTS && count < capacity; ++i)
-        if (df_shots[i].aura && now - df_shots[i].seen < 120000000LL)
-            memcpy(out[count++], df_shots[i].position, sizeof(df_shots[i].position));
+    if (df_held_aura.component && (modes & df_held_aura.mode) &&
+        now - df_held_aura.seen < 120000000LL) {
+        memcpy(out[0], df_held_aura.position, sizeof(df_held_aura.position));
+        count = 1;
+    }
     ReleaseSRWLockShared(&df_shot_lock);
     return count;
 }
@@ -144,8 +161,14 @@ void df_guest_projectile(Ctx *c) {
     df_track_projectile(c, c->x[0], 0);
 }
 
-void df_guest_seed_transition(Ctx *c) {
-    df_track_projectile(c, c->x[20], 1);
+void df_guest_projectile_transition(Ctx *c) {
+    const uint64_t component = c->x[20];
+    if ((uint32_t)c->x[19] != DF_SHOT_HELD) {
+        AcquireSRWLockExclusive(&df_shot_lock);
+        if (df_held_aura.component == component) df_held_aura.component = 0;
+        ReleaseSRWLockExclusive(&df_shot_lock);
+    }
+    df_track_projectile(c, component, 1);
 }
 
 void df_guest_projectile_frame(Ctx *c) {

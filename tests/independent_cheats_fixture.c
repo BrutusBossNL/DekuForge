@@ -1,9 +1,9 @@
 #include <assert.h>
+#include <math.h>
 #include <stdint.h>
 #include <stdalign.h>
 #include <stdlib.h>
 #include <string.h>
-#include "engine_overrides/independent/sprint.h"
 
 typedef struct { uint64_t x[32], vreg[32][2]; } Ctx;
 static alignas(8) unsigned char guest[1024*1024];
@@ -20,14 +20,67 @@ static void recomp_store32(Ctx *c, uint64_t a, uint32_t v) { (void)c; assert(hos
 static void wr64(uint64_t a,uint64_t v) { assert(hos_mem_region(a,8)); memcpy(guest+a,&v,8); }
 static int64_t hos_now_ns(void) { return 1000000000LL; }
 static void hos_log(const char *message, ...) { (void)message; }
+static int direct_sprint, player_free;
+static uint64_t link_actor;
+int hos_dekuforge_direct_sprint(void) { return direct_sprint; }
+int hos_oot_player_free(void) { return player_free; }
+static int hos_oot_is_player(Ctx *c, uint64_t actor) { (void)c; return actor == link_actor; }
+#define DF_SPRINT_HOST
+#include "engine_overrides/independent/sprint.h"
 static int resource_mask;
+static int projectile_modes;
 int rx_option(int id, int otherwise);
 void rx_option_set(int id,int value) { (void)id; (void)value; }
 #define DF_RESOURCE_HOST
 #include "engine_overrides/independent/resources.h"
-int rx_option(int id, int otherwise) { return id == DF_OPT_RESOURCE_MASK ? resource_mask : otherwise; }
 
 static uint64_t alloc(size_t bytes) { uint64_t a=next;next=(next+bytes+7)&~7u;assert(next<sizeof guest);return a; }
+typedef int SRWLOCK;
+#define SRWLOCK_INIT 0
+static void AcquireSRWLockExclusive(SRWLOCK *lock) { (void)lock; }
+static void ReleaseSRWLockExclusive(SRWLOCK *lock) { (void)lock; }
+static void AcquireSRWLockShared(SRWLOCK *lock) { (void)lock; }
+static void ReleaseSRWLockShared(SRWLOCK *lock) { (void)lock; }
+typedef void (*A64Fn)(Ctx *);
+static A64Fn a64_lookup(uint64_t address) { (void)address; return NULL; }
+static uint64_t hos_sys_alloc(unsigned size, unsigned alignment) { (void)alignment; return alloc(size); }
+static int oot_item_count(Ctx *c, const char *item) { (void)c; (void)item; return 0; }
+static int oot_gamedata_bool(Ctx *c, uint32_t hash, int *value) {
+    (void)c; (void)hash; *value = 0; return 0;
+}
+static void recomp_store64(Ctx *c, uint64_t a, uint64_t v) { (void)c; wr64(a, v); }
+#define GP(a) (guest + (a))
+#define HOS_WRITTEN(address, size) ((void)0)
+#define DF_PROJECTILE_HOST
+#include "engine_overrides/independent/projectiles.h"
+int rx_option(int id, int otherwise) {
+    if (id == DF_OPT_RESOURCE_MASK) return resource_mask;
+    if (id == DF_OPT_EXPLOSIVE_SHOTS) return projectile_modes;
+    return otherwise;
+}
+
+static void projectile_aura_release(void) {
+    Ctx c = {0};
+    float point[1][3];
+    for (int mode = DF_BOMB_ARROW; mode <= DF_EXPLOSIVE_SEED; ++mode) {
+        projectile_modes = mode;
+        const uint64_t component = alloc(0xe0);
+        df_held_aura.component = component;
+        df_held_aura.mode = mode;
+        df_held_aura.seen = hos_now_ns();
+        df_held_aura.position[0] = 4.0f;
+        assert(df_projectile_aura_points(point, 1) == 1 && point[0][0] == 4.0f);
+        c.x[19] = DF_SHOT_FIRED;
+        c.x[20] = alloc(0xe0);
+        df_guest_projectile_transition(&c);
+        assert(df_projectile_aura_points(point, 1) == 1);
+        c.x[20] = component;
+        df_guest_projectile_transition(&c);
+        assert(df_projectile_aura_points(point, 1) == 0);
+    }
+    projectile_modes = 0;
+}
+
 static void table(uint64_t mgr,int offs,uint32_t count,uint32_t stride) {
     recomp_store32(0,mgr+offs,count);
     wr64(mgr+offs+8,alloc(count*stride));
@@ -77,6 +130,31 @@ static void fishing_condition(void) {
 
 int main(void) {
     fishing_condition();
+    projectile_aura_release();
+    Ctx input = {0};
+    input.x[19] = alloc(0x20);
+    link_actor = alloc(24);
+    wr64(input.x[19] + 0x18, link_actor);
+    direct_sprint = player_free = 1;
+    input.x[10] = 0x200;
+    input.x[8] = 0x01;
+    df_guest_sprint_movement(&input);
+    df_guest_sprint_stance(&input);
+    assert(input.x[10] == 0x210 && input.x[8] == 0x11);
+    direct_sprint = 0;
+    input.x[8] = 0x10;
+    df_guest_sprint_stance(&input);
+    assert(input.x[8] == 0x10);
+    direct_sprint = 1;
+    player_free = 0;
+    input.x[10] = 0;
+    df_guest_sprint_movement(&input);
+    assert(input.x[10] == 0);
+    player_free = 1;
+    wr64(input.x[19] + 0x18, alloc(24));
+    df_guest_sprint_movement(&input);
+    assert(input.x[10] == 0);
+
     DfSprint s={0};
     assert(!df_sprint(&s,0,0,1));
     assert(df_sprint(&s,0,1,1));

@@ -74,6 +74,12 @@ Stable, also compare the candidate with the tested Preview. Record what was
 promoted, what changed since that Preview, and the scope and limits of testing.
 Keep later Experimental work under Unreleased.
 
+Before tagging Stable, check each change against its related GitHub issues
+and PRs. Both need to be closed where applicable, with validation confirming
+the fix. Keep any change awaiting closure or confirmation in Preview or
+Experimental and out of the Stable candidate. If a release was not explicitly
+requested, land the change as a commit for the Experimental channel.
+
 ## Component versions
 
 `dekuforge/components.json` records independent identities:
@@ -115,12 +121,9 @@ below still apply.
 
 Use **Updates**, choose **Preview** for prereleases, check for releases and install
 the selected version. Draft releases are never listed, even with credentials.
-While this repository is private, non-draft test previews require the user's
-authorized GitHub CLI sign-in or token. There is no embedded maintainer token.
-
-If the updater cannot access a private preview, close the launcher and run the
-new setup over the same application folder. This upgrades the application without
-uninstalling it or discarding its local game builds. Keep normal save backups.
+Public Stable and Preview downloads work without a GitHub account. You can
+also close the launcher and run the new setup over the same application folder
+to upgrade the application and retain its local game builds.
 
 Every delivered application update gets a distinct launcher version. Published
 release assets are immutable: later changes use the next preview/version. The
@@ -255,18 +258,16 @@ caches are copied locally, the old game stays selected during the build, and onl
 a successful result is activated. A failed build preserves the previous game.
 Existing game executables are never downloaded as release assets.
 
-Release assets are the setup EXE, launcher ZIP and `DekuForge-release.json`.
-Users only download the EXE manually. The updater checks GitHub's asset digest,
+For a normal manual install, download `DekuForge-Setup.exe`. The updater uses
+the launcher ZIP and `DekuForge-independent-release.json`. It checks GitHub's asset digest,
 the descriptor, every ZIP member and package component identity. It rejects
 unexpected paths, content signatures and missing inventory entries. Packages are
 cached by SHA-256; matching installed application files are not replaced.
 A frozen external helper waits for the launcher to exit before application writes.
 
-Private testing can use an existing authorized GitHub CLI session or GH_TOKEN;
-tokens are never saved in launcher settings and are stripped on asset redirects.
-Draft releases are not offered by the normal release selector. Public installers
-will not need a GitHub account. Keep the repository private until setup/update,
-failed-update recovery and local game-rebuild acceptance are complete.
+Experimental downloads can use an existing authorized GitHub CLI session or
+`GH_TOKEN`. Tokens are never saved in launcher settings and are stripped on
+asset redirects. Draft releases are not offered by the normal release selector.
 
 ## Reporting and uninstallation
 

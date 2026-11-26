@@ -96,12 +96,12 @@ frames; start mode keeps known programs and pipelines ready before the title.
 It still recreates the in-memory pipeline handles on each launch. Two starts
 of engine `0.1.0-independent.7` under the ordinary Windows account read the
 persisted cache and reached the menu in about 30 seconds each. Cold-cache
-timings, portable support and matched performance with main remain open.
+timings and matched performance with Legacy remain open.
 See the [evidence ledger](INDEPENDENT_EVIDENCE.md) for the measured scope.
 `--no-prepare-shaders` is diagnostic only and skips that readiness check too.
 
-The launcher retains its original async Play, save import/export, build inventory,
-release list/notes and update-outcome views. Main-channel installs remain blocked.
+The launcher provides asynchronous Play, save import/export, build inventory,
+release notes and update outcomes. See the distribution guide for channel behavior.
 Controller prompt generation requires the locked Windows build wheels in
 `requirements-open-engine.txt`. The build checks the generated font and texture
 packs before selecting the new executable. Auto prompts follow input from the
@@ -109,7 +109,9 @@ most recently used SDL controller. Controls keeps separate prompt and layout
 choices so a manually remapped pad can keep its own button icons.
 The build fingerprints the independent gameplay hook source as part of the CPU
 translation key. On 1.1.1, every expected guest instruction must match before
-any magic or spin hook is attached. The Cheat Manager's one-shot bottle editor
+any gameplay hook is attached. Direct L3 sprint uses the movement and stance
+dash flags. The projectile effect uses the held state and clears on release.
+The Cheat Manager's one-shot bottle editor
 validates each unlocked slot and the game's list of allowed contents.
 Asset mods use immutable verified snapshots so the first enabled provider wins,
 matching the launcher order; disabled mods are excluded. No base game file is

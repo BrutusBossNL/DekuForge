@@ -1,7 +1,7 @@
 # Instruction compatibility
 
 > Historical validation of the experimental `engine/` extensions. These results
-> do not describe the active stable 0.10.1 generator or establish its compatibility.
+> apply to that prototype only. Hookshot supplies the current Windows generator.
 > The current build route is documented in [building.md](building.md). The
 > synthetic checks remain useful development tools; their local game-generation
 > counts below are recorded observations, not shipped game content.

@@ -1,15 +1,15 @@
 {
   "schema": 1,
   "launcher": {
-    "version": "0.4.6",
-    "stage": "stable",
+    "version": "0.4.7-preview.1",
+    "stage": "preview",
     "bug_reports": true,
     "uninstaller": true,
     "updates": true,
     "healthcheck": {"screens": 40, "mod_screens": 5, "report_screens": 5}
   },
   "engine": {
-    "version": "0.1.0-independent.15",
+    "version": "0.1.0-independent.16",
     "backend": "independent",
     "reference_version": "Legacy 0.11.0 / NX2navi 0.10.1",
     "playable": false

@@ -2,13 +2,15 @@
 
 BUILD_ID = 'e0f3ccfaf50065ae4ea01eb5aeb13b1a45da3348'
 HOOKS = (
+    (0x804ce798, 0xf940014a, 'df_guest_sprint_movement'),
+    (0x80c27f3c, 0x39400108, 'df_guest_sprint_stance'),
     (0x801839b0, 0xd503237f, 'df_guest_magic'),
     (0x80c1d164, 0xbd416b08, 'df_guest_spin_charge'),
     (0x80afeff8, 0x1e241001, 'df_guest_spin_range'),
     (0x80aff0ac, 0x1e249001, 'df_guest_spin_range'),
     (0x80aff0d8, 0x1e245001, 'df_guest_spin_range'),
     (0x82ecbc30, 0xd503237f, 'df_guest_projectile'),
-    (0x82ecb934, 0xb9002693, 'df_guest_seed_transition'),
+    (0x82ecb934, 0xb9002693, 'df_guest_projectile_transition'),
     (0x80706be0, 0xd503237f, 'df_guest_projectile_frame'),
     (0x80e1ac40, 0x4a08033b, 'df_guest_fishing_condition'),
     (0x802290a8, 0x39517268, 'df_guest_world_master'),

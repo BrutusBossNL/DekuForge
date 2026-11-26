@@ -88,7 +88,7 @@ unsigned df_aura_dots(DfAuraDot *dots, unsigned capacity, float width, float hei
         const float x = clip[0] / clip[2], y = clip[1] / clip[2];
         if (!(std::abs(x) < 1.0f && std::abs(y) < 1.0f)) continue;
         dots[drawn++] = {width * .5f + x * view_width * .5f, height * .5f - y * view_height * .5f,
-                         std::clamp(view_height * .06f / clip[2], 4.0f, 29.0f)};
+                         std::clamp(view_height * .04f / clip[2], 3.0f, 18.0f)};
     }
     if (drawn) {
         static std::atomic<bool> logged{false};

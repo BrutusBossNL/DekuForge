@@ -86,6 +86,13 @@ in `dekuforge/components.json` (including the preview sequence). Increment the
 buildkit for build-orchestration changes and the engine for game/runtime changes.
 Keep Preview at the same source as Stable or ahead of it. For a paired release,
 verify both packages and publish the Preview before Stable.
+
+Only include issue and PR changes in Stable when the associated issues and PRs
+are closed and their fixes have been tested and confirmed. A merged PR does not
+clear a linked open issue. Keep open, untested or unconfirmed work in Preview
+or Experimental. Publish a release only when explicitly requested. Otherwise
+deliver the change as a commit through Experimental.
+
 Do not reuse an installed preview identity for different delivered application
 code. Never replace assets of a published release: publish a new version instead.
 Draft assets may be prepared before release, but draft releases are deliberately

@@ -1,23 +1,14 @@
 # Building DekuForge from source
 
-> Independent branch: these inherited Windows setup instructions describe main.
-> Main's engine provisioning/packaging is disabled here. The independent guide
-> provisions official standalone Python/Tk/Pillow and generic tools, or use a
-> chosen development Python 3.14+. Then run
-> `python run_builder.py --doctor` and the source tests. See
-> [INDEPENDENT_ENGINE.md](INDEPENDENT_ENGINE.md) for the current independent route.
-
-For the complete opt-in Windows NUP experiment, use
-[OPEN_ENGINE_EVALUATION.md](OPEN_ENGINE_EVALUATION.md). Its generic tool
-provisioner, source compiler and independent launcher adapter are separate from
-the inherited setup commands below. Do not run main's bootstrap to supply its
-runtime to this branch. This branch now has its own generic interpreter bootstrap.
+The independent engine on `main` uses the pinned GPL Hookshot provider. See
+[the Windows development guide](OPEN_ENGINE_EVALUATION.md) for the complete
+build and [the distribution guide](DISTRIBUTION.md) for release packaging.
 
 The independent development route also provides read-only module analysis:
 `python tools/analyze_independent.py --exefs PATH --out local/analysis.json`.
 This reuses extracted input; it neither builds nor validates a playable game.
 Use a new report filename. Consult [earlier evidence](INDEPENDENT_EVIDENCE.md)
-before repeating retired experiments; keep the stable main installation untouched.
+before repeating retired experiments. Keep the installed game separate from tests.
 
 Windows x64 is the current acceptance target. Linux source checks run in CI;
 Linux gameplay, iOS and VR are not validated DekuForge targets yet.
@@ -41,28 +32,25 @@ prepare the same pinned runtime natively without PowerShell
 (`DekuForge.exe --prepare-runtime`).
 
 ```text
-python tools/prepare_installation.py
-python tools/build_launcher.py --toolchain local/build-tools/native/msys64/ucrt64/bin
-python tools/build_setup.py --toolchain local/build-tools/native/msys64/ucrt64/bin
+python tools/provision_open_tools.py --work build/open-engine-work --jobs 4 --configure-launcher
+python tools/build_launcher.py --toolchain local/build-tools/hookshot-llvm-20261104/bin
+python tools/build_setup.py --toolchain local/build-tools/hookshot-llvm-20261104/bin
 ```
 
-Preparation verifies and caches the stable engine source, its required release
-metadata, the native compiler/SDL/Vulkan headers, shader tools, .NET SDK and Python
-dependencies. Existing verified versions are reused. The managed shader translator
-is built on demand; the Windows path does not require system-wide MSYS2 or Python.
-Downloads are pinned by hashes or verified against their provider metadata.
+Preparation verifies and caches the pinned engine source, LLVM-MinGW, SDL,
+graphics and codec dependencies and the Python build wheels. Existing verified
+versions are reused. This path uses the standalone Python and toolchain.
 
-The setup, launcher package and updater descriptor appear in `build/releases/`.
-Ship `DekuForge-Setup.exe` to users; publish all three release assets so the launcher
-can use the verified ZIP and `DekuForge-release.json` for future updates. Tag and
-component identities must match. Do not publish the whole build directory.
+Setup, launcher ZIP, `DekuForge-independent-release.json`, RecompLauncher
+portable ZIP and standalone manifest appear in `build/releases/`. Use the
+[distribution guide](DISTRIBUTION.md) for the release asset list.
 
 ## Build a local game
 
 Use the launcher wizard, or provide your own supported game 1.1.1 NUP:
 
 ```text
-python run_builder.py --nup "YOUR_OWN_GAME.nup" --out "ABSOLUTE_EMPTY_GAME_DIRECTORY"
+python tools/build_open_game.py --nup "YOUR_OWN_GAME.nup" --out build/windows-independent
 ```
 
 Use a separate destination, outside the active game. The builder extracts inputs,
@@ -71,11 +59,9 @@ button prompts locally. Keep ample space for extracted assets, build cache and
 one separate rollback build. First-build duration depends on hardware and cache;
 the UI reports measured stage progress rather than a fixed promise.
 
-The engine is pinned to NX2navi 0.10.1 with DekuForge extensions composed separately.
-Upstream [building instructions](https://github.com/tangerineturtle1/NX2navi/blob/main/docs/building.md)
-and [BuildKit notes](https://github.com/tangerineturtle1/NX2navi/blob/main/docs/README-BuildKit.md)
-are useful background, but their current main branch can differ from our pin.
-Do not replace our backend with a newer upstream checkout without validation.
+The provider pin is recorded in `dekuforge/hookshot_source.json`. DekuForge
+composes its extensions during the local build. The NX2navi 0.10.1 build route
+belongs to the frozen Legacy release.
 
 ## Resuming an interrupted build
 

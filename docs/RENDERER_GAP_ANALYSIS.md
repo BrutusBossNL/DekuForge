@@ -1,8 +1,7 @@
-> Historical investigation of the retired experimental renderer. The active game
-> backend is now the complete stable 0.10.1 source plus its verified release data.
-> See [STABLE_ENGINE_MIGRATION.md](STABLE_ENGINE_MIGRATION.md) for current results.
-> Do not apply experimental renderer repairs to that baseline without reproducing
-> a problem on the active engine first.
+> Historical investigation of the retired experimental renderer. The current
+> Windows engine uses Hookshot's Vulkan renderer. See
+> [INDEPENDENT_EVIDENCE.md](INDEPENDENT_EVIDENCE.md) for current measurements and
+> [STABLE_ENGINE_MIGRATION.md](STABLE_ENGINE_MIGRATION.md) for the Legacy comparison.
 
 # Windows renderer gap analysis
 

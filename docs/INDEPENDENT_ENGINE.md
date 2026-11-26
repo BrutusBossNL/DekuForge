@@ -5,7 +5,10 @@ The original CPU prototype described below remains an incomplete development
 component. Legacy 0.3.0 supplies historical behavior and performance evidence.
 Consult [INDEPENDENT_EVIDENCE.md](INDEPENDENT_EVIDENCE.md) for scoped validation.
 
-## Initial code and provenance inventory
+## Historical prototype code and provenance inventory
+
+The inventory below describes the original prototype. The current Windows
+runtime uses Hookshot's guest services and Vulkan renderer.
 
 | Component | Current route | Reuse status |
 | --- | --- | --- |

@@ -432,8 +432,9 @@ int debug_rows(int* out, int* groups) {
     hid = (source / 'host/nn_hid.c').read_text(encoding='utf-8')
     hid = sprint_include + '\n' + hid
     hid = _replace(hid, 'static int move_stick_held;',
-                   '''static int sprint_held;
+                   '''static int sprint_held, direct_sprint;
 int hos_dekuforge_sprint_held(void) { return __atomic_load_n(&sprint_held, __ATOMIC_RELAXED); }
+int hos_dekuforge_direct_sprint(void) { return __atomic_load_n(&direct_sprint, __ATOMIC_RELAXED); }
 static int move_stick_held;''')
     hid = _replace(hid, '        __atomic_store_n(&flight_input, flight, __ATOMIC_RELAXED);',
                    '''        int hos_oot_player_free(void);
@@ -449,13 +450,9 @@ static int move_stick_held;''')
         static DfSprint sprint;
         const int l3 = !!(buttons & (1ULL << B_LS));
         const int l3_active = df_sprint(&sprint, rx_option(DF_OPT_L3_SPRINT, 0), l3, sprint_allowed);
-        if (l3_active) {
-            static int told;
-            if (!__atomic_exchange_n(&told, 1, __ATOMIC_RELAXED)) hos_log("hid: left-stick click activated sprint");
-            buttons &= ~(1ULL << B_LS);
-            buttons |= 1ULL << B_A;
-        }
-        __atomic_store_n(&sprint_held, sprint_allowed && (buttons & (1ULL << B_A)), __ATOMIC_RELAXED);
+        if (sprint_allowed) buttons &= ~(1ULL << B_LS);
+        __atomic_store_n(&direct_sprint, l3_active, __ATOMIC_RELAXED);
+        __atomic_store_n(&sprint_held, l3_active || (sprint_allowed && (buttons & (1ULL << B_A))), __ATOMIC_RELAXED);
         __atomic_store_n(&flight_input, flight, __ATOMIC_RELAXED);''')
     files['nn_hid.c'] = hid
     replay = (source / 'gpu/vk/vk_replay.cpp').read_text(encoding='utf-8')
@@ -469,7 +466,7 @@ static int move_stick_held;''')
     files['vk_replay.cpp'] = replay
     host = (source / 'host/hos_main.c').read_text(encoding='utf-8')
     host = _replace(host, 'static void oot_update_player_cheats(Ctx *c,',
-                    '\n'.join(('#define DF_RESOURCE_HOST', resource_include, '#define DF_PROJECTILE_HOST',
+                    '\n'.join(('#define DF_SPRINT_HOST', sprint_include, '#define DF_RESOURCE_HOST', resource_include, '#define DF_PROJECTILE_HOST',
                                projectile_include, '#define DF_WORLD_HOST', world_include,
                                'static void oot_update_player_cheats(Ctx *c,')))
     host = _replace(host, '    hos_mods_init(image);', '    df_world_init();\n    hos_mods_init(image);')
